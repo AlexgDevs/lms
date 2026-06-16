@@ -1,0 +1,21 @@
+[project]
+name = "lms"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "black>=26.5.1",
+    "fastapi>=0.137.1",
+    "mypy>=2.1.0",
+    "pydantic-settings>=2.14.1",
+    "sqlalchemy>=2.0.51",
+]
+
+[tool.mypy]
+strict = true
+show_error_codes = true
+explicit_package_bases = true
+exclude = [".venv"]
