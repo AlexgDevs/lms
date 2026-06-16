@@ -43,8 +43,8 @@ class AppSettings(BaseSubSettings):
 
 
 class Settings(BaseSettings):
-    postgres: PostgresSettings = PostgresSettings()
-    app: AppSettings = AppSettings()
+    postgres: PostgresSettings = PostgresSettings()  # type: ignore
+    app: AppSettings = AppSettings()  # type: ignore
 
 
 settings = Settings()
