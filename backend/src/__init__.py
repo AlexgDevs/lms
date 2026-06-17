@@ -3,7 +3,7 @@ from .course.models import Course
 from .lesson.models import Lesson
 from .module.models import Module
 from .user.models import User
-from .postgres.base import Base
+from .core.postgres.base import Base
 
 __all__ = [
     "Course",
