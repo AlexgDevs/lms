@@ -3,8 +3,8 @@ from uuid import UUID
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.src.core.postgres.base import Base
-from backend.src.core.postgres.types import str_128, created_at, uuid_pk
+from src.core.postgres.base import Base
+from src.core.postgres.types import str_128, created_at, uuid_pk
 
 
 class Lesson(Base):

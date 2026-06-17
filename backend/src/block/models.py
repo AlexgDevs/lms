@@ -4,9 +4,9 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
-from backend.src.core.postgres.base import Base
-from backend.src.core.postgres.types import str_128, created_at, uuid_pk
-from backend.src.block.enums import BlockType, BlockSubmissionType
+from src.core.postgres.base import Base
+from src.core.postgres.types import str_128, created_at, uuid_pk
+from src.block.enums import BlockType, BlockSubmissionType
 
 
 class Block(Base):
