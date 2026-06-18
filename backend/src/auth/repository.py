@@ -7,6 +7,7 @@ from src.auth.models import RefreshToken
 from src.auth.schemas import RefreshTokenSchema
 from src.auth.mapper import AuthMapper
 
+
 class AuthRepository(BaseRepository[RefreshToken, RefreshTokenSchema]):
     model = RefreshToken
     schema = RefreshTokenSchema

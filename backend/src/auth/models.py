@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.postgres import UUIDBase, str_128, timestamp
 
+
 class RefreshToken(UUIDBase):
     __tablename__ = "refresh_tokens"
 
