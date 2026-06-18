@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from uuid import UUID
 
 from sqlalchemy import ForeignKey
@@ -18,7 +19,9 @@ class Block(Base):
     )
     title: Mapped[str_128]
     block_type: Mapped[BlockType]
-    payload: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    payload: Mapped[Dict[str, Any]] = mapped_column(
+        JSONB, default=dict, server_default="{}"
+    )
     created_at: Mapped[created_at]
 
 

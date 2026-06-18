@@ -1,10 +1,12 @@
+from typing import Literal
+
 from pydantic import computed_field, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class BaseSubSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=[".env", "../.env"],
         env_ignore_empty=True,
         extra="ignore",
     )
@@ -34,12 +36,19 @@ class AppSettings(BaseSubSettings):
     # FastAPI
     APP_PORT: int = 8000
     APP_NAME: str = "lms"
+    APP_ENV: Literal["development", "testing", "production"] = "development"
+    API_V1_STR: str = "/api/v1"
 
     # JWT
     JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    JWT_REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    JWT_ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    REFRESH_TOKEN_EXPIRE_SECONDS: int = REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+
+    @property
+    def secure_cookies(self) -> bool:
+        return self.APP_ENV == "production"
 
 
 class RedisSettings(BaseSubSettings):

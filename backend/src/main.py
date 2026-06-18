@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from loguru import logger
@@ -10,7 +11,7 @@ setup_logging()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
     # ---App startup---
     logger.info("Starting up the application...")
@@ -29,6 +30,6 @@ app = FastAPI(
 
 
 @app.get("/hello")
-async def say():
+async def say() -> dict[str, str]:
     logger.info("Received request to /hello endpoint")
     return {"say": "hello"}
