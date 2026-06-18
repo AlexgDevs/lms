@@ -42,9 +42,26 @@ class AppSettings(BaseSubSettings):
     JWT_REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
 
 
+class RedisSettings(BaseSubSettings):
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_USER: str = "default"
+    REDIS_PASSWORD: str
+    REDIS_MAX_CONNECTIONS: int = 50
+    REDIS_SOCKET_TIMEOUT: int = 5
+    REDIS_SOCKET_CONNECT_TIMEOUT: int = 2
+    REDIS_RETRY_ON_TIMEOUT: bool = True
+
+    @computed_field  # type: ignore
+    @property
+    def REDIS_URL(self) -> str:
+        return f"redis://{self.REDIS_USER}:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = PostgresSettings()  # type: ignore
     app: AppSettings = AppSettings()  # type: ignore
+    redis: RedisSettings = RedisSettings()  # type: ignore
 
 
 settings = Settings()
