@@ -1,6 +1,8 @@
 from redis.asyncio import Redis, from_url
 from redis.exceptions import ConnectionError, AuthenticationError
 
+from loguru import logger
+
 from src.config import settings
 
 
@@ -16,15 +18,24 @@ async def init_redis() -> Redis:
             retry_on_timeout=settings.redis.REDIS_RETRY_ON_TIMEOUT,
         )
 
-        client.ping()
+        await client.ping()
         return client
 
     # TODO: add logging
     except AuthenticationError:
+        logger.error(
+            "Failed to authenticate with Redis. Please check your credentials."
+        )
         raise
     except ConnectionError:
+        logger.error(
+            "Failed to connect to Redis. Please check if the Redis server is running and accessible."
+        )
         raise
     except Exception:
+        logger.error(
+            "An unexpected error occurred while initializing Redis.", exc_info=True
+        )
         raise
 
 

@@ -9,6 +9,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "black>=26.5.1",
     "fastapi>=0.137.1",
+    "loguru>=0.7.3",
     "mypy>=2.1.0",
     "pydantic-settings>=2.14.1",
     "redis[asyncio]>=8.0.0",
