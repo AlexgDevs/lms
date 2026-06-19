@@ -6,6 +6,7 @@ from loguru import logger
 
 from src.core.redis import init_redis, close_redis
 from src.core.logging import setup_logging
+from src.core.router import app_v1
 
 setup_logging()
 
@@ -28,6 +29,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(app_v1)
 
 @app.get("/hello")
 async def say() -> dict[str, str]:
