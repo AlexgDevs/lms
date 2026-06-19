@@ -18,14 +18,12 @@ class TokenPair(BaseSchema):
 
 
 class UserCreateSchema(BaseSchema):
-    name: str
     username: str
     email: str
     password_hash: str
 
 
 class UserRegisterSchema(BaseSchema):
-    name: str
     username: str
     email: EmailStr
     password: str

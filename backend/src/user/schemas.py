@@ -11,4 +11,3 @@ class UserSchema(BaseSchema):
     password_hash: str
     avatar_url: str | None
     created_at: datetime
-    updated_at: datetime
