@@ -5,7 +5,8 @@ from uuid import UUID
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.core.postgres import UUIDBase, str_128, timestamp
+from src.core.postgres.types import str_128, timestamp
+from src.core.postgres.base import UUIDBase
 
 
 class RefreshToken(UUIDBase):

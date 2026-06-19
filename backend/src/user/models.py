@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.core.postgres.base import Base
+from src.core.postgres.base import UUIDBase
 from src.core.postgres.types import str_128, created_at, uuid_pk
 
 
-class User(Base):
+class User(UUIDBase):
     __tablename__ = "users"
 
     id: Mapped[uuid_pk]

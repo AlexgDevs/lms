@@ -3,11 +3,11 @@ from uuid import UUID
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.core.postgres.base import Base
+from src.core.postgres.base import UUIDBase
 from src.core.postgres.types import str_128, created_at, uuid_pk
 
 
-class Module(Base):
+class Module(UUIDBase):
     __tablename__ = "modules"
 
     id: Mapped[uuid_pk]
