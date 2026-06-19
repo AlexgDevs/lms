@@ -83,7 +83,7 @@ class RedisSettings(BaseSettings):
 class Settings(BaseSettings):
     @computed_field  # type: ignore
     @property
-    def postgres(self) -> PostgresSettings:
+    def postgres(self) -> PostgresSettings: 
         return PostgresSettings()
 
     @computed_field  # type: ignore
@@ -97,4 +97,4 @@ class Settings(BaseSettings):
         return RedisSettings()
 
 
-settings = Settings()
+settings = Settings() #type: ignore

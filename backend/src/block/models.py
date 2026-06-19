@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
 from src.core.postgres.base import UUIDBase
-from src.core.postgres.types import str_128, created_at, uuid_pk
+from src.core.postgres.types import str_128, created_at, uuid_pk, timestamp
 from src.block.enums import BlockType, BlockSubmissionType
 
 
@@ -21,7 +21,8 @@ class Block(UUIDBase):
     payload: Mapped[Dict[str, Any]] = mapped_column(
         JSONB, default=dict, server_default="{}"
     )
-    created_at: Mapped[created_at]
+    created_at: Mapped[timestamp]
+    updated_at: Mapped[timestamp]
 
 
 class BlockSubmission(UUIDBase):
@@ -30,4 +31,5 @@ class BlockSubmission(UUIDBase):
     block_id: Mapped[UUID] = mapped_column(ForeignKey("blocks.id", ondelete="CASCADE"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     submission_type: Mapped[BlockSubmissionType]
-    created_at: Mapped[created_at]
+    created_at: Mapped[timestamp]
+    updated_at: Mapped[timestamp]
