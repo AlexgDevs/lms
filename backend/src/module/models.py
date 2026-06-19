@@ -10,7 +10,6 @@ from src.core.postgres.types import str_128, created_at, uuid_pk
 class Module(UUIDBase):
     __tablename__ = "modules"
 
-    id: Mapped[uuid_pk]
     course_id: Mapped[UUID] = mapped_column(
         ForeignKey("courses.id", ondelete="CASCADE")
     )

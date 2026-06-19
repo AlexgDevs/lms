@@ -1,13 +1,12 @@
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.postgres.base import UUIDBase
-from src.core.postgres.types import str_128, created_at, uuid_pk
+from src.core.postgres.types import str_128, created_at
 
 
 class Course(UUIDBase):
     __tablename__ = "courses"
 
-    id: Mapped[uuid_pk]
     title: Mapped[str_128]
     description: Mapped[str_128 | None]
     cover_url: Mapped[str]

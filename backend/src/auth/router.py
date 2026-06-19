@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Response, status
 
+from src.core.dependencies import RefreshTokenDep
 from src.auth.dependencies import AuthServiceDep
 from src.auth.utils import set_tokens_cookie
-from src.core.dependencies import RefreshTokenDep
 from src.auth.schemas import (
     UserRegisterSchema,
     UserLoginSchema,

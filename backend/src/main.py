@@ -31,6 +31,7 @@ app = FastAPI(
 
 app.include_router(app_v1)
 
+
 @app.get("/hello")
 async def say() -> dict[str, str]:
     logger.info("Received request to /hello endpoint")

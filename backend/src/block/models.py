@@ -5,15 +5,14 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
-from src.core.postgres.base import Base
+from src.core.postgres.base import UUIDBase
 from src.core.postgres.types import str_128, created_at, uuid_pk
 from src.block.enums import BlockType, BlockSubmissionType
 
 
-class Block(Base):
+class Block(UUIDBase):
     __tablename__ = "blocks"
 
-    id: Mapped[uuid_pk]
     lesson_id: Mapped[UUID] = mapped_column(
         ForeignKey("lessons.id", ondelete="CASCADE")
     )
@@ -25,10 +24,9 @@ class Block(Base):
     created_at: Mapped[created_at]
 
 
-class BlockSubmission(Base):
+class BlockSubmission(UUIDBase):
     __tablename__ = "block_submissions"
 
-    id: Mapped[uuid_pk]
     block_id: Mapped[UUID] = mapped_column(ForeignKey("blocks.id", ondelete="CASCADE"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     submission_type: Mapped[BlockSubmissionType]

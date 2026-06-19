@@ -1,3 +1,3 @@
-from .base import Base
+from .base import Base, UUIDBase
 
-__all__ = ["Base"]
+__all__ = ["Base", "UUIDBase"]
