@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from src.config import settings
+from src.core.config import settings
 
 engine = create_async_engine(str(settings.postgres.DATABASE_URL))

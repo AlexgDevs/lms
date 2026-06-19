@@ -1,5 +1,5 @@
 from fastapi import Response
-from src.config import settings
+from src.core.config import settings
 
 
 def set_tokens_cookie(

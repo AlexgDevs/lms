@@ -3,7 +3,7 @@ from redis.exceptions import ConnectionError, AuthenticationError
 
 from loguru import logger
 
-from src.config import settings
+from src.core.config import settings
 
 
 async def init_redis() -> Redis:

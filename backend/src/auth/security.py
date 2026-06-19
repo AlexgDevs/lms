@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from pwdlib import PasswordHash
 
-from src.config import settings
+from src.core.config import settings
 from src.auth.schemas import AccessTokenPayload
 
 password_hash = PasswordHash.recommended()

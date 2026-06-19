@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.dependencies import SessionDep
+from src.core.dependencies import SessionDep
 from src.user.repository import UserRepository
 
 

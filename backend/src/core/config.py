@@ -1,18 +1,20 @@
+from pathlib import Path
 from typing import Literal
 
 from pydantic import computed_field, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+ENV_FILE_PATH = BASE_DIR / ".env"
 
-class BaseSubSettings(BaseSettings):
+
+class PostgresSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=[".env", "../.env"],
+        env_file=ENV_FILE_PATH,
         env_ignore_empty=True,
         extra="ignore",
     )
 
-
-class PostgresSettings(BaseSubSettings):
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
@@ -32,8 +34,13 @@ class PostgresSettings(BaseSubSettings):
         )
 
 
-class AppSettings(BaseSubSettings):
-    # FastAPI
+class AppSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
     APP_PORT: int = 8000
     APP_NAME: str = "lms"
     APP_ENV: Literal["development", "testing", "production"] = "development"
@@ -41,7 +48,7 @@ class AppSettings(BaseSubSettings):
 
     # JWT
     JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str
+    JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     REFRESH_TOKEN_EXPIRE_SECONDS: int = REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
@@ -51,7 +58,13 @@ class AppSettings(BaseSubSettings):
         return self.APP_ENV == "production"
 
 
-class RedisSettings(BaseSubSettings):
+class RedisSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_USER: str = "default"
@@ -68,9 +81,20 @@ class RedisSettings(BaseSubSettings):
 
 
 class Settings(BaseSettings):
-    postgres: PostgresSettings = PostgresSettings()  # type: ignore
-    app: AppSettings = AppSettings()  # type: ignore
-    redis: RedisSettings = RedisSettings()  # type: ignore
+    @computed_field  # type: ignore
+    @property
+    def postgres(self) -> PostgresSettings:
+        return PostgresSettings()
+
+    @computed_field  # type: ignore
+    @property
+    def app(self) -> AppSettings:
+        return AppSettings()
+
+    @computed_field  # type: ignore
+    @property
+    def redis(self) -> RedisSettings:
+        return RedisSettings()
 
 
 settings = Settings()

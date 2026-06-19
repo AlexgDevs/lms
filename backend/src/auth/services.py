@@ -24,7 +24,7 @@ from src.auth.security import (
 from src.user.schemas import UserSchema
 from src.auth.unit_of_work import AuthUnitOfWork
 from src.core.services.base_service import BaseService
-from src.config import settings
+from src.core.config import settings
 
 
 class AuthService(BaseService):

@@ -3,7 +3,7 @@ from fastapi import Depends
 
 from src.auth.services import AuthService
 from src.user.dependencies import UserRepositoryDep
-from src.dependencies import RedisDep, SessionDep
+from src.core.dependencies import RedisDep, SessionDep
 from src.auth.unit_of_work import AuthUnitOfWork
 from src.auth.repository import AuthRepository
 
