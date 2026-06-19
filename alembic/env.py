@@ -1,20 +1,26 @@
 import asyncio
 from logging.config import fileConfig
+from pathlib import Path
+import sys
+
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
+BACKEND_DIR = ROOT_DIR / "backend"
+SRC_DIR = BACKEND_DIR / "src"
+
+sys.path.insert(0, str(BACKEND_DIR))
+sys.path.insert(0, str(SRC_DIR))
+
+from src.core.config import settings
+from src.core.postgres import Base
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from backend.src.config import settings
-from backend.src.user.model import User
-from backend.src.postgres.base import Base
-
-
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
 config.set_main_option("sqlalchemy.url", str(settings.postgres.DATABASE_URL))
 # Interpret the config file for Python logging.

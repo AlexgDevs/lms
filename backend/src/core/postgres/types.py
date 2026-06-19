@@ -23,3 +23,10 @@ created_at = Annotated[
         server_default=text("TIMEZONE('UTC', now())"),
     ),
 ]
+timestamp = Annotated[
+    datetime,
+    mapped_column(
+        DateTime(timezone=True),
+        server_default=text("TIMEZONE('UTC', now())"),
+    ),
+]
