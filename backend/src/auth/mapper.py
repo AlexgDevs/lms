@@ -4,5 +4,5 @@ from src.auth.schemas import RefreshTokenSchema
 
 
 class AuthMapper(BaseMapper[RefreshToken, RefreshTokenSchema]):
-    model = RefreshToken
-    schema = RefreshTokenSchema
+    model_orm = RefreshToken
+    schema_class = RefreshTokenSchema
