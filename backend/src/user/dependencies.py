@@ -41,10 +41,6 @@ def get_user_service(
     return UserService(session, user_repository)
 
 
-def get_user_repository(session: SessionDep) -> UserRepository:
-    return UserRepository(session)
-
-
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 UserIdDep = Annotated[UUID, Depends(get_current_user_id)]
 CurrentUserDep = Annotated[UserSchema, Depends(get_current_user)]
