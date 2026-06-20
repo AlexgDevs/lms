@@ -7,6 +7,7 @@ from loguru import logger
 from src.core.redis import init_redis, close_redis
 from src.core.logging import setup_logging
 from src.core.router import app_v1
+from src.core.handlers import init_errors_handler
 
 setup_logging()
 
@@ -23,13 +24,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     logger.info("Application shutdown complete.")
 
 
-app = FastAPI(
-    title="FastAPI",
-    version="0.1.0",
-    lifespan=lifespan,
-)
+def init_app() -> FastAPI:
+    app = FastAPI(
+        title="FastAPI",
+        version="0.1.0",
+        lifespan=lifespan,
+    )
 
-app.include_router(app_v1)
+    init_errors_handler(app)
+    app.include_router(app_v1)
+
+    return app
+
+
+app = init_app()
 
 
 @app.get("/hello")
