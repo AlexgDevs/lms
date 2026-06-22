@@ -10,7 +10,6 @@ from src.module.schemas import (
 )
 
 from src.user.dependencies import UserIdDep
-from src.user.schemas import UserSchema
 
 router = APIRouter(prefix="/courses/{course_id}/modules", tags=["Modules"])
 
