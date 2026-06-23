@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.errors.base_errors import ObjectNotFoundError
 from src.core.services.base_service import BaseService
 from src.course.exceptions import CourseNotFoundError
 from src.course.schemas import (
