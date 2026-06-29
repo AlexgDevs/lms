@@ -1,12 +1,12 @@
 from typing import Any, Dict
 from uuid import UUID
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
 from src.core.postgres.base import UUIDBase
-from src.core.postgres.types import str_128, created_at, uuid_pk, timestamp
+from src.core.postgres.types import str_128, timestamp
 from src.block.enums import BlockType, BlockSubmissionType
 
 
@@ -17,7 +17,13 @@ class Block(UUIDBase):
         ForeignKey("lessons.id", ondelete="CASCADE")
     )
     title: Mapped[str_128]
-    block_type: Mapped[BlockType]
+    block_type: Mapped[BlockType] = mapped_column(
+        SAEnum(
+            BlockType, 
+            name="blocktype",
+            values_callable=lambda x: [e.value for e in x]
+        )
+    )
     payload: Mapped[Dict[str, Any]] = mapped_column(
         JSONB, default=dict, server_default="{}"
     )
