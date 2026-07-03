@@ -1,5 +1,5 @@
 # core/polymorphic_validator.py
-from typing import Any, Self, Dict, Type, ClassVar
+from typing import Any, Mapping, Self, Type, ClassVar
 from pydantic import BaseModel, model_validator, Field
 
 
@@ -21,24 +21,22 @@ class PolymorphicPayloadMixin[EnumT]:
             payload_registry: ClassVar = PAYLOAD_REGISTRY
     """
 
-    # Technical fields with aliases (not visible in API schema)
     type_field: EnumT | None = Field(
-        alias="block_type", 
-        exclude=True, 
+        alias="block_type",
+        exclude=True,
         default=None,
-        description="Internal mapping for the type field"
+        description="Internal mapping for the type field",
     )
     payload_field: Any = Field(
-        alias="payload", 
-        exclude=True, 
+        alias="payload",
+        exclude=True,
         default=None,
-        description="Internal mapping for the payload field"
+        description="Internal mapping for the payload field",
     )
 
-    # Registry that maps type -> Pydantic model
-    payload_registry: ClassVar[Dict[EnumT, Type[BaseModel]]]
+    payload_registry: ClassVar[Mapping[Any, Type[BaseModel]]]
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_polymorphic_payload(self) -> Self:
         """
         Validates and converts the payload to the appropriate model

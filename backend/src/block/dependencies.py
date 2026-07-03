@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, AsyncGenerator
 from fastapi import Depends
 
 from src.core.dependencies import SessionDep
@@ -16,18 +16,19 @@ def get_block_repository(session: SessionDep) -> BlockRepository:
 BlockRepositoryDep = Annotated[BlockRepository, Depends(get_block_repository)]
 
 
-def get_block_uow(
+async def get_block_uow(
     session: SessionDep,
     block_repository: BlockRepositoryDep,
     lesson_repository: LessonRepositoryDep,
     course_repository: CourseRepositoryDep,
-) -> BlockUnitOfWork:
-    return BlockUnitOfWork(
-        session=session,
-        block_repository=block_repository,
-        lesson_repository=lesson_repository,
-        course_repository=course_repository,
-    )
+) -> AsyncGenerator[BlockUnitOfWork]:
+    async with BlockUnitOfWork(
+        session,
+        lesson_repository,
+        course_repository,
+        block_repository,
+    ) as uow:
+        yield uow
 
 
 BlockUnitOfWorkDep = Annotated[BlockUnitOfWork, Depends(get_block_uow)]

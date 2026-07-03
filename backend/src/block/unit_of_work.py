@@ -1,11 +1,15 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.block.repository import BlockRepository
-from src.lesson.repository import LessonRepository
+from src.lesson.repositories import LessonRepository
 from src.course.repository import CourseRepository
 from src.core.unit_of_work import BaseUnitOfWork
 
 
 class BlockUnitOfWork(BaseUnitOfWork):
+    lessons: LessonRepository
+    courses: CourseRepository
+    blocks: BlockRepository
+
     def __init__(
         self,
         session: AsyncSession,

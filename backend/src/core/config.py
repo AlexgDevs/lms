@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import computed_field, PostgresDsn
+from pydantic import computed_field, PostgresDsn, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -17,9 +17,9 @@ class PostgresSettings(BaseSettings):
 
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
-    POSTGRES_PASS: str
-    POSTGRES_DB: str
+    POSTGRES_USER: str = Field(default=...)
+    POSTGRES_PASS: str = Field(default=...)
+    POSTGRES_DB: str = Field(default=...)
 
     @computed_field  # type: ignore
     @property
@@ -47,7 +47,7 @@ class AppSettings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # JWT
-    JWT_SECRET_KEY: str
+    JWT_SECRET_KEY: str = Field(default=...)
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -68,7 +68,7 @@ class RedisSettings(BaseSettings):
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_USER: str = "default"
-    REDIS_PASSWORD: str
+    REDIS_PASSWORD: str = Field(default=...)
     REDIS_MAX_CONNECTIONS: int = 50
     REDIS_SOCKET_TIMEOUT: int = 5
     REDIS_SOCKET_CONNECT_TIMEOUT: int = 2
@@ -81,20 +81,9 @@ class RedisSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
-    @computed_field  # type: ignore
-    @property
-    def postgres(self) -> PostgresSettings:
-        return PostgresSettings()
-
-    @computed_field  # type: ignore
-    @property
-    def app(self) -> AppSettings:
-        return AppSettings()
-
-    @computed_field  # type: ignore
-    @property
-    def redis(self) -> RedisSettings:
-        return RedisSettings()
+    postgres: PostgresSettings = Field(default_factory=PostgresSettings)
+    app: AppSettings = Field(default_factory=AppSettings)
+    redis: RedisSettings = Field(default_factory=RedisSettings)
 
 
 settings = Settings()

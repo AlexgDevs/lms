@@ -4,6 +4,8 @@ from src.course.repository import CourseRepository
 
 
 class CourseUnitOfWork(BaseUnitOfWork):
+    courses: CourseRepository
+
     def __init__(
         self, session: AsyncSession, course_repository: CourseRepository
     ) -> None:

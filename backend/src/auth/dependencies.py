@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, AsyncGenerator
 from fastapi import Depends
 
 from src.auth.services import AuthService
@@ -16,12 +16,13 @@ async def get_auth_unit_of_work(
     session: SessionDep,
     user_repository: UserRepositoryDep,
     auth_repository: AuthRepositoryDep,
-) -> AuthUnitOfWork:
-    return AuthUnitOfWork(
+) -> AsyncGenerator[AuthUnitOfWork]:
+    async with AuthUnitOfWork(
         session,
         user_repository,
         auth_repository,
-    )
+    ) as uow:
+        yield uow
 
 
 async def get_auth_service(

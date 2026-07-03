@@ -1,6 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter, status
 
+from src.submissions.schemas import BlockSubmissionRequestCreateSchema
 from src.user.dependencies import UserIdDep
 from src.block.dependencies import BlockServiceDep
 from src.block.schemas import (

@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
@@ -16,16 +16,17 @@ def get_module_repository(session: SessionDep) -> ModuleRepository:
 ModuleRepositoryDep = Annotated[ModuleRepository, Depends(get_module_repository)]
 
 
-def get_module_uow(
+async def get_module_uow(
     session: SessionDep,
     module_repository: ModuleRepositoryDep,
     course_repository: CourseRepositoryDep,
-) -> ModuleUnitOfWork:
-    return ModuleUnitOfWork(
+) -> AsyncGenerator[ModuleUnitOfWork]:
+    async with ModuleUnitOfWork(
         session=session,
         module_repository=module_repository,
         course_repository=course_repository,
-    )
+    ) as uow:
+        yield uow
 
 
 ModuleUnitOfWorkDep = Annotated[ModuleUnitOfWork, Depends(get_module_uow)]

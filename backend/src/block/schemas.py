@@ -21,6 +21,7 @@ class BlockSchema(BaseSchema):
 class TextBlockContent(BaseSchema):
     text: str
 
+
 class QuizOption(BaseSchema):
     id: int
     text: str
@@ -73,7 +74,7 @@ PAYLOAD_REGISTRY: Dict[BlockType, Type[BaseSchema]] = {
 }
 
 
-class BlockCreateRequestSchema(PolymorphicPayloadMixin[BlockType], BaseSchema):
+class BlockCreateRequestSchema(BaseSchema, PolymorphicPayloadMixin[BlockType]):
     title: str
     block_type: BlockType
     payload: dict[str, Any]
@@ -86,12 +87,13 @@ class BlockCreateSchema(BlockCreateRequestSchema):
     course_id: UUID
 
 
-class BlockUpdateRequestSchema(PolymorphicPayloadMixin[BlockType], BaseSchema):
+class BlockUpdateRequestSchema(BaseSchema, PolymorphicPayloadMixin[BlockType]):
     title: str | None = None
     block_type: BlockType | None = None
     payload: dict[str, Any] | None = None
 
     payload_registry: ClassVar = PAYLOAD_REGISTRY
+
 
 class BlockUpdateSchema(BlockUpdateRequestSchema):
     pass

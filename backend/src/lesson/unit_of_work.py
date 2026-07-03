@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.lesson.repository import LessonRepository
+from src.lesson.repositories import LessonRepository
 from src.module.repository import ModuleRepository
 from src.course.repository import CourseRepository
 from src.core.unit_of_work import BaseUnitOfWork
