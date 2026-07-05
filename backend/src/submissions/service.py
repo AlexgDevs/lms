@@ -1,9 +1,19 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.submissions.exceptions import InvalidSubmissionCountError
-from src.block.enums import BlockSubmissionType
+from src.lesson.lesson_progress.schemas import (
+    LessonProgressCreateSchema,
+    LessonProgressUpdateSchema,
+)
 from src.block.exceptions import BlockNotFoundError
+from src.lesson.enums import LessonProgressType
+from src.lesson.service import LessonService
+from src.submissions.exceptions import (
+    DuplicateBlocksInSubmissionError,
+    InvalidSubmissionBlocksError,
+)
+from src.block.enums import BlockSubmissionType
 from src.submissions.checker import BlockChecker
 from src.submissions.schemas import (
     BlockSubmissionCreateSchema,
@@ -20,8 +30,10 @@ class BlockSubmissionService(BaseService):
         self,
         session: AsyncSession,
         block_submission_unit_of_work: BlockSubmissionUnitOfWork,
+        lesson_service: LessonService,
     ):
         self.uow = block_submission_unit_of_work
+        self.lesson_service = lesson_service
         super().__init__(session)
 
     async def submit_blocks(
@@ -31,20 +43,64 @@ class BlockSubmissionService(BaseService):
         user_id: UUID,
         submissions: list[BlockSubmissionRequestCreateSchema],
     ) -> list[BlockSubmissionSchema]:
+        """Processes a bulk submission of user answers for the current lesson's blocks.
+
+        This method performs an end-to-end validation of the incoming submission payload,
+        evaluates each block's correctness using specialized strategy checkers, updates
+        the user's attempt history, and dynamically recalculates the overall lesson
+        progress (updating the status to either IN_PROGRESS or COMPLETED).
+
+        Args:
+            course_id (UUID): The unique identifier of the course.
+            lesson_id (UUID): The unique identifier of the lesson being evaluated.
+            user_id (UUID): The unique identifier of the user submitting the answers.
+            submissions (list[BlockSubmissionRequestCreateSchema]): A list of schemas
+                containing the user's answers mapped to specific block IDs.
+
+        Returns:
+            list[BlockSubmissionSchema]: A list of updated or newly created submission
+                records containing the evaluation results for each block.
+
+        Raises:
+            DuplicateBlocksInSubmissionError: If the same `block_id` appears more than
+                once in the `submissions` list.
+            InvalidSubmissionBlocksError: If the set of submitted block IDs does not
+                exactly match the set of block IDs associated with this lesson in the database.
+            BlockNotFoundError: If a requested block cannot be retrieved from the
+                repository during iteration.
+
+        Note:
+            - Implements a "persistent green checkmark" behavior (Stepik-style): if the
+              lesson progress status is already `COMPLETED`, subsequent incorrect submissions
+              will not revert the status back to `IN_PROGRESS` or overwrite the original
+              `completed_at` timestamp.
+            - All database interactions (creating/updating block submissions and lesson
+              progress) are executed within a single atomic transaction and committed
+              at the very end via `uow.commit()`.
+        """
 
         result: list[BlockSubmissionSchema] = []
 
         # TODO: add check for course and lesson existence ; course by lesson ; user by courserecord
-        block_count = await self.uow.blocks.get_count(lesson_id)
-        if len(submissions) != block_count:
-            raise InvalidSubmissionCountError
+        existing_block_ids: set[UUID] = await self.uow.blocks.get_ids_by_lesson(
+            lesson_id
+        )
+
+        submitted_block_ids = [sub.block_id for sub in submissions]
+
+        if len(submitted_block_ids) != len(set(submitted_block_ids)):
+            raise DuplicateBlocksInSubmissionError
+
+        if set(submitted_block_ids) != existing_block_ids:
+            raise InvalidSubmissionBlocksError
 
         for sub_request in submissions:
             block = await self.uow.blocks.get_one(  # TODO: add bulk request
                 id=sub_request.block_id, lesson_id=lesson_id
             )
+
             if not block:
-                raise BlockNotFoundError(f"Block {sub_request.block_id} not found")
+                raise BlockNotFoundError
 
             is_correct = await BlockChecker.check(block, sub_request)
 
@@ -96,8 +152,51 @@ class BlockSubmissionService(BaseService):
                 created = await self.uow.submissions.create(submission_data)
                 result.append(created)
 
+        has_wrong = any(
+            sub.submission_type == BlockSubmissionType.WRONG for sub in result
+        )
+
+        lesson_progress = await self.lesson_service.get_or_create_lesson_progress(
+            user_id=user_id, lesson_id=lesson_id, only_get=True
+        )
+
+        if lesson_progress and lesson_progress.status == LessonProgressType.COMPLETED:
+            new_status = LessonProgressType.COMPLETED
+        else:
+            new_status = (
+                LessonProgressType.IN_PROGRESS
+                if has_wrong
+                else LessonProgressType.COMPLETED
+            )
+
+        # TODO: add try_first_correct check for lesson progress update
+
+        if not lesson_progress:
+            progress_data = LessonProgressCreateSchema(
+                user_id=user_id,
+                lesson_id=lesson_id,
+                status=new_status,
+                completed_at=(
+                    datetime.now(timezone.utc)
+                    if new_status == LessonProgressType.COMPLETED
+                    else None
+                ),
+            )
+            await self.uow.lessons_progress.create(progress_data)
+        else:
+            progress_update = LessonProgressUpdateSchema(
+                status=new_status,
+                completed_at=(
+                    lesson_progress.completed_at
+                    if lesson_progress.status == LessonProgressType.COMPLETED
+                    else (
+                        datetime.now(timezone.utc)
+                        if new_status == LessonProgressType.COMPLETED
+                        else None
+                    )
+                ),
+            )
+            await self.uow.lessons_progress.update(lesson_progress.id, progress_update)
+
         await self.uow.commit()
         return result
-
-
-# TODO: add LESSON TYPE CHECKER
