@@ -15,7 +15,7 @@ class BlockSubmissionSchema(BaseSchema):
     submission_type: BlockSubmissionType
     submitted_payload: dict[str, Any] | None = None
     attempts: int
-    is_first_try_correct: bool
+    is_first_try_correct: bool | None
     created_at: datetime
     updated_at: datetime
 
