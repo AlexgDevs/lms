@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Enum as SAEnum
+from sqlalchemy import ForeignKey, Enum as SAEnum, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.postgres.base import UUIDBase
@@ -37,3 +37,7 @@ class LessonProgress(UUIDBase):
         )
     )
     completed_at: Mapped[timestamp | None]
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "lesson_id", name="uq_user_lesson_progress"),
+    )
