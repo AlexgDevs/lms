@@ -9,3 +9,13 @@ class SubmissionError(AppException):
 class InvalidSubmissionCountError(SubmissionError):
     status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     detail = "Invalid submission count"
+
+
+class DuplicateBlocksInSubmissionError(SubmissionError):
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    detail = "Duplicate blocks in submission"
+
+
+class InvalidSubmissionBlocksError(SubmissionError):
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    detail = "Invalid submission blocks"
