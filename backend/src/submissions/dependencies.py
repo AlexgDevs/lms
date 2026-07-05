@@ -2,9 +2,10 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
+from src.lesson.lesson_progress.dependencies import LessonProgressRepositoryDep
 from src.block.dependencies import BlockRepositoryDep
 from src.core.dependencies import SessionDep
-from src.lesson.dependencies import LessonRepositoryDep
+from src.lesson.dependencies import LessonRepositoryDep, LessonServiceDep
 from src.submissions.repository import BlockSubmissionRepository
 from src.submissions.service import BlockSubmissionService
 from src.submissions.unit_of_work import BlockSubmissionUnitOfWork
@@ -24,12 +25,14 @@ async def get_submission_uow(
     submission_repository: BlockSubmissionRepositoryDep,
     block_repository: BlockRepositoryDep,
     lesson_repository: LessonRepositoryDep,
+    lesson_progress_repository: LessonProgressRepositoryDep,
 ) -> AsyncGenerator[BlockSubmissionUnitOfWork]:
     async with BlockSubmissionUnitOfWork(
         session=session,
         block_submission_repository=submission_repository,
         block_repository=block_repository,
         lesson_repository=lesson_repository,
+        lesson_progress_repository=lesson_progress_repository,
     ) as uow:
         yield uow
 
@@ -40,9 +43,11 @@ BlockSubmissionUnitOfWorkDep = Annotated[
 
 
 def get_submission_service(
-    session: SessionDep, block_unit_of_work: BlockSubmissionUnitOfWorkDep
+    session: SessionDep,
+    block_unit_of_work: BlockSubmissionUnitOfWorkDep,
+    lesson_service: LessonServiceDep,
 ) -> BlockSubmissionService:
-    return BlockSubmissionService(session, block_unit_of_work)
+    return BlockSubmissionService(session, block_unit_of_work, lesson_service)
 
 
 BlockSubmissionServiceDep = Annotated[

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.block.repository import BlockRepository
-from src.lesson.repositories import LessonRepository
+from src.lesson.repository import LessonRepository
 from src.course.repository import CourseRepository
 from src.core.unit_of_work import BaseUnitOfWork
 
