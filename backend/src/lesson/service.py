@@ -1,6 +1,12 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.lesson.exceptions import LessonNotFoundError
+from sqlalchemy.exc import IntegrityError
+from src.lesson.lesson_progress.schemas import (
+    LessonProgressCreateSchema,
+    LessonProgressSchema,
+)
+from src.lesson.enums import LessonProgressType
+from src.lesson.exceptions import LessonNotFoundError, LessonProgressNotFoundError
 from src.course.exceptions import CourseNotFoundError
 from src.module.exceptions import ModuleNotFoundError
 from src.lesson.schemas import (
@@ -109,3 +115,43 @@ class LessonService(BaseService):
 
         await self.uow.lessons.delete(id_=lesson_id)
         await self.uow.commit()
+
+    async def get_or_create_lesson_progress(
+        self,
+        user_id: UUID,
+        lesson_id: UUID,
+        only_get: bool = False,
+    ) -> LessonProgressSchema:
+        lesson = await self.uow.lessons_progress.get_one(
+            user_id=user_id, lesson_id=lesson_id
+        )
+
+        if only_get:
+            if not lesson:
+                raise LessonProgressNotFoundError
+
+            return lesson
+
+        if lesson:
+            return lesson
+
+        data = LessonProgressCreateSchema(
+            user_id=user_id,
+            lesson_id=lesson_id,
+            status=LessonProgressType.NOT_STARTED,
+        )
+
+        try:
+            lesson_progress = await self.uow.lessons_progress.create(data)
+            await self.uow.commit()
+            return lesson_progress
+        except IntegrityError:
+            await self.uow.rollback()
+            existing_progress = await self.uow.lessons_progress.get_one(
+                user_id=user_id, lesson_id=lesson_id
+            )
+
+            if not existing_progress:
+                raise LessonProgressNotFoundError
+
+            return existing_progress
