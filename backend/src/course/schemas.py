@@ -50,7 +50,7 @@ class CourseUpdateRequestSchema(BaseSchema):
     All fields are optional because the client might want to update only one field (PATCH-like).
     """
 
-    title: str | None = Field(None, max_length=128)
+    title: str = Field(..., max_length=128)
     description: str | None = Field(None, max_length=128)
     price: int | None = Field(None, ge=0)
 
