@@ -23,3 +23,8 @@ class BlockRepository(BaseRepository[Block, BlockSchema]):
             )
             or 0
         )
+
+    async def get_ids_by_lesson(self, lesson_id: UUID) -> set[UUID]:
+        stmt = select(self.model).where(self.model.lesson_id == lesson_id)
+        result = await self.session.execute(stmt)
+        return {row[0].id for row in result.fetchall()}
