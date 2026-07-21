@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.course.exceptions import CourseNotFoundError
 from src.lesson.lesson_progress.schemas import (
     LessonProgressCreateSchema,
     LessonProgressUpdateSchema,
@@ -79,57 +80,68 @@ class BlockSubmissionService(BaseService):
               at the very end via `uow.commit()`.
         """
 
-        result: list[BlockSubmissionSchema] = []
+        # check user on course
+        course = await self.uow.courses.get_course_by_lesson_where_user_is_member(
+            user_id=user_id, course_id=course_id, lesson_id=lesson_id
+        )
+        if not course:
+            raise CourseNotFoundError
 
-        # TODO: add check for course and lesson existence ; course by lesson ; user by courserecord
+        # check all blocks
+        submitted_block_ids = [sub.block_id for sub in submissions]
+        if len(submitted_block_ids) != len(set(submitted_block_ids)):
+            raise DuplicateBlocksInSubmissionError
+
+
         existing_block_ids: set[UUID] = await self.uow.blocks.get_ids_by_lesson(
             lesson_id
         )
 
-        submitted_block_ids = [sub.block_id for sub in submissions]
-
-        if len(submitted_block_ids) != len(set(submitted_block_ids)):
-            raise DuplicateBlocksInSubmissionError
-
+        # check true ids
         if set(submitted_block_ids) != existing_block_ids:
             raise InvalidSubmissionBlocksError
 
-        for sub_request in submissions:
-            block = await self.uow.blocks.get_one(  # TODO: add bulk request
-                id=sub_request.block_id, lesson_id=lesson_id
-            )
+        blocks_map = {
+            b.id: b for b in await self.uow.blocks.get_by_ids(submitted_block_ids)
+        }
+        existing_submissions_map = {
+            s.block_id: s
+            for s in await self.uow.submissions.get_filtered(
+                lesson_id=lesson_id,
+                user_id=user_id,
+                limit=1000,
+                offset=0,
+            )  # TODO: add limit and offset optional
+        }
 
+        result: list[BlockSubmissionSchema] = []
+
+        for sub_request in submissions:
+            block = blocks_map.get(sub_request.block_id)
             if not block:
                 raise BlockNotFoundError
 
             is_correct = await BlockChecker.check(block, sub_request)
-
-            existing = await self.uow.submissions.get_one(
-                block_id=sub_request.block_id,
-                user_id=user_id,
-            )
+            existing = existing_submissions_map.get(sub_request.block_id)
 
             if existing:
-                if existing.submission_type == BlockSubmissionType.CORRECT:
-                    update_data = BlockSubmissionUpdateSchema(
-                        attempts=existing.attempts + 1,
-                        submission_type=BlockSubmissionType.CORRECT,
-                        submitted_payload=existing.submitted_payload,
-                    )
-                else:
-                    update_data = BlockSubmissionUpdateSchema(
-                        submitted_payload=sub_request.payload,
-                        submission_type=(
-                            BlockSubmissionType.CORRECT
-                            if is_correct
-                            else BlockSubmissionType.WRONG
-                        ),
-                        attempts=existing.attempts + 1,
-                    )
+                already_correct = (
+                    existing.submission_type == BlockSubmissionType.CORRECT
+                )
 
-                if existing.is_first_try_correct is None:
-                    update_data.is_first_try_correct = is_correct
-
+                update_data = BlockSubmissionUpdateSchema(
+                    attempts=existing.attempts + 1,
+                    submission_type=(
+                        BlockSubmissionType.CORRECT
+                        if (already_correct or is_correct)
+                        else BlockSubmissionType.WRONG
+                    ),
+                    submitted_payload=(
+                        existing.submitted_payload
+                        if already_correct
+                        else sub_request.payload
+                    ),
+                )
                 updated = await self.uow.submissions.update(
                     id_=existing.id, data=update_data
                 )
@@ -160,16 +172,16 @@ class BlockSubmissionService(BaseService):
             user_id=user_id, lesson_id=lesson_id, only_get=True
         )
 
-        if lesson_progress and lesson_progress.status == LessonProgressType.COMPLETED:
-            new_status = LessonProgressType.COMPLETED
-        else:
-            new_status = (
-                LessonProgressType.IN_PROGRESS
-                if has_wrong
-                else LessonProgressType.COMPLETED
-            )
+        already_completed = (
+            lesson_progress and lesson_progress.status == LessonProgressType.COMPLETED
+        )
+        new_status = (
+            LessonProgressType.COMPLETED
+            if (already_completed or not has_wrong)
+            else LessonProgressType.IN_PROGRESS
+        )
 
-        # TODO: add try_first_correct check for lesson progress update
+        now = datetime.now(timezone.utc)
 
         if not lesson_progress:
             progress_data = LessonProgressCreateSchema(
@@ -177,24 +189,18 @@ class BlockSubmissionService(BaseService):
                 lesson_id=lesson_id,
                 status=new_status,
                 completed_at=(
-                    datetime.now(timezone.utc)
-                    if new_status == LessonProgressType.COMPLETED
-                    else None
+                    now if new_status == LessonProgressType.COMPLETED else None
                 ),
             )
             await self.uow.lessons_progress.create(progress_data)
         else:
+            completed_at = lesson_progress.completed_at
+            if new_status == LessonProgressType.COMPLETED and not completed_at:
+                completed_at = now
+
             progress_update = LessonProgressUpdateSchema(
                 status=new_status,
-                completed_at=(
-                    lesson_progress.completed_at
-                    if lesson_progress.status == LessonProgressType.COMPLETED
-                    else (
-                        datetime.now(timezone.utc)
-                        if new_status == LessonProgressType.COMPLETED
-                        else None
-                    )
-                ),
+                completed_at=completed_at,
             )
             await self.uow.lessons_progress.update(lesson_progress.id, progress_update)
 

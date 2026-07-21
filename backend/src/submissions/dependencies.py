@@ -2,6 +2,7 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
+from src.course.dependencies import CourseRepositoryDep
 from src.lesson.lesson_progress.dependencies import LessonProgressRepositoryDep
 from src.block.dependencies import BlockRepositoryDep
 from src.core.dependencies import SessionDep
@@ -26,6 +27,7 @@ async def get_submission_uow(
     block_repository: BlockRepositoryDep,
     lesson_repository: LessonRepositoryDep,
     lesson_progress_repository: LessonProgressRepositoryDep,
+    course_repository: CourseRepositoryDep
 ) -> AsyncGenerator[BlockSubmissionUnitOfWork]:
     async with BlockSubmissionUnitOfWork(
         session=session,
@@ -33,6 +35,7 @@ async def get_submission_uow(
         block_repository=block_repository,
         lesson_repository=lesson_repository,
         lesson_progress_repository=lesson_progress_repository,
+        course_repository=course_repository
     ) as uow:
         yield uow
 

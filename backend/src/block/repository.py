@@ -1,3 +1,4 @@
+from typing import List, Sequence
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -28,3 +29,8 @@ class BlockRepository(BaseRepository[Block, BlockSchema]):
         stmt = select(self.model).where(self.model.lesson_id == lesson_id)
         result = await self.session.execute(stmt)
         return {row[0].id for row in result.fetchall()}
+
+    async def get_by_ids(self, block_ids: list[UUID]) -> List[BlockSchema]:
+        stmt = select(self.model).where(self.model.id.in_(block_ids))
+        result = await self.session.execute(stmt)
+        return [self.mapper.to_schema(res) for res in result.scalars().all()]
