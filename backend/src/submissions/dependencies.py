@@ -27,7 +27,7 @@ async def get_submission_uow(
     block_repository: BlockRepositoryDep,
     lesson_repository: LessonRepositoryDep,
     lesson_progress_repository: LessonProgressRepositoryDep,
-    course_repository: CourseRepositoryDep
+    course_repository: CourseRepositoryDep,
 ) -> AsyncGenerator[BlockSubmissionUnitOfWork]:
     async with BlockSubmissionUnitOfWork(
         session=session,
@@ -35,7 +35,7 @@ async def get_submission_uow(
         block_repository=block_repository,
         lesson_repository=lesson_repository,
         lesson_progress_repository=lesson_progress_repository,
-        course_repository=course_repository
+        course_repository=course_repository,
     ) as uow:
         yield uow
 

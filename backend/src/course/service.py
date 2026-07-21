@@ -10,6 +10,7 @@ from src.course.schemas import (
     CourseSchema,
     CourseUpdateRequestSchema,
     CourseUpdateSchema,
+    CourseUserBriefSchema,
 )
 from src.course.unit_of_work import CourseUnitOfWork
 
@@ -71,3 +72,8 @@ class CourseService(BaseService):
 
         await self.uow.courses.update(course_id, delete_data)
         await self.uow.commit()
+
+    async def get_courses_where_user_member(
+        self, user_id: UUID
+    ) -> list[CourseUserBriefSchema]:
+        return await self.uow.courses.get_courses_where_user_is_member(user_id)

@@ -4,7 +4,7 @@ from src.auth import router as auth_router
 from src.course.router import router as course_router
 from src.module import router as module_router
 from src.lesson.router import router as lesson_router
-from src.lesson.lesson_progress.router import router as  lesson_prorgress_router
+from src.lesson.lesson_progress.router import router as lesson_prorgress_router
 from src.block import router as block_router
 from src.submissions import router as submissions_router
 

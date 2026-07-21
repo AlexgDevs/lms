@@ -92,7 +92,6 @@ class BlockSubmissionService(BaseService):
         if len(submitted_block_ids) != len(set(submitted_block_ids)):
             raise DuplicateBlocksInSubmissionError
 
-
         existing_block_ids: set[UUID] = await self.uow.blocks.get_ids_by_lesson(
             lesson_id
         )

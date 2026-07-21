@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import Field
 
+from src.course.enums import CourseMemberRole
 from src.core.schemas.base_schema import BaseSchema
 
 
@@ -65,3 +66,7 @@ class CourseUpdateSchema(BaseSchema):
     price: int | None = None
     cover_url: str | None = None
     is_deleted: datetime | None = None
+
+
+class CourseUserBriefSchema(CourseSchema):
+    role: CourseMemberRole
