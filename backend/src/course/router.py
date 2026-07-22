@@ -1,4 +1,7 @@
+from typing import Sequence
+
 from fastapi import APIRouter, Query, status
+from src.course.course_member.schemas import CourseMemberSchema
 from src.course.schemas import (
     CourseSchema,
     CourseCreateRequestSchema,
@@ -48,7 +51,7 @@ async def get_created_courses(
     service: CourseServiceDep,
     limit: int = 10,
     offset: int = 0,
-) -> list[CourseSchema]:
+) -> Sequence[CourseSchema]:
     return await service.uow.courses.get_filtered(  # TODO: add local method they don't viled SOLID layers
         owner_id=user_id,
         limit=limit,
@@ -56,8 +59,15 @@ async def get_created_courses(
     )
 
 
-@router.get("")
+@router.get("/my")
 async def get_my_courses(
     user_id: UserIdDep, service: CourseServiceDep
 ) -> list[CourseUserBriefSchema]:
     return await service.get_courses_where_user_member(user_id)
+
+
+@router.post("/{course_id}/enroll")
+async def create_member(
+    user_id: UserIdDep, course_id: UUID, service: CourseServiceDep
+) -> CourseMemberSchema:
+    return await service.enroll(course_id=course_id, user_id=user_id)

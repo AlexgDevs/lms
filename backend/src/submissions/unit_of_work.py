@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.course.course_member.repository import CourseMemberRepository
 from src.course.repository import CourseRepository
 from src.lesson.lesson_progress.repository import LessonProgressRepository
 from src.block.repository import BlockRepository
@@ -13,6 +14,7 @@ class BlockSubmissionUnitOfWork(BaseUnitOfWork):
     lessons: LessonRepository
     lessons_progress: LessonProgressRepository
     courses: CourseRepository
+    members: CourseMemberRepository
 
     def __init__(
         self,
@@ -22,6 +24,7 @@ class BlockSubmissionUnitOfWork(BaseUnitOfWork):
         lesson_repository: LessonRepository,
         lesson_progress_repository: LessonProgressRepository,
         course_repository: CourseRepository,
+        course_member_repository: CourseMemberRepository,
     ) -> None:
         super().__init__(session)
 
@@ -30,6 +33,7 @@ class BlockSubmissionUnitOfWork(BaseUnitOfWork):
         self.lessons = lesson_repository
         self.lessons_progress = lesson_progress_repository
         self.courses = course_repository
+        self.members = course_member_repository
 
     def _uow_marker(self) -> None:
         pass

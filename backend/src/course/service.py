@@ -2,8 +2,12 @@ from datetime import datetime, timezone
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.course.course_member.schemas import (
+    CourseMemberCreateSchema,
+    CourseMemberSchema,
+)
 from src.core.services.base_service import BaseService
-from src.course.exceptions import CourseNotFoundError
+from src.course.exceptions import CourseMemberAlredyEnrolledError, CourseNotFoundError
 from src.course.schemas import (
     CourseCreateRequestSchema,
     CourseCreateSchema,
@@ -19,7 +23,7 @@ class CourseService(BaseService):
     def __init__(
         self,
         session: AsyncSession,
-        course_unit_of_work: CourseUnitOfWork,
+        course_unit_of_work: CourseUnitOfWork,  # TODO: add payment service in uow
     ):
         self.uow = course_unit_of_work
         super().__init__(session)
@@ -77,3 +81,18 @@ class CourseService(BaseService):
         self, user_id: UUID
     ) -> list[CourseUserBriefSchema]:
         return await self.uow.courses.get_courses_where_user_is_member(user_id)
+
+    async def enroll(self, course_id: UUID, user_id: UUID) -> CourseMemberSchema:
+        member = await self.uow.members.get_one(
+            user_id=user_id, course_id=course_id, left_at=None
+        )
+        if member:
+            raise CourseMemberAlredyEnrolledError
+
+        # TODO: creating payment and other services
+
+        data = CourseMemberCreateSchema(course_id=course_id, user_id=user_id)
+        new_member = await self.uow.members.create(data=data)
+
+        await self.uow.commit()
+        return new_member

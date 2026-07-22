@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.course.exceptions import CourseNotFoundError
+from src.course.exceptions import CourseMemberNotFoundError, CourseNotFoundError
 from src.lesson.lesson_progress.schemas import (
     LessonProgressCreateSchema,
     LessonProgressUpdateSchema,
@@ -81,11 +81,15 @@ class BlockSubmissionService(BaseService):
         """
 
         # check user on course
-        course = await self.uow.courses.get_course_by_lesson_where_user_is_member(
-            user_id=user_id, course_id=course_id, lesson_id=lesson_id
-        )
+        course = await self.uow.courses.get_one(id=course_id)
         if not course:
             raise CourseNotFoundError
+
+        member = await self.uow.members.get_one(
+            user_id=user_id, course_id=course.id, left_at=None
+        )
+        if not member:
+            raise CourseMemberNotFoundError
 
         # check all blocks
         submitted_block_ids = [sub.block_id for sub in submissions]
@@ -168,7 +172,7 @@ class BlockSubmissionService(BaseService):
         )
 
         lesson_progress = await self.lesson_service.get_or_create_lesson_progress(
-            user_id=user_id, lesson_id=lesson_id, only_get=True
+            user_id=user_id, lesson_id=lesson_id, only_get=False
         )
 
         already_completed = (

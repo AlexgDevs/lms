@@ -2,6 +2,7 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
+from src.course.course_member.repository import CourseMemberRepository
 from src.core.dependencies import SessionDep
 from src.course.repository import CourseRepository
 from src.course.service import CourseService
@@ -15,11 +16,23 @@ def get_course_repository(session: SessionDep) -> CourseRepository:
 CourseRepositoryDep = Annotated[CourseRepository, Depends(get_course_repository)]
 
 
+def get_course_member_repository(session: SessionDep) -> CourseMemberRepository:
+    return CourseMemberRepository(session)
+
+
+CourseMemberRepositoryDep = Annotated[
+    CourseMemberRepository, Depends(get_course_member_repository)
+]
+
+
 async def get_course_uow(
     session: SessionDep,
     course_repository: CourseRepositoryDep,
+    course_member_repository: CourseMemberRepositoryDep,
 ) -> AsyncGenerator[CourseUnitOfWork]:
-    async with CourseUnitOfWork(session, course_repository) as uow:
+    async with CourseUnitOfWork(
+        session, course_repository, course_member_repository
+    ) as uow:
         yield uow
 
 
