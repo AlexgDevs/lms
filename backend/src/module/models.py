@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.postgres.base import UUIDBase
-from src.core.postgres.types import str_128, created_at, uuid_pk
+from src.core.postgres.types import str_128, timestamp
 
 
 class Module(UUIDBase):
@@ -16,4 +16,5 @@ class Module(UUIDBase):
     title: Mapped[str_128]
     description: Mapped[str_128 | None]
     order: Mapped[int] = mapped_column(default=0)
-    created_at: Mapped[created_at]
+    created_at: Mapped[timestamp]
+    updated_at: Mapped[timestamp]
