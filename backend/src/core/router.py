@@ -7,6 +7,7 @@ from src.lesson.router import router as lesson_router
 from src.lesson.lesson_progress.router import router as lesson_prorgress_router
 from src.block import router as block_router
 from src.submissions import router as submissions_router
+from src.user.router import router as user_router
 
 app_v1 = APIRouter()
 app_v1.include_router(auth_router)
@@ -16,3 +17,4 @@ app_v1.include_router(lesson_router)
 app_v1.include_router(block_router)
 app_v1.include_router(submissions_router)
 app_v1.include_router(lesson_prorgress_router)
+app_v1.include_router(user_router)
