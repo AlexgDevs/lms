@@ -219,3 +219,11 @@ __marimo__/
 
 # Log files
 backend/logs/app.log
+
+# Frontend & Build tools
+node_modules/
+.pnpm-store/
+dist/
+.vite/
+.tanstack/
+*.log
