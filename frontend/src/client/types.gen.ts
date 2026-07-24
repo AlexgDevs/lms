@@ -1247,6 +1247,61 @@ export type CreateLessonLessonsLessonIdProgressPostResponses = {
 
 export type CreateLessonLessonsLessonIdProgressPostResponse = CreateLessonLessonsLessonIdProgressPostResponses[keyof CreateLessonLessonsLessonIdProgressPostResponses];
 
+export type GetCurrentUserUsersMeGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/users/me';
+};
+
+export type GetCurrentUserUsersMeGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCurrentUserUsersMeGetError = GetCurrentUserUsersMeGetErrors[keyof GetCurrentUserUsersMeGetErrors];
+
+export type GetCurrentUserUsersMeGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserSchema;
+};
+
+export type GetCurrentUserUsersMeGetResponse = GetCurrentUserUsersMeGetResponses[keyof GetCurrentUserUsersMeGetResponses];
+
+export type GetUserByIdUsersUserIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/users/{user_id}';
+};
+
+export type GetUserByIdUsersUserIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetUserByIdUsersUserIdGetError = GetUserByIdUsersUserIdGetErrors[keyof GetUserByIdUsersUserIdGetErrors];
+
+export type GetUserByIdUsersUserIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserSchema;
+};
+
+export type GetUserByIdUsersUserIdGetResponse = GetUserByIdUsersUserIdGetResponses[keyof GetUserByIdUsersUserIdGetResponses];
+
 export type SayHelloGetData = {
     body?: never;
     path?: never;

@@ -37,12 +37,16 @@ export function SignupForm() {
     })
 
     const onSubmit = (data: SignupFormData) => {
-        if (signUpMutation.isPending) return
+    if (signUpMutation.isPending) return;
 
-        // exclude confirmPassword from submission data
-        const { confirmPassword: _confirmPassword, ...submitData } = data
-        signUpMutation.mutate({ body: submitData })
-    }
+    // Исключаем confirmPassword
+    const { confirmPassword: _confirmPassword, ...submitData } = data;
+
+    // Передаем данные в мутацию
+    signUpMutation.mutate({
+        body: submitData,
+    });
+};
 
     return (
         <Card>

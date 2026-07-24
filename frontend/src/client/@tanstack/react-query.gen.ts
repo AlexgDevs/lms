@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { AuthService, BlockService, CourseService, DefaultService, LessonService, LessonsProgresService, ModuleService, type Options, SubmissionService } from '../sdk.gen';
-import type { CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseCoursesPostData, CreateCourseCoursesPostError, CreateCourseCoursesPostResponse, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonLessonsLessonIdProgressPostData, CreateLessonLessonsLessonIdProgressPostError, CreateLessonLessonsLessonIdProgressPostResponse, CreateMemberCoursesCourseIdEnrollPostData, CreateMemberCoursesCourseIdEnrollPostError, CreateMemberCoursesCourseIdEnrollPostResponse, CreateModuleCoursesCourseIdModulesPostData, CreateModuleCoursesCourseIdModulesPostError, CreateModuleCoursesCourseIdModulesPostResponse, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseCoursesCourseIdDeleteData, DeleteCourseCoursesCourseIdDeleteError, DeleteCourseCoursesCourseIdDeleteResponse, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleCoursesCourseIdModulesModuleIdDeleteData, DeleteModuleCoursesCourseIdModulesModuleIdDeleteError, DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponse, GetCreatedCoursesCoursesCreatedGetData, GetCreatedCoursesCoursesCreatedGetError, GetCreatedCoursesCoursesCreatedGetResponse, GetMyCoursesCoursesMyGetData, GetMyCoursesCoursesMyGetError, GetMyCoursesCoursesMyGetResponse, LoginUserAuthLoginPostData, LoginUserAuthLoginPostError, LoginUserAuthLoginPostResponse, RefreshAuthRefreshPostData, RefreshAuthRefreshPostError, RefreshAuthRefreshPostResponse, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostError, RegisterUserAuthRegisterPostResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostData, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostError, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponse, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseCoursesCourseIdPatchData, UpdateCourseCoursesCourseIdPatchError, UpdateCourseCoursesCourseIdPatchResponse, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleCoursesCourseIdModulesModuleIdPatchData, UpdateModuleCoursesCourseIdModulesModuleIdPatchError, UpdateModuleCoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
+import { AuthService, BlockService, CourseService, DefaultService, LessonService, LessonsProgresService, ModuleService, type Options, SubmissionService, UserService } from '../sdk.gen';
+import type { CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseCoursesPostData, CreateCourseCoursesPostError, CreateCourseCoursesPostResponse, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonLessonsLessonIdProgressPostData, CreateLessonLessonsLessonIdProgressPostError, CreateLessonLessonsLessonIdProgressPostResponse, CreateMemberCoursesCourseIdEnrollPostData, CreateMemberCoursesCourseIdEnrollPostError, CreateMemberCoursesCourseIdEnrollPostResponse, CreateModuleCoursesCourseIdModulesPostData, CreateModuleCoursesCourseIdModulesPostError, CreateModuleCoursesCourseIdModulesPostResponse, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseCoursesCourseIdDeleteData, DeleteCourseCoursesCourseIdDeleteError, DeleteCourseCoursesCourseIdDeleteResponse, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleCoursesCourseIdModulesModuleIdDeleteData, DeleteModuleCoursesCourseIdModulesModuleIdDeleteError, DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponse, GetCreatedCoursesCoursesCreatedGetData, GetCreatedCoursesCoursesCreatedGetError, GetCreatedCoursesCoursesCreatedGetResponse, GetCurrentUserUsersMeGetData, GetCurrentUserUsersMeGetError, GetCurrentUserUsersMeGetResponse, GetMyCoursesCoursesMyGetData, GetMyCoursesCoursesMyGetError, GetMyCoursesCoursesMyGetResponse, GetUserByIdUsersUserIdGetData, GetUserByIdUsersUserIdGetError, GetUserByIdUsersUserIdGetResponse, LoginUserAuthLoginPostData, LoginUserAuthLoginPostError, LoginUserAuthLoginPostResponse, RefreshAuthRefreshPostData, RefreshAuthRefreshPostError, RefreshAuthRefreshPostResponse, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostError, RegisterUserAuthRegisterPostResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostData, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostError, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponse, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseCoursesCourseIdPatchData, UpdateCourseCoursesCourseIdPatchError, UpdateCourseCoursesCourseIdPatchResponse, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleCoursesCourseIdModulesModuleIdPatchData, UpdateModuleCoursesCourseIdModulesModuleIdPatchError, UpdateModuleCoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
 
 /**
  * Register new user
@@ -195,30 +195,27 @@ export const getCreatedCoursesCoursesCreatedGetInfiniteQueryKey = (options?: Opt
 /**
  * Get Created Courses
  */
-export const getCreatedCoursesCoursesCreatedGetInfiniteOptions = (options?: Options<GetCreatedCoursesCoursesCreatedGetData>) => {
-    const opts = infiniteQueryOptions<GetCreatedCoursesCoursesCreatedGetResponse, GetCreatedCoursesCoursesCreatedGetError, InfiniteData<GetCreatedCoursesCoursesCreatedGetResponse>, QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>, number | Pick<QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-    // @ts-ignore
-    {
-        queryFn: async ({ pageParam, queryKey, signal }) => {
-            // @ts-ignore
-            const page: Pick<QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-                query: {
-                    offset: pageParam
-                }
-            };
-            const params = createInfiniteParams(queryKey, page);
-            const { data } = await CourseService.getCreatedCoursesCoursesCreatedGet({
-                ...options,
-                ...params,
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: getCreatedCoursesCoursesCreatedGetInfiniteQueryKey(options)
-    });
-    return opts as Omit<typeof opts, 'initialData'>;
-};
+export const getCreatedCoursesCoursesCreatedGetInfiniteOptions = (options?: Options<GetCreatedCoursesCoursesCreatedGetData>) => infiniteQueryOptions<GetCreatedCoursesCoursesCreatedGetResponse, GetCreatedCoursesCoursesCreatedGetError, InfiniteData<GetCreatedCoursesCoursesCreatedGetResponse>, QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>, number | Pick<QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await CourseService.getCreatedCoursesCoursesCreatedGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getCreatedCoursesCoursesCreatedGetInfiniteQueryKey(options)
+});
 
 export const getMyCoursesCoursesMyGetQueryKey = (options?: Options<GetMyCoursesCoursesMyGetData>) => createQueryKey('getMyCoursesCoursesMyGet', options);
 
@@ -441,6 +438,42 @@ export const createLessonLessonsLessonIdProgressPostMutation = (options?: Partia
     };
     return mutationOptions;
 };
+
+export const getCurrentUserUsersMeGetQueryKey = (options?: Options<GetCurrentUserUsersMeGetData>) => createQueryKey('getCurrentUserUsersMeGet', options);
+
+/**
+ * Get current user
+ */
+export const getCurrentUserUsersMeGetOptions = (options?: Options<GetCurrentUserUsersMeGetData>) => queryOptions<GetCurrentUserUsersMeGetResponse, GetCurrentUserUsersMeGetError, GetCurrentUserUsersMeGetResponse, ReturnType<typeof getCurrentUserUsersMeGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await UserService.getCurrentUserUsersMeGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getCurrentUserUsersMeGetQueryKey(options)
+});
+
+export const getUserByIdUsersUserIdGetQueryKey = (options: Options<GetUserByIdUsersUserIdGetData>) => createQueryKey('getUserByIdUsersUserIdGet', options);
+
+/**
+ * Get user by id
+ */
+export const getUserByIdUsersUserIdGetOptions = (options: Options<GetUserByIdUsersUserIdGetData>) => queryOptions<GetUserByIdUsersUserIdGetResponse, GetUserByIdUsersUserIdGetError, GetUserByIdUsersUserIdGetResponse, ReturnType<typeof getUserByIdUsersUserIdGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await UserService.getUserByIdUsersUserIdGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getUserByIdUsersUserIdGetQueryKey(options)
+});
 
 export const sayHelloGetQueryKey = (options?: Options<SayHelloGetData>) => createQueryKey('sayHelloGet', options);
 

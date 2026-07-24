@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { getErrorMessage } from "@/utils"
-import useCustomToast from "@/hooks/useCustomToast.tsx"
-import { ROUTES } from "@/routes.ts"
+import useCustomToast from "@/hooks/useCustomToast"
+import { ROUTES } from "@/routes"
+
 import {
     loginUserAuthLoginPostMutation,
     registerUserAuthRegisterPostMutation,
-    // getMeUsersMeGetOptions, // или твоя функция получения текущего юзера
-} from "@/client/@tanstack/react-query.gen.ts"
+    getCurrentUserUsersMeGetOptions,
+} from "@/client/@tanstack/react-query.gen"
 
 const isLoggedIn = () => {
     return localStorage.getItem("access_token") !== null
@@ -18,18 +19,16 @@ const useAuth = () => {
     const queryClient = useQueryClient()
     const { showErrorToast, showSuccessToast } = useCustomToast()
 
-    // 1. Получаем текущего пользователя
-    // const { data: user } = useQuery({
-    //     ...getMeUsersMeGetOptions(),
-    //     enabled: isLoggedIn(),
-    // })
+    const { data: user } = useQuery({
+        ...getCurrentUserUsersMeGetOptions(),
+        enabled: isLoggedIn(),
+    })
 
-    // 2. Регистрация
     const signUpMutation = useMutation({
         ...registerUserAuthRegisterPostMutation(),
         onSuccess: () => {
             navigate({ to: ROUTES.LOGIN })
-            showSuccessToast("Вы успешно зарегистрировались.")
+            showSuccessToast("You have successfully registered.")
         },
         onError: (error) => showErrorToast(getErrorMessage(error)),
         onSettled: () => {
@@ -37,27 +36,18 @@ const useAuth = () => {
         },
     })
 
-    // 3. Логин
     const loginMutation = useMutation({
         ...loginUserAuthLoginPostMutation(),
         onSuccess: (data) => {
-            // Записываем access_token, который возвращает FastAPI
-            if (data?.access_token) {
-                localStorage.setItem("access_token", data.access_token)
-            }
-            // Инвалидируем кэш юзера, чтобы useQuery заново запросил профиль
-            // queryClient.invalidateQueries({ queryKey: getMeUsersMeGetOptions().queryKey })
-            
+            localStorage.setItem("access_token", data.access_token)
             navigate({ to: ROUTES.DASHBOARD })
-            showSuccessToast("Вы успешно вошли в систему.")
+            showSuccessToast("You have successfully logged in.")
         },
         onError: (error) => showErrorToast(getErrorMessage(error)),
     })
 
-    // 4. Логаут
     const logout = () => {
         localStorage.removeItem("access_token")
-        // Очищаем кэш TanStack Query при выходе
         queryClient.clear()
         navigate({ to: ROUTES.LOGIN })
     }
@@ -66,7 +56,7 @@ const useAuth = () => {
         signUpMutation,
         loginMutation,
         logout,
-        // user,
+        user,
     }
 }
 
