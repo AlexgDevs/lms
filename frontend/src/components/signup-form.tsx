@@ -29,6 +29,7 @@ export function SignupForm() {
         mode: "onBlur",
         criteriaMode: "all",
         defaultValues: {
+            name: "",
             username: "",
             email: "",
             password: "",
@@ -37,16 +38,12 @@ export function SignupForm() {
     })
 
     const onSubmit = (data: SignupFormData) => {
-    if (signUpMutation.isPending) return;
+        if (signUpMutation.isPending) return
 
-    // Исключаем confirmPassword
-    const { confirmPassword: _confirmPassword, ...submitData } = data;
-
-    // Передаем данные в мутацию
-    signUpMutation.mutate({
-        body: submitData,
-    });
-};
+        // exclude confirmPassword from submission data
+        const { confirmPassword: _confirmPassword, ...submitData } = data
+        signUpMutation.mutate({ body: submitData })
+    }
 
     return (
         <Card>
@@ -61,6 +58,26 @@ export function SignupForm() {
                     <FieldGroup>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                             <Controller
+                                name="name"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id={field.name}
+                                            aria-invalid={fieldState.invalid}
+                                            type="text"
+                                            placeholder="John Doe"
+                                            required
+                                        />
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
+                            <Controller
                                 name="username"
                                 control={form.control}
                                 render={({ field, fieldState }) => (
@@ -71,7 +88,7 @@ export function SignupForm() {
                                             id={field.name}
                                             aria-invalid={fieldState.invalid}
                                             type="text"
-                                            placeholder="plectix"
+                                            placeholder="johndoe_42"
                                             required
                                         />
                                         {fieldState.invalid && (

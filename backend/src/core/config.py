@@ -1,8 +1,10 @@
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import computed_field, PostgresDsn, Field
+from pydantic import AnyUrl, BeforeValidator, Field, PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from src.core.utils import parse_cors
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ENV_FILE_PATH = BASE_DIR / ".env"
@@ -21,7 +23,7 @@ class PostgresSettings(BaseSettings):
     POSTGRES_PASS: str = Field(default=...)
     POSTGRES_DB: str = Field(default=...)
 
-    @computed_field  # type: ignore
+    @computed_field
     @property
     def DATABASE_URL(self) -> PostgresDsn:
         return PostgresDsn.build(
@@ -53,9 +55,26 @@ class AppSettings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     REFRESH_TOKEN_EXPIRE_SECONDS: int = REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
 
+    # CORS & Frontend
+    FRONTEND_HOST: str = "http://localhost:3000"
+    CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
+
     @property
     def secure_cookies(self) -> bool:
         return self.APP_ENV == "production"
+
+    @computed_field
+    @property
+    def ALL_CORS_ORIGINS(self) -> list[str]:
+        if isinstance(self.CORS_ORIGINS, str):
+            origins = [self.CORS_ORIGINS] if self.CORS_ORIGINS else []
+        else:
+            origins = [str(origin) for origin in self.CORS_ORIGINS]
+
+        if self.FRONTEND_HOST:
+            origins.append(self.FRONTEND_HOST)
+
+        return list({origin.rstrip("/") for origin in origins if origin})
 
 
 class RedisSettings(BaseSettings):
@@ -74,7 +93,7 @@ class RedisSettings(BaseSettings):
     REDIS_SOCKET_CONNECT_TIMEOUT: int = 2
     REDIS_RETRY_ON_TIMEOUT: bool = True
 
-    @computed_field  # type: ignore
+    @computed_field
     @property
     def REDIS_URL(self) -> str:
         return f"redis://{self.REDIS_USER}:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"
