@@ -1,0 +1,9 @@
+{
+	"devDependencies": {
+		"@hey-api/openapi-ts": "^0.99.0"
+	},
+	"dependencies": {
+		"@hey-api/client-fetch": "^0.13.1",
+		"@tanstack/react-query": "^5.101.4"
+	}
+}
