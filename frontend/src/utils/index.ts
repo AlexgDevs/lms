@@ -1,0 +1,1 @@
+export { getErrorMessage, getInitials, colorFromId } from "./common"
