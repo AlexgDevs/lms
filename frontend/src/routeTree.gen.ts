@@ -12,7 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as LayoutIndexRouteImport } from './routes/index'
+import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutProfileRouteImport } from './routes/_layout/profile'
+import { Route as LayoutTeachingIndexRouteImport } from './routes/_layout/teaching.index'
+import { Route as LayoutTeachingCoursesRouteImport } from './routes/_layout/teaching.courses'
 
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
@@ -33,30 +36,64 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutProfileRoute = LayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutTeachingIndexRoute = LayoutTeachingIndexRouteImport.update({
+  id: '/teaching/',
+  path: '/teaching/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutTeachingCoursesRoute = LayoutTeachingCoursesRouteImport.update({
+  id: '/teaching/courses',
+  path: '/teaching/courses',
+  getParentRoute: () => LayoutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/profile': typeof LayoutProfileRoute
+  '/teaching/courses': typeof LayoutTeachingCoursesRoute
+  '/teaching/': typeof LayoutTeachingIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/profile': typeof LayoutProfileRoute
   '/': typeof LayoutIndexRoute
+  '/teaching/courses': typeof LayoutTeachingCoursesRoute
+  '/teaching': typeof LayoutTeachingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/_layout/profile': typeof LayoutProfileRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/teaching/courses': typeof LayoutTeachingCoursesRoute
+  '/_layout/teaching/': typeof LayoutTeachingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signup'
+  fullPaths:
+    '/' | '/login' | '/signup' | '/profile' | '/teaching/courses' | '/teaching/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/signup' | '/'
-  id: '__root__' | '/_layout' | '/login' | '/signup' | '/_layout/'
+  to:
+    '/login' | '/signup' | '/profile' | '/' | '/teaching/courses' | '/teaching'
+  id:
+    | '__root__'
+    | '/_layout'
+    | '/login'
+    | '/signup'
+    | '/_layout/profile'
+    | '/_layout/'
+    | '/_layout/teaching/courses'
+    | '/_layout/teaching/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,15 +132,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/profile': {
+      id: '/_layout/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof LayoutProfileRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/teaching/': {
+      id: '/_layout/teaching/'
+      path: '/teaching'
+      fullPath: '/teaching/'
+      preLoaderRoute: typeof LayoutTeachingIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/teaching/courses': {
+      id: '/_layout/teaching/courses'
+      path: '/teaching/courses'
+      fullPath: '/teaching/courses'
+      preLoaderRoute: typeof LayoutTeachingCoursesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
   }
 }
 
 interface LayoutRouteChildren {
+  LayoutProfileRoute: typeof LayoutProfileRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutTeachingCoursesRoute: typeof LayoutTeachingCoursesRoute
+  LayoutTeachingIndexRoute: typeof LayoutTeachingIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutProfileRoute: LayoutProfileRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutTeachingCoursesRoute: LayoutTeachingCoursesRoute,
+  LayoutTeachingIndexRoute: LayoutTeachingIndexRoute,
 }
 
 const LayoutRouteWithChildren =

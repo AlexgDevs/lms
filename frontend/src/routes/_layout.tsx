@@ -4,9 +4,12 @@ import { ROUTES } from "@/routes.ts";
 import { Header } from "@/components/sidebars/Header";
 import { Footer } from "@/components/sidebars/Footer";
 
+const PUBLIC_ROUTES = [ROUTES.DASHBOARD, "/about", "/catalog"];
+
 export const Route = createFileRoute("/_layout")({
-  beforeLoad: () => {
-    if (!isLoggedIn()) {
+  beforeLoad: ({ location }) => {
+    // Если страница НЕ публичная и юзер НЕ залогинен — отправляем на логин
+    if (!PUBLIC_ROUTES.includes(location.pathname) && !isLoggedIn()) {
       throw redirect({ to: ROUTES.LOGIN });
     }
   },

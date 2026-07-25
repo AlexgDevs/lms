@@ -57,6 +57,7 @@ const useAuth = () => {
         loginMutation,
         logout,
         user,
+        isLoggedIn: isLoggedIn(),
     }
 }
 

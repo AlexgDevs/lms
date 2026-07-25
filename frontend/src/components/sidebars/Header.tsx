@@ -3,21 +3,13 @@ import { useLayout } from "@/context/LayoutContext";
 import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CategoryCatalog } from "@/components/layouts/CategoryCatalog"; // <-- Наш каталог
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { CategoryCatalog } from "@/components/layouts/CategoryCatalog";
+import { UserMenu } from "@/components/layouts/UserMenu"; // <-- Наш чистый компонент
 import { Search, Bell, Moon, Sun } from "lucide-react";
-import useAuth from "@/hooks/useAuth";
 
 export function Header() {
   const { header } = useLayout();
   const { theme, toggleTheme } = useTheme();
-  const { user, isLoggedIn, logout } = useAuth();
 
   if (!header.visible) return null;
 
@@ -30,7 +22,6 @@ export function Header() {
         </div>
       ) : (
         <>
-          {/* Левая часть: Логотип и навигация */}
           <div className="flex items-center gap-6">
             <Link
               to="/"
@@ -59,12 +50,9 @@ export function Header() {
             </nav>
           </div>
 
-          {/* Центральная часть: Каталог категорий + Инпут поиска */}
           <div className="flex-1 max-w-lg hidden sm:flex items-center gap-2">
-            {/* Кругляш-кнопка каталога */}
             <CategoryCatalog />
 
-            {/* Поисковое окно */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -99,25 +87,8 @@ export function Header() {
           <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
         </Button>
 
-        {isLoggedIn && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/10 text-primary font-semibold text-sm border border-primary/20 hover:ring-2 hover:ring-primary/30 transition-all cursor-pointer ml-1">
-                {user?.username?.[0]?.toUpperCase() ?? "U"}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
-              <div className="px-3 py-2">
-                <p className="text-sm font-medium text-foreground">{user?.username}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-destructive cursor-pointer">
-                Выйти
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        {/* Вся логика авторизации и аватара тут */}
+        <UserMenu />
       </div>
 
     </header>
