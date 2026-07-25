@@ -1,0 +1,31 @@
+/* styles/light.css */
+[data-theme="light"] {
+  --text: oklch(0.20 0.025 240);
+  --subtext1: oklch(0.42 0.035 240);
+  --subtext0: oklch(0.55 0.030 240);
+
+  --overlay2: oklch(0.82 0.020 240);
+  --overlay1: oklch(0.90 0.015 240);
+  --overlay0: oklch(0.94 0.010 240);
+
+  --surface2: oklch(0.92 0.012 240);
+  --surface1: oklch(0.97 0.005 240);
+  --surface0: oklch(0.99 0.002 240);
+
+  --base: oklch(0.98 0.005 240);
+  --mantle: oklch(0.95 0.010 240);
+  --crust: oklch(0.92 0.015 240);
+
+  --blue: oklch(0.55 0.200 250);
+  --green: oklch(0.58 0.170 160);
+  --yellow: oklch(0.65 0.180 75);
+  --red: oklch(0.57 0.210 25);
+  --mauve: oklch(0.58 0.190 300);
+  --teal: oklch(0.60 0.150 190);
+
+  --blue-alpha: oklch(0.55 0.200 250 / 0.12);
+  --green-alpha: oklch(0.58 0.170 160 / 0.12);
+  --yellow-alpha: oklch(0.65 0.180 75 / 0.12);
+  --red-alpha: oklch(0.57 0.210 25 / 0.12);
+  --mauve-alpha: oklch(0.58 0.190 300 / 0.12);
+}

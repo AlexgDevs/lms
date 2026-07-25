@@ -2,6 +2,7 @@ import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LayoutProvider } from "@/context/LayoutContext.tsx";
+import '@/styles/global.css'
 
 export const Route = createRootRoute({
     component: () => (
