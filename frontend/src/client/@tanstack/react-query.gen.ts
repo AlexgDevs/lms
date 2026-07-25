@@ -4,17 +4,15 @@ import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOption
 
 import { client } from '../client.gen';
 import { AuthService, BlockService, CourseService, DefaultService, LessonService, LessonsProgresService, ModuleService, type Options, SubmissionService, UserService } from '../sdk.gen';
-import type { CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseCoursesPostData, CreateCourseCoursesPostError, CreateCourseCoursesPostResponse, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonLessonsLessonIdProgressPostData, CreateLessonLessonsLessonIdProgressPostError, CreateLessonLessonsLessonIdProgressPostResponse, CreateMemberCoursesCourseIdEnrollPostData, CreateMemberCoursesCourseIdEnrollPostError, CreateMemberCoursesCourseIdEnrollPostResponse, CreateModuleCoursesCourseIdModulesPostData, CreateModuleCoursesCourseIdModulesPostError, CreateModuleCoursesCourseIdModulesPostResponse, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseCoursesCourseIdDeleteData, DeleteCourseCoursesCourseIdDeleteError, DeleteCourseCoursesCourseIdDeleteResponse, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleCoursesCourseIdModulesModuleIdDeleteData, DeleteModuleCoursesCourseIdModulesModuleIdDeleteError, DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponse, GetCreatedCoursesCoursesCreatedGetData, GetCreatedCoursesCoursesCreatedGetError, GetCreatedCoursesCoursesCreatedGetResponse, GetCurrentUserUsersMeGetData, GetCurrentUserUsersMeGetError, GetCurrentUserUsersMeGetResponse, GetMyCoursesCoursesMyGetData, GetMyCoursesCoursesMyGetError, GetMyCoursesCoursesMyGetResponse, GetUserByIdUsersUserIdGetData, GetUserByIdUsersUserIdGetError, GetUserByIdUsersUserIdGetResponse, LoginUserAuthLoginPostData, LoginUserAuthLoginPostError, LoginUserAuthLoginPostResponse, RefreshAuthRefreshPostData, RefreshAuthRefreshPostError, RefreshAuthRefreshPostResponse, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostError, RegisterUserAuthRegisterPostResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostData, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostError, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponse, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseCoursesCourseIdPatchData, UpdateCourseCoursesCourseIdPatchError, UpdateCourseCoursesCourseIdPatchResponse, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleCoursesCourseIdModulesModuleIdPatchData, UpdateModuleCoursesCourseIdModulesModuleIdPatchError, UpdateModuleCoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
+import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostError, CreateCourseApiV1CoursesPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostError, CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateMemberApiV1CoursesCourseIdEnrollPostData, CreateMemberApiV1CoursesCourseIdEnrollPostError, CreateMemberApiV1CoursesCourseIdEnrollPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostError, CreateModuleApiV1CoursesCourseIdModulesPostResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteError, DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, GetCreatedCoursesApiV1CoursesCreatedGetData, GetCreatedCoursesApiV1CoursesCreatedGetError, GetCreatedCoursesApiV1CoursesCreatedGetResponse, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponse, GetMyCoursesApiV1CoursesMyGetData, GetMyCoursesApiV1CoursesMyGetResponse, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetError, GetUserByIdApiV1UsersUserIdGetResponse, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostError, LoginApiV1AuthLoginPostResponse, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostError, LogoutApiV1AuthLogoutPostResponse, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostError, RefreshApiV1AuthRefreshPostResponse, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostError, RegisterApiV1AuthRegisterPostResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostError, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchError, UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
 
 /**
- * Register new user
- *
- * Register new user
+ * Register
  */
-export const registerUserAuthRegisterPostMutation = (options?: Partial<Options<RegisterUserAuthRegisterPostData>>): UseMutationOptions<RegisterUserAuthRegisterPostResponse, RegisterUserAuthRegisterPostError, Options<RegisterUserAuthRegisterPostData>> => {
-    const mutationOptions: UseMutationOptions<RegisterUserAuthRegisterPostResponse, RegisterUserAuthRegisterPostError, Options<RegisterUserAuthRegisterPostData>> = {
+export const registerApiV1AuthRegisterPostMutation = (options?: Partial<Options<RegisterApiV1AuthRegisterPostData>>): UseMutationOptions<RegisterApiV1AuthRegisterPostResponse, RegisterApiV1AuthRegisterPostError, Options<RegisterApiV1AuthRegisterPostData>> => {
+    const mutationOptions: UseMutationOptions<RegisterApiV1AuthRegisterPostResponse, RegisterApiV1AuthRegisterPostError, Options<RegisterApiV1AuthRegisterPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await AuthService.registerUserAuthRegisterPost({
+            const { data } = await AuthService.registerApiV1AuthRegisterPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -26,12 +24,12 @@ export const registerUserAuthRegisterPostMutation = (options?: Partial<Options<R
 };
 
 /**
- * Login user
+ * Login
  */
-export const loginUserAuthLoginPostMutation = (options?: Partial<Options<LoginUserAuthLoginPostData>>): UseMutationOptions<LoginUserAuthLoginPostResponse, LoginUserAuthLoginPostError, Options<LoginUserAuthLoginPostData>> => {
-    const mutationOptions: UseMutationOptions<LoginUserAuthLoginPostResponse, LoginUserAuthLoginPostError, Options<LoginUserAuthLoginPostData>> = {
+export const loginApiV1AuthLoginPostMutation = (options?: Partial<Options<LoginApiV1AuthLoginPostData>>): UseMutationOptions<LoginApiV1AuthLoginPostResponse, LoginApiV1AuthLoginPostError, Options<LoginApiV1AuthLoginPostData>> => {
+    const mutationOptions: UseMutationOptions<LoginApiV1AuthLoginPostResponse, LoginApiV1AuthLoginPostError, Options<LoginApiV1AuthLoginPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await AuthService.loginUserAuthLoginPost({
+            const { data } = await AuthService.loginApiV1AuthLoginPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -45,10 +43,27 @@ export const loginUserAuthLoginPostMutation = (options?: Partial<Options<LoginUs
 /**
  * Refresh token
  */
-export const refreshAuthRefreshPostMutation = (options?: Partial<Options<RefreshAuthRefreshPostData>>): UseMutationOptions<RefreshAuthRefreshPostResponse, RefreshAuthRefreshPostError, Options<RefreshAuthRefreshPostData>> => {
-    const mutationOptions: UseMutationOptions<RefreshAuthRefreshPostResponse, RefreshAuthRefreshPostError, Options<RefreshAuthRefreshPostData>> = {
+export const refreshApiV1AuthRefreshPostMutation = (options?: Partial<Options<RefreshApiV1AuthRefreshPostData>>): UseMutationOptions<RefreshApiV1AuthRefreshPostResponse, RefreshApiV1AuthRefreshPostError, Options<RefreshApiV1AuthRefreshPostData>> => {
+    const mutationOptions: UseMutationOptions<RefreshApiV1AuthRefreshPostResponse, RefreshApiV1AuthRefreshPostError, Options<RefreshApiV1AuthRefreshPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await AuthService.refreshAuthRefreshPost({
+            const { data } = await AuthService.refreshApiV1AuthRefreshPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Logout
+ */
+export const logoutApiV1AuthLogoutPostMutation = (options?: Partial<Options<LogoutApiV1AuthLogoutPostData>>): UseMutationOptions<LogoutApiV1AuthLogoutPostResponse, LogoutApiV1AuthLogoutPostError, Options<LogoutApiV1AuthLogoutPostData>> => {
+    const mutationOptions: UseMutationOptions<LogoutApiV1AuthLogoutPostResponse, LogoutApiV1AuthLogoutPostError, Options<LogoutApiV1AuthLogoutPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await AuthService.logoutApiV1AuthLogoutPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -62,10 +77,10 @@ export const refreshAuthRefreshPostMutation = (options?: Partial<Options<Refresh
 /**
  * Create Course
  */
-export const createCourseCoursesPostMutation = (options?: Partial<Options<CreateCourseCoursesPostData>>): UseMutationOptions<CreateCourseCoursesPostResponse, CreateCourseCoursesPostError, Options<CreateCourseCoursesPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateCourseCoursesPostResponse, CreateCourseCoursesPostError, Options<CreateCourseCoursesPostData>> = {
+export const createCourseApiV1CoursesPostMutation = (options?: Partial<Options<CreateCourseApiV1CoursesPostData>>): UseMutationOptions<CreateCourseApiV1CoursesPostResponse, CreateCourseApiV1CoursesPostError, Options<CreateCourseApiV1CoursesPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateCourseApiV1CoursesPostResponse, CreateCourseApiV1CoursesPostError, Options<CreateCourseApiV1CoursesPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await CourseService.createCourseCoursesPost({
+            const { data } = await CourseService.createCourseApiV1CoursesPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -79,10 +94,10 @@ export const createCourseCoursesPostMutation = (options?: Partial<Options<Create
 /**
  * Delete Course
  */
-export const deleteCourseCoursesCourseIdDeleteMutation = (options?: Partial<Options<DeleteCourseCoursesCourseIdDeleteData>>): UseMutationOptions<DeleteCourseCoursesCourseIdDeleteResponse, DeleteCourseCoursesCourseIdDeleteError, Options<DeleteCourseCoursesCourseIdDeleteData>> => {
-    const mutationOptions: UseMutationOptions<DeleteCourseCoursesCourseIdDeleteResponse, DeleteCourseCoursesCourseIdDeleteError, Options<DeleteCourseCoursesCourseIdDeleteData>> = {
+export const deleteCourseApiV1CoursesCourseIdDeleteMutation = (options?: Partial<Options<DeleteCourseApiV1CoursesCourseIdDeleteData>>): UseMutationOptions<DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteError, Options<DeleteCourseApiV1CoursesCourseIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteError, Options<DeleteCourseApiV1CoursesCourseIdDeleteData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await CourseService.deleteCourseCoursesCourseIdDelete({
+            const { data } = await CourseService.deleteCourseApiV1CoursesCourseIdDelete({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -96,10 +111,10 @@ export const deleteCourseCoursesCourseIdDeleteMutation = (options?: Partial<Opti
 /**
  * Update Course
  */
-export const updateCourseCoursesCourseIdPatchMutation = (options?: Partial<Options<UpdateCourseCoursesCourseIdPatchData>>): UseMutationOptions<UpdateCourseCoursesCourseIdPatchResponse, UpdateCourseCoursesCourseIdPatchError, Options<UpdateCourseCoursesCourseIdPatchData>> => {
-    const mutationOptions: UseMutationOptions<UpdateCourseCoursesCourseIdPatchResponse, UpdateCourseCoursesCourseIdPatchError, Options<UpdateCourseCoursesCourseIdPatchData>> = {
+export const updateCourseApiV1CoursesCourseIdPatchMutation = (options?: Partial<Options<UpdateCourseApiV1CoursesCourseIdPatchData>>): UseMutationOptions<UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchError, Options<UpdateCourseApiV1CoursesCourseIdPatchData>> => {
+    const mutationOptions: UseMutationOptions<UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchError, Options<UpdateCourseApiV1CoursesCourseIdPatchData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await CourseService.updateCourseCoursesCourseIdPatch({
+            const { data } = await CourseService.updateCourseApiV1CoursesCourseIdPatch({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -143,14 +158,14 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
     return [params];
 };
 
-export const getCreatedCoursesCoursesCreatedGetQueryKey = (options?: Options<GetCreatedCoursesCoursesCreatedGetData>) => createQueryKey('getCreatedCoursesCoursesCreatedGet', options);
+export const getCreatedCoursesApiV1CoursesCreatedGetQueryKey = (options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData>) => createQueryKey('getCreatedCoursesApiV1CoursesCreatedGet', options);
 
 /**
  * Get Created Courses
  */
-export const getCreatedCoursesCoursesCreatedGetOptions = (options?: Options<GetCreatedCoursesCoursesCreatedGetData>) => queryOptions<GetCreatedCoursesCoursesCreatedGetResponse, GetCreatedCoursesCoursesCreatedGetError, GetCreatedCoursesCoursesCreatedGetResponse, ReturnType<typeof getCreatedCoursesCoursesCreatedGetQueryKey>>({
+export const getCreatedCoursesApiV1CoursesCreatedGetOptions = (options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData>) => queryOptions<GetCreatedCoursesApiV1CoursesCreatedGetResponse, GetCreatedCoursesApiV1CoursesCreatedGetError, GetCreatedCoursesApiV1CoursesCreatedGetResponse, ReturnType<typeof getCreatedCoursesApiV1CoursesCreatedGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await CourseService.getCreatedCoursesCoursesCreatedGet({
+        const { data } = await CourseService.getCreatedCoursesApiV1CoursesCreatedGet({
             ...options,
             ...queryKey[0],
             signal,
@@ -158,7 +173,7 @@ export const getCreatedCoursesCoursesCreatedGetOptions = (options?: Options<GetC
         });
         return data;
     },
-    queryKey: getCreatedCoursesCoursesCreatedGetQueryKey(options)
+    queryKey: getCreatedCoursesApiV1CoursesCreatedGetQueryKey(options)
 });
 
 const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<Options>, page: K) => {
@@ -190,23 +205,23 @@ const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'hea
     return params as unknown as typeof page;
 };
 
-export const getCreatedCoursesCoursesCreatedGetInfiniteQueryKey = (options?: Options<GetCreatedCoursesCoursesCreatedGetData>): QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>> => createQueryKey('getCreatedCoursesCoursesCreatedGet', options, true);
+export const getCreatedCoursesApiV1CoursesCreatedGetInfiniteQueryKey = (options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData>): QueryKey<Options<GetCreatedCoursesApiV1CoursesCreatedGetData>> => createQueryKey('getCreatedCoursesApiV1CoursesCreatedGet', options, true);
 
 /**
  * Get Created Courses
  */
-export const getCreatedCoursesCoursesCreatedGetInfiniteOptions = (options?: Options<GetCreatedCoursesCoursesCreatedGetData>) => infiniteQueryOptions<GetCreatedCoursesCoursesCreatedGetResponse, GetCreatedCoursesCoursesCreatedGetError, InfiniteData<GetCreatedCoursesCoursesCreatedGetResponse>, QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>, number | Pick<QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCreatedCoursesApiV1CoursesCreatedGetInfiniteOptions = (options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData>) => infiniteQueryOptions<GetCreatedCoursesApiV1CoursesCreatedGetResponse, GetCreatedCoursesApiV1CoursesCreatedGetError, InfiniteData<GetCreatedCoursesApiV1CoursesCreatedGetResponse>, QueryKey<Options<GetCreatedCoursesApiV1CoursesCreatedGetData>>, number | Pick<QueryKey<Options<GetCreatedCoursesApiV1CoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCreatedCoursesCoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCreatedCoursesApiV1CoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 offset: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await CourseService.getCreatedCoursesCoursesCreatedGet({
+        const { data } = await CourseService.getCreatedCoursesApiV1CoursesCreatedGet({
             ...options,
             ...params,
             signal,
@@ -214,17 +229,17 @@ export const getCreatedCoursesCoursesCreatedGetInfiniteOptions = (options?: Opti
         });
         return data;
     },
-    queryKey: getCreatedCoursesCoursesCreatedGetInfiniteQueryKey(options)
+    queryKey: getCreatedCoursesApiV1CoursesCreatedGetInfiniteQueryKey(options)
 });
 
-export const getMyCoursesCoursesMyGetQueryKey = (options?: Options<GetMyCoursesCoursesMyGetData>) => createQueryKey('getMyCoursesCoursesMyGet', options);
+export const getMyCoursesApiV1CoursesMyGetQueryKey = (options?: Options<GetMyCoursesApiV1CoursesMyGetData>) => createQueryKey('getMyCoursesApiV1CoursesMyGet', options);
 
 /**
  * Get My Courses
  */
-export const getMyCoursesCoursesMyGetOptions = (options?: Options<GetMyCoursesCoursesMyGetData>) => queryOptions<GetMyCoursesCoursesMyGetResponse, GetMyCoursesCoursesMyGetError, GetMyCoursesCoursesMyGetResponse, ReturnType<typeof getMyCoursesCoursesMyGetQueryKey>>({
+export const getMyCoursesApiV1CoursesMyGetOptions = (options?: Options<GetMyCoursesApiV1CoursesMyGetData>) => queryOptions<GetMyCoursesApiV1CoursesMyGetResponse, DefaultError, GetMyCoursesApiV1CoursesMyGetResponse, ReturnType<typeof getMyCoursesApiV1CoursesMyGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await CourseService.getMyCoursesCoursesMyGet({
+        const { data } = await CourseService.getMyCoursesApiV1CoursesMyGet({
             ...options,
             ...queryKey[0],
             signal,
@@ -232,16 +247,16 @@ export const getMyCoursesCoursesMyGetOptions = (options?: Options<GetMyCoursesCo
         });
         return data;
     },
-    queryKey: getMyCoursesCoursesMyGetQueryKey(options)
+    queryKey: getMyCoursesApiV1CoursesMyGetQueryKey(options)
 });
 
 /**
  * Create Member
  */
-export const createMemberCoursesCourseIdEnrollPostMutation = (options?: Partial<Options<CreateMemberCoursesCourseIdEnrollPostData>>): UseMutationOptions<CreateMemberCoursesCourseIdEnrollPostResponse, CreateMemberCoursesCourseIdEnrollPostError, Options<CreateMemberCoursesCourseIdEnrollPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateMemberCoursesCourseIdEnrollPostResponse, CreateMemberCoursesCourseIdEnrollPostError, Options<CreateMemberCoursesCourseIdEnrollPostData>> = {
+export const createMemberApiV1CoursesCourseIdEnrollPostMutation = (options?: Partial<Options<CreateMemberApiV1CoursesCourseIdEnrollPostData>>): UseMutationOptions<CreateMemberApiV1CoursesCourseIdEnrollPostResponse, CreateMemberApiV1CoursesCourseIdEnrollPostError, Options<CreateMemberApiV1CoursesCourseIdEnrollPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateMemberApiV1CoursesCourseIdEnrollPostResponse, CreateMemberApiV1CoursesCourseIdEnrollPostError, Options<CreateMemberApiV1CoursesCourseIdEnrollPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await CourseService.createMemberCoursesCourseIdEnrollPost({
+            const { data } = await CourseService.createMemberApiV1CoursesCourseIdEnrollPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -255,10 +270,10 @@ export const createMemberCoursesCourseIdEnrollPostMutation = (options?: Partial<
 /**
  * Create Module
  */
-export const createModuleCoursesCourseIdModulesPostMutation = (options?: Partial<Options<CreateModuleCoursesCourseIdModulesPostData>>): UseMutationOptions<CreateModuleCoursesCourseIdModulesPostResponse, CreateModuleCoursesCourseIdModulesPostError, Options<CreateModuleCoursesCourseIdModulesPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateModuleCoursesCourseIdModulesPostResponse, CreateModuleCoursesCourseIdModulesPostError, Options<CreateModuleCoursesCourseIdModulesPostData>> = {
+export const createModuleApiV1CoursesCourseIdModulesPostMutation = (options?: Partial<Options<CreateModuleApiV1CoursesCourseIdModulesPostData>>): UseMutationOptions<CreateModuleApiV1CoursesCourseIdModulesPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostError, Options<CreateModuleApiV1CoursesCourseIdModulesPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateModuleApiV1CoursesCourseIdModulesPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostError, Options<CreateModuleApiV1CoursesCourseIdModulesPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await ModuleService.createModuleCoursesCourseIdModulesPost({
+            const { data } = await ModuleService.createModuleApiV1CoursesCourseIdModulesPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -272,10 +287,10 @@ export const createModuleCoursesCourseIdModulesPostMutation = (options?: Partial
 /**
  * Delete Module
  */
-export const deleteModuleCoursesCourseIdModulesModuleIdDeleteMutation = (options?: Partial<Options<DeleteModuleCoursesCourseIdModulesModuleIdDeleteData>>): UseMutationOptions<DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponse, DeleteModuleCoursesCourseIdModulesModuleIdDeleteError, Options<DeleteModuleCoursesCourseIdModulesModuleIdDeleteData>> => {
-    const mutationOptions: UseMutationOptions<DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponse, DeleteModuleCoursesCourseIdModulesModuleIdDeleteError, Options<DeleteModuleCoursesCourseIdModulesModuleIdDeleteData>> = {
+export const deleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteMutation = (options?: Partial<Options<DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData>>): UseMutationOptions<DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, Options<DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, Options<DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await ModuleService.deleteModuleCoursesCourseIdModulesModuleIdDelete({
+            const { data } = await ModuleService.deleteModuleApiV1CoursesCourseIdModulesModuleIdDelete({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -289,10 +304,10 @@ export const deleteModuleCoursesCourseIdModulesModuleIdDeleteMutation = (options
 /**
  * Update Module
  */
-export const updateModuleCoursesCourseIdModulesModuleIdPatchMutation = (options?: Partial<Options<UpdateModuleCoursesCourseIdModulesModuleIdPatchData>>): UseMutationOptions<UpdateModuleCoursesCourseIdModulesModuleIdPatchResponse, UpdateModuleCoursesCourseIdModulesModuleIdPatchError, Options<UpdateModuleCoursesCourseIdModulesModuleIdPatchData>> => {
-    const mutationOptions: UseMutationOptions<UpdateModuleCoursesCourseIdModulesModuleIdPatchResponse, UpdateModuleCoursesCourseIdModulesModuleIdPatchError, Options<UpdateModuleCoursesCourseIdModulesModuleIdPatchData>> = {
+export const updateModuleApiV1CoursesCourseIdModulesModuleIdPatchMutation = (options?: Partial<Options<UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData>>): UseMutationOptions<UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, Options<UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData>> => {
+    const mutationOptions: UseMutationOptions<UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, Options<UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await ModuleService.updateModuleCoursesCourseIdModulesModuleIdPatch({
+            const { data } = await ModuleService.updateModuleApiV1CoursesCourseIdModulesModuleIdPatch({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -306,10 +321,10 @@ export const updateModuleCoursesCourseIdModulesModuleIdPatchMutation = (options?
 /**
  * Create Lesson
  */
-export const createLessonCoursesCourseIdModulesModuleIdLessonsPostMutation = (options?: Partial<Options<CreateLessonCoursesCourseIdModulesModuleIdLessonsPostData>>): UseMutationOptions<CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostError, Options<CreateLessonCoursesCourseIdModulesModuleIdLessonsPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonCoursesCourseIdModulesModuleIdLessonsPostError, Options<CreateLessonCoursesCourseIdModulesModuleIdLessonsPostData>> = {
+export const createLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostMutation = (options?: Partial<Options<CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData>>): UseMutationOptions<CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, Options<CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, Options<CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await LessonService.createLessonCoursesCourseIdModulesModuleIdLessonsPost({
+            const { data } = await LessonService.createLessonApiV1CoursesCourseIdModulesModuleIdLessonsPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -323,10 +338,10 @@ export const createLessonCoursesCourseIdModulesModuleIdLessonsPostMutation = (op
 /**
  * Delete Lesson
  */
-export const deleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteMutation = (options?: Partial<Options<DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData>>): UseMutationOptions<DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, Options<DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData>> => {
-    const mutationOptions: UseMutationOptions<DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, Options<DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData>> = {
+export const deleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteMutation = (options?: Partial<Options<DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData>>): UseMutationOptions<DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, Options<DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, Options<DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await LessonService.deleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDelete({
+            const { data } = await LessonService.deleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDelete({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -340,10 +355,10 @@ export const deleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteMuta
 /**
  * Update Lesson
  */
-export const updateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchMutation = (options?: Partial<Options<UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchData>>): UseMutationOptions<UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, Options<UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchData>> => {
-    const mutationOptions: UseMutationOptions<UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, Options<UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchData>> = {
+export const updateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchMutation = (options?: Partial<Options<UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData>>): UseMutationOptions<UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, Options<UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData>> => {
+    const mutationOptions: UseMutationOptions<UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, Options<UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await LessonService.updateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatch({
+            const { data } = await LessonService.updateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatch({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -357,10 +372,10 @@ export const updateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchMutat
 /**
  * Create Block
  */
-export const createBlockCoursesCourseIdLessonsLessonIdBlocksPostMutation = (options?: Partial<Options<CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostData>>): UseMutationOptions<CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostError, Options<CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostError, Options<CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostData>> = {
+export const createBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostMutation = (options?: Partial<Options<CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData>>): UseMutationOptions<CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, Options<CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, Options<CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await BlockService.createBlockCoursesCourseIdLessonsLessonIdBlocksPost({
+            const { data } = await BlockService.createBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -374,10 +389,10 @@ export const createBlockCoursesCourseIdLessonsLessonIdBlocksPostMutation = (opti
 /**
  * Delete Block
  */
-export const deleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteMutation = (options?: Partial<Options<DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData>>): UseMutationOptions<DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, Options<DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData>> => {
-    const mutationOptions: UseMutationOptions<DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, Options<DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData>> = {
+export const deleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteMutation = (options?: Partial<Options<DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData>>): UseMutationOptions<DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, Options<DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, Options<DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await BlockService.deleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDelete({
+            const { data } = await BlockService.deleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDelete({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -391,10 +406,10 @@ export const deleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteMutatio
 /**
  * Update Block
  */
-export const updateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchMutation = (options?: Partial<Options<UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData>>): UseMutationOptions<UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, Options<UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData>> => {
-    const mutationOptions: UseMutationOptions<UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, Options<UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData>> = {
+export const updateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchMutation = (options?: Partial<Options<UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData>>): UseMutationOptions<UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, Options<UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData>> => {
+    const mutationOptions: UseMutationOptions<UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, Options<UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await BlockService.updateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatch({
+            const { data } = await BlockService.updateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatch({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -408,10 +423,10 @@ export const updateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchMutation
 /**
  * Submit Lesson
  */
-export const submitLessonCoursesCourseIdLessonsLessonIdSubmitPostMutation = (options?: Partial<Options<SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostData>>): UseMutationOptions<SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponse, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostError, Options<SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostData>> => {
-    const mutationOptions: UseMutationOptions<SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponse, SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostError, Options<SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostData>> = {
+export const submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostMutation = (options?: Partial<Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData>>): UseMutationOptions<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostError, Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData>> => {
+    const mutationOptions: UseMutationOptions<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostError, Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await SubmissionService.submitLessonCoursesCourseIdLessonsLessonIdSubmitPost({
+            const { data } = await SubmissionService.submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -425,10 +440,10 @@ export const submitLessonCoursesCourseIdLessonsLessonIdSubmitPostMutation = (opt
 /**
  * Create Lesson
  */
-export const createLessonLessonsLessonIdProgressPostMutation = (options?: Partial<Options<CreateLessonLessonsLessonIdProgressPostData>>): UseMutationOptions<CreateLessonLessonsLessonIdProgressPostResponse, CreateLessonLessonsLessonIdProgressPostError, Options<CreateLessonLessonsLessonIdProgressPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateLessonLessonsLessonIdProgressPostResponse, CreateLessonLessonsLessonIdProgressPostError, Options<CreateLessonLessonsLessonIdProgressPostData>> = {
+export const createLessonApiV1LessonsLessonIdProgressPostMutation = (options?: Partial<Options<CreateLessonApiV1LessonsLessonIdProgressPostData>>): UseMutationOptions<CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostError, Options<CreateLessonApiV1LessonsLessonIdProgressPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostError, Options<CreateLessonApiV1LessonsLessonIdProgressPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await LessonsProgresService.createLessonLessonsLessonIdProgressPost({
+            const { data } = await LessonsProgresService.createLessonApiV1LessonsLessonIdProgressPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -439,14 +454,14 @@ export const createLessonLessonsLessonIdProgressPostMutation = (options?: Partia
     return mutationOptions;
 };
 
-export const getCurrentUserUsersMeGetQueryKey = (options?: Options<GetCurrentUserUsersMeGetData>) => createQueryKey('getCurrentUserUsersMeGet', options);
+export const getCurrentUserApiV1UsersMeGetQueryKey = (options?: Options<GetCurrentUserApiV1UsersMeGetData>) => createQueryKey('getCurrentUserApiV1UsersMeGet', options);
 
 /**
  * Get current user
  */
-export const getCurrentUserUsersMeGetOptions = (options?: Options<GetCurrentUserUsersMeGetData>) => queryOptions<GetCurrentUserUsersMeGetResponse, GetCurrentUserUsersMeGetError, GetCurrentUserUsersMeGetResponse, ReturnType<typeof getCurrentUserUsersMeGetQueryKey>>({
+export const getCurrentUserApiV1UsersMeGetOptions = (options?: Options<GetCurrentUserApiV1UsersMeGetData>) => queryOptions<GetCurrentUserApiV1UsersMeGetResponse, DefaultError, GetCurrentUserApiV1UsersMeGetResponse, ReturnType<typeof getCurrentUserApiV1UsersMeGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await UserService.getCurrentUserUsersMeGet({
+        const { data } = await UserService.getCurrentUserApiV1UsersMeGet({
             ...options,
             ...queryKey[0],
             signal,
@@ -454,17 +469,17 @@ export const getCurrentUserUsersMeGetOptions = (options?: Options<GetCurrentUser
         });
         return data;
     },
-    queryKey: getCurrentUserUsersMeGetQueryKey(options)
+    queryKey: getCurrentUserApiV1UsersMeGetQueryKey(options)
 });
 
-export const getUserByIdUsersUserIdGetQueryKey = (options: Options<GetUserByIdUsersUserIdGetData>) => createQueryKey('getUserByIdUsersUserIdGet', options);
+export const getUserByIdApiV1UsersUserIdGetQueryKey = (options: Options<GetUserByIdApiV1UsersUserIdGetData>) => createQueryKey('getUserByIdApiV1UsersUserIdGet', options);
 
 /**
  * Get user by id
  */
-export const getUserByIdUsersUserIdGetOptions = (options: Options<GetUserByIdUsersUserIdGetData>) => queryOptions<GetUserByIdUsersUserIdGetResponse, GetUserByIdUsersUserIdGetError, GetUserByIdUsersUserIdGetResponse, ReturnType<typeof getUserByIdUsersUserIdGetQueryKey>>({
+export const getUserByIdApiV1UsersUserIdGetOptions = (options: Options<GetUserByIdApiV1UsersUserIdGetData>) => queryOptions<GetUserByIdApiV1UsersUserIdGetResponse, GetUserByIdApiV1UsersUserIdGetError, GetUserByIdApiV1UsersUserIdGetResponse, ReturnType<typeof getUserByIdApiV1UsersUserIdGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await UserService.getUserByIdUsersUserIdGet({
+        const { data } = await UserService.getUserByIdApiV1UsersUserIdGet({
             ...options,
             ...queryKey[0],
             signal,
@@ -472,7 +487,7 @@ export const getUserByIdUsersUserIdGetOptions = (options: Options<GetUserByIdUse
         });
         return data;
     },
-    queryKey: getUserByIdUsersUserIdGetQueryKey(options)
+    queryKey: getUserByIdApiV1UsersUserIdGetQueryKey(options)
 });
 
 export const sayHelloGetQueryKey = (options?: Options<SayHelloGetData>) => createQueryKey('sayHelloGet', options);

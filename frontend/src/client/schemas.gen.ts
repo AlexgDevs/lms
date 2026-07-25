@@ -240,7 +240,67 @@ export const BlockUpdateRequestSchemaSchema = {
     title: 'BlockUpdateRequestSchema'
 } as const;
 
-export const Body_refresh_auth_refresh_postSchema = {
+export const Body_login_api_v1_auth_login_postSchema = {
+    properties: {
+        grant_type: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^password$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grant Type'
+        },
+        username: {
+            type: 'string',
+            title: 'Username'
+        },
+        password: {
+            type: 'string',
+            format: 'password',
+            title: 'Password'
+        },
+        scope: {
+            type: 'string',
+            title: 'Scope',
+            default: ''
+        },
+        client_id: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Client Id'
+        },
+        client_secret: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            format: 'password',
+            title: 'Client Secret'
+        }
+    },
+    type: 'object',
+    required: [
+        'username',
+        'password'
+    ],
+    title: 'Body_login_api_v1_auth_login_post'
+} as const;
+
+export const Body_logout_api_v1_auth_logout_postSchema = {
     properties: {
         refresh_token: {
             type: 'string',
@@ -248,7 +308,24 @@ export const Body_refresh_auth_refresh_postSchema = {
         }
     },
     type: 'object',
-    title: 'Body_refresh_auth_refresh_post'
+    required: [
+        'refresh_token'
+    ],
+    title: 'Body_logout_api_v1_auth_logout_post'
+} as const;
+
+export const Body_refresh_api_v1_auth_refresh_postSchema = {
+    properties: {
+        refresh_token: {
+            type: 'string',
+            title: 'Refresh Token'
+        }
+    },
+    type: 'object',
+    required: [
+        'refresh_token'
+    ],
+    title: 'Body_refresh_api_v1_auth_refresh_post'
 } as const;
 
 export const CourseCreateRequestSchemaSchema = {
@@ -794,6 +871,11 @@ export const TokenPairSchema = {
         refresh_token: {
             type: 'string',
             title: 'Refresh Token'
+        },
+        token_type: {
+            type: 'string',
+            title: 'Token Type',
+            default: 'bearer'
         }
     },
     type: 'object',
@@ -802,25 +884,6 @@ export const TokenPairSchema = {
         'refresh_token'
     ],
     title: 'TokenPair'
-} as const;
-
-export const UserLoginSchemaSchema = {
-    properties: {
-        username: {
-            type: 'string',
-            title: 'Username'
-        },
-        password: {
-            type: 'string',
-            title: 'Password'
-        }
-    },
-    type: 'object',
-    required: [
-        'username',
-        'password'
-    ],
-    title: 'UserLoginSchema'
 } as const;
 
 export const UserRegisterSchemaSchema = {

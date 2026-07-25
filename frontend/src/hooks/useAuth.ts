@@ -1,14 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { getErrorMessage } from "@/utils"
-import useCustomToast from "@/hooks/useCustomToast"
-import { ROUTES } from "@/routes"
-
+import { getErrorMessage } from "@/utils";
+import useCustomToast from "@/hooks/useCustomToast.tsx";
+import { ROUTES } from "@/routes.ts";
 import {
-    loginUserAuthLoginPostMutation,
-    registerUserAuthRegisterPostMutation,
-    getCurrentUserUsersMeGetOptions,
-} from "@/client/@tanstack/react-query.gen"
+    loginApiV1AuthLoginPostMutation,
+    registerApiV1AuthRegisterPostMutation,
+    getCurrentUserApiV1UsersMeGetOptions,
+} from "@/client/@tanstack/react-query.gen.ts";
 
 const isLoggedIn = () => {
     return localStorage.getItem("access_token") !== null
@@ -20,12 +19,12 @@ const useAuth = () => {
     const { showErrorToast, showSuccessToast } = useCustomToast()
 
     const { data: user } = useQuery({
-        ...getCurrentUserUsersMeGetOptions(),
+        ...getCurrentUserApiV1UsersMeGetOptions(),
         enabled: isLoggedIn(),
     })
 
     const signUpMutation = useMutation({
-        ...registerUserAuthRegisterPostMutation(),
+        ...registerApiV1AuthRegisterPostMutation(),
         onSuccess: () => {
             navigate({ to: ROUTES.LOGIN })
             showSuccessToast("You have successfully registered.")
@@ -37,9 +36,10 @@ const useAuth = () => {
     })
 
     const loginMutation = useMutation({
-        ...loginUserAuthLoginPostMutation(),
+        ...loginApiV1AuthLoginPostMutation(),
         onSuccess: (data) => {
             localStorage.setItem("access_token", data.access_token)
+            localStorage.setItem("refresh_token", data.refresh_token);
             navigate({ to: ROUTES.DASHBOARD })
             showSuccessToast("You have successfully logged in.")
         },
@@ -48,7 +48,7 @@ const useAuth = () => {
 
     const logout = () => {
         localStorage.removeItem("access_token")
-        queryClient.clear()
+        localStorage.removeItem("refresh_token");
         navigate({ to: ROUTES.LOGIN })
     }
 

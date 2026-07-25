@@ -167,13 +167,53 @@ export type BlockUpdateRequestSchema = {
 };
 
 /**
- * Body_refresh_auth_refresh_post
+ * Body_login_api_v1_auth_login_post
  */
-export type BodyRefreshAuthRefreshPost = {
+export type BodyLoginApiV1AuthLoginPost = {
+    /**
+     * Grant Type
+     */
+    grant_type?: string | null;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Password
+     */
+    password: string;
+    /**
+     * Scope
+     */
+    scope?: string;
+    /**
+     * Client Id
+     */
+    client_id?: string | null;
+    /**
+     * Client Secret
+     */
+    client_secret?: string | null;
+};
+
+/**
+ * Body_logout_api_v1_auth_logout_post
+ */
+export type BodyLogoutApiV1AuthLogoutPost = {
     /**
      * Refresh Token
      */
-    refresh_token?: string;
+    refresh_token: string;
+};
+
+/**
+ * Body_refresh_api_v1_auth_refresh_post
+ */
+export type BodyRefreshApiV1AuthRefreshPost = {
+    /**
+     * Refresh Token
+     */
+    refresh_token: string;
 };
 
 /**
@@ -515,20 +555,10 @@ export type TokenPair = {
      * Refresh Token
      */
     refresh_token: string;
-};
-
-/**
- * UserLoginSchema
- */
-export type UserLoginSchema = {
     /**
-     * Username
+     * Token Type
      */
-    username: string;
-    /**
-     * Password
-     */
-    password: string;
+    token_type?: string;
 };
 
 /**
@@ -607,107 +637,132 @@ export type ValidationError = {
     };
 };
 
-export type RegisterUserAuthRegisterPostData = {
+export type RegisterApiV1AuthRegisterPostData = {
     body: UserRegisterSchema;
     path?: never;
     query?: never;
-    url: '/auth/register';
+    url: '/api/v1/auth/register';
 };
 
-export type RegisterUserAuthRegisterPostErrors = {
+export type RegisterApiV1AuthRegisterPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type RegisterUserAuthRegisterPostError = RegisterUserAuthRegisterPostErrors[keyof RegisterUserAuthRegisterPostErrors];
+export type RegisterApiV1AuthRegisterPostError = RegisterApiV1AuthRegisterPostErrors[keyof RegisterApiV1AuthRegisterPostErrors];
 
-export type RegisterUserAuthRegisterPostResponses = {
+export type RegisterApiV1AuthRegisterPostResponses = {
     /**
      * Successful Response
      */
     201: UserSchema;
 };
 
-export type RegisterUserAuthRegisterPostResponse = RegisterUserAuthRegisterPostResponses[keyof RegisterUserAuthRegisterPostResponses];
+export type RegisterApiV1AuthRegisterPostResponse = RegisterApiV1AuthRegisterPostResponses[keyof RegisterApiV1AuthRegisterPostResponses];
 
-export type LoginUserAuthLoginPostData = {
-    body: UserLoginSchema;
+export type LoginApiV1AuthLoginPostData = {
+    body: BodyLoginApiV1AuthLoginPost;
     path?: never;
     query?: never;
-    url: '/auth/login';
+    url: '/api/v1/auth/login';
 };
 
-export type LoginUserAuthLoginPostErrors = {
+export type LoginApiV1AuthLoginPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type LoginUserAuthLoginPostError = LoginUserAuthLoginPostErrors[keyof LoginUserAuthLoginPostErrors];
+export type LoginApiV1AuthLoginPostError = LoginApiV1AuthLoginPostErrors[keyof LoginApiV1AuthLoginPostErrors];
 
-export type LoginUserAuthLoginPostResponses = {
+export type LoginApiV1AuthLoginPostResponses = {
     /**
      * Successful Response
      */
     200: TokenPair;
 };
 
-export type LoginUserAuthLoginPostResponse = LoginUserAuthLoginPostResponses[keyof LoginUserAuthLoginPostResponses];
+export type LoginApiV1AuthLoginPostResponse = LoginApiV1AuthLoginPostResponses[keyof LoginApiV1AuthLoginPostResponses];
 
-export type RefreshAuthRefreshPostData = {
-    body?: BodyRefreshAuthRefreshPost;
+export type RefreshApiV1AuthRefreshPostData = {
+    body: BodyRefreshApiV1AuthRefreshPost;
     path?: never;
     query?: never;
-    url: '/auth/refresh';
+    url: '/api/v1/auth/refresh';
 };
 
-export type RefreshAuthRefreshPostErrors = {
+export type RefreshApiV1AuthRefreshPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type RefreshAuthRefreshPostError = RefreshAuthRefreshPostErrors[keyof RefreshAuthRefreshPostErrors];
+export type RefreshApiV1AuthRefreshPostError = RefreshApiV1AuthRefreshPostErrors[keyof RefreshApiV1AuthRefreshPostErrors];
 
-export type RefreshAuthRefreshPostResponses = {
+export type RefreshApiV1AuthRefreshPostResponses = {
     /**
      * Successful Response
      */
     200: TokenPair;
 };
 
-export type RefreshAuthRefreshPostResponse = RefreshAuthRefreshPostResponses[keyof RefreshAuthRefreshPostResponses];
+export type RefreshApiV1AuthRefreshPostResponse = RefreshApiV1AuthRefreshPostResponses[keyof RefreshApiV1AuthRefreshPostResponses];
 
-export type CreateCourseCoursesPostData = {
+export type LogoutApiV1AuthLogoutPostData = {
+    body: BodyLogoutApiV1AuthLogoutPost;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/logout';
+};
+
+export type LogoutApiV1AuthLogoutPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LogoutApiV1AuthLogoutPostError = LogoutApiV1AuthLogoutPostErrors[keyof LogoutApiV1AuthLogoutPostErrors];
+
+export type LogoutApiV1AuthLogoutPostResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type LogoutApiV1AuthLogoutPostResponse = LogoutApiV1AuthLogoutPostResponses[keyof LogoutApiV1AuthLogoutPostResponses];
+
+export type CreateCourseApiV1CoursesPostData = {
     body: CourseCreateRequestSchema;
     path?: never;
     query?: never;
-    url: '/courses';
+    url: '/api/v1/courses';
 };
 
-export type CreateCourseCoursesPostErrors = {
+export type CreateCourseApiV1CoursesPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateCourseCoursesPostError = CreateCourseCoursesPostErrors[keyof CreateCourseCoursesPostErrors];
+export type CreateCourseApiV1CoursesPostError = CreateCourseApiV1CoursesPostErrors[keyof CreateCourseApiV1CoursesPostErrors];
 
-export type CreateCourseCoursesPostResponses = {
+export type CreateCourseApiV1CoursesPostResponses = {
     /**
      * Successful Response
      */
     201: CourseSchema;
 };
 
-export type CreateCourseCoursesPostResponse = CreateCourseCoursesPostResponses[keyof CreateCourseCoursesPostResponses];
+export type CreateCourseApiV1CoursesPostResponse = CreateCourseApiV1CoursesPostResponses[keyof CreateCourseApiV1CoursesPostResponses];
 
-export type DeleteCourseCoursesCourseIdDeleteData = {
+export type DeleteCourseApiV1CoursesCourseIdDeleteData = {
     body?: never;
     path: {
         /**
@@ -716,28 +771,28 @@ export type DeleteCourseCoursesCourseIdDeleteData = {
         course_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}';
+    url: '/api/v1/courses/{course_id}';
 };
 
-export type DeleteCourseCoursesCourseIdDeleteErrors = {
+export type DeleteCourseApiV1CoursesCourseIdDeleteErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteCourseCoursesCourseIdDeleteError = DeleteCourseCoursesCourseIdDeleteErrors[keyof DeleteCourseCoursesCourseIdDeleteErrors];
+export type DeleteCourseApiV1CoursesCourseIdDeleteError = DeleteCourseApiV1CoursesCourseIdDeleteErrors[keyof DeleteCourseApiV1CoursesCourseIdDeleteErrors];
 
-export type DeleteCourseCoursesCourseIdDeleteResponses = {
+export type DeleteCourseApiV1CoursesCourseIdDeleteResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type DeleteCourseCoursesCourseIdDeleteResponse = DeleteCourseCoursesCourseIdDeleteResponses[keyof DeleteCourseCoursesCourseIdDeleteResponses];
+export type DeleteCourseApiV1CoursesCourseIdDeleteResponse = DeleteCourseApiV1CoursesCourseIdDeleteResponses[keyof DeleteCourseApiV1CoursesCourseIdDeleteResponses];
 
-export type UpdateCourseCoursesCourseIdPatchData = {
+export type UpdateCourseApiV1CoursesCourseIdPatchData = {
     body: CourseUpdateRequestSchema;
     path: {
         /**
@@ -746,28 +801,28 @@ export type UpdateCourseCoursesCourseIdPatchData = {
         course_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}';
+    url: '/api/v1/courses/{course_id}';
 };
 
-export type UpdateCourseCoursesCourseIdPatchErrors = {
+export type UpdateCourseApiV1CoursesCourseIdPatchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateCourseCoursesCourseIdPatchError = UpdateCourseCoursesCourseIdPatchErrors[keyof UpdateCourseCoursesCourseIdPatchErrors];
+export type UpdateCourseApiV1CoursesCourseIdPatchError = UpdateCourseApiV1CoursesCourseIdPatchErrors[keyof UpdateCourseApiV1CoursesCourseIdPatchErrors];
 
-export type UpdateCourseCoursesCourseIdPatchResponses = {
+export type UpdateCourseApiV1CoursesCourseIdPatchResponses = {
     /**
      * Successful Response
      */
     200: CourseSchema;
 };
 
-export type UpdateCourseCoursesCourseIdPatchResponse = UpdateCourseCoursesCourseIdPatchResponses[keyof UpdateCourseCoursesCourseIdPatchResponses];
+export type UpdateCourseApiV1CoursesCourseIdPatchResponse = UpdateCourseApiV1CoursesCourseIdPatchResponses[keyof UpdateCourseApiV1CoursesCourseIdPatchResponses];
 
-export type GetCreatedCoursesCoursesCreatedGetData = {
+export type GetCreatedCoursesApiV1CoursesCreatedGetData = {
     body?: never;
     path?: never;
     query?: {
@@ -780,57 +835,48 @@ export type GetCreatedCoursesCoursesCreatedGetData = {
          */
         offset?: number;
     };
-    url: '/courses/created';
+    url: '/api/v1/courses/created';
 };
 
-export type GetCreatedCoursesCoursesCreatedGetErrors = {
+export type GetCreatedCoursesApiV1CoursesCreatedGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetCreatedCoursesCoursesCreatedGetError = GetCreatedCoursesCoursesCreatedGetErrors[keyof GetCreatedCoursesCoursesCreatedGetErrors];
+export type GetCreatedCoursesApiV1CoursesCreatedGetError = GetCreatedCoursesApiV1CoursesCreatedGetErrors[keyof GetCreatedCoursesApiV1CoursesCreatedGetErrors];
 
-export type GetCreatedCoursesCoursesCreatedGetResponses = {
+export type GetCreatedCoursesApiV1CoursesCreatedGetResponses = {
     /**
-     * Response Get Created Courses Courses Created Get
+     * Response Get Created Courses Api V1 Courses Created Get
      *
      * Successful Response
      */
     200: Array<CourseSchema>;
 };
 
-export type GetCreatedCoursesCoursesCreatedGetResponse = GetCreatedCoursesCoursesCreatedGetResponses[keyof GetCreatedCoursesCoursesCreatedGetResponses];
+export type GetCreatedCoursesApiV1CoursesCreatedGetResponse = GetCreatedCoursesApiV1CoursesCreatedGetResponses[keyof GetCreatedCoursesApiV1CoursesCreatedGetResponses];
 
-export type GetMyCoursesCoursesMyGetData = {
+export type GetMyCoursesApiV1CoursesMyGetData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/courses/my';
+    url: '/api/v1/courses/my';
 };
 
-export type GetMyCoursesCoursesMyGetErrors = {
+export type GetMyCoursesApiV1CoursesMyGetResponses = {
     /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetMyCoursesCoursesMyGetError = GetMyCoursesCoursesMyGetErrors[keyof GetMyCoursesCoursesMyGetErrors];
-
-export type GetMyCoursesCoursesMyGetResponses = {
-    /**
-     * Response Get My Courses Courses My Get
+     * Response Get My Courses Api V1 Courses My Get
      *
      * Successful Response
      */
     200: Array<CourseUserBriefSchema>;
 };
 
-export type GetMyCoursesCoursesMyGetResponse = GetMyCoursesCoursesMyGetResponses[keyof GetMyCoursesCoursesMyGetResponses];
+export type GetMyCoursesApiV1CoursesMyGetResponse = GetMyCoursesApiV1CoursesMyGetResponses[keyof GetMyCoursesApiV1CoursesMyGetResponses];
 
-export type CreateMemberCoursesCourseIdEnrollPostData = {
+export type CreateMemberApiV1CoursesCourseIdEnrollPostData = {
     body?: never;
     path: {
         /**
@@ -839,28 +885,28 @@ export type CreateMemberCoursesCourseIdEnrollPostData = {
         course_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/enroll';
+    url: '/api/v1/courses/{course_id}/enroll';
 };
 
-export type CreateMemberCoursesCourseIdEnrollPostErrors = {
+export type CreateMemberApiV1CoursesCourseIdEnrollPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateMemberCoursesCourseIdEnrollPostError = CreateMemberCoursesCourseIdEnrollPostErrors[keyof CreateMemberCoursesCourseIdEnrollPostErrors];
+export type CreateMemberApiV1CoursesCourseIdEnrollPostError = CreateMemberApiV1CoursesCourseIdEnrollPostErrors[keyof CreateMemberApiV1CoursesCourseIdEnrollPostErrors];
 
-export type CreateMemberCoursesCourseIdEnrollPostResponses = {
+export type CreateMemberApiV1CoursesCourseIdEnrollPostResponses = {
     /**
      * Successful Response
      */
     200: CourseMemberSchema;
 };
 
-export type CreateMemberCoursesCourseIdEnrollPostResponse = CreateMemberCoursesCourseIdEnrollPostResponses[keyof CreateMemberCoursesCourseIdEnrollPostResponses];
+export type CreateMemberApiV1CoursesCourseIdEnrollPostResponse = CreateMemberApiV1CoursesCourseIdEnrollPostResponses[keyof CreateMemberApiV1CoursesCourseIdEnrollPostResponses];
 
-export type CreateModuleCoursesCourseIdModulesPostData = {
+export type CreateModuleApiV1CoursesCourseIdModulesPostData = {
     body: ModuleCreateRequestSchema;
     path: {
         /**
@@ -869,28 +915,28 @@ export type CreateModuleCoursesCourseIdModulesPostData = {
         course_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/modules';
+    url: '/api/v1/courses/{course_id}/modules';
 };
 
-export type CreateModuleCoursesCourseIdModulesPostErrors = {
+export type CreateModuleApiV1CoursesCourseIdModulesPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateModuleCoursesCourseIdModulesPostError = CreateModuleCoursesCourseIdModulesPostErrors[keyof CreateModuleCoursesCourseIdModulesPostErrors];
+export type CreateModuleApiV1CoursesCourseIdModulesPostError = CreateModuleApiV1CoursesCourseIdModulesPostErrors[keyof CreateModuleApiV1CoursesCourseIdModulesPostErrors];
 
-export type CreateModuleCoursesCourseIdModulesPostResponses = {
+export type CreateModuleApiV1CoursesCourseIdModulesPostResponses = {
     /**
      * Successful Response
      */
     201: ModuleSchema;
 };
 
-export type CreateModuleCoursesCourseIdModulesPostResponse = CreateModuleCoursesCourseIdModulesPostResponses[keyof CreateModuleCoursesCourseIdModulesPostResponses];
+export type CreateModuleApiV1CoursesCourseIdModulesPostResponse = CreateModuleApiV1CoursesCourseIdModulesPostResponses[keyof CreateModuleApiV1CoursesCourseIdModulesPostResponses];
 
-export type DeleteModuleCoursesCourseIdModulesModuleIdDeleteData = {
+export type DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData = {
     body?: never;
     path: {
         /**
@@ -903,28 +949,28 @@ export type DeleteModuleCoursesCourseIdModulesModuleIdDeleteData = {
         module_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/modules/{module_id}';
+    url: '/api/v1/courses/{course_id}/modules/{module_id}';
 };
 
-export type DeleteModuleCoursesCourseIdModulesModuleIdDeleteErrors = {
+export type DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteModuleCoursesCourseIdModulesModuleIdDeleteError = DeleteModuleCoursesCourseIdModulesModuleIdDeleteErrors[keyof DeleteModuleCoursesCourseIdModulesModuleIdDeleteErrors];
+export type DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError = DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteErrors[keyof DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteErrors];
 
-export type DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponses = {
+export type DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponse = DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponses[keyof DeleteModuleCoursesCourseIdModulesModuleIdDeleteResponses];
+export type DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse = DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponses[keyof DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponses];
 
-export type UpdateModuleCoursesCourseIdModulesModuleIdPatchData = {
+export type UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData = {
     body: ModuleUpdateRequestSchema;
     path: {
         /**
@@ -937,28 +983,28 @@ export type UpdateModuleCoursesCourseIdModulesModuleIdPatchData = {
         module_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/modules/{module_id}';
+    url: '/api/v1/courses/{course_id}/modules/{module_id}';
 };
 
-export type UpdateModuleCoursesCourseIdModulesModuleIdPatchErrors = {
+export type UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateModuleCoursesCourseIdModulesModuleIdPatchError = UpdateModuleCoursesCourseIdModulesModuleIdPatchErrors[keyof UpdateModuleCoursesCourseIdModulesModuleIdPatchErrors];
+export type UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError = UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchErrors[keyof UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchErrors];
 
-export type UpdateModuleCoursesCourseIdModulesModuleIdPatchResponses = {
+export type UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses = {
     /**
      * Successful Response
      */
     200: ModuleSchema;
 };
 
-export type UpdateModuleCoursesCourseIdModulesModuleIdPatchResponse = UpdateModuleCoursesCourseIdModulesModuleIdPatchResponses[keyof UpdateModuleCoursesCourseIdModulesModuleIdPatchResponses];
+export type UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse = UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses[keyof UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses];
 
-export type CreateLessonCoursesCourseIdModulesModuleIdLessonsPostData = {
+export type CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData = {
     body: LessonCreateRequestSchema;
     path: {
         /**
@@ -971,28 +1017,28 @@ export type CreateLessonCoursesCourseIdModulesModuleIdLessonsPostData = {
         module_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/modules/{module_id}/lessons';
+    url: '/api/v1/courses/{course_id}/modules/{module_id}/lessons';
 };
 
-export type CreateLessonCoursesCourseIdModulesModuleIdLessonsPostErrors = {
+export type CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateLessonCoursesCourseIdModulesModuleIdLessonsPostError = CreateLessonCoursesCourseIdModulesModuleIdLessonsPostErrors[keyof CreateLessonCoursesCourseIdModulesModuleIdLessonsPostErrors];
+export type CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError = CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostErrors[keyof CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostErrors];
 
-export type CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponses = {
+export type CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses = {
     /**
      * Successful Response
      */
     201: LessonSchema;
 };
 
-export type CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponse = CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponses[keyof CreateLessonCoursesCourseIdModulesModuleIdLessonsPostResponses];
+export type CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse = CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses[keyof CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses];
 
-export type DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData = {
+export type DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData = {
     body?: never;
     path: {
         /**
@@ -1009,28 +1055,28 @@ export type DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData 
         lesson_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/modules/{module_id}/lessons/{lesson_id}';
+    url: '/api/v1/courses/{course_id}/modules/{module_id}/lessons/{lesson_id}';
 };
 
-export type DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors = {
+export type DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError = DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors[keyof DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors];
+export type DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError = DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors[keyof DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors];
 
-export type DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses = {
+export type DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse = DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses[keyof DeleteLessonCoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses];
+export type DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse = DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses[keyof DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses];
 
-export type UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchData = {
+export type UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData = {
     body: LessonUpdateRequestSchema;
     path: {
         /**
@@ -1047,28 +1093,28 @@ export type UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchData =
         lesson_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/modules/{module_id}/lessons/{lesson_id}';
+    url: '/api/v1/courses/{course_id}/modules/{module_id}/lessons/{lesson_id}';
 };
 
-export type UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors = {
+export type UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchError = UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors[keyof UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors];
+export type UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError = UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors[keyof UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors];
 
-export type UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses = {
+export type UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses = {
     /**
      * Successful Response
      */
     200: LessonSchema;
 };
 
-export type UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse = UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses[keyof UpdateLessonCoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses];
+export type UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse = UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses[keyof UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses];
 
-export type CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostData = {
+export type CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData = {
     body: BlockCreateRequestSchema;
     path: {
         /**
@@ -1081,28 +1127,28 @@ export type CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostData = {
         lesson_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/lessons/{lesson_id}/blocks';
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/blocks';
 };
 
-export type CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostErrors = {
+export type CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostError = CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostErrors[keyof CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostErrors];
+export type CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError = CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostErrors[keyof CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostErrors];
 
-export type CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponses = {
+export type CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses = {
     /**
      * Successful Response
      */
     201: BlockSchema;
 };
 
-export type CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponse = CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponses[keyof CreateBlockCoursesCourseIdLessonsLessonIdBlocksPostResponses];
+export type CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse = CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses[keyof CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses];
 
-export type DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData = {
+export type DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData = {
     body?: never;
     path: {
         /**
@@ -1119,28 +1165,28 @@ export type DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData = {
         block_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/lessons/{lesson_id}/blocks/{block_id}';
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/blocks/{block_id}';
 };
 
-export type DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors = {
+export type DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError = DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors[keyof DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors];
+export type DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError = DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors[keyof DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors];
 
-export type DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses = {
+export type DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse = DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses[keyof DeleteBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses];
+export type DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse = DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses[keyof DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses];
 
-export type UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData = {
+export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData = {
     body: BlockUpdateRequestSchema;
     path: {
         /**
@@ -1157,28 +1203,28 @@ export type UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData = {
         block_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/lessons/{lesson_id}/blocks/{block_id}';
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/blocks/{block_id}';
 };
 
-export type UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors = {
+export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError = UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors[keyof UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors];
+export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError = UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors[keyof UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors];
 
-export type UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses = {
+export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses = {
     /**
      * Successful Response
      */
     200: BlockSchema;
 };
 
-export type UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse = UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses[keyof UpdateBlockCoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses];
+export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse = UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses[keyof UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses];
 
-export type SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostData = {
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData = {
     /**
      * Payload
      */
@@ -1194,30 +1240,30 @@ export type SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostData = {
         lesson_id: string;
     };
     query?: never;
-    url: '/courses/{course_id}/lessons/{lesson_id}/submit';
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/submit';
 };
 
-export type SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostErrors = {
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostError = SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostErrors[keyof SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostErrors];
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostError = SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors[keyof SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors];
 
-export type SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponses = {
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses = {
     /**
-     * Response Submit Lesson Courses  Course Id  Lessons  Lesson Id  Submit Post
+     * Response Submit Lesson Api V1 Courses  Course Id  Lessons  Lesson Id  Submit Post
      *
      * Successful Response
      */
     201: Array<BlockSubmissionSchema>;
 };
 
-export type SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponse = SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponses[keyof SubmitLessonCoursesCourseIdLessonsLessonIdSubmitPostResponses];
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponse = SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses[keyof SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses];
 
-export type CreateLessonLessonsLessonIdProgressPostData = {
+export type CreateLessonApiV1LessonsLessonIdProgressPostData = {
     body?: never;
     path: {
         /**
@@ -1226,53 +1272,44 @@ export type CreateLessonLessonsLessonIdProgressPostData = {
         lesson_id: string;
     };
     query?: never;
-    url: '/lessons/{lesson_id}/progress';
+    url: '/api/v1/lessons/{lesson_id}/progress';
 };
 
-export type CreateLessonLessonsLessonIdProgressPostErrors = {
+export type CreateLessonApiV1LessonsLessonIdProgressPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateLessonLessonsLessonIdProgressPostError = CreateLessonLessonsLessonIdProgressPostErrors[keyof CreateLessonLessonsLessonIdProgressPostErrors];
+export type CreateLessonApiV1LessonsLessonIdProgressPostError = CreateLessonApiV1LessonsLessonIdProgressPostErrors[keyof CreateLessonApiV1LessonsLessonIdProgressPostErrors];
 
-export type CreateLessonLessonsLessonIdProgressPostResponses = {
+export type CreateLessonApiV1LessonsLessonIdProgressPostResponses = {
     /**
      * Successful Response
      */
     201: LessonProgressSchema;
 };
 
-export type CreateLessonLessonsLessonIdProgressPostResponse = CreateLessonLessonsLessonIdProgressPostResponses[keyof CreateLessonLessonsLessonIdProgressPostResponses];
+export type CreateLessonApiV1LessonsLessonIdProgressPostResponse = CreateLessonApiV1LessonsLessonIdProgressPostResponses[keyof CreateLessonApiV1LessonsLessonIdProgressPostResponses];
 
-export type GetCurrentUserUsersMeGetData = {
+export type GetCurrentUserApiV1UsersMeGetData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/users/me';
+    url: '/api/v1/users/me';
 };
 
-export type GetCurrentUserUsersMeGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetCurrentUserUsersMeGetError = GetCurrentUserUsersMeGetErrors[keyof GetCurrentUserUsersMeGetErrors];
-
-export type GetCurrentUserUsersMeGetResponses = {
+export type GetCurrentUserApiV1UsersMeGetResponses = {
     /**
      * Successful Response
      */
     200: UserSchema;
 };
 
-export type GetCurrentUserUsersMeGetResponse = GetCurrentUserUsersMeGetResponses[keyof GetCurrentUserUsersMeGetResponses];
+export type GetCurrentUserApiV1UsersMeGetResponse = GetCurrentUserApiV1UsersMeGetResponses[keyof GetCurrentUserApiV1UsersMeGetResponses];
 
-export type GetUserByIdUsersUserIdGetData = {
+export type GetUserByIdApiV1UsersUserIdGetData = {
     body?: never;
     path: {
         /**
@@ -1281,26 +1318,26 @@ export type GetUserByIdUsersUserIdGetData = {
         user_id: string;
     };
     query?: never;
-    url: '/users/{user_id}';
+    url: '/api/v1/users/{user_id}';
 };
 
-export type GetUserByIdUsersUserIdGetErrors = {
+export type GetUserByIdApiV1UsersUserIdGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetUserByIdUsersUserIdGetError = GetUserByIdUsersUserIdGetErrors[keyof GetUserByIdUsersUserIdGetErrors];
+export type GetUserByIdApiV1UsersUserIdGetError = GetUserByIdApiV1UsersUserIdGetErrors[keyof GetUserByIdApiV1UsersUserIdGetErrors];
 
-export type GetUserByIdUsersUserIdGetResponses = {
+export type GetUserByIdApiV1UsersUserIdGetResponses = {
     /**
      * Successful Response
      */
     200: UserSchema;
 };
 
-export type GetUserByIdUsersUserIdGetResponse = GetUserByIdUsersUserIdGetResponses[keyof GetUserByIdUsersUserIdGetResponses];
+export type GetUserByIdApiV1UsersUserIdGetResponse = GetUserByIdApiV1UsersUserIdGetResponses[keyof GetUserByIdApiV1UsersUserIdGetResponses];
 
 export type SayHelloGetData = {
     body?: never;
