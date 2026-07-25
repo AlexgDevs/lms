@@ -12,11 +12,6 @@ class AccessTokenPayload:
     sub: UUID
 
 
-class TokenPair(BaseSchema):
-    access_token: str
-    refresh_token: str
-
-
 class UserCreateSchema(BaseSchema):
     username: str
     email: str
@@ -46,3 +41,15 @@ class RefreshTokenSchema(BaseSchema):
     is_revoked: bool
     expires_at: datetime
     created_at: datetime
+
+
+class TokenPair(BaseSchema):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class RefreshTokenCreate(BaseSchema):
+    user_id: UUID
+    token_hash: str
+    expires_at: datetime

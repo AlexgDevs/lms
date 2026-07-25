@@ -8,8 +8,9 @@ from src.lesson.lesson_progress.router import router as lesson_prorgress_router
 from src.block import router as block_router
 from src.submissions import router as submissions_router
 from src.user.router import router as user_router
+from src.core.config import settings
 
-app_v1 = APIRouter()
+app_v1 = APIRouter(prefix=settings.app.API_V1_STR)
 app_v1.include_router(auth_router)
 app_v1.include_router(course_router)
 app_v1.include_router(module_router)

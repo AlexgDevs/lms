@@ -23,7 +23,7 @@ class PostgresSettings(BaseSettings):
     POSTGRES_PASS: str = Field(default=...)
     POSTGRES_DB: str = Field(default=...)
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def DATABASE_URL(self) -> PostgresDsn:
         return PostgresDsn.build(
@@ -63,7 +63,7 @@ class AppSettings(BaseSettings):
     def secure_cookies(self) -> bool:
         return self.APP_ENV == "production"
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def ALL_CORS_ORIGINS(self) -> list[str]:
         if isinstance(self.CORS_ORIGINS, str):
@@ -93,7 +93,7 @@ class RedisSettings(BaseSettings):
     REDIS_SOCKET_CONNECT_TIMEOUT: int = 2
     REDIS_RETRY_ON_TIMEOUT: bool = True
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def REDIS_URL(self) -> str:
         return f"redis://{self.REDIS_USER}:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"

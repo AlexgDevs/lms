@@ -30,15 +30,16 @@ def init_app() -> FastAPI:
     app = FastAPI(
         title="FastAPI",
         version="0.1.0",
+        openapi_url=f"{settings.app.API_V1_STR}/openapi.json",
         lifespan=lifespan,
     )
     app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.app.ALL_CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+        CORSMiddleware,
+        allow_origins=settings.app.ALL_CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     init_errors_handler(app)
     app.include_router(app_v1)
