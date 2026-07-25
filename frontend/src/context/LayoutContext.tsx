@@ -1,108 +1,80 @@
 import {
-    createContext,
-    useContext,
-    useState,
-    useCallback,
-    type ReactNode,
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
 } from "react";
 
-export interface SidebarSlot {
-    /** Arbitrary ReactNode to render inside the sidebar */
-    content: ReactNode | null;
-    /** Whether the sidebar is currently visible */
-    visible: boolean;
+export interface HeaderSlot {
+  /** Кастомный контент для шапки (например, поиск, хлебные крошки или навигация) */
+  content: ReactNode | null;
+  /** Видимость шапки на текущей странице */
+  visible: boolean;
 }
 
 interface LayoutContextValue {
-    leftSidebar: SidebarSlot;
-    rightSidebar: SidebarSlot;
+  header: HeaderSlot;
 
-    setLeftSidebar: (content: ReactNode | null) => void;
-    setRightSidebar: (content: ReactNode | null) => void;
-
-    toggleLeftSidebar: () => void;
-    toggleRightSidebar: () => void;
-
-    showLeftSidebar: () => void;
-    hideLeftSidebar: () => void;
-    showRightSidebar: () => void;
-    hideRightSidebar: () => void;
+  setHeader: (content: ReactNode | null) => void;
+  toggleHeader: () => void;
+  showHeader: () => void;
+  hideHeader: () => void;
 }
 
 const LayoutContext = createContext<LayoutContextValue | null>(null);
 
 interface LayoutProviderProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
 export function LayoutProvider({ children }: LayoutProviderProps) {
-    const [leftSidebar, setLeftState] = useState<SidebarSlot>({
-        content: null,
-        visible: true,
-    });
-    const [rightSidebar, setRightState] = useState<SidebarSlot>({
-        content: null,
-        visible: false,
-    });
+  const [header, setHeaderState] = useState<HeaderSlot>({
+    content: null,
+    visible: true,
+  });
 
-    const setLeftSidebar = useCallback((content: ReactNode | null) => {
-        setLeftState((prev) => ({ ...prev, content, visible: content !== null }));
-    }, []);
+  const setHeader = useCallback((content: ReactNode | null) => {
+    setHeaderState((prev) => ({
+      ...prev,
+      content,
+      visible: content !== null,
+    }));
+  }, []);
 
-    const setRightSidebar = useCallback((content: ReactNode | null) => {
-        setRightState((prev) => ({ ...prev, content, visible: content !== null }));
-    }, []);
+  const toggleHeader = useCallback(() => {
+    setHeaderState((prev) => ({ ...prev, visible: !prev.visible }));
+  }, []);
 
-    const toggleLeftSidebar = useCallback(() => {
-        setLeftState((prev) => ({ ...prev, visible: !prev.visible }));
-    }, []);
+  const showHeader = useCallback(() => {
+    setHeaderState((prev) => ({ ...prev, visible: true }));
+  }, []);
 
-    const toggleRightSidebar = useCallback(() => {
-        setRightState((prev) => ({ ...prev, visible: !prev.visible }));
-    }, []);
+  const hideHeader = useCallback(() => {
+    setHeaderState((prev) => ({ ...prev, visible: false }));
+  }, []);
 
-    const showLeftSidebar = useCallback(() => {
-        setLeftState((prev) => ({ ...prev, visible: true }));
-    }, []);
-
-    const hideLeftSidebar = useCallback(() => {
-        setLeftState((prev) => ({ ...prev, visible: false }));
-    }, []);
-
-    const showRightSidebar = useCallback(() => {
-        setRightState((prev) => ({ ...prev, visible: true }));
-    }, []);
-
-    const hideRightSidebar = useCallback(() => {
-        setRightState((prev) => ({ ...prev, visible: false }));
-    }, []);
-
-    return (
-        <LayoutContext.Provider
-            value={{
-                leftSidebar,
-                rightSidebar,
-                setLeftSidebar,
-                setRightSidebar,
-                toggleLeftSidebar,
-                toggleRightSidebar,
-                showLeftSidebar,
-                hideLeftSidebar,
-                showRightSidebar,
-                hideRightSidebar,
-            }}
-        >
-            {children}
-        </LayoutContext.Provider>
-    );
+  return (
+    <LayoutContext.Provider
+      value={{
+        header,
+        setHeader,
+        toggleHeader,
+        showHeader,
+        hideHeader,
+      }}
+    >
+      {children}
+    </LayoutContext.Provider>
+  );
 }
 
 export function useLayout() {
-    const ctx = useContext(LayoutContext);
+  const ctx = useContext(LayoutContext);
 
-    if (!ctx) {
-        throw new Error("useLayout must be used inside <LayoutProvider>");
-    }
+  if (!ctx) {
+    throw new Error("useLayout must be used inside <LayoutProvider>");
+  }
 
-    return ctx;
+  return ctx;
 }
