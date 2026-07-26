@@ -66,6 +66,22 @@ async def get_my_courses(
     return await service.get_courses_where_user_member(user_id)
 
 
+@router.get("/author/{course_id}")
+async def get_author_course_by_id(
+    course_id: UUID, user_id: UserIdDep, service: CourseServiceDep
+) -> CourseSchema:
+    return await service.get_author_course_by_id(course_id, user_id)
+
+
+@router.get("/{course_id}")
+async def get_course_by_id(
+    course_id: UUID, user_id: UserIdDep, service: CourseServiceDep
+) -> CourseSchema:
+    return await service.get_course_by_id(
+        course_id,
+    )
+
+
 @router.post("/{course_id}/enroll")
 async def create_member(
     user_id: UserIdDep, course_id: UUID, service: CourseServiceDep

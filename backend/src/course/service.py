@@ -96,3 +96,27 @@ class CourseService(BaseService):
 
         await self.uow.commit()
         return new_member
+
+    async def get_author_course_by_id(
+        self, course_id: UUID, user_id: UUID
+    ) -> CourseSchema:
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=user_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        return course
+
+    async def get_course_by_id(
+        self,
+        course_id: UUID,
+    ) -> CourseSchema:
+        course = await self.uow.courses.get_one(
+            id=course_id, is_deleted=None
+        )  # TODO: add type draft for checked
+
+        if not course:
+            raise CourseNotFoundError
+
+        return course
