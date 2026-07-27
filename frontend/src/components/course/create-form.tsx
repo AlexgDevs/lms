@@ -29,7 +29,8 @@ interface CreateCourseFormProps {
 
 export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
   const navigate = useNavigate()
-  const { createCourseMutation } = useCourses()
+  // Достаём те названия, которые реально возвращаются из useCourses
+  const { createCourseAsync, isCreatingCourse } = useCourses()
 
   const form = useForm<CreateCourseFormData>({
     resolver: zodResolver(createCourseSchema),
@@ -41,21 +42,23 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
     },
   })
 
-  const onSubmit = (data: CreateCourseFormData) => {
-    if (createCourseMutation.isPending) return
+  const onSubmit = async (data: CreateCourseFormData) => {
+    if (isCreatingCourse) return
 
-    createCourseMutation.mutate(
-      { body: data },
-      {
-        onSuccess: (newCourse) => {
-          // Мгновенный редирект в конструктор курса по полученному id
-          navigate({
-            to: `${ROUTES.TEACHING_COURSE}/$courseId`,
-            params: { courseId: String(newCourse.id) },
-          })
-        },
+    try {
+      // Вызываем асинхронную мутацию
+      const newCourse = await createCourseAsync({ body: data })
+
+      // Мгновенный редирект в конструктор курса по полученному id
+      if (newCourse?.id) {
+        navigate({
+          to: `${ROUTES.TEACHING_COURSE}/$courseId`,
+          params: { courseId: String(newCourse.id) },
+        })
       }
-    )
+    } catch {
+      // Ошибки подхватываются глобальным toast'ом из хука useCourses
+    }
   }
 
   return (
@@ -138,7 +141,10 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
                       type="number"
                       min={0}
                       placeholder="0 для бесплатного курса"
-                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                      onChange={(e) => {
+                        const val = e.target.valueAsNumber
+                        field.onChange(Number.isNaN(val) ? 0 : val)
+                      }}
                     />
                     {fieldState.invalid && (
                       <FieldError
@@ -156,13 +162,13 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
                     type="button"
                     variant="outline"
                     onClick={onCancel}
-                    disabled={createCourseMutation.isPending}
+                    disabled={isCreatingCourse}
                   >
                     Отмена
                   </Button>
                 )}
-                <Button type="submit" disabled={createCourseMutation.isPending}>
-                  {createCourseMutation.isPending ? (
+                <Button type="submit" disabled={isCreatingCourse}>
+                  {isCreatingCourse ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <Plus className="mr-2 h-4 w-4" />

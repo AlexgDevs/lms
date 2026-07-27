@@ -322,7 +322,7 @@ export type CourseUpdateRequestSchema = {
     /**
      * Title
      */
-    title: string;
+    title?: string | null;
     /**
      * Description
      */
@@ -792,6 +792,36 @@ export type DeleteCourseApiV1CoursesCourseIdDeleteResponses = {
 
 export type DeleteCourseApiV1CoursesCourseIdDeleteResponse = DeleteCourseApiV1CoursesCourseIdDeleteResponses[keyof DeleteCourseApiV1CoursesCourseIdDeleteResponses];
 
+export type GetCourseByIdApiV1CoursesCourseIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}';
+};
+
+export type GetCourseByIdApiV1CoursesCourseIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCourseByIdApiV1CoursesCourseIdGetError = GetCourseByIdApiV1CoursesCourseIdGetErrors[keyof GetCourseByIdApiV1CoursesCourseIdGetErrors];
+
+export type GetCourseByIdApiV1CoursesCourseIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseSchema;
+};
+
+export type GetCourseByIdApiV1CoursesCourseIdGetResponse = GetCourseByIdApiV1CoursesCourseIdGetResponses[keyof GetCourseByIdApiV1CoursesCourseIdGetResponses];
+
 export type UpdateCourseApiV1CoursesCourseIdPatchData = {
     body: CourseUpdateRequestSchema;
     path: {
@@ -875,6 +905,36 @@ export type GetMyCoursesApiV1CoursesMyGetResponses = {
 };
 
 export type GetMyCoursesApiV1CoursesMyGetResponse = GetMyCoursesApiV1CoursesMyGetResponses[keyof GetMyCoursesApiV1CoursesMyGetResponses];
+
+export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/author/{course_id}';
+};
+
+export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetError = GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors[keyof GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors];
+
+export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseSchema;
+};
+
+export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponse = GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses[keyof GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses];
 
 export type CreateMemberApiV1CoursesCourseIdEnrollPostData = {
     body?: never;

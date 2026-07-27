@@ -172,7 +172,7 @@ export function TeachingPage() {
                     type="button"
                     onClick={() => {
                       navigate({
-                        to: `${ROUTES.TEACHING}/builder/$courseId`,
+                        to: `${ROUTES.TEACHING_COURSE}/$courseId`,
                         params: { courseId: String(mainCourse.id) },
                       })
                     }}

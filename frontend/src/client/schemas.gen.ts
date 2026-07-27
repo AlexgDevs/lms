@@ -471,8 +471,15 @@ export const CourseSchemaSchema = {
 export const CourseUpdateRequestSchemaSchema = {
     properties: {
         title: {
-            type: 'string',
-            maxLength: 128,
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 128
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Title'
         },
         description: {
@@ -501,9 +508,6 @@ export const CourseUpdateRequestSchemaSchema = {
         }
     },
     type: 'object',
-    required: [
-        'title'
-    ],
     title: 'CourseUpdateRequestSchema',
     description: 'Schema for updating an existing course.\nAll fields are optional because the client might want to update only one field (PATCH-like).'
 } as const;
