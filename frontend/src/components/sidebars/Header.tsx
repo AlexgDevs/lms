@@ -3,8 +3,8 @@ import { useLayout } from "@/context/LayoutContext";
 import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CategoryCatalog } from "@/components/layouts/CategoryCatalog";
-import { UserMenu } from "@/components/layouts/UserMenu"; // <-- Наш чистый компонент
+import { CategoryCatalog } from "@/components/dashboard/CategoryCatalog";
+import { UserMenu } from "@/components/dashboard/UserMenu"; // <-- Наш чистый компонент
 import { Search, Bell, Moon, Sun } from "lucide-react";
 
 export function Header() {

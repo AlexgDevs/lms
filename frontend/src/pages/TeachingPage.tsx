@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
 import { useCourses } from "@/hooks/useCourses"
-import { CreateCourseForm } from "@/components/course/create-form"
+import { CreateCourseForm } from "@/components/forms/course/create-form"
 import { ROUTES } from "@/routes"
 
 export function TeachingPage() {
