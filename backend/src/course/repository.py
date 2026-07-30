@@ -52,3 +52,33 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
 
         result = await self.session.execute(statement)
         return [CourseUserBriefMapper.to_schema(model) for model in result.all()]
+
+    async def get_course_where_user_is_member(
+        self, course_id: UUID, user_id: UUID
+    ) -> CourseUserBriefSchema | None:
+        statement = (
+            select(
+                Course.id,
+                Course.title,
+                Course.cover_url,
+                Course.description,
+                Course.owner_id,
+                Course.price,
+                Course.created_at,
+                Course.member_count,
+                CourseMember.role,
+            )
+            .join(CourseMember, CourseMember.course_id == Course.id)
+            .where(
+                Course.id == course_id,
+                CourseMember.user_id == user_id,
+                CourseMember.left_at.is_(None),
+            )
+        )
+
+        result = await self.session.execute(statement)
+        row = result.one_or_none()
+        if not row:
+            return None
+
+        return CourseUserBriefMapper.to_schema(row)

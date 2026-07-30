@@ -72,3 +72,31 @@ async def delete_block(
         course_id=course_id,
         user_id=user_id,
     )
+
+
+@router.get("")
+async def get_blocks(
+    course_id: UUID,
+    lesson_id: UUID,
+    user_id: UserIdDep,
+    service: BlockServiceDep,
+    only_created: bool = False,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[BlockSchema]:
+    if only_created:
+        return await service.get_all_by_owner(
+            course_id=course_id,
+            lesson_id=lesson_id,
+            user_id=user_id,
+            limit=limit,
+            offset=offset,
+        )
+
+    return await service.get_all(
+        course_id=course_id,
+        lesson_id=lesson_id,
+        user_id=user_id,
+        limit=limit,
+        offset=offset,
+    )

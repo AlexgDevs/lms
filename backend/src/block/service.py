@@ -108,3 +108,75 @@ class BlockService(BaseService):
 
         await self.uow.blocks.delete(id_=block_id)
         await self.uow.commit()
+
+    async def get_all(
+        self,
+        course_id: UUID,
+        lesson_id: UUID,
+        user_id: UUID,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[BlockSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id,
+            is_deleted=None,  # TODO: add draft type
+        )
+
+        if not course:
+            raise CourseNotFoundError
+
+        member = await self.uow.courses.get_course_where_user_is_member(
+            course_id=course_id,
+            user_id=user_id,
+        )
+
+        if not member:
+            raise CourseNotFoundError
+
+        lesson = await self.uow.lessons.get_one(
+            id=lesson_id,
+            course_id=course_id,
+        )
+
+        if not lesson:
+            raise LessonNotFoundError
+
+        return list(
+            await self.uow.blocks.get_filtered(
+                limit=limit,
+                offset=offset,
+                course_id=course.id,
+                lesson_id=lesson.id,
+            )
+        )
+
+    async def get_all_by_owner(
+        self,
+        course_id: UUID,
+        lesson_id: UUID,
+        user_id: UUID,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[BlockSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id,
+            owner_id=user_id,
+            is_deleted=None,
+        )
+
+        if not course:
+            raise CourseNotFoundError
+
+        lesson = await self.uow.lessons.get_one(
+            id=lesson_id,
+            course_id=course_id,
+        )
+
+        if not lesson:
+            raise LessonNotFoundError
+
+        return list(
+            await self.uow.blocks.get_filtered(
+                limit=limit, offset=offset, course_id=course.id, lesson_id=lesson.id
+            )
+        )

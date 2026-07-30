@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.post(
-    "/submit",
+    "/submissions",
     response_model=list[BlockSubmissionSchema],
     status_code=status.HTTP_201_CREATED,
 )

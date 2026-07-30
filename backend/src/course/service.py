@@ -7,7 +7,11 @@ from src.course.course_member.schemas import (
     CourseMemberSchema,
 )
 from src.core.services.base_service import BaseService
-from src.course.exceptions import CourseMemberAlredyEnrolledError, CourseNotFoundError
+from src.course.exceptions import (
+    CourseMemberAlredyEnrolledError,
+    CourseNotFoundError,
+    CourseOwnerCannotEnrollError,
+)
 from src.course.schemas import (
     CourseCreateRequestSchema,
     CourseCreateSchema,
@@ -83,6 +87,14 @@ class CourseService(BaseService):
         return await self.uow.courses.get_courses_where_user_is_member(user_id)
 
     async def enroll(self, course_id: UUID, user_id: UUID) -> CourseMemberSchema:
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+
+        if not course:
+            raise CourseNotFoundError
+
+        if course.owner_id == user_id:
+            raise CourseOwnerCannotEnrollError
+
         member = await self.uow.members.get_one(
             user_id=user_id, course_id=course_id, left_at=None
         )
@@ -96,6 +108,18 @@ class CourseService(BaseService):
 
         await self.uow.commit()
         return new_member
+
+    async def get_course_where_user_member(
+        self, course_id: UUID, user_id: UUID
+    ) -> CourseUserBriefSchema:
+        course = await self.uow.courses.get_course_where_user_is_member(
+            course_id,
+            user_id,
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        return course
 
     async def get_author_course_by_id(
         self, course_id: UUID, user_id: UUID

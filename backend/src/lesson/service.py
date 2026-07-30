@@ -155,3 +155,78 @@ class LessonService(BaseService):
                 raise LessonProgressNotFoundError
 
             return existing_progress
+
+    async def get_all(
+        self,
+        course_id: UUID,
+        module_id: UUID,
+        user_id: UUID,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[LessonSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id,
+            is_deleted=None,  # TODO: add draft type
+        )
+
+        if not course:
+            raise CourseNotFoundError
+
+        member = await self.uow.courses.get_course_where_user_is_member(
+            course_id=course_id,
+            user_id=user_id,
+        )
+
+        if not member:
+            raise CourseNotFoundError
+
+        module = await self.uow.modules.get_one(
+            id=module_id,
+            course_id=course_id,
+        )
+
+        if not module:
+            raise ModuleNotFoundError
+
+        return list(
+            await self.uow.lessons.get_filtered(
+                limit=limit,
+                offset=offset,
+                course_id=course.id,
+                module_id=module.id,
+            )
+        )
+
+    async def get_all_by_owner(
+        self,
+        course_id: UUID,
+        module_id: UUID,
+        user_id: UUID,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[LessonSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id,
+            owner_id=user_id,
+            is_deleted=None,
+        )
+
+        if not course:
+            raise CourseNotFoundError
+
+        module = await self.uow.modules.get_one(
+            id=module_id,
+            course_id=course_id,
+        )
+
+        if not module:
+            raise ModuleNotFoundError
+
+        return list(
+            await self.uow.lessons.get_filtered(
+                limit=limit,
+                offset=offset,
+                course_id=course.id,
+                module_id=module.id,
+            )
+        )

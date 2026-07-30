@@ -72,3 +72,31 @@ async def delete_lesson(
         course_id=course_id,
         user_id=user_id,
     )
+
+
+@router.get("")
+async def get_lessons(
+    course_id: UUID,
+    module_id: UUID,
+    user_id: UserIdDep,
+    service: LessonServiceDep,
+    only_created: bool = False,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[LessonSchema]:
+    if only_created:
+        return await service.get_all_by_owner(
+            course_id=course_id,
+            module_id=module_id,
+            user_id=user_id,
+            limit=limit,
+            offset=offset,
+        )
+
+    return await service.get_all(
+        course_id=course_id,
+        module_id=module_id,
+        user_id=user_id,
+        limit=limit,
+        offset=offset,
+    )

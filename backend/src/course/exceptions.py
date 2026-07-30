@@ -15,3 +15,7 @@ class CourseMemberNotFoundError(ObjectNotFoundError, CourseError):
 
 class CourseMemberAlredyEnrolledError(CourseError):
     detail = "Member alredy enrolled on this course"
+
+
+class CourseOwnerCannotEnrollError(CourseError):
+    detail = "Owner cannot enroll on this course"

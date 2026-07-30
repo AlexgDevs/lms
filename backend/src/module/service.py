@@ -87,3 +87,44 @@ class ModuleService(BaseService):
 
         await self.uow.modules.delete(id_=module_id)
         await self.uow.commit()
+
+    async def get_all_by_owner_course(
+        self, course_id: UUID, user_id: UUID, limit: int = 100, offset: int = 0
+    ) -> list[ModuleSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id,
+            owner_id=user_id,
+            is_deleted=None,
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        return list(
+            await self.uow.modules.get_filtered(
+                limit=limit, offset=offset, course_id=course.id
+            )
+        )
+
+    async def get_all_by_course(
+        self, course_id: UUID, user_id: UUID, limit: int = 100, offset: int = 0
+    ) -> list[ModuleSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id,
+            owner_id=user_id,
+            is_deleted=None,
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        member = await self.uow.courses.get_course_where_user_is_member(
+            course_id=course_id, user_id=user_id
+        )
+
+        if not member:
+            raise CourseNotFoundError
+
+        return list(
+            await self.uow.modules.get_filtered(
+                limit=limit, offset=offset, course_id=course.id
+            )
+        )

@@ -1,6 +1,6 @@
-from typing import Sequence
+from typing import Literal, Sequence
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, status
 from src.course.course_member.schemas import CourseMemberSchema
 from src.course.schemas import (
     CourseSchema,
@@ -45,44 +45,50 @@ async def delete_course(
     await course_service.delete_course(course_id=course_id, owner_id=owner_id)
 
 
-@router.get("/created")
-async def get_created_courses(
+@router.get("")
+async def get_courses(
     user_id: UserIdDep,
     service: CourseServiceDep,
+    filter: Literal["all", "created", "my"] = "all",
     limit: int = 10,
     offset: int = 0,
-) -> Sequence[CourseSchema]:
-    return await service.uow.courses.get_filtered(  # TODO: add local method they don't viled SOLID layers
-        owner_id=user_id,
-        limit=limit,
-        offset=offset,
-    )
+) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
+    if filter == "created":
+        return await service.uow.courses.get_filtered(  # TODO: add service layer
+            owner_id=user_id,
+            limit=limit,
+            offset=offset,
+        )
+
+    if filter == "my":
+        return await service.get_courses_where_user_member(user_id)
+
+    return await service.uow.courses.get_filtered(
+        limit=limit, offset=offset
+    )  # TODO: add status draft and then who has this status - become vanish
 
 
-@router.get("/my")
-async def get_my_courses(
-    user_id: UserIdDep, service: CourseServiceDep
-) -> list[CourseUserBriefSchema]:
-    return await service.get_courses_where_user_member(user_id)
-
-
-@router.get("/author/{course_id}")
-async def get_author_course_by_id(
-    course_id: UUID, user_id: UserIdDep, service: CourseServiceDep
-) -> CourseSchema:
-    return await service.get_author_course_by_id(course_id, user_id)
-
-
-@router.get("/{course_id}")
+@router.get("/{course_id}")  # TODO: add course where user is member
 async def get_course_by_id(
-    course_id: UUID, user_id: UserIdDep, service: CourseServiceDep
-) -> CourseSchema:
-    return await service.get_course_by_id(
-        course_id,
-    )
+    course_id: UUID,
+    user_id: UserIdDep,
+    service: CourseServiceDep,
+    filter: Literal["current", "author", "my"] = "current",
+) -> CourseSchema | CourseUserBriefSchema:
+    match filter:
+        case "author":
+            return await service.get_author_course_by_id(course_id, user_id)
+
+        case "my":
+            return await service.get_course_where_user_member(course_id, user_id)
+
+        case "current" | _:
+            return await service.get_course_by_id(
+                course_id  # TODO: add status published/draft
+            )
 
 
-@router.post("/{course_id}/enroll")
+@router.post("/{course_id}/members")
 async def create_member(
     user_id: UserIdDep, course_id: UUID, service: CourseServiceDep
 ) -> CourseMemberSchema:
