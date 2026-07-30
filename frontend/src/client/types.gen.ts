@@ -737,6 +737,46 @@ export type LogoutApiV1AuthLogoutPostResponses = {
 
 export type LogoutApiV1AuthLogoutPostResponse = LogoutApiV1AuthLogoutPostResponses[keyof LogoutApiV1AuthLogoutPostResponses];
 
+export type GetCoursesApiV1CoursesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter
+         */
+        filter?: 'all' | 'created' | 'my';
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/v1/courses';
+};
+
+export type GetCoursesApiV1CoursesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCoursesApiV1CoursesGetError = GetCoursesApiV1CoursesGetErrors[keyof GetCoursesApiV1CoursesGetErrors];
+
+export type GetCoursesApiV1CoursesGetResponses = {
+    /**
+     * Response Get Courses Api V1 Courses Get
+     *
+     * Successful Response
+     */
+    200: Array<CourseSchema> | Array<CourseUserBriefSchema>;
+};
+
+export type GetCoursesApiV1CoursesGetResponse = GetCoursesApiV1CoursesGetResponses[keyof GetCoursesApiV1CoursesGetResponses];
+
 export type CreateCourseApiV1CoursesPostData = {
     body: CourseCreateRequestSchema;
     path?: never;
@@ -800,7 +840,12 @@ export type GetCourseByIdApiV1CoursesCourseIdGetData = {
          */
         course_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Filter
+         */
+        filter?: 'current' | 'author' | 'my';
+    };
     url: '/api/v1/courses/{course_id}';
 };
 
@@ -815,9 +860,11 @@ export type GetCourseByIdApiV1CoursesCourseIdGetError = GetCourseByIdApiV1Course
 
 export type GetCourseByIdApiV1CoursesCourseIdGetResponses = {
     /**
+     * Response Get Course By Id Api V1 Courses  Course Id  Get
+     *
      * Successful Response
      */
-    200: CourseSchema;
+    200: CourseSchema | CourseUserBriefSchema;
 };
 
 export type GetCourseByIdApiV1CoursesCourseIdGetResponse = GetCourseByIdApiV1CoursesCourseIdGetResponses[keyof GetCourseByIdApiV1CoursesCourseIdGetResponses];
@@ -852,10 +899,49 @@ export type UpdateCourseApiV1CoursesCourseIdPatchResponses = {
 
 export type UpdateCourseApiV1CoursesCourseIdPatchResponse = UpdateCourseApiV1CoursesCourseIdPatchResponses[keyof UpdateCourseApiV1CoursesCourseIdPatchResponses];
 
-export type GetCreatedCoursesApiV1CoursesCreatedGetData = {
+export type CreateMemberApiV1CoursesCourseIdMembersPostData = {
     body?: never;
-    path?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/members';
+};
+
+export type CreateMemberApiV1CoursesCourseIdMembersPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateMemberApiV1CoursesCourseIdMembersPostError = CreateMemberApiV1CoursesCourseIdMembersPostErrors[keyof CreateMemberApiV1CoursesCourseIdMembersPostErrors];
+
+export type CreateMemberApiV1CoursesCourseIdMembersPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseMemberSchema;
+};
+
+export type CreateMemberApiV1CoursesCourseIdMembersPostResponse = CreateMemberApiV1CoursesCourseIdMembersPostResponses[keyof CreateMemberApiV1CoursesCourseIdMembersPostResponses];
+
+export type GetModulesApiV1CoursesCourseIdModulesGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
     query?: {
+        /**
+         * Only Created
+         */
+        only_created?: boolean;
         /**
          * Limit
          */
@@ -865,106 +951,28 @@ export type GetCreatedCoursesApiV1CoursesCreatedGetData = {
          */
         offset?: number;
     };
-    url: '/api/v1/courses/created';
+    url: '/api/v1/courses/{course_id}/modules';
 };
 
-export type GetCreatedCoursesApiV1CoursesCreatedGetErrors = {
+export type GetModulesApiV1CoursesCourseIdModulesGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetCreatedCoursesApiV1CoursesCreatedGetError = GetCreatedCoursesApiV1CoursesCreatedGetErrors[keyof GetCreatedCoursesApiV1CoursesCreatedGetErrors];
+export type GetModulesApiV1CoursesCourseIdModulesGetError = GetModulesApiV1CoursesCourseIdModulesGetErrors[keyof GetModulesApiV1CoursesCourseIdModulesGetErrors];
 
-export type GetCreatedCoursesApiV1CoursesCreatedGetResponses = {
+export type GetModulesApiV1CoursesCourseIdModulesGetResponses = {
     /**
-     * Response Get Created Courses Api V1 Courses Created Get
+     * Response Get Modules Api V1 Courses  Course Id  Modules Get
      *
      * Successful Response
      */
-    200: Array<CourseSchema>;
+    200: Array<ModuleSchema>;
 };
 
-export type GetCreatedCoursesApiV1CoursesCreatedGetResponse = GetCreatedCoursesApiV1CoursesCreatedGetResponses[keyof GetCreatedCoursesApiV1CoursesCreatedGetResponses];
-
-export type GetMyCoursesApiV1CoursesMyGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/courses/my';
-};
-
-export type GetMyCoursesApiV1CoursesMyGetResponses = {
-    /**
-     * Response Get My Courses Api V1 Courses My Get
-     *
-     * Successful Response
-     */
-    200: Array<CourseUserBriefSchema>;
-};
-
-export type GetMyCoursesApiV1CoursesMyGetResponse = GetMyCoursesApiV1CoursesMyGetResponses[keyof GetMyCoursesApiV1CoursesMyGetResponses];
-
-export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetData = {
-    body?: never;
-    path: {
-        /**
-         * Course Id
-         */
-        course_id: string;
-    };
-    query?: never;
-    url: '/api/v1/courses/author/{course_id}';
-};
-
-export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetError = GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors[keyof GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors];
-
-export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: CourseSchema;
-};
-
-export type GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponse = GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses[keyof GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses];
-
-export type CreateMemberApiV1CoursesCourseIdEnrollPostData = {
-    body?: never;
-    path: {
-        /**
-         * Course Id
-         */
-        course_id: string;
-    };
-    query?: never;
-    url: '/api/v1/courses/{course_id}/enroll';
-};
-
-export type CreateMemberApiV1CoursesCourseIdEnrollPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateMemberApiV1CoursesCourseIdEnrollPostError = CreateMemberApiV1CoursesCourseIdEnrollPostErrors[keyof CreateMemberApiV1CoursesCourseIdEnrollPostErrors];
-
-export type CreateMemberApiV1CoursesCourseIdEnrollPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: CourseMemberSchema;
-};
-
-export type CreateMemberApiV1CoursesCourseIdEnrollPostResponse = CreateMemberApiV1CoursesCourseIdEnrollPostResponses[keyof CreateMemberApiV1CoursesCourseIdEnrollPostResponses];
+export type GetModulesApiV1CoursesCourseIdModulesGetResponse = GetModulesApiV1CoursesCourseIdModulesGetResponses[keyof GetModulesApiV1CoursesCourseIdModulesGetResponses];
 
 export type CreateModuleApiV1CoursesCourseIdModulesPostData = {
     body: ModuleCreateRequestSchema;
@@ -1063,6 +1071,55 @@ export type UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses = {
 };
 
 export type UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse = UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses[keyof UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses];
+
+export type GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: {
+        /**
+         * Only Created
+         */
+        only_created?: boolean;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/v1/courses/{course_id}/modules/{module_id}/lessons';
+};
+
+export type GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetError = GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors[keyof GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors];
+
+export type GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses = {
+    /**
+     * Response Get Lessons Api V1 Courses  Course Id  Modules  Module Id  Lessons Get
+     *
+     * Successful Response
+     */
+    200: Array<LessonSchema>;
+};
+
+export type GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse = GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses[keyof GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses];
 
 export type CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData = {
     body: LessonCreateRequestSchema;
@@ -1174,6 +1231,55 @@ export type UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchR
 
 export type UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse = UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses[keyof UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses];
 
+export type GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: {
+        /**
+         * Only Created
+         */
+        only_created?: boolean;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/blocks';
+};
+
+export type GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetError = GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetErrors[keyof GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetErrors];
+
+export type GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponses = {
+    /**
+     * Response Get Blocks Api V1 Courses  Course Id  Lessons  Lesson Id  Blocks Get
+     *
+     * Successful Response
+     */
+    200: Array<BlockSchema>;
+};
+
+export type GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse = GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponses[keyof GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponses];
+
 export type CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData = {
     body: BlockCreateRequestSchema;
     path: {
@@ -1284,7 +1390,7 @@ export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResp
 
 export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse = UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses[keyof UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses];
 
-export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData = {
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData = {
     /**
      * Payload
      */
@@ -1300,28 +1406,28 @@ export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData = {
         lesson_id: string;
     };
     query?: never;
-    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/submit';
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/submissions';
 };
 
-export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors = {
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostError = SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors[keyof SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors];
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError = SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostErrors[keyof SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostErrors];
 
-export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses = {
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses = {
     /**
-     * Response Submit Lesson Api V1 Courses  Course Id  Lessons  Lesson Id  Submit Post
+     * Response Submit Lesson Api V1 Courses  Course Id  Lessons  Lesson Id  Submissions Post
      *
      * Successful Response
      */
     201: Array<BlockSubmissionSchema>;
 };
 
-export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponse = SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses[keyof SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses];
+export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse = SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses[keyof SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses];
 
 export type CreateLessonApiV1LessonsLessonIdProgressPostData = {
     body?: never;

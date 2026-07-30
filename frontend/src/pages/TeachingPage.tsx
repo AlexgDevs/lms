@@ -20,15 +20,19 @@ import { ROUTES } from "@/routes"
 
 export function TeachingPage() {
   const navigate = useNavigate()
+  
+  // 1. Используем созданные курсы (фильтр "created") из нашего хука
   const { createdCourses, isLoadingCreatedCourses } = useCourses()
-  const [activeCourseId, setActiveCourseId] = useState<string | number | null>(null)
+  const [activeCourseId, setActiveCourseId] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
 
-  // Получаем список курсов с бэкенда (или пустой массив)
-  const coursesList = createdCourses || []
+  // 2. Достаем список курсов (поддерживает и массив, и объект ответа { items: [...] })
+  const coursesList = Array.isArray(createdCourses) 
+    ? createdCourses 
+    : createdCourses?.items || []
 
   // Выбираем фокусный курс (выбранный вручную или первый в списке)
-  const mainCourse = coursesList.find((c) => c.id === activeCourseId) || coursesList[0]
+  const mainCourse = coursesList.find((c: any) => String(c.id) === String(activeCourseId)) || coursesList[0]
 
   if (isLoadingCreatedCourses) {
     return (
@@ -139,7 +143,7 @@ export function TeachingPage() {
                   </div>
 
                   <div>
-                    <span className="text-xs font-bold text-purple-400 tracking-wider uppercase">
+                    <span className="text-xs font-bold text-purple-400 tracking-wider uppercase font-mono">
                       Курс ID: #{mainCourse.id}
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mt-1">
@@ -156,7 +160,7 @@ export function TeachingPage() {
                     <div className="bg-background/40 backdrop-blur-md rounded-xl p-3 border border-border/40">
                       <span className="text-[10px] text-muted-foreground block">Автор (Owner ID)</span>
                       <span className="text-xs font-bold text-foreground font-mono truncate block">
-                        #{mainCourse.owner_id}
+                        #{mainCourse.owner_id ?? mainCourse.author_id ?? "N/A"}
                       </span>
                     </div>
                     <div className="bg-background/40 backdrop-blur-md rounded-xl p-3 border border-border/40">
@@ -203,7 +207,7 @@ export function TeachingPage() {
                 <div className="flex items-center gap-2">
                   <Layers className="w-4 h-4 text-purple-400" />
                   <h3 className="font-bold text-base text-foreground">
-                    Все программы ({coursesList.length})
+                    Мои программы ({coursesList.length})
                   </h3>
                 </div>
 
@@ -218,19 +222,19 @@ export function TeachingPage() {
               </div>
 
               <div className="divide-y divide-border/40 border border-border/50 rounded-2xl bg-card overflow-hidden">
-                {coursesList.map((course) => {
+                {coursesList.map((course: any) => {
                   const isSelected = mainCourse?.id === course.id
                   return (
                     <div
                       key={course.id}
-                      onClick={() => setActiveCourseId(course.id)}
+                      onClick={() => setActiveCourseId(String(course.id))}
                       className={`p-4 flex items-center justify-between gap-4 cursor-pointer transition-colors group ${
                         isSelected ? "bg-purple-500/5" : "hover:bg-muted/30"
                       }`}
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 font-bold text-xs">
-                          #{course.id}
+                        <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 font-bold text-xs font-mono">
+                          #{String(course.id).slice(0, 4)}
                         </div>
                         <div className="min-w-0">
                           <h4 className="font-semibold text-sm text-foreground truncate group-hover:text-purple-400 transition-colors">

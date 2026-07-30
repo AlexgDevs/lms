@@ -4,7 +4,7 @@ import { Loader2, AlertCircle, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCourses } from "@/hooks/useCourses"
 import { CourseHeader } from "@/components/course_builder/CourseHeader"
-import { CourseSidebar } from "@/components/course_builder/CourseSidebar" // Импортируем сайдбар
+import { CourseSidebar } from "@/components/course_builder/CourseSidebar"
 import { ROUTES } from "@/routes"
 
 export function CourseBuilderPage() {
@@ -22,6 +22,7 @@ export function CourseBuilderPage() {
     return null
   }
 
+  // Забираем данные из обновленного хука (используем прокинутые алиасы)
   const {
     authorCourse,
     isLoadingAuthorCourse,
@@ -80,7 +81,7 @@ export function CourseBuilderPage() {
     is_published?: boolean
   }) => {
     await updateCourseAsync({
-      path: { course_id: authorCourse.id },
+      path: { course_id: String(authorCourse.id) },
       body: data,
     })
   }

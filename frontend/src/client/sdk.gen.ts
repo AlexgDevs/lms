@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostErrors, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostErrors, CreateCourseApiV1CoursesPostResponses, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostErrors, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostErrors, CreateLessonApiV1LessonsLessonIdProgressPostResponses, CreateMemberApiV1CoursesCourseIdEnrollPostData, CreateMemberApiV1CoursesCourseIdEnrollPostErrors, CreateMemberApiV1CoursesCourseIdEnrollPostResponses, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostErrors, CreateModuleApiV1CoursesCourseIdModulesPostResponses, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteErrors, DeleteCourseApiV1CoursesCourseIdDeleteResponses, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteErrors, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponses, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetData, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetErrors, GetCourseByIdApiV1CoursesCourseIdGetResponses, GetCreatedCoursesApiV1CoursesCreatedGetData, GetCreatedCoursesApiV1CoursesCreatedGetErrors, GetCreatedCoursesApiV1CoursesCreatedGetResponses, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponses, GetMyCoursesApiV1CoursesMyGetData, GetMyCoursesApiV1CoursesMyGetResponses, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetErrors, GetUserByIdApiV1UsersUserIdGetResponses, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostErrors, LoginApiV1AuthLoginPostResponses, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostErrors, LogoutApiV1AuthLogoutPostResponses, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostErrors, RefreshApiV1AuthRefreshPostResponses, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostErrors, RegisterApiV1AuthRegisterPostResponses, SayHelloGetData, SayHelloGetResponses, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchErrors, UpdateCourseApiV1CoursesCourseIdPatchResponses, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchErrors, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses } from './types.gen';
+import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostErrors, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostErrors, CreateCourseApiV1CoursesPostResponses, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostErrors, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostErrors, CreateLessonApiV1LessonsLessonIdProgressPostResponses, CreateMemberApiV1CoursesCourseIdMembersPostData, CreateMemberApiV1CoursesCourseIdMembersPostErrors, CreateMemberApiV1CoursesCourseIdMembersPostResponses, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostErrors, CreateModuleApiV1CoursesCourseIdModulesPostResponses, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteErrors, DeleteCourseApiV1CoursesCourseIdDeleteResponses, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteErrors, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponses, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetErrors, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponses, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetErrors, GetCourseByIdApiV1CoursesCourseIdGetResponses, GetCoursesApiV1CoursesGetData, GetCoursesApiV1CoursesGetErrors, GetCoursesApiV1CoursesGetResponses, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponses, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses, GetModulesApiV1CoursesCourseIdModulesGetData, GetModulesApiV1CoursesCourseIdModulesGetErrors, GetModulesApiV1CoursesCourseIdModulesGetResponses, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetErrors, GetUserByIdApiV1UsersUserIdGetResponses, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostErrors, LoginApiV1AuthLoginPostResponses, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostErrors, LogoutApiV1AuthLogoutPostResponses, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostErrors, RefreshApiV1AuthRefreshPostResponses, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostErrors, RegisterApiV1AuthRegisterPostResponses, SayHelloGetData, SayHelloGetResponses, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostErrors, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchErrors, UpdateCourseApiV1CoursesCourseIdPatchResponses, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchErrors, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -79,6 +79,17 @@ export class AuthService {
 
 export class CourseService {
     /**
+     * Get Courses
+     */
+    public static getCoursesApiV1CoursesGet<ThrowOnError extends boolean = false>(options?: Options<GetCoursesApiV1CoursesGetData, ThrowOnError>): RequestResult<GetCoursesApiV1CoursesGetResponses, GetCoursesApiV1CoursesGetErrors, ThrowOnError> {
+        return (options?.client ?? client).get<GetCoursesApiV1CoursesGetResponses, GetCoursesApiV1CoursesGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/courses',
+            ...options
+        });
+    }
+    
+    /**
      * Create Course
      */
     public static createCourseApiV1CoursesPost<ThrowOnError extends boolean = false>(options: Options<CreateCourseApiV1CoursesPostData, ThrowOnError>): RequestResult<CreateCourseApiV1CoursesPostResponses, CreateCourseApiV1CoursesPostErrors, ThrowOnError> {
@@ -131,51 +142,29 @@ export class CourseService {
     }
     
     /**
-     * Get Created Courses
-     */
-    public static getCreatedCoursesApiV1CoursesCreatedGet<ThrowOnError extends boolean = false>(options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData, ThrowOnError>): RequestResult<GetCreatedCoursesApiV1CoursesCreatedGetResponses, GetCreatedCoursesApiV1CoursesCreatedGetErrors, ThrowOnError> {
-        return (options?.client ?? client).get<GetCreatedCoursesApiV1CoursesCreatedGetResponses, GetCreatedCoursesApiV1CoursesCreatedGetErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses/created',
-            ...options
-        });
-    }
-    
-    /**
-     * Get My Courses
-     */
-    public static getMyCoursesApiV1CoursesMyGet<ThrowOnError extends boolean = false>(options?: Options<GetMyCoursesApiV1CoursesMyGetData, ThrowOnError>): RequestResult<GetMyCoursesApiV1CoursesMyGetResponses, unknown, ThrowOnError> {
-        return (options?.client ?? client).get<GetMyCoursesApiV1CoursesMyGetResponses, unknown, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses/my',
-            ...options
-        });
-    }
-    
-    /**
-     * Get Author Course By Id
-     */
-    public static getAuthorCourseByIdApiV1CoursesAuthorCourseIdGet<ThrowOnError extends boolean = false>(options: Options<GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetData, ThrowOnError>): RequestResult<GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors, ThrowOnError> {
-        return (options.client ?? client).get<GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponses, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses/author/{course_id}',
-            ...options
-        });
-    }
-    
-    /**
      * Create Member
      */
-    public static createMemberApiV1CoursesCourseIdEnrollPost<ThrowOnError extends boolean = false>(options: Options<CreateMemberApiV1CoursesCourseIdEnrollPostData, ThrowOnError>): RequestResult<CreateMemberApiV1CoursesCourseIdEnrollPostResponses, CreateMemberApiV1CoursesCourseIdEnrollPostErrors, ThrowOnError> {
-        return (options.client ?? client).post<CreateMemberApiV1CoursesCourseIdEnrollPostResponses, CreateMemberApiV1CoursesCourseIdEnrollPostErrors, ThrowOnError>({
+    public static createMemberApiV1CoursesCourseIdMembersPost<ThrowOnError extends boolean = false>(options: Options<CreateMemberApiV1CoursesCourseIdMembersPostData, ThrowOnError>): RequestResult<CreateMemberApiV1CoursesCourseIdMembersPostResponses, CreateMemberApiV1CoursesCourseIdMembersPostErrors, ThrowOnError> {
+        return (options.client ?? client).post<CreateMemberApiV1CoursesCourseIdMembersPostResponses, CreateMemberApiV1CoursesCourseIdMembersPostErrors, ThrowOnError>({
             security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses/{course_id}/enroll',
+            url: '/api/v1/courses/{course_id}/members',
             ...options
         });
     }
 }
 
 export class ModuleService {
+    /**
+     * Get Modules
+     */
+    public static getModulesApiV1CoursesCourseIdModulesGet<ThrowOnError extends boolean = false>(options: Options<GetModulesApiV1CoursesCourseIdModulesGetData, ThrowOnError>): RequestResult<GetModulesApiV1CoursesCourseIdModulesGetResponses, GetModulesApiV1CoursesCourseIdModulesGetErrors, ThrowOnError> {
+        return (options.client ?? client).get<GetModulesApiV1CoursesCourseIdModulesGetResponses, GetModulesApiV1CoursesCourseIdModulesGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/courses/{course_id}/modules',
+            ...options
+        });
+    }
+    
     /**
      * Create Module
      */
@@ -220,6 +209,17 @@ export class ModuleService {
 
 export class LessonService {
     /**
+     * Get Lessons
+     */
+    public static getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGet<ThrowOnError extends boolean = false>(options: Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, ThrowOnError>): RequestResult<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors, ThrowOnError> {
+        return (options.client ?? client).get<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/courses/{course_id}/modules/{module_id}/lessons',
+            ...options
+        });
+    }
+    
+    /**
      * Create Lesson
      */
     public static createLessonApiV1CoursesCourseIdModulesModuleIdLessonsPost<ThrowOnError extends boolean = false>(options: Options<CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, ThrowOnError>): RequestResult<CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostErrors, ThrowOnError> {
@@ -262,6 +262,17 @@ export class LessonService {
 }
 
 export class BlockService {
+    /**
+     * Get Blocks
+     */
+    public static getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGet<ThrowOnError extends boolean = false>(options: Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, ThrowOnError>): RequestResult<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponses, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetErrors, ThrowOnError> {
+        return (options.client ?? client).get<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponses, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/blocks',
+            ...options
+        });
+    }
+    
     /**
      * Create Block
      */
@@ -308,10 +319,10 @@ export class SubmissionService {
     /**
      * Submit Lesson
      */
-    public static submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPost<ThrowOnError extends boolean = false>(options: Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData, ThrowOnError>): RequestResult<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors, ThrowOnError> {
-        return (options.client ?? client).post<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponses, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostErrors, ThrowOnError>({
+    public static submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPost<ThrowOnError extends boolean = false>(options: Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, ThrowOnError>): RequestResult<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostErrors, ThrowOnError> {
+        return (options.client ?? client).post<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostErrors, ThrowOnError>({
             security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/submit',
+            url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/submissions',
             ...options,
             headers: {
                 'Content-Type': 'application/json',

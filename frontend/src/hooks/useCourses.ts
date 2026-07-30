@@ -2,58 +2,70 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import useCustomToast from "@/hooks/useCustomToast"
 import { getErrorMessage } from "@/utils"
 import {
-  createCourseApiV1CoursesPostMutation,
-  createMemberApiV1CoursesCourseIdEnrollPostMutation,
-  deleteCourseApiV1CoursesCourseIdDeleteMutation,
-  getAuthorCourseByIdApiV1CoursesAuthorCourseIdGetOptions,
-  getAuthorCourseByIdApiV1CoursesAuthorCourseIdGetQueryKey,
+  getCoursesApiV1CoursesGetOptions,
+  getCoursesApiV1CoursesGetQueryKey,
   getCourseByIdApiV1CoursesCourseIdGetOptions,
   getCourseByIdApiV1CoursesCourseIdGetQueryKey,
-  getCreatedCoursesApiV1CoursesCreatedGetOptions,
-  getCreatedCoursesApiV1CoursesCreatedGetQueryKey,
-  getMyCoursesApiV1CoursesMyGetOptions,
-  getMyCoursesApiV1CoursesMyGetQueryKey,
+  createCourseApiV1CoursesPostMutation,
   updateCourseApiV1CoursesCourseIdPatchMutation,
+  deleteCourseApiV1CoursesCourseIdDeleteMutation,
+  createMemberApiV1CoursesCourseIdMembersPostMutation,
 } from "@/client/@tanstack/react-query.gen"
 
 export const useCourses = (courseId?: string) => {
   const queryClient = useQueryClient()
   const { showErrorToast, showSuccessToast } = useCustomToast()
 
+  const isValidCourseId = Boolean(courseId && courseId !== "undefined")
+
   // --- QUERIES ---
 
-  // Курсы, на которые пользователь записан
-  const { data: myCourses, isLoading: isLoadingMyCourses } = useQuery({
-    ...getMyCoursesApiV1CoursesMyGetOptions(),
+  // 1. Общий публичный каталог всех курсов
+  const {
+    data: courses,
+    isLoading: isLoadingCourses,
+    error: coursesError,
+  } = useQuery({
+    ...getCoursesApiV1CoursesGetOptions({
+      query: { filter: "all" },
+    }),
   })
 
-  // Созданные пользователем курсы (для авторов)
-  const { data: createdCourses, isLoading: isLoadingCreatedCourses } = useQuery({
-    ...getCreatedCoursesApiV1CoursesCreatedGetOptions(),
+  // 2. Список курсов, СОЗДАННЫХ ТЕКУЩИМ ПОЛЬЗОВАТЕЛЕМ (Для TeachingPage)
+  const {
+    data: createdCourses,
+    isLoading: isLoadingCreatedCourses,
+    error: createdCoursesError,
+  } = useQuery({
+    ...getCoursesApiV1CoursesGetOptions({
+      query: { filter: "created" },
+    }),
   })
 
-  // Деталка курса (Публичная)
+  // 3. Публичная деталка курса (для обычных студентов)
   const {
     data: course,
     isLoading: isLoadingCourse,
     error: courseError,
   } = useQuery({
     ...getCourseByIdApiV1CoursesCourseIdGetOptions({
-      path: { course_id: courseId! },
+      path: { course_id: courseId as string },
+      query: { filter: "current" },
     }),
-    enabled: Boolean(courseId),
+    enabled: isValidCourseId,
   })
 
-  // Деталка курса для Автора (включает черновики)
+  // 4. Деталка курса ДЛЯ АВТОРА (Для Конструктора/Билдера)
   const {
     data: authorCourse,
     isLoading: isLoadingAuthorCourse,
     error: authorCourseError,
   } = useQuery({
-    ...getAuthorCourseByIdApiV1CoursesAuthorCourseIdGetOptions({
-      path: { course_id: courseId! },
+    ...getCourseByIdApiV1CoursesCourseIdGetOptions({
+      path: { course_id: courseId as string },
+      query: { filter: "author" }, // 🎯 Запрашиваем права автора
     }),
-    enabled: Boolean(courseId),
+    enabled: isValidCourseId,
   })
 
   // --- MUTATIONS ---
@@ -64,7 +76,7 @@ export const useCourses = (courseId?: string) => {
     onSuccess: () => {
       showSuccessToast("Курс успешно создан")
       queryClient.invalidateQueries({
-        queryKey: getCreatedCoursesApiV1CoursesCreatedGetQueryKey(),
+        queryKey: getCoursesApiV1CoursesGetQueryKey(),
       })
     },
     onError: (err) => {
@@ -77,21 +89,19 @@ export const useCourses = (courseId?: string) => {
     ...updateCourseApiV1CoursesCourseIdPatchMutation(),
     onSuccess: (_, variables) => {
       showSuccessToast("Курс успешно обновлен")
-      const currentCourseId = variables.path.course_id
-      
+      const targetCourseId = variables.path?.course_id
+
       queryClient.invalidateQueries({
-        queryKey: getCreatedCoursesApiV1CoursesCreatedGetQueryKey(),
+        queryKey: getCoursesApiV1CoursesGetQueryKey(),
       })
-      queryClient.invalidateQueries({
-        queryKey: getAuthorCourseByIdApiV1CoursesAuthorCourseIdGetQueryKey({
-          path: { course_id: currentCourseId },
-        }),
-      })
-      queryClient.invalidateQueries({
-        queryKey: getCourseByIdApiV1CoursesCourseIdGetQueryKey({
-          path: { course_id: currentCourseId },
-        }),
-      })
+
+      if (targetCourseId) {
+        queryClient.invalidateQueries({
+          queryKey: getCourseByIdApiV1CoursesCourseIdGetQueryKey({
+            path: { course_id: targetCourseId },
+          }),
+        })
+      }
     },
     onError: (err) => {
       showErrorToast(getErrorMessage(err) || "Ошибка при обновлении курса")
@@ -104,7 +114,7 @@ export const useCourses = (courseId?: string) => {
     onSuccess: () => {
       showSuccessToast("Курс успешно удален")
       queryClient.invalidateQueries({
-        queryKey: getCreatedCoursesApiV1CoursesCreatedGetQueryKey(),
+        queryKey: getCoursesApiV1CoursesGetQueryKey(),
       })
     },
     onError: (err) => {
@@ -112,14 +122,24 @@ export const useCourses = (courseId?: string) => {
     },
   })
 
-  // Запись на курс (Enroll)
+  // Запись на курс (Member)
   const enrollCourseMutation = useMutation({
-    ...createMemberApiV1CoursesCourseIdEnrollPostMutation(),
-    onSuccess: () => {
+    ...createMemberApiV1CoursesCourseIdMembersPostMutation(),
+    onSuccess: (_, variables) => {
       showSuccessToast("Вы успешно записались на курс!")
+      const targetCourseId = variables.path?.course_id
+
       queryClient.invalidateQueries({
-        queryKey: getMyCoursesApiV1CoursesMyGetQueryKey(),
+        queryKey: getCoursesApiV1CoursesGetQueryKey(),
       })
+
+      if (targetCourseId) {
+        queryClient.invalidateQueries({
+          queryKey: getCourseByIdApiV1CoursesCourseIdGetQueryKey({
+            path: { course_id: targetCourseId },
+          }),
+        })
+      }
     },
     onError: (err) => {
       showErrorToast(getErrorMessage(err) || "Ошибка при записи на курс")
@@ -128,18 +148,20 @@ export const useCourses = (courseId?: string) => {
 
   return {
     // Data
-    myCourses,
+    courses,
     createdCourses,
     course,
     authorCourse,
 
     // Loadings
-    isLoadingMyCourses,
+    isLoadingCourses,
     isLoadingCreatedCourses,
     isLoadingCourse,
     isLoadingAuthorCourse,
 
     // Errors
+    coursesError,
+    createdCoursesError,
     courseError,
     authorCourseError,
 

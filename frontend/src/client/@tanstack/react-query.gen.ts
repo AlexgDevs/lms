@@ -4,7 +4,7 @@ import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOption
 
 import { client } from '../client.gen';
 import { AuthService, BlockService, CourseService, DefaultService, LessonService, LessonsProgresService, ModuleService, type Options, SubmissionService, UserService } from '../sdk.gen';
-import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostError, CreateCourseApiV1CoursesPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostError, CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateMemberApiV1CoursesCourseIdEnrollPostData, CreateMemberApiV1CoursesCourseIdEnrollPostError, CreateMemberApiV1CoursesCourseIdEnrollPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostError, CreateModuleApiV1CoursesCourseIdModulesPostResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteError, DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetData, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetError, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponse, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetError, GetCourseByIdApiV1CoursesCourseIdGetResponse, GetCreatedCoursesApiV1CoursesCreatedGetData, GetCreatedCoursesApiV1CoursesCreatedGetError, GetCreatedCoursesApiV1CoursesCreatedGetResponse, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponse, GetMyCoursesApiV1CoursesMyGetData, GetMyCoursesApiV1CoursesMyGetResponse, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetError, GetUserByIdApiV1UsersUserIdGetResponse, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostError, LoginApiV1AuthLoginPostResponse, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostError, LogoutApiV1AuthLogoutPostResponse, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostError, RefreshApiV1AuthRefreshPostResponse, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostError, RegisterApiV1AuthRegisterPostResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostError, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchError, UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
+import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostError, CreateCourseApiV1CoursesPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostError, CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateMemberApiV1CoursesCourseIdMembersPostData, CreateMemberApiV1CoursesCourseIdMembersPostError, CreateMemberApiV1CoursesCourseIdMembersPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostError, CreateModuleApiV1CoursesCourseIdModulesPostResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteError, DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetError, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetError, GetCourseByIdApiV1CoursesCourseIdGetResponse, GetCoursesApiV1CoursesGetData, GetCoursesApiV1CoursesGetError, GetCoursesApiV1CoursesGetResponse, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponse, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetError, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse, GetModulesApiV1CoursesCourseIdModulesGetData, GetModulesApiV1CoursesCourseIdModulesGetError, GetModulesApiV1CoursesCourseIdModulesGetResponse, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetError, GetUserByIdApiV1UsersUserIdGetResponse, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostError, LoginApiV1AuthLoginPostResponse, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostError, LogoutApiV1AuthLogoutPostResponse, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostError, RefreshApiV1AuthRefreshPostResponse, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostError, RegisterApiV1AuthRegisterPostResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchError, UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
 
 /**
  * Register
@@ -74,6 +74,113 @@ export const logoutApiV1AuthLogoutPostMutation = (options?: Partial<Options<Logo
     return mutationOptions;
 };
 
+export type QueryKey<TOptions extends Options> = [
+    Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
+        _id: string;
+        _infinite?: boolean;
+        tags?: ReadonlyArray<string>;
+    }
+];
+
+const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions, infinite?: boolean, tags?: ReadonlyArray<string>): [
+    QueryKey<TOptions>[0]
+] => {
+    const params: QueryKey<TOptions>[0] = { _id: id, baseUrl: options?.baseUrl || (options?.client ?? client).getConfig().baseUrl } as QueryKey<TOptions>[0];
+    if (infinite) {
+        params._infinite = infinite;
+    }
+    if (tags) {
+        params.tags = tags;
+    }
+    if (options?.body) {
+        params.body = options.body;
+    }
+    if (options?.headers) {
+        params.headers = options.headers;
+    }
+    if (options?.path) {
+        params.path = options.path;
+    }
+    if (options?.query) {
+        params.query = options.query;
+    }
+    return [params];
+};
+
+export const getCoursesApiV1CoursesGetQueryKey = (options?: Options<GetCoursesApiV1CoursesGetData>) => createQueryKey('getCoursesApiV1CoursesGet', options);
+
+/**
+ * Get Courses
+ */
+export const getCoursesApiV1CoursesGetOptions = (options?: Options<GetCoursesApiV1CoursesGetData>) => queryOptions<GetCoursesApiV1CoursesGetResponse, GetCoursesApiV1CoursesGetError, GetCoursesApiV1CoursesGetResponse, ReturnType<typeof getCoursesApiV1CoursesGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await CourseService.getCoursesApiV1CoursesGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getCoursesApiV1CoursesGetQueryKey(options)
+});
+
+const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<Options>, page: K) => {
+    const params = { ...queryKey[0] };
+    if (page.body) {
+        params.body = {
+            ...queryKey[0].body as any,
+            ...page.body as any
+        };
+    }
+    if (page.headers) {
+        params.headers = {
+            ...queryKey[0].headers,
+            ...page.headers
+        };
+    }
+    if (page.path) {
+        params.path = {
+            ...queryKey[0].path as any,
+            ...page.path as any
+        };
+    }
+    if (page.query) {
+        params.query = {
+            ...queryKey[0].query as any,
+            ...page.query as any
+        };
+    }
+    return params as unknown as typeof page;
+};
+
+export const getCoursesApiV1CoursesGetInfiniteQueryKey = (options?: Options<GetCoursesApiV1CoursesGetData>): QueryKey<Options<GetCoursesApiV1CoursesGetData>> => createQueryKey('getCoursesApiV1CoursesGet', options, true);
+
+/**
+ * Get Courses
+ */
+export const getCoursesApiV1CoursesGetInfiniteOptions = (options?: Options<GetCoursesApiV1CoursesGetData>) => infiniteQueryOptions<GetCoursesApiV1CoursesGetResponse, GetCoursesApiV1CoursesGetError, InfiniteData<GetCoursesApiV1CoursesGetResponse>, QueryKey<Options<GetCoursesApiV1CoursesGetData>>, number | Pick<QueryKey<Options<GetCoursesApiV1CoursesGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<GetCoursesApiV1CoursesGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await CourseService.getCoursesApiV1CoursesGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getCoursesApiV1CoursesGetInfiniteQueryKey(options)
+});
+
 /**
  * Create Course
  */
@@ -106,39 +213,6 @@ export const deleteCourseApiV1CoursesCourseIdDeleteMutation = (options?: Partial
         }
     };
     return mutationOptions;
-};
-
-export type QueryKey<TOptions extends Options> = [
-    Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
-        _id: string;
-        _infinite?: boolean;
-        tags?: ReadonlyArray<string>;
-    }
-];
-
-const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions, infinite?: boolean, tags?: ReadonlyArray<string>): [
-    QueryKey<TOptions>[0]
-] => {
-    const params: QueryKey<TOptions>[0] = { _id: id, baseUrl: options?.baseUrl || (options?.client ?? client).getConfig().baseUrl } as QueryKey<TOptions>[0];
-    if (infinite) {
-        params._infinite = infinite;
-    }
-    if (tags) {
-        params.tags = tags;
-    }
-    if (options?.body) {
-        params.body = options.body;
-    }
-    if (options?.headers) {
-        params.headers = options.headers;
-    }
-    if (options?.path) {
-        params.path = options.path;
-    }
-    if (options?.query) {
-        params.query = options.query;
-    }
-    return [params];
 };
 
 export const getCourseByIdApiV1CoursesCourseIdGetQueryKey = (options: Options<GetCourseByIdApiV1CoursesCourseIdGetData>) => createQueryKey('getCourseByIdApiV1CoursesCourseIdGet', options);
@@ -176,123 +250,13 @@ export const updateCourseApiV1CoursesCourseIdPatchMutation = (options?: Partial<
     return mutationOptions;
 };
 
-export const getCreatedCoursesApiV1CoursesCreatedGetQueryKey = (options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData>) => createQueryKey('getCreatedCoursesApiV1CoursesCreatedGet', options);
-
-/**
- * Get Created Courses
- */
-export const getCreatedCoursesApiV1CoursesCreatedGetOptions = (options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData>) => queryOptions<GetCreatedCoursesApiV1CoursesCreatedGetResponse, GetCreatedCoursesApiV1CoursesCreatedGetError, GetCreatedCoursesApiV1CoursesCreatedGetResponse, ReturnType<typeof getCreatedCoursesApiV1CoursesCreatedGetQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await CourseService.getCreatedCoursesApiV1CoursesCreatedGet({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCreatedCoursesApiV1CoursesCreatedGetQueryKey(options)
-});
-
-const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<Options>, page: K) => {
-    const params = { ...queryKey[0] };
-    if (page.body) {
-        params.body = {
-            ...queryKey[0].body as any,
-            ...page.body as any
-        };
-    }
-    if (page.headers) {
-        params.headers = {
-            ...queryKey[0].headers,
-            ...page.headers
-        };
-    }
-    if (page.path) {
-        params.path = {
-            ...queryKey[0].path as any,
-            ...page.path as any
-        };
-    }
-    if (page.query) {
-        params.query = {
-            ...queryKey[0].query as any,
-            ...page.query as any
-        };
-    }
-    return params as unknown as typeof page;
-};
-
-export const getCreatedCoursesApiV1CoursesCreatedGetInfiniteQueryKey = (options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData>): QueryKey<Options<GetCreatedCoursesApiV1CoursesCreatedGetData>> => createQueryKey('getCreatedCoursesApiV1CoursesCreatedGet', options, true);
-
-/**
- * Get Created Courses
- */
-export const getCreatedCoursesApiV1CoursesCreatedGetInfiniteOptions = (options?: Options<GetCreatedCoursesApiV1CoursesCreatedGetData>) => infiniteQueryOptions<GetCreatedCoursesApiV1CoursesCreatedGetResponse, GetCreatedCoursesApiV1CoursesCreatedGetError, InfiniteData<GetCreatedCoursesApiV1CoursesCreatedGetResponse>, QueryKey<Options<GetCreatedCoursesApiV1CoursesCreatedGetData>>, number | Pick<QueryKey<Options<GetCreatedCoursesApiV1CoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCreatedCoursesApiV1CoursesCreatedGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                offset: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await CourseService.getCreatedCoursesApiV1CoursesCreatedGet({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCreatedCoursesApiV1CoursesCreatedGetInfiniteQueryKey(options)
-});
-
-export const getMyCoursesApiV1CoursesMyGetQueryKey = (options?: Options<GetMyCoursesApiV1CoursesMyGetData>) => createQueryKey('getMyCoursesApiV1CoursesMyGet', options);
-
-/**
- * Get My Courses
- */
-export const getMyCoursesApiV1CoursesMyGetOptions = (options?: Options<GetMyCoursesApiV1CoursesMyGetData>) => queryOptions<GetMyCoursesApiV1CoursesMyGetResponse, DefaultError, GetMyCoursesApiV1CoursesMyGetResponse, ReturnType<typeof getMyCoursesApiV1CoursesMyGetQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await CourseService.getMyCoursesApiV1CoursesMyGet({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getMyCoursesApiV1CoursesMyGetQueryKey(options)
-});
-
-export const getAuthorCourseByIdApiV1CoursesAuthorCourseIdGetQueryKey = (options: Options<GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetData>) => createQueryKey('getAuthorCourseByIdApiV1CoursesAuthorCourseIdGet', options);
-
-/**
- * Get Author Course By Id
- */
-export const getAuthorCourseByIdApiV1CoursesAuthorCourseIdGetOptions = (options: Options<GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetData>) => queryOptions<GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponse, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetError, GetAuthorCourseByIdApiV1CoursesAuthorCourseIdGetResponse, ReturnType<typeof getAuthorCourseByIdApiV1CoursesAuthorCourseIdGetQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await CourseService.getAuthorCourseByIdApiV1CoursesAuthorCourseIdGet({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAuthorCourseByIdApiV1CoursesAuthorCourseIdGetQueryKey(options)
-});
-
 /**
  * Create Member
  */
-export const createMemberApiV1CoursesCourseIdEnrollPostMutation = (options?: Partial<Options<CreateMemberApiV1CoursesCourseIdEnrollPostData>>): UseMutationOptions<CreateMemberApiV1CoursesCourseIdEnrollPostResponse, CreateMemberApiV1CoursesCourseIdEnrollPostError, Options<CreateMemberApiV1CoursesCourseIdEnrollPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateMemberApiV1CoursesCourseIdEnrollPostResponse, CreateMemberApiV1CoursesCourseIdEnrollPostError, Options<CreateMemberApiV1CoursesCourseIdEnrollPostData>> = {
+export const createMemberApiV1CoursesCourseIdMembersPostMutation = (options?: Partial<Options<CreateMemberApiV1CoursesCourseIdMembersPostData>>): UseMutationOptions<CreateMemberApiV1CoursesCourseIdMembersPostResponse, CreateMemberApiV1CoursesCourseIdMembersPostError, Options<CreateMemberApiV1CoursesCourseIdMembersPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateMemberApiV1CoursesCourseIdMembersPostResponse, CreateMemberApiV1CoursesCourseIdMembersPostError, Options<CreateMemberApiV1CoursesCourseIdMembersPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await CourseService.createMemberApiV1CoursesCourseIdEnrollPost({
+            const { data } = await CourseService.createMemberApiV1CoursesCourseIdMembersPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -302,6 +266,51 @@ export const createMemberApiV1CoursesCourseIdEnrollPostMutation = (options?: Par
     };
     return mutationOptions;
 };
+
+export const getModulesApiV1CoursesCourseIdModulesGetQueryKey = (options: Options<GetModulesApiV1CoursesCourseIdModulesGetData>) => createQueryKey('getModulesApiV1CoursesCourseIdModulesGet', options);
+
+/**
+ * Get Modules
+ */
+export const getModulesApiV1CoursesCourseIdModulesGetOptions = (options: Options<GetModulesApiV1CoursesCourseIdModulesGetData>) => queryOptions<GetModulesApiV1CoursesCourseIdModulesGetResponse, GetModulesApiV1CoursesCourseIdModulesGetError, GetModulesApiV1CoursesCourseIdModulesGetResponse, ReturnType<typeof getModulesApiV1CoursesCourseIdModulesGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await ModuleService.getModulesApiV1CoursesCourseIdModulesGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getModulesApiV1CoursesCourseIdModulesGetQueryKey(options)
+});
+
+export const getModulesApiV1CoursesCourseIdModulesGetInfiniteQueryKey = (options: Options<GetModulesApiV1CoursesCourseIdModulesGetData>): QueryKey<Options<GetModulesApiV1CoursesCourseIdModulesGetData>> => createQueryKey('getModulesApiV1CoursesCourseIdModulesGet', options, true);
+
+/**
+ * Get Modules
+ */
+export const getModulesApiV1CoursesCourseIdModulesGetInfiniteOptions = (options: Options<GetModulesApiV1CoursesCourseIdModulesGetData>) => infiniteQueryOptions<GetModulesApiV1CoursesCourseIdModulesGetResponse, GetModulesApiV1CoursesCourseIdModulesGetError, InfiniteData<GetModulesApiV1CoursesCourseIdModulesGetResponse>, QueryKey<Options<GetModulesApiV1CoursesCourseIdModulesGetData>>, number | Pick<QueryKey<Options<GetModulesApiV1CoursesCourseIdModulesGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<GetModulesApiV1CoursesCourseIdModulesGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await ModuleService.getModulesApiV1CoursesCourseIdModulesGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getModulesApiV1CoursesCourseIdModulesGetInfiniteQueryKey(options)
+});
 
 /**
  * Create Module
@@ -354,6 +363,51 @@ export const updateModuleApiV1CoursesCourseIdModulesModuleIdPatchMutation = (opt
     return mutationOptions;
 };
 
+export const getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetQueryKey = (options: Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData>) => createQueryKey('getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGet', options);
+
+/**
+ * Get Lessons
+ */
+export const getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetOptions = (options: Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData>) => queryOptions<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetError, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse, ReturnType<typeof getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await LessonService.getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetQueryKey(options)
+});
+
+export const getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetInfiniteQueryKey = (options: Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData>): QueryKey<Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData>> => createQueryKey('getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGet', options, true);
+
+/**
+ * Get Lessons
+ */
+export const getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetInfiniteOptions = (options: Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData>) => infiniteQueryOptions<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetError, InfiniteData<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse>, QueryKey<Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData>>, number | Pick<QueryKey<Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await LessonService.getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetInfiniteQueryKey(options)
+});
+
 /**
  * Create Lesson
  */
@@ -404,6 +458,51 @@ export const updateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatch
     };
     return mutationOptions;
 };
+
+export const getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetQueryKey = (options: Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData>) => createQueryKey('getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGet', options);
+
+/**
+ * Get Blocks
+ */
+export const getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetOptions = (options: Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData>) => queryOptions<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetError, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse, ReturnType<typeof getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await BlockService.getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetQueryKey(options)
+});
+
+export const getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetInfiniteQueryKey = (options: Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData>): QueryKey<Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData>> => createQueryKey('getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGet', options, true);
+
+/**
+ * Get Blocks
+ */
+export const getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetInfiniteOptions = (options: Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData>) => infiniteQueryOptions<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetError, InfiniteData<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse>, QueryKey<Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData>>, number | Pick<QueryKey<Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await BlockService.getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetInfiniteQueryKey(options)
+});
 
 /**
  * Create Block
@@ -459,10 +558,10 @@ export const updateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchMut
 /**
  * Submit Lesson
  */
-export const submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostMutation = (options?: Partial<Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData>>): UseMutationOptions<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostError, Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData>> => {
-    const mutationOptions: UseMutationOptions<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostError, Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPostData>> = {
+export const submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostMutation = (options?: Partial<Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData>>): UseMutationOptions<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError, Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData>> => {
+    const mutationOptions: UseMutationOptions<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError, Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await SubmissionService.submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmitPost({
+            const { data } = await SubmissionService.submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
