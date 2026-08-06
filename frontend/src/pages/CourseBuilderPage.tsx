@@ -1,28 +1,27 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "@tanstack/react-router"
-import { Loader2, AlertCircle, ArrowLeft } from "lucide-react"
+import { Loader2, AlertCircle, ArrowLeft, FileText, Folder } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCourses } from "@/hooks/useCourses"
 import { CourseHeader } from "@/components/course_builder/CourseHeader"
 import { CourseSidebar } from "@/components/course_builder/CourseSidebar"
 import { ROUTES } from "@/routes"
+import { CourseBlocks } from "@/components/course_builder/CourseBlocks"
 
 export function CourseBuilderPage() {
   const { courseId } = useParams({ strict: false })
   const navigate = useNavigate()
 
-  // Храним выбранный элемент (модуль или урок)
-  const [selectedItem, setSelectedItem] = useState<{
-    id: string
-    type: "module" | "lesson"
-  } | null>(null)
+  // Храним выбранный модуль и выбранный урок
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null)
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
 
   if (!courseId) {
     navigate({ to: ROUTES.TEACHING })
     return null
   }
 
-  // Забираем данные из обновленного хука (используем прокинутые алиасы)
+  // Забираем данные из хука
   const {
     authorCourse,
     isLoadingAuthorCourse,
@@ -120,31 +119,56 @@ export function CourseBuilderPage() {
         {/* Рабочая область: Сайдбар + Центральный холст */}
         <div className="flex-1 flex gap-4 overflow-hidden">
           
-          {/* Левый Сайдбар (Дерево структуры) */}
+          {/* Левый Сайдбар (Модули и Уроки) */}
           <CourseSidebar
-            selectedId={selectedItem?.id || null}
-            onSelect={(id, type) => setSelectedItem({ id, type })}
+            courseId={courseId}
+            selectedModuleId={selectedModuleId}
+            selectedLessonId={selectedLessonId}
+            onSelectModule={(id) => {
+              setSelectedModuleId(id)
+              // Сбрасываем выбранный урок при переключении модуля, если это необходимо
+            }}
+            onSelectLesson={(moduleId, lessonId) => {
+              setSelectedModuleId(moduleId)
+              setSelectedLessonId(lessonId)
+            }}
           />
 
           {/* Центральный редактор контента */}
-          <main className="flex-1 rounded-2xl border border-border/60 bg-card p-6 overflow-y-auto shadow-sm flex flex-col items-center justify-center text-center">
-            {selectedItem ? (
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold">
-                  Редактирование {selectedItem.type === "module" ? "Модуля" : "Урока"}
-                </h3>
-                <p className="text-xs font-mono text-muted-foreground bg-muted/30 px-3 py-1 rounded-lg">
-                  ID: {selectedItem.id}
-                </p>
+          {/* Центральный редактор контента */}
+          <main className="flex-1 rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm flex flex-col">
+            {selectedLessonId ? (
+              // СНАЧАЛА проверяем урок, так как он приоритетнее
+              <CourseBlocks
+                courseId={courseId}
+                lessonId={selectedLessonId}
+              />
+            ) : selectedModuleId ? (
+              // ПОТОМ проверяем модуль, если урок не выбран
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+                    <Folder size={20} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold">Редактирование модуля</h3>
+                    <p className="text-xs font-mono text-muted-foreground bg-muted/30 px-3 py-1 rounded-lg">
+                      Module ID: {selectedModuleId}
+                    </p>
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className="max-w-sm space-y-1.5">
-                <p className="text-sm font-semibold text-foreground">
-                  Выберите элемент слева
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Нажмите на модуль или урок в структуре курса, чтобы открыть настройки и конструктор блоков по центру.
-                </p>
+              // Ничего не выбрано
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+                <div className="max-w-sm space-y-1.5">
+                  <p className="text-sm font-semibold text-foreground">
+                    Выберите модуль или урок слева
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Нажмите на элемент структуры курса, чтобы открыть его настройки и редактирование.
+                  </p>
+                </div>
               </div>
             )}
           </main>
