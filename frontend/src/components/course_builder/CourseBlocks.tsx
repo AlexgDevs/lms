@@ -42,6 +42,11 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
   const [isAdding, setIsAdding] = useState(false)
   const [newBlockTitle, setNewBlockTitle] = useState("")
   const [newBlockType, setNewBlockType] = useState<BlockType>(BlockType.TEXT)
+  
+  // Состояния для загрузки файла/медиа при создании
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [filePreviewUrl, setFilePreviewUrl] = useState("")
+  const [newBlockAlt, setNewBlockAlt] = useState("")
 
   // Если урок не выбран
   if (!lessonId) {
@@ -56,12 +61,31 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
     )
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setSelectedFile(file)
+    setNewBlockAlt(file.name) // Автоматически подставляем имя файла как alt
+
+    // Конвертируем в Data URL (Base64) для превью и сохранения в payload.url
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setFilePreviewUrl(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
   const handleCreateBlock = async (e: React.FormEvent) => {
     e.preventDefault()
     const trimmedTitle = newBlockTitle.trim()
     if (!trimmedTitle || isCreatingBlock) return
 
-    // Начальный payload в зависимости от типа блока
+    // Если это медиа-блок, но файл не выбран — прерываем выполнение
+    if ([BlockType.IMAGE, BlockType.VIDEO, BlockType.AUDIO, BlockType.FILE].includes(newBlockType) && !filePreviewUrl) {
+      return
+    }
+
     let initialPayload: Record<string, any> = {}
 
     switch (newBlockType) {
@@ -74,20 +98,21 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
       case BlockType.QUIZ_SINGLE_CHOICE:
         initialPayload = { options: [{ id: 1, text: "Вариант 1" }], correct_option_id: 1 }
         break
-    case BlockType.QUIZ_MULTIPLE_CHOICE:
+      case BlockType.QUIZ_MULTIPLE_CHOICE:
         initialPayload = { 
-        options: [{ id: 1, text: "Вариант 1" }], 
-          correct_option_ids: [1] // Обязательный массив для множественного выбора
+          options: [{ id: 1, text: "Вариант 1" }], 
+          correct_option_ids: [1] 
         }
         break
       case BlockType.IMAGE:
+        initialPayload = { url: filePreviewUrl, alt_text: newBlockAlt }
+        break
       case BlockType.VIDEO:
       case BlockType.AUDIO:
+        initialPayload = { url: filePreviewUrl }
+        break
       case BlockType.FILE:
-        initialPayload = { url: "", alt_text: "" }
-        if (newBlockType === BlockType.FILE) {
-          initialPayload = { url: "", file_name: "file.txt", file_size: 0 }
-        }
+        initialPayload = { url: filePreviewUrl, file_name: selectedFile?.name || "file.txt", file_size: selectedFile?.size || 0 }
         break
       default:
         initialPayload = {}
@@ -96,6 +121,9 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
     try {
       await createBlockAsync(trimmedTitle, newBlockType, initialPayload)
       setNewBlockTitle("")
+      setSelectedFile(null)
+      setFilePreviewUrl("")
+      setNewBlockAlt("")
       setIsAdding(false)
     } catch (err) {
       console.error("Ошибка при создании блока:", err)
@@ -154,6 +182,7 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-primary">Новый блок</span>
             </div>
+            
             <Input
               placeholder="Название блока (например, Введение)..."
               value={newBlockTitle}
@@ -161,11 +190,17 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
               className="text-xs bg-background"
               autoFocus
             />
+
             <div className="space-y-1.5">
               <label className="text-[11px] font-medium text-muted-foreground">Тип блока:</label>
               <select
                 value={newBlockType}
-                onChange={(e) => setNewBlockType(e.target.value as BlockType)}
+                onChange={(e) => {
+                  setNewBlockType(e.target.value as BlockType)
+                  setSelectedFile(null)
+                  setFilePreviewUrl("")
+                  setNewBlockAlt("")
+                }}
                 className="w-full h-8 px-2 text-xs rounded-md border border-input bg-background"
               >
                 <option value={BlockType.TEXT}>Текст</option>
@@ -178,6 +213,66 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
                 <option value={BlockType.FILE}>Файл</option>
               </select>
             </div>
+
+            {/* Зона загрузки файла для медиа-блоков */}
+            {[BlockType.IMAGE, BlockType.VIDEO, BlockType.AUDIO, BlockType.FILE].includes(newBlockType) && (
+              <div className="space-y-2 pt-1">
+                <label className="text-[10px] text-muted-foreground font-medium">Загрузите файл (обязательно):</label>
+                
+                {!filePreviewUrl ? (
+                  <label className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-input hover:border-primary/60 rounded-xl cursor-pointer bg-background/50 transition-colors p-2 text-center">
+                    <ImageIcon size={24} className="text-muted-foreground mb-1 opacity-50" />
+                    <span className="text-xs font-medium text-foreground">Нажмите для выбора файла</span>
+                    <span className="text-[10px] text-muted-foreground mt-0.5">Перетащите или выберите файл с устройства</span>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      onChange={handleFileChange}
+                      accept={
+                        newBlockType === BlockType.IMAGE ? "image/*" :
+                        newBlockType === BlockType.VIDEO ? "video/*" :
+                        newBlockType === BlockType.AUDIO ? "audio/*" : "*/*"
+                      }
+                    />
+                  </label>
+                ) : (
+                  <div className="flex items-center gap-3 p-2 bg-background border border-border rounded-xl">
+                    {newBlockType === BlockType.IMAGE ? (
+                      <img src={filePreviewUrl} alt="Preview" className="w-12 h-12 object-cover rounded-lg border" />
+                    ) : (
+                      <div className="w-12 h-12 flex items-center justify-center bg-muted rounded-lg text-xs font-bold uppercase">
+                        {newBlockType.slice(0, 3)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{selectedFile?.name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {selectedFile ? Math.round(selectedFile.size / 1024) + " KB" : ""}
+                      </p>
+                    </div>
+                    <Button 
+                      type="button" 
+                      size="sm" 
+                      variant="ghost" 
+                      className="text-xs text-destructive h-7 px-2 hover:bg-destructive/10"
+                      onClick={() => { setSelectedFile(null); setFilePreviewUrl(""); setNewBlockAlt("") }}
+                    >
+                      Удалить
+                    </Button>
+                  </div>
+                )}
+
+                {newBlockType === BlockType.IMAGE && (
+                  <Input
+                    placeholder="Альтернативный текст (alt)"
+                    value={newBlockAlt}
+                    onChange={(e) => setNewBlockAlt(e.target.value)}
+                    className="text-xs bg-background"
+                  />
+                )}
+              </div>
+            )}
+
             <div className="flex items-center justify-end gap-2 pt-1">
               <Button
                 type="button"
@@ -192,7 +287,11 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
                 type="submit"
                 size="sm"
                 className="h-7 text-xs gap-1"
-                disabled={isCreatingBlock || !newBlockTitle.trim()}
+                disabled={
+                  isCreatingBlock || 
+                  !newBlockTitle.trim() || 
+                  ([BlockType.IMAGE, BlockType.VIDEO, BlockType.AUDIO, BlockType.FILE].includes(newBlockType) && !filePreviewUrl)
+                }
               >
                 {isCreatingBlock && <Loader2 size={12} className="animate-spin" />}
                 Создать блок
@@ -341,6 +440,7 @@ function BlockItem({ block, index, onUpdate, onDelete, isDeleting }: BlockItemPr
             )}
           </div>
         )}
+
         {block.block_type === BlockType.QUIZ_SINGLE_CHOICE && (
           <QuizSingleBlockEditor
             payload={payload}
