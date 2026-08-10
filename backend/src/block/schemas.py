@@ -44,23 +44,27 @@ class CodeBlockContent(BaseSchema):
 
 
 class ImageBlockContent(BaseSchema):
-    url: str
+    url: str | None = None
+    media_id: UUID | None = None
     alt_text: str | None = None
 
 
 class VideoBlockContent(BaseSchema):
-    url: str
+    url: str | None = None
+    media_id: UUID | None = None
     duration: int | None = None
 
 
 class AudioBlockContent(BaseSchema):
-    url: str
+    url: str | None = None
+    media_id: UUID | None = None
 
 
 class FileBlockContent(BaseSchema):
-    url: str
-    file_name: str
-    file_size: int
+    url: str | None = None
+    media_id: UUID | None = None
+    file_name: str | None = None
+    file_size: int | None = None
 
 
 PAYLOAD_REGISTRY: Dict[BlockType, Type[BaseSchema]] = {

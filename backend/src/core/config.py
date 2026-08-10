@@ -99,10 +99,61 @@ class RedisSettings(BaseSettings):
         return f"redis://{self.REDIS_USER}:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"
 
 
+class StorageSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    STORAGE_BACKEND: Literal["local", "s3"] = "local"
+    STORAGE_BUCKET: str = "lms-media"
+    STORAGE_ENDPOINT_URL: str | None = None
+    STORAGE_ACCESS_KEY: str | None = None
+    STORAGE_SECRET_KEY: str | None = None
+    STORAGE_REGION: str = "us-east-1"
+    STORAGE_PUBLIC_BASE_URL: str | None = None
+    STORAGE_ROOT_DIR: str = "media"
+
+    @property
+    def storage_root_path(self) -> Path:
+        path = Path(self.STORAGE_ROOT_DIR)
+        return path if path.is_absolute() else (BASE_DIR / path).resolve()
+
+
+class MediaSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    MEDIA_MAX_SIZE_MB: int = 20
+    MEDIA_ALLOWED_TYPES: list[str] = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+        "image/avif",
+        "image/svg+xml",
+        "video/mp4",
+        "video/webm",
+        "video/quicktime",
+        "audio/mpeg",
+        "audio/ogg",
+        "audio/wav",
+        "application/pdf",
+        "text/plain",
+        "text/markdown",
+    ]
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
     app: AppSettings = Field(default_factory=AppSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
+    storage: StorageSettings = Field(default_factory=StorageSettings)
+    media: MediaSettings = Field(default_factory=MediaSettings)
 
 
 settings = Settings()
