@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { isLoggedIn } from "@/hooks/useAuth";
+import { isLoggedIn } from "@/features/auth/api/useAuth";
 import { ROUTES } from "@/routes.ts";
-import { Header } from "@/components/sidebars/Header";
-import { Footer } from "@/components/sidebars/Footer";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 const PUBLIC_ROUTES = [ROUTES.DASHBOARD, "/about", "/catalog"];
 

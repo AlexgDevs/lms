@@ -1,0 +1,104 @@
+import { useState } from "react"
+import { Plus, Loader2, FileText } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useBlocks } from "@/features/teaching/api/useBlocks"
+import { BlockItem } from "./BlockItem"
+import { BlockCreateForm } from "./BlockCreateForm"
+import { BlockType } from "@/client"
+
+interface CourseBlocksProps {
+    courseId: string
+    lessonId: string | null
+}
+
+export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
+    const {
+        blocks,
+        isLoadingBlocks,
+        createBlockAsync,
+        isCreatingBlock,
+        updateBlockAsync,
+        deleteBlockAsync,
+        isDeletingBlock,
+    } = useBlocks({
+        courseId: courseId || undefined,
+        lessonId: lessonId || undefined,
+        onlyCreated: true,
+    })
+
+    const [isAdding, setIsAdding] = useState(false)
+
+    // Если урок не выбран
+    if (!lessonId) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted-foreground bg-card rounded-2xl border border-border/60 shadow-sm">
+                <FileText size={40} className="mb-2 opacity-30" />
+                <p className="text-sm font-medium">Выберите урок в боковой панели</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">
+                    Чтобы просматривать и редактировать содержимое блоков, выберите конкретный урок.
+                </p>
+            </div>
+        )
+    }
+
+    const handleCreateBlock = async (title: string, blockType: BlockType, payload: Record<string, any>) => {
+        await createBlockAsync(title, blockType, payload)
+        setIsAdding(false)
+    }
+
+    return (
+        <div className="flex-1 flex flex-col h-[calc(100vh-140px)] bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+            {/* Шапка */}
+            <div className="p-4 border-b border-border/60 flex items-center justify-between bg-muted/20">
+                <div>
+                    <h2 className="font-semibold text-sm">Содержимое урока</h2>
+                    <p className="text-xs text-muted-foreground">Управляйте информационными блоками</p>
+                </div>
+                <Button
+                    size="sm"
+                    className="h-8 text-xs gap-1.5"
+                    onClick={() => setIsAdding(true)}
+                    disabled={isAdding}
+                >
+                    <Plus size={14} />
+                    Добавить блок
+                </Button>
+            </div>
+
+            {/* Список блоков */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {isLoadingBlocks ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground gap-2 text-xs">
+                        <Loader2 className="animate-spin" size={16} />
+                        <span>Загрузка блоков...</span>
+                    </div>
+                ) : blocks && blocks.length > 0 ? (
+                    blocks.map((block, index) => (
+                        <BlockItem
+                            key={block.id}
+                            block={block}
+                            index={index}
+                            onUpdate={updateBlockAsync}
+                            onDelete={deleteBlockAsync}
+                            isDeleting={isDeletingBlock}
+                        />
+                    ))
+                ) : !isAdding ? (
+                    <div className="text-center py-16 text-muted-foreground">
+                        <p className="text-sm font-medium">В этом уроке пока нет блоков</p>
+                        <p className="text-xs text-muted-foreground/70 mt-1">Нажмите «Добавить блок», чтобы начать наполнение.</p>
+                    </div>
+                ) : null}
+
+                {/* Форма добавления нового блока */}
+                {isAdding && (
+                    <BlockCreateForm
+                        isCreating={isCreatingBlock}
+                        onCreate={handleCreateBlock}
+                        onCancel={() => setIsAdding(false)}
+                    />
+                )}
+            </div>
+        </div>
+    )
+}
