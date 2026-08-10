@@ -41,7 +41,14 @@ class MediaService(BaseService):
         original_name: str,
         content_type: str,
         is_public: bool = True,
+        commit: bool = True,
     ) -> MediaSchema:
+        """Upload a file and persist a ``Media`` row.
+
+        With ``commit=False`` the row is added to the session but not committed;
+        the caller owns the transaction and must clean up the file on failure
+        (via :meth:`delete_media_file`).
+        """
         self._validate_size(len(data))
         self._validate_content_type(content_type)
 
@@ -65,9 +72,10 @@ class MediaService(BaseService):
 
         try:
             media = await self.uow.media.create(create_data)
-            await self.uow.commit()
+            if commit:
+                await self.uow.commit()
         except BaseException:
-            await self._delete_orphaned_object(storage_key)
+            await self.delete_media_file(storage_key)
             raise
 
         return media
@@ -121,11 +129,24 @@ class MediaService(BaseService):
             raise MediaForbiddenError
         return media
 
-    async def _delete_orphaned_object(self, storage_key: str) -> None:
+    async def delete_media_file(self, storage_key: str) -> None:
+        """Best-effort deletion of an uploaded file (orphan cleanup)."""
         try:
             await self.storage.delete(storage_key)
         except Exception:
             ...
+
+    async def cleanup_unreferenced(self, media_ids: list[UUID]) -> None:
+        """Delete media (file + row) that is no longer referenced by any
+        attachment. Does not commit — the caller commits."""
+        for media_id in media_ids:
+            if await self.uow.media_attachments.is_referenced(media_id):
+                continue
+            media = await self.uow.media.get_one(id=media_id)
+            if not media:
+                continue
+            await self.storage.delete(media.storage_key)
+            await self.uow.media.delete(id_=media_id)
 
     def _validate_size(self, size: int) -> None:
         if size > settings.media.MEDIA_MAX_SIZE_MB * 1024 * 1024:

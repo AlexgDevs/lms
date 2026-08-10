@@ -4,13 +4,15 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.block.enums import BlockType
-from src.block.exceptions import BlockNotFoundError
+from src.block.exceptions import BlockNotFoundError, BlockTypeNotMediaError
 from src.course.exceptions import CourseNotFoundError
 from src.lesson.exceptions import LessonNotFoundError
 from src.core.services.base_service import BaseService
 from src.core.storage import Storage
 from src.block.unit_of_work import BlockUnitOfWork
 from src.media.exceptions import MediaForbiddenError, MediaNotFoundError
+from src.media.schemas import MediaSchema
+from src.media.service import MediaService
 from src.block.schemas import (
     BlockCreateRequestSchema,
     BlockCreateSchema,
@@ -31,9 +33,11 @@ class BlockService(BaseService):
         session: AsyncSession,
         block_unit_of_work: BlockUnitOfWork,
         storage: Storage,
+        media_service: MediaService,
     ):
         self.uow = block_unit_of_work
         self.storage = storage
+        self.media_service = media_service
         super().__init__(session)
 
     async def create_block(
@@ -165,6 +169,100 @@ class BlockService(BaseService):
         )
         await self.uow.blocks.delete(id_=block_id)
         await self.uow.commit()
+
+    async def upload_media(
+        self,
+        block_id: UUID,
+        lesson_id: UUID,
+        course_id: UUID,
+        user_id: UUID,
+        *,
+        data: bytes,
+        original_name: str,
+        content_type: str,
+        is_public: bool = True,
+    ) -> BlockSchema:
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=user_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        lesson = await self.uow.lessons.get_one(id=lesson_id, course_id=course_id)
+        if not lesson:
+            raise LessonNotFoundError
+
+        block = await self.uow.blocks.get_one(
+            id=block_id, lesson_id=lesson_id, course_id=course_id
+        )
+        if not block:
+            raise BlockNotFoundError
+
+        if block.block_type not in MEDIA_BLOCK_TYPES:
+            raise BlockTypeNotMediaError
+
+        old_media_ids = [
+            attachment.media_id
+            for attachment in await self.uow.media_attachments.get_for_owner(
+                "block", block_id
+            )
+        ]
+
+        media = await self.media_service.create_media(
+            user_id=user_id,
+            data=data,
+            original_name=original_name,
+            content_type=content_type,
+            is_public=is_public,
+            commit=False,
+        )
+
+        try:
+            await self.uow.media_attachments.detach_all(
+                owner_type="block", owner_id=block_id
+            )
+            await self.uow.media_attachments.attach(
+                media_id=media.id,
+                owner_type="block",
+                owner_id=block_id,
+                role="content",
+                position=0,
+            )
+
+            payload = self._media_payload(block.block_type, block.payload, media)
+            updated_block = await self.uow.blocks.update(
+                block_id, BlockUpdateSchema(payload=payload)
+            )
+
+            await self.uow.commit()
+        except BaseException:
+            await self.media_service.delete_media_file(media.storage_key)
+            raise
+
+        if old_media_ids:
+            await self.media_service.cleanup_unreferenced(old_media_ids)
+            await self.uow.commit()
+
+        return (await self._resolve_block_urls([updated_block]))[0]
+
+    def _media_payload(
+        self,
+        block_type: BlockType,
+        current_payload: dict[str, Any],
+        media: MediaSchema,
+    ) -> dict[str, Any]:
+        payload = {**current_payload}
+        payload["media_id"] = str(media.id)
+        payload["url"] = self._media_url(media)
+        if block_type is BlockType.FILE:
+            payload["file_name"] = media.original_name
+            payload["file_size"] = media.size_bytes
+        return payload
+
+    def _media_url(self, media: MediaSchema) -> str | None:
+        if media.is_public:
+            return self.storage.get_public_url(media.storage_key)
+        return None
 
     async def get_all(
         self,

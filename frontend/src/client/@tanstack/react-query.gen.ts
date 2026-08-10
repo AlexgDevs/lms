@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { AuthService, BlockService, CourseService, DefaultService, LessonService, LessonsProgresService, ModuleService, type Options, SubmissionService, UserService } from '../sdk.gen';
-import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostError, CreateCourseApiV1CoursesPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostError, CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateMemberApiV1CoursesCourseIdMembersPostData, CreateMemberApiV1CoursesCourseIdMembersPostError, CreateMemberApiV1CoursesCourseIdMembersPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostError, CreateModuleApiV1CoursesCourseIdModulesPostResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteError, DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetError, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetError, GetCourseByIdApiV1CoursesCourseIdGetResponse, GetCoursesApiV1CoursesGetData, GetCoursesApiV1CoursesGetError, GetCoursesApiV1CoursesGetResponse, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponse, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetError, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse, GetModulesApiV1CoursesCourseIdModulesGetData, GetModulesApiV1CoursesCourseIdModulesGetError, GetModulesApiV1CoursesCourseIdModulesGetResponse, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetError, GetUserByIdApiV1UsersUserIdGetResponse, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostError, LoginApiV1AuthLoginPostResponse, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostError, LogoutApiV1AuthLogoutPostResponse, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostError, RefreshApiV1AuthRefreshPostResponse, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostError, RegisterApiV1AuthRegisterPostResponse, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchError, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponse, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchError, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponse, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchError, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchError, UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
+import { AuthService, BlockService, CourseService, DefaultService, LessonService, LessonsProgresService, MediaService, ModuleService, type Options, SubmissionService, UserService } from '../sdk.gen';
+import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostError, CreateCourseApiV1CoursesPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostError, CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateMemberApiV1CoursesCourseIdMembersPostData, CreateMemberApiV1CoursesCourseIdMembersPostError, CreateMemberApiV1CoursesCourseIdMembersPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostError, CreateModuleApiV1CoursesCourseIdModulesPostResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteError, DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteMediaApiV1MediaMediaIdDeleteData, DeleteMediaApiV1MediaMediaIdDeleteError, DeleteMediaApiV1MediaMediaIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetError, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetError, GetCourseByIdApiV1CoursesCourseIdGetResponse, GetCoursesApiV1CoursesGetData, GetCoursesApiV1CoursesGetError, GetCoursesApiV1CoursesGetResponse, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponse, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetError, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse, GetMediaApiV1MediaMediaIdGetData, GetMediaApiV1MediaMediaIdGetError, GetMediaApiV1MediaMediaIdGetResponse, GetMediaUrlApiV1MediaMediaIdUrlGetData, GetMediaUrlApiV1MediaMediaIdUrlGetError, GetMediaUrlApiV1MediaMediaIdUrlGetResponse, GetModulesApiV1CoursesCourseIdModulesGetData, GetModulesApiV1CoursesCourseIdModulesGetError, GetModulesApiV1CoursesCourseIdModulesGetResponse, GetMyMediaApiV1MediaGetData, GetMyMediaApiV1MediaGetError, GetMyMediaApiV1MediaGetResponse, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetError, GetUserByIdApiV1UsersUserIdGetResponse, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostError, LoginApiV1AuthLoginPostResponse, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostError, LogoutApiV1AuthLogoutPostResponse, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostError, RefreshApiV1AuthRefreshPostResponse, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostError, RegisterApiV1AuthRegisterPostResponse, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteError, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponse, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchError, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponse, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchError, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponse, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchError, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchError, UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostData, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostError, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponse, UploadCourseCoverApiV1CoursesCourseIdMediaPostData, UploadCourseCoverApiV1CoursesCourseIdMediaPostError, UploadCourseCoverApiV1CoursesCourseIdMediaPostResponse, UploadMediaApiV1MediaPostData, UploadMediaApiV1MediaPostError, UploadMediaApiV1MediaPostResponse } from '../types.gen';
 
 /**
  * Register
@@ -257,6 +257,40 @@ export const createMemberApiV1CoursesCourseIdMembersPostMutation = (options?: Pa
     const mutationOptions: UseMutationOptions<CreateMemberApiV1CoursesCourseIdMembersPostResponse, CreateMemberApiV1CoursesCourseIdMembersPostError, Options<CreateMemberApiV1CoursesCourseIdMembersPostData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await CourseService.createMemberApiV1CoursesCourseIdMembersPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Remove Course Cover
+ */
+export const removeCourseCoverApiV1CoursesCourseIdMediaDeleteMutation = (options?: Partial<Options<RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData>>): UseMutationOptions<RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponse, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteError, Options<RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData>> => {
+    const mutationOptions: UseMutationOptions<RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponse, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteError, Options<RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await CourseService.removeCourseCoverApiV1CoursesCourseIdMediaDelete({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Upload Course Cover
+ */
+export const uploadCourseCoverApiV1CoursesCourseIdMediaPostMutation = (options?: Partial<Options<UploadCourseCoverApiV1CoursesCourseIdMediaPostData>>): UseMutationOptions<UploadCourseCoverApiV1CoursesCourseIdMediaPostResponse, UploadCourseCoverApiV1CoursesCourseIdMediaPostError, Options<UploadCourseCoverApiV1CoursesCourseIdMediaPostData>> => {
+    const mutationOptions: UseMutationOptions<UploadCourseCoverApiV1CoursesCourseIdMediaPostResponse, UploadCourseCoverApiV1CoursesCourseIdMediaPostError, Options<UploadCourseCoverApiV1CoursesCourseIdMediaPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await CourseService.uploadCourseCoverApiV1CoursesCourseIdMediaPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -607,6 +641,23 @@ export const updateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchMut
 };
 
 /**
+ * Upload Block Media
+ */
+export const uploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostMutation = (options?: Partial<Options<UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostData>>): UseMutationOptions<UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponse, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostError, Options<UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostData>> => {
+    const mutationOptions: UseMutationOptions<UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponse, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostError, Options<UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await BlockService.uploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
  * Submit Lesson
  */
 export const submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostMutation = (options?: Partial<Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData>>): UseMutationOptions<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError, Options<SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData>> => {
@@ -622,6 +673,121 @@ export const submitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostMutat
     };
     return mutationOptions;
 };
+
+export const getMyMediaApiV1MediaGetQueryKey = (options?: Options<GetMyMediaApiV1MediaGetData>) => createQueryKey('getMyMediaApiV1MediaGet', options);
+
+/**
+ * Get My Media
+ */
+export const getMyMediaApiV1MediaGetOptions = (options?: Options<GetMyMediaApiV1MediaGetData>) => queryOptions<GetMyMediaApiV1MediaGetResponse, GetMyMediaApiV1MediaGetError, GetMyMediaApiV1MediaGetResponse, ReturnType<typeof getMyMediaApiV1MediaGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await MediaService.getMyMediaApiV1MediaGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMyMediaApiV1MediaGetQueryKey(options)
+});
+
+export const getMyMediaApiV1MediaGetInfiniteQueryKey = (options?: Options<GetMyMediaApiV1MediaGetData>): QueryKey<Options<GetMyMediaApiV1MediaGetData>> => createQueryKey('getMyMediaApiV1MediaGet', options, true);
+
+/**
+ * Get My Media
+ */
+export const getMyMediaApiV1MediaGetInfiniteOptions = (options?: Options<GetMyMediaApiV1MediaGetData>) => infiniteQueryOptions<GetMyMediaApiV1MediaGetResponse, GetMyMediaApiV1MediaGetError, InfiniteData<GetMyMediaApiV1MediaGetResponse>, QueryKey<Options<GetMyMediaApiV1MediaGetData>>, number | Pick<QueryKey<Options<GetMyMediaApiV1MediaGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<GetMyMediaApiV1MediaGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                offset: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await MediaService.getMyMediaApiV1MediaGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMyMediaApiV1MediaGetInfiniteQueryKey(options)
+});
+
+/**
+ * Upload Media
+ */
+export const uploadMediaApiV1MediaPostMutation = (options?: Partial<Options<UploadMediaApiV1MediaPostData>>): UseMutationOptions<UploadMediaApiV1MediaPostResponse, UploadMediaApiV1MediaPostError, Options<UploadMediaApiV1MediaPostData>> => {
+    const mutationOptions: UseMutationOptions<UploadMediaApiV1MediaPostResponse, UploadMediaApiV1MediaPostError, Options<UploadMediaApiV1MediaPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await MediaService.uploadMediaApiV1MediaPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Media
+ */
+export const deleteMediaApiV1MediaMediaIdDeleteMutation = (options?: Partial<Options<DeleteMediaApiV1MediaMediaIdDeleteData>>): UseMutationOptions<DeleteMediaApiV1MediaMediaIdDeleteResponse, DeleteMediaApiV1MediaMediaIdDeleteError, Options<DeleteMediaApiV1MediaMediaIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteMediaApiV1MediaMediaIdDeleteResponse, DeleteMediaApiV1MediaMediaIdDeleteError, Options<DeleteMediaApiV1MediaMediaIdDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await MediaService.deleteMediaApiV1MediaMediaIdDelete({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMediaApiV1MediaMediaIdGetQueryKey = (options: Options<GetMediaApiV1MediaMediaIdGetData>) => createQueryKey('getMediaApiV1MediaMediaIdGet', options);
+
+/**
+ * Get Media
+ */
+export const getMediaApiV1MediaMediaIdGetOptions = (options: Options<GetMediaApiV1MediaMediaIdGetData>) => queryOptions<GetMediaApiV1MediaMediaIdGetResponse, GetMediaApiV1MediaMediaIdGetError, GetMediaApiV1MediaMediaIdGetResponse, ReturnType<typeof getMediaApiV1MediaMediaIdGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await MediaService.getMediaApiV1MediaMediaIdGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMediaApiV1MediaMediaIdGetQueryKey(options)
+});
+
+export const getMediaUrlApiV1MediaMediaIdUrlGetQueryKey = (options: Options<GetMediaUrlApiV1MediaMediaIdUrlGetData>) => createQueryKey('getMediaUrlApiV1MediaMediaIdUrlGet', options);
+
+/**
+ * Get Media Url
+ */
+export const getMediaUrlApiV1MediaMediaIdUrlGetOptions = (options: Options<GetMediaUrlApiV1MediaMediaIdUrlGetData>) => queryOptions<GetMediaUrlApiV1MediaMediaIdUrlGetResponse, GetMediaUrlApiV1MediaMediaIdUrlGetError, GetMediaUrlApiV1MediaMediaIdUrlGetResponse, ReturnType<typeof getMediaUrlApiV1MediaMediaIdUrlGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await MediaService.getMediaUrlApiV1MediaMediaIdUrlGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMediaUrlApiV1MediaMediaIdUrlGetQueryKey(options)
+});
 
 /**
  * Create Lesson

@@ -1,6 +1,6 @@
-from typing import Literal, Sequence
+from typing import Annotated, Literal, Sequence
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, File, Form, UploadFile, status
 from src.course.course_member.schemas import CourseMemberSchema
 from src.course.schemas import (
     CourseSchema,
@@ -93,3 +93,30 @@ async def create_member(
     user_id: UserIdDep, course_id: UUID, service: CourseServiceDep
 ) -> CourseMemberSchema:
     return await service.enroll(course_id=course_id, user_id=user_id)
+
+
+@router.post("/{course_id}/media", response_model=CourseSchema)
+async def upload_course_cover(
+    course_id: UUID,
+    owner_id: UserIdDep,
+    service: CourseServiceDep,
+    file: Annotated[UploadFile, File()],
+    is_public: Annotated[bool, Form()] = True,
+) -> CourseSchema:
+    return await service.upload_cover(
+        course_id=course_id,
+        owner_id=owner_id,
+        data=await file.read(),
+        original_name=file.filename or "untitled",
+        content_type=file.content_type or "application/octet-stream",
+        is_public=is_public,
+    )
+
+
+@router.delete("/{course_id}/media", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_course_cover(
+    course_id: UUID,
+    owner_id: UserIdDep,
+    service: CourseServiceDep,
+) -> None:
+    await service.remove_cover(course_id=course_id, owner_id=owner_id)

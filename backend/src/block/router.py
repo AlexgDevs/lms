@@ -1,5 +1,6 @@
+from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, status
+from fastapi import APIRouter, File, Form, UploadFile, status
 
 from src.user.dependencies import UserIdDep
 from src.block.dependencies import BlockServiceDep
@@ -69,6 +70,28 @@ async def update_block(
         course_id=course_id,
         owner_id=user_id,
         payload=payload,
+    )
+
+
+@router.post("/{block_id}/media", response_model=BlockSchema)
+async def upload_block_media(
+    course_id: UUID,
+    lesson_id: UUID,
+    block_id: UUID,
+    service: BlockServiceDep,
+    user_id: UserIdDep,
+    file: Annotated[UploadFile, File()],
+    is_public: Annotated[bool, Form()] = True,
+) -> BlockSchema:
+    return await service.upload_media(
+        block_id=block_id,
+        lesson_id=lesson_id,
+        course_id=course_id,
+        user_id=user_id,
+        data=await file.read(),
+        original_name=file.filename or "untitled",
+        content_type=file.content_type or "application/octet-stream",
+        is_public=is_public,
     )
 
 

@@ -7,6 +7,11 @@ from src.core.dependencies import SessionDep
 from src.course.repository import CourseRepository
 from src.course.service import CourseService
 from src.course.unit_of_work import CourseUnitOfWork
+from src.media.dependencies import (
+    MediaAttachmentRepositoryDep,
+    MediaRepositoryDep,
+    MediaServiceDep,
+)
 
 
 def get_course_repository(session: SessionDep) -> CourseRepository:
@@ -29,9 +34,15 @@ async def get_course_uow(
     session: SessionDep,
     course_repository: CourseRepositoryDep,
     course_member_repository: CourseMemberRepositoryDep,
+    media_attachment_repository: MediaAttachmentRepositoryDep,
+    media_repository: MediaRepositoryDep,
 ) -> AsyncGenerator[CourseUnitOfWork]:
     async with CourseUnitOfWork(
-        session, course_repository, course_member_repository
+        session,
+        course_repository,
+        course_member_repository,
+        media_attachment_repository,
+        media_repository,
     ) as uow:
         yield uow
 
@@ -42,10 +53,12 @@ CourseUnitOfWorkDep = Annotated[CourseUnitOfWork, Depends(get_course_uow)]
 def get_course_service(
     session: SessionDep,
     uow: CourseUnitOfWorkDep,
+    media_service: MediaServiceDep,
 ) -> CourseService:
     return CourseService(
         session=session,
         course_unit_of_work=uow,
+        media_service=media_service,
     )
 
 

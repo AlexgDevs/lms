@@ -351,6 +351,66 @@ export const Body_refresh_api_v1_auth_refresh_postSchema = {
     title: 'Body_refresh_api_v1_auth_refresh_post'
 } as const;
 
+export const Body_upload_block_media_api_v1_courses__course_id__lessons__lesson_id__blocks__block_id__media_postSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            contentMediaType: 'application/octet-stream',
+            title: 'File'
+        },
+        is_public: {
+            type: 'boolean',
+            title: 'Is Public',
+            default: true
+        }
+    },
+    type: 'object',
+    required: [
+        'file'
+    ],
+    title: 'Body_upload_block_media_api_v1_courses__course_id__lessons__lesson_id__blocks__block_id__media_post'
+} as const;
+
+export const Body_upload_course_cover_api_v1_courses__course_id__media_postSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            contentMediaType: 'application/octet-stream',
+            title: 'File'
+        },
+        is_public: {
+            type: 'boolean',
+            title: 'Is Public',
+            default: true
+        }
+    },
+    type: 'object',
+    required: [
+        'file'
+    ],
+    title: 'Body_upload_course_cover_api_v1_courses__course_id__media_post'
+} as const;
+
+export const Body_upload_media_api_v1_media_postSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            contentMediaType: 'application/octet-stream',
+            title: 'File'
+        },
+        is_public: {
+            type: 'boolean',
+            title: 'Is Public',
+            default: true
+        }
+    },
+    type: 'object',
+    required: [
+        'file'
+    ],
+    title: 'Body_upload_media_api_v1_media_post'
+} as const;
+
 export const CourseCreateRequestSchemaSchema = {
     properties: {
         title: {
@@ -797,6 +857,93 @@ export const LessonUpdateRequestSchemaSchema = {
     },
     type: 'object',
     title: 'LessonUpdateRequestSchema'
+} as const;
+
+export const MediaSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        },
+        original_name: {
+            type: 'string',
+            title: 'Original Name'
+        },
+        storage_key: {
+            type: 'string',
+            title: 'Storage Key'
+        },
+        content_type: {
+            type: 'string',
+            title: 'Content Type'
+        },
+        size_bytes: {
+            type: 'integer',
+            title: 'Size Bytes'
+        },
+        etag: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Etag'
+        },
+        is_public: {
+            type: 'boolean',
+            title: 'Is Public',
+            default: true
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'owner_id',
+        'original_name',
+        'storage_key',
+        'content_type',
+        'size_bytes',
+        'created_at',
+        'updated_at'
+    ],
+    title: 'MediaSchema'
+} as const;
+
+export const MediaUrlResponseSchemaSchema = {
+    properties: {
+        url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Url'
+        }
+    },
+    type: 'object',
+    title: 'MediaUrlResponseSchema'
 } as const;
 
 export const ModuleCreateRequestSchemaSchema = {

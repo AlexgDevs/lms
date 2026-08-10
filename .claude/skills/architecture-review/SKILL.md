@@ -21,7 +21,10 @@ evaluating whether the current architecture is sound.
      `core/*` level deps and small public seams (like `UserIdDep`).
    - **Cohesion**: does the feature group responsibilities that change together?
    - **Duplicate CRUD**: could the work reuse `BaseRepository` /
-     `BaseUnitOfWork` / `BaseMapper` instead of new bespoke code?
+      `BaseUnitOfWork` / `BaseMapper` instead of new bespoke code?
+   - **Reusable patterns**: `core/storage/factory.py` (registry) and
+      `media/media_attachment` (generic owner↔media join) are shared patterns —
+      prefer extending them over new one-off mechanisms.
    - **Frontend**: is the code placed in the right feature (`features/`), or
      should it be shared (`components/`, `lib/`)? Will a backend change require
      regenerating the typed client?

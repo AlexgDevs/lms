@@ -21,6 +21,9 @@ from src.course.schemas import (
     CourseUserBriefSchema,
 )
 from src.course.unit_of_work import CourseUnitOfWork
+from src.media.service import MediaService
+
+COVER_ROLE = "cover"
 
 
 class CourseService(BaseService):
@@ -28,8 +31,10 @@ class CourseService(BaseService):
         self,
         session: AsyncSession,
         course_unit_of_work: CourseUnitOfWork,  # TODO: add payment service in uow
+        media_service: MediaService,
     ):
         self.uow = course_unit_of_work
+        self.media_service = media_service
         super().__init__(session)
 
     async def create_course(
@@ -144,3 +149,89 @@ class CourseService(BaseService):
             raise CourseNotFoundError
 
         return course
+
+    async def upload_cover(
+        self,
+        course_id: UUID,
+        owner_id: UUID,
+        *,
+        data: bytes,
+        original_name: str,
+        content_type: str,
+        is_public: bool = True,
+    ) -> CourseSchema:
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=owner_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        old_cover_ids = await self._get_cover_media_ids(course_id)
+
+        media = await self.media_service.create_media(
+            user_id=owner_id,
+            data=data,
+            original_name=original_name,
+            content_type=content_type,
+            is_public=is_public,
+            commit=False,
+        )
+
+        try:
+            await self.uow.media_attachments.detach_all(
+                owner_type="course", owner_id=course_id
+            )
+            await self.uow.media_attachments.attach(
+                media_id=media.id,
+                owner_type="course",
+                owner_id=course_id,
+                role=COVER_ROLE,
+                position=0,
+            )
+            updated = await self.uow.courses.update(
+                course_id,
+                CourseUpdateSchema(
+                    cover_url=self.media_service.storage.get_public_url(
+                        media.storage_key
+                    )
+                ),
+            )
+            await self.uow.commit()
+        except BaseException:
+            await self.media_service.delete_media_file(media.storage_key)
+            raise
+
+        await self._purge_old_covers(old_cover_ids)
+        return updated
+
+    async def remove_cover(self, course_id: UUID, owner_id: UUID) -> CourseSchema:
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=owner_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        old_cover_ids = await self._get_cover_media_ids(course_id)
+
+        await self.uow.media_attachments.detach_all(
+            owner_type="course", owner_id=course_id
+        )
+        updated = await self.uow.courses.update(
+            course_id, CourseUpdateSchema(cover_url=None), exclude_none=False
+        )
+        await self.uow.commit()
+
+        await self._purge_old_covers(old_cover_ids)
+        return updated
+
+    async def _get_cover_media_ids(self, course_id: UUID) -> list[UUID]:
+        attachments = await self.uow.media_attachments.get_for_owner(
+            "course", course_id
+        )
+        return [attachment.media_id for attachment in attachments]
+
+    async def _purge_old_covers(self, media_ids: list[UUID]) -> None:
+        if not media_ids:
+            return
+        await self.media_service.cleanup_unreferenced(media_ids)
+        await self.uow.commit()

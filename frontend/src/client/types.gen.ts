@@ -231,6 +231,48 @@ export type BodyRefreshApiV1AuthRefreshPost = {
 };
 
 /**
+ * Body_upload_block_media_api_v1_courses__course_id__lessons__lesson_id__blocks__block_id__media_post
+ */
+export type BodyUploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPost = {
+    /**
+     * File
+     */
+    file: Blob | File;
+    /**
+     * Is Public
+     */
+    is_public?: boolean;
+};
+
+/**
+ * Body_upload_course_cover_api_v1_courses__course_id__media_post
+ */
+export type BodyUploadCourseCoverApiV1CoursesCourseIdMediaPost = {
+    /**
+     * File
+     */
+    file: Blob | File;
+    /**
+     * Is Public
+     */
+    is_public?: boolean;
+};
+
+/**
+ * Body_upload_media_api_v1_media_post
+ */
+export type BodyUploadMediaApiV1MediaPost = {
+    /**
+     * File
+     */
+    file: Blob | File;
+    /**
+     * Is Public
+     */
+    is_public?: boolean;
+};
+
+/**
  * CourseCreateRequestSchema
  *
  * Schema for incoming client request to create a course.
@@ -503,6 +545,62 @@ export type LessonUpdateRequestSchema = {
      * Description
      */
     description?: string | null;
+};
+
+/**
+ * MediaSchema
+ */
+export type MediaSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
+    /**
+     * Original Name
+     */
+    original_name: string;
+    /**
+     * Storage Key
+     */
+    storage_key: string;
+    /**
+     * Content Type
+     */
+    content_type: string;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number;
+    /**
+     * Etag
+     */
+    etag?: string | null;
+    /**
+     * Is Public
+     */
+    is_public?: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * MediaUrlResponseSchema
+ */
+export type MediaUrlResponseSchema = {
+    /**
+     * Url
+     */
+    url?: string | null;
 };
 
 /**
@@ -962,6 +1060,66 @@ export type CreateMemberApiV1CoursesCourseIdMembersPostResponses = {
 };
 
 export type CreateMemberApiV1CoursesCourseIdMembersPostResponse = CreateMemberApiV1CoursesCourseIdMembersPostResponses[keyof CreateMemberApiV1CoursesCourseIdMembersPostResponses];
+
+export type RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/media';
+};
+
+export type RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteError = RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteErrors[keyof RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteErrors];
+
+export type RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponse = RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponses[keyof RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponses];
+
+export type UploadCourseCoverApiV1CoursesCourseIdMediaPostData = {
+    body: BodyUploadCourseCoverApiV1CoursesCourseIdMediaPost;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/media';
+};
+
+export type UploadCourseCoverApiV1CoursesCourseIdMediaPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadCourseCoverApiV1CoursesCourseIdMediaPostError = UploadCourseCoverApiV1CoursesCourseIdMediaPostErrors[keyof UploadCourseCoverApiV1CoursesCourseIdMediaPostErrors];
+
+export type UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseSchema;
+};
+
+export type UploadCourseCoverApiV1CoursesCourseIdMediaPostResponse = UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses[keyof UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses];
 
 export type GetModulesApiV1CoursesCourseIdModulesGetData = {
     body?: never;
@@ -1528,6 +1686,44 @@ export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResp
 
 export type UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse = UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses[keyof UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses];
 
+export type UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostData = {
+    body: BodyUploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPost;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+        /**
+         * Block Id
+         */
+        block_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/blocks/{block_id}/media';
+};
+
+export type UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostError = UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostErrors[keyof UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostErrors];
+
+export type UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: BlockSchema;
+};
+
+export type UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponse = UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponses[keyof UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponses];
+
 export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData = {
     /**
      * Payload
@@ -1566,6 +1762,162 @@ export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostRespon
 };
 
 export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse = SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses[keyof SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses];
+
+export type GetMyMediaApiV1MediaGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/v1/media';
+};
+
+export type GetMyMediaApiV1MediaGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMyMediaApiV1MediaGetError = GetMyMediaApiV1MediaGetErrors[keyof GetMyMediaApiV1MediaGetErrors];
+
+export type GetMyMediaApiV1MediaGetResponses = {
+    /**
+     * Response Get My Media Api V1 Media Get
+     *
+     * Successful Response
+     */
+    200: Array<MediaSchema>;
+};
+
+export type GetMyMediaApiV1MediaGetResponse = GetMyMediaApiV1MediaGetResponses[keyof GetMyMediaApiV1MediaGetResponses];
+
+export type UploadMediaApiV1MediaPostData = {
+    body: BodyUploadMediaApiV1MediaPost;
+    path?: never;
+    query?: never;
+    url: '/api/v1/media';
+};
+
+export type UploadMediaApiV1MediaPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadMediaApiV1MediaPostError = UploadMediaApiV1MediaPostErrors[keyof UploadMediaApiV1MediaPostErrors];
+
+export type UploadMediaApiV1MediaPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: MediaSchema;
+};
+
+export type UploadMediaApiV1MediaPostResponse = UploadMediaApiV1MediaPostResponses[keyof UploadMediaApiV1MediaPostResponses];
+
+export type DeleteMediaApiV1MediaMediaIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/v1/media/{media_id}';
+};
+
+export type DeleteMediaApiV1MediaMediaIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteMediaApiV1MediaMediaIdDeleteError = DeleteMediaApiV1MediaMediaIdDeleteErrors[keyof DeleteMediaApiV1MediaMediaIdDeleteErrors];
+
+export type DeleteMediaApiV1MediaMediaIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteMediaApiV1MediaMediaIdDeleteResponse = DeleteMediaApiV1MediaMediaIdDeleteResponses[keyof DeleteMediaApiV1MediaMediaIdDeleteResponses];
+
+export type GetMediaApiV1MediaMediaIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/v1/media/{media_id}';
+};
+
+export type GetMediaApiV1MediaMediaIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMediaApiV1MediaMediaIdGetError = GetMediaApiV1MediaMediaIdGetErrors[keyof GetMediaApiV1MediaMediaIdGetErrors];
+
+export type GetMediaApiV1MediaMediaIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MediaSchema;
+};
+
+export type GetMediaApiV1MediaMediaIdGetResponse = GetMediaApiV1MediaMediaIdGetResponses[keyof GetMediaApiV1MediaMediaIdGetResponses];
+
+export type GetMediaUrlApiV1MediaMediaIdUrlGetData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: {
+        /**
+         * Expires In
+         */
+        expires_in?: number;
+    };
+    url: '/api/v1/media/{media_id}/url';
+};
+
+export type GetMediaUrlApiV1MediaMediaIdUrlGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMediaUrlApiV1MediaMediaIdUrlGetError = GetMediaUrlApiV1MediaMediaIdUrlGetErrors[keyof GetMediaUrlApiV1MediaMediaIdUrlGetErrors];
+
+export type GetMediaUrlApiV1MediaMediaIdUrlGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MediaUrlResponseSchema;
+};
+
+export type GetMediaUrlApiV1MediaMediaIdUrlGetResponse = GetMediaUrlApiV1MediaMediaIdUrlGetResponses[keyof GetMediaUrlApiV1MediaMediaIdUrlGetResponses];
 
 export type CreateLessonApiV1LessonsLessonIdProgressPostData = {
     body?: never;

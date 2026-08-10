@@ -10,6 +10,7 @@ from src.block.unit_of_work import BlockUnitOfWork
 from src.media.dependencies import (
     MediaAttachmentRepositoryDep,
     MediaRepositoryDep,
+    MediaServiceDep,
 )
 
 
@@ -46,11 +47,13 @@ def get_block_service(
     session: SessionDep,
     uow: BlockUnitOfWorkDep,
     storage: StorageDep,
+    media_service: MediaServiceDep,
 ) -> BlockService:
     return BlockService(
         session=session,
         block_unit_of_work=uow,
         storage=storage,
+        media_service=media_service,
     )
 
 

@@ -10,7 +10,7 @@ A modern, AI-first **Learning Management System**. Monorepo with three parts:
 
 | Part | Path | Stack |
 | --- | --- | --- |
-| Backend | `backend/` | Python 3.14, FastAPI, SQLAlchemy 2.0 async + asyncpg, Alembic, Pydantic v2, Redis (asyncio), PyJWT + Argon2 (`pwdlib`), loguru |
+| Backend | `backend/` | Python 3.14, FastAPI, SQLAlchemy 2.0 async + asyncpg, Alembic, Pydantic v2, Redis (asyncio), PyJWT + Argon2 (`pwdlib`), object storage (local / S3 via aioboto3), loguru |
 | Frontend | `frontend/` | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, TanStack Router + Query, react-hook-form + zod |
 | Infra | `docker-compose.yaml` | PostgreSQL 18, Redis 7.2 |
 
@@ -37,13 +37,14 @@ Run from the repo root unless otherwise noted.
 ```
 ├── alembic/                # DB migrations (versions/) + alembic.ini
 ├── backend/src/
-│   ├── main.py             # FastAPI app, lifespan (redis), CORS, error handlers
+│   ├── main.py             # FastAPI app, lifespan (redis + storage), CORS, static /media, error handlers
 │   ├── core/               # Shared infrastructure — no business logic
-│   │   ├── config.py       # pydantic-settings: postgres / app / redis
+│   │   ├── config.py       # pydantic-settings: postgres / app / redis / storage / media
 │   │   ├── router.py       # app_v1; registers ALL feature routers
-│   │   ├── dependencies.py # SessionDep, RedisDep, AccessTokenDep
+│   │   ├── dependencies.py # SessionDep, RedisDep, StorageDep, AccessTokenDep
 │   │   ├── postgres/       # engine, session, Base/UUIDBase, types, mixins
 │   │   ├── redis/          # asyncio redis client
+│   │   ├── storage/        # Storage Protocol + local/S3 backends (factory registry)
 │   │   ├── repositories/   # BaseRepository (generic CRUD)
 │   │   ├── unit_of_work/   # BaseUnitOfWork
 │   │   ├── mappers/        # BaseMapper
@@ -53,7 +54,8 @@ Run from the repo root unless otherwise noted.
 │   │   ├── handlers/       # error handler → {error, detail}
 │   │   └── logging/        # loguru setup
 │   └── <feature>/          # auth, user, course (+course_member), module,
-│                           # lesson (+lesson_progress), block, submissions
+│                           # lesson (+lesson_progress), block, submissions, media
+│                           #   (+media/media_attachment)
 ├── frontend/src/
 │   ├── main.tsx, routes.ts, routeTree.gen.ts
 │   ├── app/providers/      # React Query, theme, layout
@@ -96,16 +98,19 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 - **Timestamps**: `created_at`/`updated_at` timezone-aware (UTC). Soft delete via nullable `is_deleted`.
 - **Errors**: raise `AppException` subclasses; global handler (`core/handlers/base_handler.py`) returns `{error, detail}`. Base: `ObjectNotFoundError` (404), `ObjectAlreadyExistsError` (409).
 - **Auth**: JWT access/refresh, Argon2 via `pwdlib`; `UserIdDep` (`user/dependencies.py`) decodes current user id.
+- **Storage**: all file I/O goes through `core.storage.Storage` (Protocol; local/S3 via `STORAGE_BACKEND`, factory registry in `core/storage/factory.py`); media routes use `StorageDep`.
 - **Layering**: business logic lives in services, NOT in routers or repositories; routers are thin.
 
 ### Feature modules (full graph in `.claude/graph.md`)
 - `auth` — register/login/refresh/logout, `RefreshToken` model, security utils.
 - `user` — profiles; exposes `UserIdDep` / `CurrentUserDep`.
-- `course` + `course/course_member` — courses and enrollment (`CourseMember`).
+- `course` + `course/course_member` — courses and enrollment (`CourseMember`);
+  cover upload/remove (`POST/DELETE /courses/{id}/media`) via `MediaService`.
 - `module` — modules within a course.
 - `lesson` + `lesson/lesson_progress` — lessons and per-user progress (`LessonProgress`).
-- `block` — content blocks; `BlockType` covers text/quiz(code...)/media; `payload` is JSONB.
+- `block` — content blocks; `BlockType` covers text/quiz(code...)/media; `payload` is JSONB; media blocks bind a `MediaAttachment` (create/update reconcile, delete detach), resolve `payload.url` on read, and support upload via `POST /blocks/{id}/media`.
 - `submissions` — `BlockSubmission` checking via `BlockChecker` registry (`submissions/checker.py`).
+- `media` + `media/media_attachment` — uploads (local/S3 storage), per-owner listing, presigned URLs, delete protection via generic `MediaAttachment` (owner_type/owner_id/role); service used by `block` and `course`.
 
 ## Frontend architecture
 

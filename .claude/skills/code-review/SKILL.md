@@ -30,6 +30,8 @@ bugs, or validate that new code follows the project's conventions.
   `status_code`; never raise raw `HTTPException`.
 - **Models**: extend `UUIDBase`; UUID PKs; timezone-aware timestamps; sensible FK `ondelete`; named unique constraints.
 - **Repo/mapper**: extend `BaseRepository` / `BaseMapper`; don't duplicate generic CRUD.
+- **Storage**: file I/O goes through `core.storage.Storage` (`StorageDep`), never direct fs/SDK calls in features.
+- **Media attachments**: blocks referencing media must attach/reconcile/detach `MediaAttachment` rows in the same UoW transaction; `delete_media` must reject while `is_referenced`.
 - **Migrations**: model/schema changes are accompanied by an Alembic revision.
 - **Secrets/logging**: no secrets in logs; loguru used consistently.
 
