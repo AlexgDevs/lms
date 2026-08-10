@@ -20,7 +20,7 @@ No business logic. Everything below is shared infrastructure.
 | `core/postgres/mixins.py` | `UUIDMixin` (uuid PK, `gen_random_uuid()`) |
 | `core/postgres/types.py` | `uuid_pk`, `int_pk`, `str_128`, `created_at`, `timestamp` |
 | `core/redis/client.py` | asyncio redis: `init_redis`, `close_redis` |
-| `core/repositories/base_repository.py` | `BaseRepository[T, R]` — generic CRUD (get_filtered/get_one/create/update/delete) |
+| `core/repositories/base_repository.py` | `BaseRepository[T, R]` — generic CRUD (get_filtered [`order_by`]/get_one/create/update/delete) |
 | `core/unit_of_work/base_unit_of_work.py` | `BaseUnitOfWork` — async context manager, commit/rollback |
 | `core/mappers/base_mapper.py` | `BaseMapper[ORM, Schema]` — `to_schema`/`to_orm`/`update_orm` |
 | `core/services/base_service.py` | `BaseService` — holds session |
@@ -78,8 +78,10 @@ Files (course_member): `schemas, service, repository, mappers, unit_of_work`.
 Files: `router, service, unit_of_work, repository, mapper, schemas, models,
 exceptions, dependencies`.
 - Router prefix `/courses/{course_id}/modules`, tags `["Modules"]`:
-  `POST ""`, `PATCH /{module_id}`, `DELETE /{module_id}`, `GET ""` (only_created).
+  `POST ""`, `PATCH /reorder` (`ModuleReorderSchema.ordered_ids`),
+  `PATCH /{module_id}`, `DELETE /{module_id}`, `GET ""` (only_created).
 - Model: `Module` (course_id→courses, title, description, order).
+- Repository: `set_order_bulk(course_id, ordered_ids)` (bulk `order` update).
 - Deps on: `user.dependencies` (`UserIdDep`), `core/*`.
 
 ### lesson (`src/lesson/`) + `lesson/lesson_progress`
@@ -87,8 +89,9 @@ Files (lesson): `router, service, unit_of_work, repository, mapper, schemas,
 models, exceptions, enums, dependencies`.
 Files (lesson_progress): `router, schemas, repository, mapper, dependencies`.
 - Router prefix `/courses/{course_id}/modules/{module_id}/lessons`,
-  tags `["Lessons"]`: `POST ""`, `PATCH /{lesson_id}`, `DELETE /{lesson_id}`,
-  `GET ""` (only_created).
+  tags `["Lessons"]`: `POST ""`, `PATCH /reorder` (`LessonReorderSchema`),
+  `PATCH /{lesson_id}`, `DELETE /{lesson_id}`, `GET ""` (only_created).
+- Repository: `set_order_bulk(module_id, ordered_ids)`.
 - Progress router prefix `/lessons/{lesson_id}/progress`,
   tags `["Lessons Progress"]`: `POST ""` → `get_or_create_lesson_progress`.
 - Models: `Lesson` (module_id→modules, course_id, title, order),
@@ -101,11 +104,14 @@ Files (lesson_progress): `router, schemas, repository, mapper, dependencies`.
 Files: `router, service, unit_of_work, repository, mapper, schemas, models,
 exceptions, enums, dependencies`.
 - Router prefix `/courses/{course_id}/lessons/{lesson_id}/blocks`,
-  tags `["Blocks"]`: `POST ""`, `PATCH /{block_id}`, `DELETE /{block_id}`,
-  `GET ""` (only_created).
-- Model: `Block` (lesson_id→lessons, course_id, title, `block_type`, `payload`
-  JSONB). `BlockSubmission` (lesson_id, block_id, user_id, submission_type,
-  submitted_payload, attempts, is_first_try_correct; unique uq_user_block_submission).
+  tags `["Blocks"]`: `POST ""`, `PATCH /reorder` (`BlockReorderSchema`),
+  `PATCH /{block_id}`, `DELETE /{block_id}`, `GET ""` (only_created).
+- Model: `Block` (lesson_id→lessons, course_id, title, `block_type`, `order`,
+  `payload` JSONB). `BlockSubmission` (lesson_id, block_id, user_id,
+  submission_type, submitted_payload, attempts, is_first_try_correct; unique
+  uq_user_block_submission).
+- Repository: `set_order_bulk(lesson_id, ordered_ids)`; lists ordered by
+  `order.asc()`.
 - Enums: `BlockType` (text/quiz_single_choice/quiz_multiple_choice/code/image/
   video/audio/file), `BlockSubmissionType` (completed/wrong/correct).
 - Deps on: `user.dependencies` (`UserIdDep`), `core/*`.
@@ -152,7 +158,7 @@ all routers → core.router (app_v1)
 | `modules` | `Module` (`module/models.py`) | FK courses.id ON DELETE CASCADE |
 | `lessons` | `Lesson` (`lesson/models.py`) | FK modules.id (CASCADE), courses.id |
 | `lesson_progress` | `LessonProgress` (`lesson/models.py`) | FK users.id, lessons.id; uq_user_lesson_progress |
-| `blocks` | `Block` (`block/models.py`) | FK lessons.id (CASCADE), courses.id; payload JSONB |
+| `blocks` | `Block` (`block/models.py`) | FK lessons.id (CASCADE), courses.id; order; payload JSONB |
 | `block_submissions` | `BlockSubmission` (`block/models.py`) | FK lessons/blocks/users; submitted_payload JSONB; attempts, is_first_try_correct; uq_user_block_submission |
 
 Alembic revision chain (linear, `down_revision` → `revision`):
@@ -162,8 +168,9 @@ block_submissions) → `801e6361c843` (course_id in models) →
 `c05cf7919967` (lesson_progress table, block_submissions payload/attempts/
 first-try columns, uq) → `e264701752f9` → `cafdbe78a029` (submission_type
 renames) → `a4e1ff2972d3` (submission attr rename) → `cf704b7d5f64`
-(lesson_progress constraint) → `f547cd198dee` (**HEAD**: course_members table,
-courses.member_count). Run `uv run alembic upgrade head` from `backend/`.
+(lesson_progress constraint) → `f547cd198dee` (course_members table,
+courses.member_count) → `a1b2c3d4e5f6` (**HEAD**: `blocks.order`, server
+default 0). Run `uv run alembic upgrade head` from `backend/`.
 
 ## 4. Frontend (`frontend/src/`)
 
@@ -175,7 +182,8 @@ client/           GENERATED @hey-api client (sdk.gen.ts, types.gen.ts, schemas.g
                   @tanstack/react-query.gen.ts, client.gen.ts) — DO NOT EDIT
 components/       ui/ (shadcn) + layout/ (Header, Footer, UserMenu, CategoryCatalog)
 features/         auth, dashboard, profile, teaching
-lib/              utils (cn), toast, errors
+lib/              utils (cn), toast, errors, dnd (arrayMove, applyOrderToCache,
+                  useReorderableList for drag-and-drop reordering)
 routes/           TanStack Router files + routeTree.gen.ts (generated)
 routes.ts         central ROUTES constant
 ```
@@ -186,7 +194,7 @@ routes.ts         central ROUTES constant
 | auth | `useAuth` | LoginPage, SignupPage | `/login`, `/signup` |
 | dashboard | — (uses course catalog) | RootPage (+ CourseCard, CatalogFilters, types, data/mocks) | `/` |
 | profile | — | ProfilePage (streak, achievements, activity, certificates) | `/profile` |
-| teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` | TeachingPage, CourseBuilderPage (builder components + QuizSingle/QuizMultipleBlockEditor) | `/teaching`, `/teaching/courses/$courseId` |
+| teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`) | TeachingPage, CourseBuilderPage (builder components + QuizSingle/QuizMultipleBlockEditor; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem are drag-reorderable) | `/teaching`, `/teaching/courses/$courseId` |
 
 Route files: `routes/_layout.tsx`, `_layout/index.tsx` (dashboard),
 `_layout/teaching.index.tsx`, `_layout/teaching.courses.$courseId.tsx`,
