@@ -3,6 +3,7 @@ import { Plus, GripVertical, FileText, Loader2, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useLessons } from "@/features/teaching/api/useLessons"
+import { useReorderableList } from "@/lib/dnd"
 
 interface Lesson {
   id: string
@@ -33,11 +34,24 @@ export function CourseLessonsList({
     isCreatingLesson,
     deleteLessonAsync,
     isDeletingLesson,
+    reorderLessonsAsync,
+    isReordering,
   } = useLessons({
     courseId,
     moduleId,
     onlyCreated: true,
   })
+
+  // Переупорядочивание уроков (drag & drop)
+  const lessonList = useReorderableList(
+    (lessons as Lesson[]) || [],
+    (orderedIds) => {
+      reorderLessonsAsync(orderedIds).catch((e) => {
+        console.error("Ошибка при переупорядочивании уроков:", e)
+      })
+    },
+    isReordering,
+  )
 
   const [isAddingLesson, setIsAddingLesson] = useState(false)
   const [newLessonTitle, setNewLessonTitle] = useState("")
@@ -104,17 +118,27 @@ export function CourseLessonsList({
             return (
               <div
                 key={lesson.id}
+                onDragOver={(e) => lessonList.dragOver(e, lesson.id)}
+                onDrop={(e) => lessonList.drop(e, lesson.id)}
                 className={`group flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-                  isSelected
-                    ? "bg-primary/10 text-primary font-semibold"
-                    : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                  lessonList.draggingId === lesson.id
+                    ? "opacity-40"
+                    : lessonList.overId === lesson.id
+                      ? "ring-1 ring-primary/40 bg-muted/40"
+                      : isSelected
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                 }`}
                 onClick={() => onSelectLesson(lesson.id)}
               >
-                <GripVertical
-                  size={13}
-                  className="text-muted-foreground/30 opacity-0 group-hover:opacity-100 cursor-grab shrink-0 transition-opacity"
-                />
+                <span
+                  draggable
+                  onDragStart={(e) => lessonList.beginDrag(e, lesson.id)}
+                  onDragEnd={lessonList.dragEnd}
+                  className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing shrink-0 transition-opacity select-none"
+                >
+                  <GripVertical size={13} className="text-muted-foreground/30" />
+                </span>
 
                 <FileText size={14} className="text-blue-500 shrink-0" />
 

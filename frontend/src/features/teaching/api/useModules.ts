@@ -4,10 +4,12 @@ import {
   getModulesApiV1CoursesCourseIdModulesGetQueryKey,
   createModuleApiV1CoursesCourseIdModulesPostMutation,
   updateModuleApiV1CoursesCourseIdModulesModuleIdPatchMutation,
-  deleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteMutation
+  deleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteMutation,
+  reorderModulesApiV1CoursesCourseIdModulesReorderPatchMutation
 } from "@/client/@tanstack/react-query.gen"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 import { getErrorMessage } from "@/lib/errors"
+import { applyOrderToCache } from "@/lib/dnd"
 
 interface UseModulesOptions {
   courseId: string
@@ -119,6 +121,43 @@ export function useModules({ courseId, onlyCreated = false }: UseModulesOptions)
     })
   }
 
+  // 5. Переупорядочивание модулей
+  const reorderModulesMutation = useMutation({
+    ...reorderModulesApiV1CoursesCourseIdModulesReorderPatchMutation(),
+    onMutate: async (variables) => {
+      const queryKey = getModulesApiV1CoursesCourseIdModulesGetQueryKey({
+        path: { course_id: variables.path.course_id },
+      })
+      await queryClient.cancelQueries({ queryKey })
+      const previous = queryClient.getQueryData(queryKey)
+
+      queryClient.setQueryData(queryKey, (old: unknown) =>
+        applyOrderToCache(old, variables.body.ordered_ids),
+      )
+
+      return { previous, queryKey }
+    },
+    onError: (err, _variables, context) => {
+      if (context?.queryKey && context?.previous !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previous)
+      }
+      showErrorToast(getErrorMessage(err) || "Ошибка при изменении порядка модулей")
+    },
+    onSuccess: (_, variables) => {
+      invalidateModulesCache(variables.path?.course_id)
+    },
+  })
+
+  const reorderModulesAsync = async (orderedIds: string[]) => {
+    if (!isValidCourseId) {
+      throw new Error("Нельзя изменить порядок: невалидный courseId")
+    }
+    return reorderModulesMutation.mutateAsync({
+      path: { course_id: courseId },
+      body: { ordered_ids: orderedIds },
+    })
+  }
+
   return {
     modules,
     isLoadingModules,
@@ -128,14 +167,17 @@ export function useModules({ courseId, onlyCreated = false }: UseModulesOptions)
     createModuleMutation,
     updateModuleMutation,
     deleteModuleMutation,
+    reorderModulesMutation,
 
     // Чистые обертки
     createModuleAsync,
     updateModuleAsync,
     deleteModuleAsync,
+    reorderModulesAsync,
 
     isCreating: createModuleMutation.isPending,
     isUpdating: updateModuleMutation.isPending,
     isDeleting: deleteModuleMutation.isPending,
+    isReordering: reorderModulesMutation.isPending,
   }
 }

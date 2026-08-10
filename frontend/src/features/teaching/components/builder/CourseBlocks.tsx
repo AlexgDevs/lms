@@ -5,6 +5,7 @@ import { useBlocks } from "@/features/teaching/api/useBlocks"
 import { BlockItem } from "./BlockItem"
 import { BlockCreateForm } from "./BlockCreateForm"
 import { BlockType } from "@/client"
+import { useReorderableList } from "@/lib/dnd"
 
 interface CourseBlocksProps {
     courseId: string
@@ -20,11 +21,24 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
         updateBlockAsync,
         deleteBlockAsync,
         isDeletingBlock,
+        reorderBlocksAsync,
+        isReordering,
     } = useBlocks({
         courseId: courseId || undefined,
         lessonId: lessonId || undefined,
         onlyCreated: true,
     })
+
+    // Переупорядочивание блоков (drag & drop)
+    const blockList = useReorderableList(
+        blocks || [],
+        (orderedIds) => {
+            reorderBlocksAsync(orderedIds).catch((e) => {
+                console.error("Ошибка при переупорядочивании блоков:", e)
+            })
+        },
+        isReordering,
+    )
 
     const [isAdding, setIsAdding] = useState(false)
 
@@ -81,6 +95,15 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
                             onUpdate={updateBlockAsync}
                             onDelete={deleteBlockAsync}
                             isDeleting={isDeletingBlock}
+                            onDragStart={(e) => blockList.beginDrag(e, block.id)}
+                            onDragEnd={blockList.dragEnd}
+                            onDragOver={(e) => blockList.dragOver(e, block.id)}
+                            onDrop={(e) => blockList.drop(e, block.id)}
+                            isDragging={blockList.draggingId === block.id}
+                            isDragOver={
+                                blockList.overId === block.id &&
+                                blockList.draggingId !== block.id
+                            }
                         />
                     ))
                 ) : !isAdding ? (

@@ -7,8 +7,10 @@ import {
   createBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostMutation,
   updateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchMutation,
   deleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteMutation,
+  reorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchMutation,
 } from "@/client/@tanstack/react-query.gen"
 import type { BlockType } from "@/client" // Импортируй BlockType из твоего сгенерированного клиента (или типов)
+import { applyOrderToCache } from "@/lib/dnd"
 
 interface UseBlocksParams {
   courseId?: string
@@ -147,6 +149,49 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
     })
   }
 
+  // 4. Переупорядочивание блоков
+  const reorderBlocksMutation = useMutation({
+    ...reorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchMutation(),
+    onMutate: async (variables) => {
+      const targetCourseId = variables.path?.course_id || courseId
+      const targetLessonId = variables.path?.lesson_id || lessonId
+      const queryKey = getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetQueryKey({
+        path: { course_id: targetCourseId as string, lesson_id: targetLessonId as string },
+      })
+      await queryClient.cancelQueries({ queryKey })
+      const previous = queryClient.getQueryData(queryKey)
+
+      queryClient.setQueryData(queryKey, (old: unknown) =>
+        applyOrderToCache(old, variables.body.ordered_ids),
+      )
+
+      return { previous, queryKey }
+    },
+    onError: (err, _variables, context) => {
+      if (context?.queryKey && context?.previous !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previous)
+      }
+      showErrorToast(getErrorMessage(err) || "Ошибка при изменении порядка блоков")
+    },
+    onSuccess: (_, variables) => {
+      invalidateBlocksQuery(variables.path?.course_id, variables.path?.lesson_id)
+    },
+  })
+
+  const reorderBlocksAsync = async (orderedIds: string[]) => {
+    if (!isValidParams) throw new Error("Не передан courseId или lessonId")
+
+    return reorderBlocksMutation.mutateAsync({
+      path: {
+        course_id: courseId as string,
+        lesson_id: lessonId as string,
+      },
+      body: {
+        ordered_ids: orderedIds,
+      },
+    })
+  }
+
   return {
     // Data & Query States
     blocks,
@@ -158,6 +203,7 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
     createBlockAsync,
     updateBlockAsync,
     deleteBlockAsync,
+    reorderBlocksAsync,
 
     // Raw Mutations & States
     createBlock: createBlockMutation.mutate,
@@ -168,5 +214,7 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
 
     deleteBlock: deleteBlockMutation.mutate,
     isDeletingBlock: deleteBlockMutation.isPending,
+
+    isReordering: reorderBlocksMutation.isPending,
   }
 }

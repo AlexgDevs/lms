@@ -9,7 +9,8 @@ import {
   Loader2,
   Folder,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  GripVertical
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useModules } from "@/features/teaching/api/useModules"
 import { CourseLessonsList } from "./CourseLessonsList"
+import { useReorderableList } from "@/lib/dnd"
 
 interface Module {
   id: string
@@ -48,8 +50,21 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
     createModuleAsync, 
     updateModuleAsync, 
     deleteModuleAsync,
-    isCreating 
+    reorderModulesAsync,
+    isCreating,
+    isReordering
   } = useModules({ courseId, onlyCreated: true })
+
+  // Переупорядочивание модулей (drag & drop)
+  const moduleList = useReorderableList(
+    (modules as Module[]) || [],
+    (orderedIds) => {
+      reorderModulesAsync(orderedIds).catch((e) => {
+        console.error("Ошибка при переупорядочивании модулей:", e)
+      })
+    },
+    isReordering,
+  )
 
   // Стейт открытых аккордеонов модулей
   const [expandedModuleIds, setExpandedModuleIds] = useState<Record<string, boolean>>({})
@@ -169,10 +184,16 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
           return (
             <div
               key={module.id}
+              onDragOver={(e) => moduleList.dragOver(e, module.id)}
+              onDrop={(e) => moduleList.drop(e, module.id)}
               className={`border rounded-xl transition-colors overflow-hidden ${
-                isActive
-                  ? "border-primary/50 bg-primary/5"
-                  : "border-border/60 bg-card hover:border-border"
+                moduleList.draggingId === module.id
+                  ? "opacity-40"
+                  : moduleList.overId === module.id
+                    ? "border-primary/60 ring-1 ring-primary/30"
+                    : isActive
+                      ? "border-primary/50 bg-primary/5"
+                      : "border-border/60 bg-card hover:border-border"
               }`}
             >
               {/* Шапка модуля */}
@@ -186,6 +207,16 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
                 }}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span
+                    draggable
+                    onDragStart={(e) => moduleList.beginDrag(e, module.id)}
+                    onDragEnd={moduleList.dragEnd}
+                    className="h-5 w-5 shrink-0 flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing select-none"
+                    title="Перетащите, чтобы изменить порядок"
+                  >
+                    <GripVertical size={14} />
+                  </span>
+
                   <Button
                     type="button"
                     variant="ghost"

@@ -24,6 +24,24 @@ export const BlockCreateRequestSchemaSchema = {
     title: 'BlockCreateRequestSchema'
 } as const;
 
+export const BlockReorderSchemaSchema = {
+    properties: {
+        ordered_ids: {
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
+            type: 'array',
+            title: 'Ordered Ids'
+        }
+    },
+    type: 'object',
+    required: [
+        'ordered_ids'
+    ],
+    title: 'BlockReorderSchema'
+} as const;
+
 export const BlockSchemaSchema = {
     properties: {
         id: {
@@ -52,6 +70,11 @@ export const BlockSchemaSchema = {
             additionalProperties: true,
             type: 'object',
             title: 'Payload'
+        },
+        order: {
+            type: 'integer',
+            title: 'Order',
+            default: 0
         },
         created_at: {
             type: 'string',
@@ -669,6 +692,24 @@ export const LessonProgressTypeSchema = {
     title: 'LessonProgressType'
 } as const;
 
+export const LessonReorderSchemaSchema = {
+    properties: {
+        ordered_ids: {
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
+            type: 'array',
+            title: 'Ordered Ids'
+        }
+    },
+    type: 'object',
+    required: [
+        'ordered_ids'
+    ],
+    title: 'LessonReorderSchema'
+} as const;
+
 export const LessonSchemaSchema = {
     properties: {
         id: {
@@ -781,6 +822,24 @@ export const ModuleCreateRequestSchemaSchema = {
         'title'
     ],
     title: 'ModuleCreateRequestSchema'
+} as const;
+
+export const ModuleReorderSchemaSchema = {
+    properties: {
+        ordered_ids: {
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
+            type: 'array',
+            title: 'Ordered Ids'
+        }
+    },
+    type: 'object',
+    required: [
+        'ordered_ids'
+    ],
+    title: 'ModuleReorderSchema'
 } as const;
 
 export const ModuleSchemaSchema = {

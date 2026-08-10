@@ -4,7 +4,7 @@ import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOption
 
 import { client } from '../client.gen';
 import { AuthService, BlockService, CourseService, DefaultService, LessonService, LessonsProgresService, ModuleService, type Options, SubmissionService, UserService } from '../sdk.gen';
-import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostError, CreateCourseApiV1CoursesPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostError, CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateMemberApiV1CoursesCourseIdMembersPostData, CreateMemberApiV1CoursesCourseIdMembersPostError, CreateMemberApiV1CoursesCourseIdMembersPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostError, CreateModuleApiV1CoursesCourseIdModulesPostResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteError, DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetError, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetError, GetCourseByIdApiV1CoursesCourseIdGetResponse, GetCoursesApiV1CoursesGetData, GetCoursesApiV1CoursesGetError, GetCoursesApiV1CoursesGetResponse, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponse, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetError, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse, GetModulesApiV1CoursesCourseIdModulesGetData, GetModulesApiV1CoursesCourseIdModulesGetError, GetModulesApiV1CoursesCourseIdModulesGetResponse, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetError, GetUserByIdApiV1UsersUserIdGetResponse, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostError, LoginApiV1AuthLoginPostResponse, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostError, LogoutApiV1AuthLogoutPostResponse, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostError, RefreshApiV1AuthRefreshPostResponse, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostError, RegisterApiV1AuthRegisterPostResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchError, UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
+import type { CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostError, CreateCourseApiV1CoursesPostResponse, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostError, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostError, CreateLessonApiV1LessonsLessonIdProgressPostResponse, CreateMemberApiV1CoursesCourseIdMembersPostData, CreateMemberApiV1CoursesCourseIdMembersPostError, CreateMemberApiV1CoursesCourseIdMembersPostResponse, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostError, CreateModuleApiV1CoursesCourseIdModulesPostResponse, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteError, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponse, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteError, DeleteCourseApiV1CoursesCourseIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetError, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponse, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetError, GetCourseByIdApiV1CoursesCourseIdGetResponse, GetCoursesApiV1CoursesGetData, GetCoursesApiV1CoursesGetError, GetCoursesApiV1CoursesGetResponse, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponse, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetError, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponse, GetModulesApiV1CoursesCourseIdModulesGetData, GetModulesApiV1CoursesCourseIdModulesGetError, GetModulesApiV1CoursesCourseIdModulesGetResponse, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetError, GetUserByIdApiV1UsersUserIdGetResponse, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostError, LoginApiV1AuthLoginPostResponse, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostError, LogoutApiV1AuthLogoutPostResponse, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostError, RefreshApiV1AuthRefreshPostResponse, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostError, RegisterApiV1AuthRegisterPostResponse, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchError, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponse, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchError, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponse, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchError, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponse, SayHelloGetData, SayHelloGetResponse, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostError, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchError, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponse, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchError, UpdateCourseApiV1CoursesCourseIdPatchResponse, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchError, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponse, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchError, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponse } from '../types.gen';
 
 /**
  * Register
@@ -330,6 +330,23 @@ export const createModuleApiV1CoursesCourseIdModulesPostMutation = (options?: Pa
 };
 
 /**
+ * Reorder Modules
+ */
+export const reorderModulesApiV1CoursesCourseIdModulesReorderPatchMutation = (options?: Partial<Options<ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData>>): UseMutationOptions<ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponse, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchError, Options<ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData>> => {
+    const mutationOptions: UseMutationOptions<ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponse, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchError, Options<ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await ModuleService.reorderModulesApiV1CoursesCourseIdModulesReorderPatch({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
  * Delete Module
  */
 export const deleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteMutation = (options?: Partial<Options<DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData>>): UseMutationOptions<DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponse, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteError, Options<DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData>> => {
@@ -426,6 +443,23 @@ export const createLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostMutation 
 };
 
 /**
+ * Reorder Lessons
+ */
+export const reorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchMutation = (options?: Partial<Options<ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData>>): UseMutationOptions<ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponse, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchError, Options<ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData>> => {
+    const mutationOptions: UseMutationOptions<ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponse, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchError, Options<ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await LessonService.reorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatch({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
  * Delete Lesson
  */
 export const deleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteMutation = (options?: Partial<Options<DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData>>): UseMutationOptions<DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponse, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteError, Options<DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData>> => {
@@ -511,6 +545,23 @@ export const createBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostMutation = 
     const mutationOptions: UseMutationOptions<CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostError, Options<CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await BlockService.createBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Reorder Blocks
+ */
+export const reorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchMutation = (options?: Partial<Options<ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData>>): UseMutationOptions<ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponse, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchError, Options<ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData>> => {
+    const mutationOptions: UseMutationOptions<ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponse, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchError, Options<ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await BlockService.reorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatch({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

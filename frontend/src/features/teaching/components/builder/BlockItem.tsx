@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Loader2, Trash2 } from "lucide-react"
+import { Loader2, Trash2, GripVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -14,9 +14,15 @@ interface BlockItemProps {
     onUpdate: (blockId: string, data: any) => Promise<any>
     onDelete: (blockId: string) => Promise<any>
     isDeleting: boolean
+    onDragStart?: (e: React.DragEvent) => void
+    onDragEnd?: () => void
+    onDragOver?: (e: React.DragEvent) => void
+    onDrop?: (e: React.DragEvent) => void
+    isDragging?: boolean
+    isDragOver?: boolean
 }
 
-export function BlockItem({ block, index, onUpdate, onDelete, isDeleting }: BlockItemProps) {
+export function BlockItem({ block, index, onUpdate, onDelete, isDeleting, onDragStart, onDragEnd, onDragOver, onDrop, isDragging, isDragOver }: BlockItemProps) {
     const [title, setTitle] = useState(block.title)
     const [payload, setPayload] = useState(block.payload || {})
     const [isSaving, setIsSaving] = useState(false)
@@ -36,9 +42,24 @@ export function BlockItem({ block, index, onUpdate, onDelete, isDeleting }: Bloc
     }
 
     return (
-        <div className="border border-border/60 rounded-xl bg-background p-4 space-y-3 shadow-2xs">
+        <div
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            className={`border border-border/60 rounded-xl bg-background p-4 space-y-3 shadow-2xs transition-colors ${
+                isDragging ? "opacity-40" : isDragOver ? "border-primary/60 ring-1 ring-primary/30" : ""
+            }`}
+        >
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-1">
+                    <span
+                        draggable
+                        onDragStart={onDragStart}
+                        onDragEnd={onDragEnd}
+                        className="shrink-0 text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing select-none"
+                        title="Перетащите, чтобы изменить порядок"
+                    >
+                        <GripVertical size={16} />
+                    </span>
                     <span className="text-xs font-semibold text-muted-foreground">{index + 1}.</span>
                     <BlockTypeIcon type={block.block_type} />
                     <Input

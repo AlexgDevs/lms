@@ -22,6 +22,16 @@ export type BlockCreateRequestSchema = {
 };
 
 /**
+ * BlockReorderSchema
+ */
+export type BlockReorderSchema = {
+    /**
+     * Ordered Ids
+     */
+    ordered_ids: Array<string>;
+};
+
+/**
  * BlockSchema
  */
 export type BlockSchema = {
@@ -48,6 +58,10 @@ export type BlockSchema = {
     payload: {
         [key: string]: unknown;
     };
+    /**
+     * Order
+     */
+    order?: number;
     /**
      * Created At
      */
@@ -430,6 +444,16 @@ export const LessonProgressType = {
 export type LessonProgressType = typeof LessonProgressType[keyof typeof LessonProgressType];
 
 /**
+ * LessonReorderSchema
+ */
+export type LessonReorderSchema = {
+    /**
+     * Ordered Ids
+     */
+    ordered_ids: Array<string>;
+};
+
+/**
  * LessonSchema
  */
 export type LessonSchema = {
@@ -493,6 +517,16 @@ export type ModuleCreateRequestSchema = {
      * Description
      */
     description?: string | null;
+};
+
+/**
+ * ModuleReorderSchema
+ */
+export type ModuleReorderSchema = {
+    /**
+     * Ordered Ids
+     */
+    ordered_ids: Array<string>;
 };
 
 /**
@@ -1004,6 +1038,38 @@ export type CreateModuleApiV1CoursesCourseIdModulesPostResponses = {
 
 export type CreateModuleApiV1CoursesCourseIdModulesPostResponse = CreateModuleApiV1CoursesCourseIdModulesPostResponses[keyof CreateModuleApiV1CoursesCourseIdModulesPostResponses];
 
+export type ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData = {
+    body: ModuleReorderSchema;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/modules/reorder';
+};
+
+export type ReorderModulesApiV1CoursesCourseIdModulesReorderPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReorderModulesApiV1CoursesCourseIdModulesReorderPatchError = ReorderModulesApiV1CoursesCourseIdModulesReorderPatchErrors[keyof ReorderModulesApiV1CoursesCourseIdModulesReorderPatchErrors];
+
+export type ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponses = {
+    /**
+     * Response Reorder Modules Api V1 Courses  Course Id  Modules Reorder Patch
+     *
+     * Successful Response
+     */
+    200: Array<ModuleSchema>;
+};
+
+export type ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponse = ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponses[keyof ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponses];
+
 export type DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData = {
     body?: never;
     path: {
@@ -1154,6 +1220,42 @@ export type CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses 
 };
 
 export type CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponse = CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses[keyof CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses];
+
+export type ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData = {
+    body: LessonReorderSchema;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/modules/{module_id}/lessons/reorder';
+};
+
+export type ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchError = ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchErrors[keyof ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchErrors];
+
+export type ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponses = {
+    /**
+     * Response Reorder Lessons Api V1 Courses  Course Id  Modules  Module Id  Lessons Reorder Patch
+     *
+     * Successful Response
+     */
+    200: Array<LessonSchema>;
+};
+
+export type ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponse = ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponses[keyof ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponses];
 
 export type DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData = {
     body?: never;
@@ -1313,6 +1415,42 @@ export type CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses = 
 };
 
 export type CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponse = CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses[keyof CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses];
+
+export type ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData = {
+    body: BlockReorderSchema;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/blocks/reorder';
+};
+
+export type ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchError = ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchErrors[keyof ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchErrors];
+
+export type ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponses = {
+    /**
+     * Response Reorder Blocks Api V1 Courses  Course Id  Lessons  Lesson Id  Blocks Reorder Patch
+     *
+     * Successful Response
+     */
+    200: Array<BlockSchema>;
+};
+
+export type ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponse = ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponses[keyof ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponses];
 
 export type DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData = {
     body?: never;
