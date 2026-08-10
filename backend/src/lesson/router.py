@@ -7,6 +7,7 @@ from src.lesson.schemas import (
     LessonSchema,
     LessonCreateRequestSchema,
     LessonUpdateRequestSchema,
+    LessonReorderSchema,
 )
 
 router = APIRouter(
@@ -27,6 +28,22 @@ async def create_lesson(
     user_id: UserIdDep,
 ) -> LessonSchema:
     return await service.create_lesson(
+        course_id=course_id,
+        module_id=module_id,
+        user_id=user_id,
+        payload=payload,
+    )
+
+
+@router.patch("/reorder", response_model=list[LessonSchema])
+async def reorder_lessons(
+    course_id: UUID,
+    module_id: UUID,
+    payload: LessonReorderSchema,
+    service: LessonServiceDep,
+    user_id: UserIdDep,
+) -> list[LessonSchema]:
+    return await service.reorder(
         course_id=course_id,
         module_id=module_id,
         user_id=user_id,

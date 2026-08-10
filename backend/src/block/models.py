@@ -25,6 +25,7 @@ class Block(UUIDBase):
     payload: Mapped[Dict[str, Any]] = mapped_column(
         JSONB, default=dict, server_default="{}"
     )
+    order: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[timestamp]
     updated_at: Mapped[timestamp]
     course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"))

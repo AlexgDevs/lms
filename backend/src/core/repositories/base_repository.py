@@ -2,7 +2,7 @@ from typing import Sequence, Any
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import insert, select, update, delete
+from sqlalchemy import ColumnElement, insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Executable
 
@@ -24,9 +24,13 @@ class BaseRepository[T: UUIDBase, R: BaseSchema]:
         self,
         limit: int,
         offset: int,
+        order_by: ColumnElement[Any] | None = None,
         **filter_by: Any,
     ) -> Sequence[R]:
-        query = select(self.model).filter_by(**filter_by).limit(limit).offset(offset)
+        query = select(self.model).filter_by(**filter_by)
+        if order_by is not None:
+            query = query.order_by(order_by)
+        query = query.limit(limit).offset(offset)
         return await self._execute_and_map_all(query)
 
     async def get_one(self, **filter_by: Any) -> R | None:

@@ -10,6 +10,7 @@ from src.module.schemas import (
     ModuleSchema,
     ModuleUpdateRequestSchema,
     ModuleUpdateSchema,
+    ModuleReorderSchema,
 )
 
 
@@ -101,7 +102,10 @@ class ModuleService(BaseService):
 
         return list(
             await self.uow.modules.get_filtered(
-                limit=limit, offset=offset, course_id=course.id
+                limit=limit,
+                offset=offset,
+                order_by=self.uow.modules.model.order.asc(),
+                course_id=course.id,
             )
         )
 
@@ -125,6 +129,35 @@ class ModuleService(BaseService):
 
         return list(
             await self.uow.modules.get_filtered(
-                limit=limit, offset=offset, course_id=course.id
+                limit=limit,
+                offset=offset,
+                order_by=self.uow.modules.model.order.asc(),
+                course_id=course.id,
+            )
+        )
+
+    async def reorder(
+        self,
+        course_id: UUID,
+        user_id: UUID,
+        payload: ModuleReorderSchema,
+    ) -> list[ModuleSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=user_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        await self.uow.modules.set_order_bulk(
+            course_id=course_id, ordered_ids=payload.ordered_ids
+        )
+        await self.uow.commit()
+
+        return list(
+            await self.uow.modules.get_filtered(
+                limit=1000,
+                offset=0,
+                order_by=self.uow.modules.model.order.asc(),
+                course_id=course.id,
             )
         )

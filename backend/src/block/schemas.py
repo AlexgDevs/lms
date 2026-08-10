@@ -14,6 +14,7 @@ class BlockSchema(BaseSchema):
     title: str
     block_type: BlockType
     payload: dict[str, Any]
+    order: int = 0
     created_at: datetime
     updated_at: datetime
 
@@ -85,6 +86,7 @@ class BlockCreateRequestSchema(BaseSchema, PolymorphicPayloadMixin[BlockType]):
 class BlockCreateSchema(BlockCreateRequestSchema):
     lesson_id: UUID
     course_id: UUID
+    order: int = 0
 
 
 class BlockUpdateRequestSchema(BaseSchema, PolymorphicPayloadMixin[BlockType]):
@@ -97,3 +99,7 @@ class BlockUpdateRequestSchema(BaseSchema, PolymorphicPayloadMixin[BlockType]):
 
 class BlockUpdateSchema(BlockUpdateRequestSchema):
     pass
+
+
+class BlockReorderSchema(BaseSchema):
+    ordered_ids: list[UUID]

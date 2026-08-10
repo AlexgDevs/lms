@@ -15,6 +15,7 @@ from src.lesson.schemas import (
     LessonSchema,
     LessonUpdateRequestSchema,
     LessonUpdateSchema,
+    LessonReorderSchema,
 )
 from src.lesson.unit_of_work import LessonUnitOfWork
 from src.core.services import BaseService
@@ -192,6 +193,7 @@ class LessonService(BaseService):
             await self.uow.lessons.get_filtered(
                 limit=limit,
                 offset=offset,
+                order_by=self.uow.lessons.model.order.asc(),
                 course_id=course.id,
                 module_id=module.id,
             )
@@ -226,6 +228,39 @@ class LessonService(BaseService):
             await self.uow.lessons.get_filtered(
                 limit=limit,
                 offset=offset,
+                order_by=self.uow.lessons.model.order.asc(),
+                course_id=course.id,
+                module_id=module.id,
+            )
+        )
+
+    async def reorder(
+        self,
+        course_id: UUID,
+        module_id: UUID,
+        user_id: UUID,
+        payload: LessonReorderSchema,
+    ) -> list[LessonSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=user_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
+        if not module:
+            raise ModuleNotFoundError
+
+        await self.uow.lessons.set_order_bulk(
+            module_id=module_id, course_id=course_id, ordered_ids=payload.ordered_ids
+        )
+        await self.uow.commit()
+
+        return list(
+            await self.uow.lessons.get_filtered(
+                limit=1000,
+                offset=0,
+                order_by=self.uow.lessons.model.order.asc(),
                 course_id=course.id,
                 module_id=module.id,
             )

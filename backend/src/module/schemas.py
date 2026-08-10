@@ -31,3 +31,7 @@ class ModuleUpdateRequestSchema(BaseSchema):
 
 class ModuleUpdateSchema(ModuleUpdateRequestSchema):
     pass
+
+
+class ModuleReorderSchema(BaseSchema):
+    ordered_ids: list[UUID]

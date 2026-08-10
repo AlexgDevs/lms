@@ -7,6 +7,7 @@ from src.module.schemas import (
     ModuleCreateRequestSchema,
     ModuleUpdateRequestSchema,
     ModuleSchema,
+    ModuleReorderSchema,
 )
 
 from src.user.dependencies import UserIdDep
@@ -28,6 +29,16 @@ async def create_module(
     return await service.create_module(
         course_id=course_id, user_id=user_id, payload=payload
     )
+
+
+@router.patch("/reorder", response_model=list[ModuleSchema])
+async def reorder_modules(
+    course_id: UUID,
+    payload: ModuleReorderSchema,
+    service: ModuleServiceDep,
+    user_id: UserIdDep,
+) -> list[ModuleSchema]:
+    return await service.reorder(course_id=course_id, user_id=user_id, payload=payload)
 
 
 @router.patch(

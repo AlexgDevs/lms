@@ -13,6 +13,7 @@ from src.block.schemas import (
     BlockSchema,
     BlockUpdateRequestSchema,
     BlockUpdateSchema,
+    BlockReorderSchema,
 )
 
 
@@ -42,10 +43,13 @@ class BlockService(BaseService):
         if not lesson:
             raise LessonNotFoundError
 
+        next_order = await self.uow.blocks.get_count(lesson_id=lesson.id)
+
         create_data = BlockCreateSchema(
             **payload.model_dump(),
             course_id=course.id,
             lesson_id=lesson.id,
+            order=next_order,
         )
         block = await self.uow.blocks.create(create_data)
         await self.uow.commit()
@@ -145,6 +149,7 @@ class BlockService(BaseService):
             await self.uow.blocks.get_filtered(
                 limit=limit,
                 offset=offset,
+                order_by=self.uow.blocks.model.order.asc(),
                 course_id=course.id,
                 lesson_id=lesson.id,
             )
@@ -177,6 +182,42 @@ class BlockService(BaseService):
 
         return list(
             await self.uow.blocks.get_filtered(
-                limit=limit, offset=offset, course_id=course.id, lesson_id=lesson.id
+                limit=limit,
+                offset=offset,
+                order_by=self.uow.blocks.model.order.asc(),
+                course_id=course.id,
+                lesson_id=lesson.id,
+            )
+        )
+
+    async def reorder(
+        self,
+        course_id: UUID,
+        lesson_id: UUID,
+        user_id: UUID,
+        payload: BlockReorderSchema,
+    ) -> list[BlockSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=user_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        lesson = await self.uow.lessons.get_one(id=lesson_id, course_id=course_id)
+        if not lesson:
+            raise LessonNotFoundError
+
+        await self.uow.blocks.set_order_bulk(
+            lesson_id=lesson_id, ordered_ids=payload.ordered_ids
+        )
+        await self.uow.commit()
+
+        return list(
+            await self.uow.blocks.get_filtered(
+                limit=1000,
+                offset=0,
+                order_by=self.uow.blocks.model.order.asc(),
+                course_id=course.id,
+                lesson_id=lesson.id,
             )
         )

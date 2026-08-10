@@ -7,6 +7,7 @@ from src.block.schemas import (
     BlockSchema,
     BlockCreateRequestSchema,
     BlockUpdateRequestSchema,
+    BlockReorderSchema,
 )
 
 router = APIRouter(
@@ -27,6 +28,22 @@ async def create_block(
     user_id: UserIdDep,
 ) -> BlockSchema:
     return await service.create_block(
+        course_id=course_id,
+        lesson_id=lesson_id,
+        user_id=user_id,
+        payload=payload,
+    )
+
+
+@router.patch("/reorder", response_model=list[BlockSchema])
+async def reorder_blocks(
+    course_id: UUID,
+    lesson_id: UUID,
+    payload: BlockReorderSchema,
+    service: BlockServiceDep,
+    user_id: UserIdDep,
+) -> list[BlockSchema]:
+    return await service.reorder(
         course_id=course_id,
         lesson_id=lesson_id,
         user_id=user_id,

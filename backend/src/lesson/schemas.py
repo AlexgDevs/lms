@@ -33,3 +33,7 @@ class LessonUpdateRequestSchema(BaseSchema):
 
 class LessonUpdateSchema(LessonUpdateRequestSchema):
     pass
+
+
+class LessonReorderSchema(BaseSchema):
+    ordered_ids: list[UUID]
