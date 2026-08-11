@@ -4,17 +4,19 @@ import {
   getCoursesApiV1CoursesGetOptions,
 } from "@/client/@tanstack/react-query.gen"
 
-export const useEnrolledCourses = () => {
+export const useEnrolledCourses = (enabled = true) => {
   return useQuery({
     ...getCoursesApiV1CoursesGetOptions({ query: { filter: "my" } }),
+    enabled,
   })
 }
 
-export const useCreatedCourses = (limit = 12) => {
+export const useCreatedCourses = (limit = 12, enabled = true) => {
   return useQuery({
     ...getCoursesApiV1CoursesGetOptions({
       query: { filter: "created", limit, offset: 0 },
     }),
+    enabled,
   })
 }
 

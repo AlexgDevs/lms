@@ -9,7 +9,7 @@ from src.course.schemas import (
     CourseUserBriefSchema,
 )
 from src.course.dependencies import CourseServiceDep
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import OptionalUserIdDep, UserIdDep
 from uuid import UUID
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
@@ -47,7 +47,7 @@ async def delete_course(
 
 @router.get("")
 async def get_courses(
-    user_id: UserIdDep,
+    user_id: OptionalUserIdDep,
     service: CourseServiceDep,
     filter: Literal["all", "created", "my"] = "all",
     limit: int = 10,
@@ -61,7 +61,7 @@ async def get_courses(
 @router.get("/{course_id}")
 async def get_course_by_id(
     course_id: UUID,
-    user_id: UserIdDep,
+    user_id: OptionalUserIdDep,
     service: CourseServiceDep,
     filter: Literal["current", "author", "my"] = "current",
 ) -> CourseSchema | CourseUserBriefSchema:

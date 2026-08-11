@@ -51,9 +51,7 @@ export function useModules({ courseId, onlyCreated = false }: UseModulesOptions)
     enabled: isValidCourseId,
   })
 
-  const modules = Array.isArray(modulesData) 
-    ? modulesData 
-    : (modulesData as any)?.items || []
+  const modules = Array.isArray(modulesData) ? modulesData : []
 
   // 2. Создание модуля
   const createModuleMutation = useMutation({

@@ -11,26 +11,28 @@ interface YearlyActivityProps {
   data?: ContributionDay[];
 }
 
-export function YearlyActivity({ data = [] }: YearlyActivityProps) {
-  // Генерируем моковую сетку за последние ~52 недели (364 дня)
-  const days = useMemo(() => {
-    if (data.length > 0) return data;
+function generateMockDays(): ContributionDay[] {
+  const mockDays: ContributionDay[] = [];
+  const today = new Date();
 
-    // Заглушка: случайно закрашенные дни для красивой демонстрации
-    const mockDays: ContributionDay[] = [];
-    const today = new Date();
-    
-    for (let i = 363; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split("T")[0];
-      
-      // Случайная интенсивность для визуала
-      const randomCount = Math.random() > 0.65 ? Math.floor(Math.random() * 8) : 0;
-      mockDays.push({ date: dateStr, count: randomCount });
-    }
-    return mockDays;
-  }, [data]);
+  for (let i = 363; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+
+    const randomCount = Math.random() > 0.65 ? Math.floor(Math.random() * 8) : 0;
+    mockDays.push({ date: dateStr, count: randomCount });
+  }
+  return mockDays;
+}
+
+const FALLBACK_MOCK_DAYS = generateMockDays();
+
+export function YearlyActivity({ data = [] }: YearlyActivityProps) {
+  const days = useMemo(
+    () => (data.length > 0 ? data : FALLBACK_MOCK_DAYS),
+    [data]
+  );
 
   // Вычисляем уровень подсветки (0..4)
   const getLevelClass = (count: number) => {

@@ -68,30 +68,33 @@ client.interceptors.response.use(async (response, request) => {
 
   const isRefreshUrl = request.url.includes("/auth/refresh");
 
-  if (response.status === 401 && !isRefreshUrl) {
-    const isRetry = request.headers.get("X-Is-Retry") === "true";
+    if (response.status === 401 && !isRefreshUrl) {
+      const isRetry = request.headers.get("X-Is-Retry") === "true";
+      const hadToken = localStorage.getItem("access_token");
 
-    if (!isRetry) {
-      if (!refreshPromise) {
-        refreshPromise = refreshAccessToken().finally(() => {
-          refreshPromise = null;
-        });
+      if (!isRetry && hadToken) {
+        if (!refreshPromise) {
+          refreshPromise = refreshAccessToken().finally(() => {
+            refreshPromise = null;
+          });
+        }
+
+        const newAccessToken = await refreshPromise;
+
+        if (newAccessToken) {
+          const retryRequest = request.clone();
+          retryRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
+          retryRequest.headers.set("X-Is-Retry", "true");
+
+          return fetch(retryRequest);
+        }
       }
 
-      const newAccessToken = await refreshPromise;
-
-      if (newAccessToken) {
-        const retryRequest = request.clone();
-        retryRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
-        retryRequest.headers.set("X-Is-Retry", "true");
-
-        return fetch(retryRequest);
+      if (hadToken) {
+        handleLogout();
       }
+      throw new ApiError(response.status, { message: "Unauthorized" });
     }
-
-    handleLogout();
-    throw new ApiError(response.status, { message: "Unauthorized" });
-  }
 
   const body = await response.json().catch(() => null);
   throw new ApiError(response.status, body);

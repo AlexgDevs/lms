@@ -66,8 +66,9 @@ Files: `router, service, repository, mappers, schemas, models, exceptions, depen
 - Router prefix `/users`, tags `["Users"]`: `GET /me`, `GET /{user_id}`.
 - Model: `User` (username/email unique, password_hash, avatar_url, joined_at,
   is_active, refresh_tokens relationship).
-- **Public seam**: `UserIdDep`, `CurrentUserDep`, `UserServiceDep`,
-  `UserRepositoryDep` (`dependencies.py`) — consumed by most other features.
+- **Public seam**: `UserIdDep`, `OptionalUserIdDep`, `CurrentUserDep`,
+  `UserServiceDep`, `UserRepositoryDep` (`dependencies.py`) — consumed by most
+  other features.
 - Deps on: `auth.security`/`auth.exceptions` (token decode), `core/*`.
 
 ### course (`src/course/`) + `course/course_member`
@@ -80,9 +81,15 @@ Files (course_member): `schemas, service, repository, mappers, unit_of_work`.
   `POST /{course_id}/members` (enroll), `POST /{course_id}/media` (upload cover,
   multipart `file` + `is_public` → `CourseSchema`), `DELETE /{course_id}/media`
   (remove cover, 204).
+- **Public read (anonymous)**: both GETs take `OptionalUserIdDep` — `filter=all`
+  and `filter=current` return only `status=published` courses and work with no
+  token (no security scheme in OpenAPI); `filter=created|my|author` require a
+  token (`user_id=None` → `InvalidAccessTokenError` 401).
 - Models: `Course` (owner_id→users, title, description, cover_url, price,
-  member_count, is_deleted), `CourseMember` (user_id, course_id, role, left_at).
-- Enums: `CourseMemberRole` (member/teacher/so_owner).
+  member_count, status, is_deleted), `CourseMember` (user_id, course_id, role,
+  left_at).
+- Enums: `CourseMemberRole` (member/teacher/so_owner), `CourseStatus`
+  (draft/published).
 - Media cover: `cover_url` is a server-generated public storage URL. Upload
   attaches a `MediaAttachment(owner_type=course, role=cover)` and replaces the
   previous cover (old media purged after commit if unreferenced); remove detaches
@@ -229,7 +236,7 @@ all routers → core.router (app_v1)
 | --- | --- | --- |
 | `users` | `User` (`user/models.py`) | username/email unique; is_active; ↔ refresh_tokens |
 | `refresh_tokens` | `RefreshToken` (`auth/models.py`) | FK users.id ON DELETE CASCADE |
-| `courses` | `Course` (`course/models.py`) | FK users.id (owner_id); title/description/cover_url/price/member_count; soft delete is_deleted |
+| `courses` | `Course` (`course/models.py`) | FK users.id (owner_id); title/description/cover_url/price/member_count/status; soft delete is_deleted |
 | `course_members` | `CourseMember` (`course/models.py`) | FK users.id, courses.id; role, left_at |
 | `modules` | `Module` (`module/models.py`) | FK courses.id ON DELETE CASCADE |
 | `lessons` | `Lesson` (`lesson/models.py`) | FK modules.id (CASCADE), courses.id |
@@ -248,18 +255,23 @@ first-try columns, uq) → `e264701752f9` → `cafdbe78a029` (submission_type
 renames) → `a4e1ff2972d3` (submission attr rename) → `cf704b7d5f64`
 (lesson_progress constraint) → `f547cd198dee` (course_members table,
 courses.member_count) → `a1b2c3d4e5f6` (blocks.order, server default 0) →
-`0af48c677726` (media table) → `56787d9db8f1` (**HEAD**: media_attachments
-table, uq_media_attachment, indexes). Run `uv run alembic upgrade head` from `backend/`.
+`0af48c677726` (media table) → `56787d9db8f1` (media_attachments table,
+uq_media_attachment, indexes) → `ff5277c7f3ec` (**HEAD**: courses.status).
+Run `uv run alembic upgrade head` from `backend/`.
 
 ## 4. Frontend (`frontend/src/`)
 
 ### Structure
 ```
-app/providers/    AppProviders, React Query, theme, layout
-api/client.ts     HTTP bootstrap: VITE_API_URL, auth interceptor (silent refresh), 401 logout
+app/providers/    AppProviders, React Query, theme, layout (+ theme-context.ts,
+                  layout-context.ts — contexts split out for lint-clean React Refresh)
+api/client.ts     HTTP bootstrap: VITE_API_URL, auth interceptor (silent refresh;
+                  401 → logout only if an access token was present, so anonymous
+                  requests never redirect to /login)
 client/           GENERATED @hey-api client (sdk.gen.ts, types.gen.ts, schemas.gen.ts,
                   @tanstack/react-query.gen.ts, client.gen.ts) — DO NOT EDIT
-components/       ui/ (shadcn) + layout/ (Header, Footer, UserMenu, CategoryCatalog)
+components/       ui/ (shadcn) + layout/ (Header, Footer, UserMenu, CategoryCatalog,
+                  Layout — mounted by routes/_layout.tsx)
 features/         auth, dashboard, media, profile, teaching
 lib/              utils (cn), toast, errors, dnd (arrayMove, applyOrderToCache,
                   useReorderableList for drag-and-drop reordering), media
@@ -274,12 +286,14 @@ styles/           Tailwind v4 CSS design system: tokens.css, semantic.css,
 | Feature | api/ hooks | pages | main routes |
 | --- | --- | --- | --- |
 | auth | `useAuth` | LoginPage, SignupPage | `/login`, `/signup` |
-| dashboard | — (uses course catalog) | RootPage (+ CourseCard, CatalogFilters, types, data/mocks) | `/` |
+| dashboard | `useEnrolledCourses(enabled)`, `useCreatedCourses(limit, enabled)`, `useRecommendedCourses(limit)`, `useCourseCatalog(pageSize)` | RootPage, CatalogPage (+ CourseCard, CourseRow, CourseRowSection, types) | `/`, `/catalog` |
 | profile | — | ProfilePage (streak, achievements, activity, certificates) | `/profile` |
 | teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`; `useBlocks` also `uploadBlockMediaAsync`), `useCourseMedia` (course cover upload/remove) | TeachingPage, CourseBuilderPage (builder components + block-editors/ incl. Image/File/Code/Audio/Video/QuizSingle/QuizMultiple; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem are drag-reorderable; `MediaUploadControl` validates/uploads media files) | `/teaching`, `/teaching/courses/$courseId` |
 | media | `useMyMedia`, `useMediaUrl`, `useUploadMedia`, `useDeleteMedia`, `useMedia` (aggregate) | — (api hooks only; wired through teaching `MediaUploadControl`) | — |
 
-Route files: `routes/_layout.tsx`, `_layout/index.tsx` (dashboard),
+Route files: `routes/_layout.tsx` (Layout shell; redirects logged-out users to
+`/login` on non-public routes — `/`, `/catalog`, `/about` stay public),
+`_layout/index.tsx` (dashboard), `_layout/catalog.tsx` (catalog),
 `_layout/teaching.index.tsx`, `_layout/teaching.courses.$courseId.tsx`,
 `_layout/profile.tsx`, `login.tsx`, `signup.tsx`, `__root.tsx`.
 
@@ -303,7 +317,7 @@ cover via `useCourseMedia`; standalone media listing/urls/delete via the
 ## 5. Key architecture seams (reused everywhere)
 
 - `core.dependencies.SessionDep / RedisDep / StorageDep / AccessTokenDep`
-- `user.dependencies.UserIdDep / CurrentUserDep / UserServiceDep`
+- `user.dependencies.UserIdDep / OptionalUserIdDep / CurrentUserDep / UserServiceDep`
 - `media.dependencies.MediaRepositoryDep / MediaAttachmentRepositoryDep /
   MediaServiceDep` (consumed by `block` and `course`)
 - `core.router.app_v1` — single registration point for all feature routers

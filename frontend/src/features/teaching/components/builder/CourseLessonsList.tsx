@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Plus, GripVertical, FileText, Loader2, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,13 +55,13 @@ export function CourseLessonsList({
 
   const [isAddingLesson, setIsAddingLesson] = useState(false)
   const [newLessonTitle, setNewLessonTitle] = useState("")
+  const [prevAutoAdd, setPrevAutoAdd] = useState(autoAdd)
 
   // Реагируем на триггер "autoAdd" из родителя (при клике на + на самом модуле)
-  useEffect(() => {
-    if (autoAdd) {
-      setIsAddingLesson(true)
-    }
-  }, [autoAdd])
+  if (autoAdd && !prevAutoAdd) {
+    setPrevAutoAdd(true)
+    setIsAddingLesson(true)
+  }
 
   const handleCloseAdding = () => {
     setIsAddingLesson(false)

@@ -7,6 +7,7 @@ from src.course.course_member.schemas import (
     CourseMemberCreateSchema,
     CourseMemberSchema,
 )
+from src.auth.exceptions import InvalidAccessTokenError
 from src.core.services.base_service import BaseService
 from src.course.enums import CourseStatus
 from src.course.exceptions import (
@@ -97,12 +98,14 @@ class CourseService(BaseService):
     async def list_courses(
         self,
         filter: Literal["all", "created", "my"],
-        user_id: UUID,
+        user_id: UUID | None,
         limit: int = 10,
         offset: int = 0,
     ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
         match filter:
             case "created":
+                if user_id is None:
+                    raise InvalidAccessTokenError
                 return list(
                     await self.uow.courses.get_filtered(
                         owner_id=user_id,
@@ -112,6 +115,8 @@ class CourseService(BaseService):
                     )
                 )
             case "my":
+                if user_id is None:
+                    raise InvalidAccessTokenError
                 return await self.get_courses_where_user_member(user_id)
             case "all" | _:
                 return list(
@@ -127,12 +132,16 @@ class CourseService(BaseService):
         self,
         filter: Literal["current", "author", "my"],
         course_id: UUID,
-        user_id: UUID,
+        user_id: UUID | None,
     ) -> CourseSchema | CourseUserBriefSchema:
         match filter:
             case "author":
+                if user_id is None:
+                    raise InvalidAccessTokenError
                 return await self.get_author_course_by_id(course_id, user_id)
             case "my":
+                if user_id is None:
+                    raise InvalidAccessTokenError
                 return await self.get_course_where_user_member(course_id, user_id)
             case "current" | _:
                 course = await self.uow.courses.get_one(id=course_id, is_deleted=None)

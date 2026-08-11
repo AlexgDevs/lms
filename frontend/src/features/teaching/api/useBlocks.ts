@@ -116,7 +116,7 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
   })
 
   // Вспомогательная обёртка для удобного создания блока
-  const createBlockAsync = (title: string, blockType: BlockType, payload: Record<string, any>) => {
+  const createBlockAsync = (title: string, blockType: BlockType, payload: Record<string, unknown>) => {
     if (!isValidParams) throw new Error("Не передан courseId или lessonId")
 
     return createBlockMutation.mutateAsync({
@@ -135,7 +135,7 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
   // Вспомогательная обёртка для обновления блока
   const updateBlockAsync = (
     blockId: string, 
-    data: { title?: string; block_type?: BlockType; payload?: Record<string, any> }
+    data: { title?: string; block_type?: BlockType; payload?: Record<string, unknown> }
   ) => {
     if (!isValidParams) throw new Error("Не передан courseId или lessonId")
 

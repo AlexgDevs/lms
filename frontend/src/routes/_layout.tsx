@@ -1,10 +1,9 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { isLoggedIn } from "@/features/auth/api/useAuth";
 import { ROUTES } from "@/routes.ts";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import { Layout } from "@/components/layout/Layout";
 
-const PUBLIC_ROUTES = [ROUTES.DASHBOARD, "/about", "/catalog"];
+const PUBLIC_ROUTES = [ROUTES.DASHBOARD, "/about", ROUTES.CATALOG];
 
 export const Route = createFileRoute("/_layout")({
   beforeLoad: ({ location }) => {
@@ -13,22 +12,5 @@ export const Route = createFileRoute("/_layout")({
       throw redirect({ to: ROUTES.LOGIN });
     }
   },
-  component: LayoutComponent,
+  component: Layout,
 });
-
-function LayoutComponent() {
-  return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground antialiased selection:bg-primary/10">
-      {/* 1. Наш единый Header с вызовом useLayout */}
-      <Header />
-
-      {/* 2. Основная область, куда рендерится текущая страница (через Outlet) */}
-      <main className="flex-1 w-full mx-auto max-w-7xl px-4 py-6 md:px-8">
-        <Outlet />
-      </main>
-
-      {/* 3. Подвал приложения */}
-      <Footer />
-    </div>
-  );
-}

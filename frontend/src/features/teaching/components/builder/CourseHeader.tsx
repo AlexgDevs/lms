@@ -60,16 +60,18 @@ export function CourseHeader({
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [savedField, setSavedField] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [courseSnapshot, setCourseSnapshot] = useState(course)
 
   const titleInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
+  if (course !== courseSnapshot) {
+    setCourseSnapshot(course)
     setTitle(course.title)
     setDescription(course.description || "")
     setPrice(course.price ?? 0)
     setIsFree((course.price ?? 0) === 0)
-  }, [course])
+  }
 
   useEffect(() => {
     if (isEditingTitle) titleInputRef.current?.focus()

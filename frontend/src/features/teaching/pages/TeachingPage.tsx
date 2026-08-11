@@ -17,6 +17,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useCourses } from "@/features/teaching/api/useCourses"
 import { CreateCourseForm } from "@/features/teaching/components/CreateCourseForm"
 import { ROUTES } from "@/routes"
+import type { CourseSchema } from "@/client"
 
 export function TeachingPage() {
   const navigate = useNavigate()
@@ -26,17 +27,13 @@ export function TeachingPage() {
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
 
-  // 2. Достаем список курсов (нормализуем ответ: массив, { items: [...] } или { data: [...] })
-  const coursesList: any[] = Array.isArray(createdCourses)
-    ? createdCourses
-    : Array.isArray((createdCourses as any)?.items)
-      ? (createdCourses as any).items
-      : Array.isArray((createdCourses as any)?.data)
-        ? (createdCourses as any).data
-        : []
+  // 2. Достаем список курсов (normalized: ответ может быть массивом или объектом пагинации)
+  const coursesList: CourseSchema[] = Array.isArray(createdCourses)
+    ? (createdCourses as CourseSchema[])
+    : []
 
   // Выбираем фокусный курс (выбранный вручную или первый в списке)
-  const mainCourse = coursesList.find((c: any) => String(c.id) === String(activeCourseId)) || coursesList[0]
+  const mainCourse = coursesList.find((c) => String(c.id) === String(activeCourseId)) || coursesList[0]
 
   if (isLoadingCreatedCourses) {
     return (
@@ -226,7 +223,7 @@ export function TeachingPage() {
               </div>
 
               <div className="divide-y divide-border/40 border border-border/50 rounded-2xl bg-card overflow-hidden">
-                {coursesList.map((course: any) => {
+                {coursesList.map((course) => {
                   const isSelected = mainCourse?.id === course.id
                   return (
                     <div

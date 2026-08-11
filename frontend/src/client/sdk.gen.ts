@@ -82,11 +82,7 @@ export class CourseService {
      * Get Courses
      */
     public static getCoursesApiV1CoursesGet<ThrowOnError extends boolean = false>(options?: Options<GetCoursesApiV1CoursesGetData, ThrowOnError>): RequestResult<GetCoursesApiV1CoursesGetResponses, GetCoursesApiV1CoursesGetErrors, ThrowOnError> {
-        return (options?.client ?? client).get<GetCoursesApiV1CoursesGetResponses, GetCoursesApiV1CoursesGetErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses',
-            ...options
-        });
+        return (options?.client ?? client).get<GetCoursesApiV1CoursesGetResponses, GetCoursesApiV1CoursesGetErrors, ThrowOnError>({ url: '/api/v1/courses', ...options });
     }
     
     /**
@@ -119,11 +115,7 @@ export class CourseService {
      * Get Course By Id
      */
     public static getCourseByIdApiV1CoursesCourseIdGet<ThrowOnError extends boolean = false>(options: Options<GetCourseByIdApiV1CoursesCourseIdGetData, ThrowOnError>): RequestResult<GetCourseByIdApiV1CoursesCourseIdGetResponses, GetCourseByIdApiV1CoursesCourseIdGetErrors, ThrowOnError> {
-        return (options.client ?? client).get<GetCourseByIdApiV1CoursesCourseIdGetResponses, GetCourseByIdApiV1CoursesCourseIdGetErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses/{course_id}',
-            ...options
-        });
+        return (options.client ?? client).get<GetCourseByIdApiV1CoursesCourseIdGetResponses, GetCourseByIdApiV1CoursesCourseIdGetErrors, ThrowOnError>({ url: '/api/v1/courses/{course_id}', ...options });
     }
     
     /**

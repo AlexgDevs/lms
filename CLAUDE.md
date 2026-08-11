@@ -106,7 +106,10 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 - `auth` — register/login/refresh/logout, `RefreshToken` model, security utils.
 - `user` — profiles; exposes `UserIdDep` / `CurrentUserDep`.
 - `course` + `course/course_member` — courses and enrollment (`CourseMember`);
-  cover upload/remove (`POST/DELETE /courses/{id}/media`) via `MediaService`.
+  `CourseStatus` (draft/published); **anonymous public read** of published courses
+  (`GET /courses` with `filter=all`, `GET /courses/{id}` with `filter=current`,
+  via `OptionalUserIdDep`); cover upload/remove
+  (`POST/DELETE /courses/{id}/media`) via `MediaService`.
 - `module` — modules within a course.
 - `lesson` + `lesson/lesson_progress` — lessons and per-user progress (`LessonProgress`).
 - `block` — content blocks; `BlockType` covers text/quiz(code...)/media; `payload` is JSONB; media blocks bind a `MediaAttachment` (create/update reconcile, delete detach), resolve `payload.url` on read, and support upload via `POST /blocks/{id}/media`.
@@ -118,9 +121,9 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 - Feature-based: each feature lives in `features/<name>/` with `api/`, `pages/`, `components/`, `schemas/`.
 - **API client is generated.** `frontend/src/client/` is produced from `frontend/openapi.json` by `@hey-api/openapi-ts` (`frontend/openapi-ts.config.ts`; plugins: client-fetch, schemas, sdk byTags → `XxxService`, typescript, tanstack/react-query). NEVER edit `src/client/**`.
 - Data layer: `features/<name>/api/useX.ts` hooks wrap the generated `...Options()` / `...Mutation()` from `@/client/@tanstack/react-query.gen`, add toasts (`@/lib/toast`) and query invalidation.
-- HTTP bootstrap: `src/api/client.ts` (baseUrl from `VITE_API_URL`, auth interceptor with silent refresh, logout on 401).
+- HTTP bootstrap: `src/api/client.ts` (baseUrl from `VITE_API_URL`, auth interceptor with silent refresh; 401 → logout only if an access token was present, so anonymous requests never redirect to `/login`).
 - Routing: TanStack Router; routes in `src/routes/` + generated `routeTree.gen.ts`; central `ROUTES` constant in `src/routes.ts`.
-- UI: shadcn/ui in `components/ui/`; shared layout in `components/layout/` (`Header`, `Footer`, `UserMenu`, `CategoryCatalog`).
+- UI: shadcn/ui in `components/ui/`; shared layout in `components/layout/` (`Header`, `Footer`, `UserMenu`, `CategoryCatalog`, `Layout`).
 - Path alias `@/` → `frontend/src`.
 
 ## Critical rules

@@ -23,8 +23,8 @@ export function RootPage() {
   const navigate = useNavigate();
   const loggedIn = isLoggedIn();
 
-  const enrolled = useEnrolledCourses();
-  const created = useCreatedCourses(12);
+  const enrolled = useEnrolledCourses(loggedIn);
+  const created = useCreatedCourses(12, loggedIn);
   const recommended = useRecommendedCourses(10);
 
   const enrolledCourses = (enrolled.data ?? []) as CourseCardData[];

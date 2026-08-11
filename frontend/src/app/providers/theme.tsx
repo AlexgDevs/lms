@@ -1,14 +1,5 @@
-import { createContext, useEffect, useState } from "react";
-
-export type Theme = "dark" | "light";
-
-interface ThemeContextValue {
-    theme: Theme;
-    setTheme: (theme: Theme) => void;
-    toggleTheme: () => void;
-}
-
-export const ThemeContext = createContext<ThemeContextValue | null>(null);
+import { useEffect, useState } from "react";
+import { ThemeContext, type Theme } from "./theme-context";
 
 const STORAGE_KEY = "plectix-theme";
 
