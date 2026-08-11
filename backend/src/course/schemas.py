@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from src.course.enums import CourseMemberRole
+from src.course.enums import CourseMemberRole, CourseStatus
 from src.core.schemas.base_schema import BaseSchema
 
 
@@ -18,6 +18,7 @@ class CourseSchema(BaseSchema):
     description: str | None
     cover_url: str | None
     price: int
+    status: CourseStatus
     created_at: datetime
 
 
@@ -43,6 +44,7 @@ class CourseCreateSchema(BaseSchema):
     description: str | None
     price: int
     cover_url: str | None = None
+    status: CourseStatus = CourseStatus.DRAFT
 
 
 class CourseUpdateRequestSchema(BaseSchema):
@@ -54,6 +56,7 @@ class CourseUpdateRequestSchema(BaseSchema):
     title: str | None = Field(None, max_length=128)
     description: str | None = Field(None, max_length=128)
     price: int | None = Field(None, ge=0)
+    status: CourseStatus | None = None
 
 
 class CourseUpdateSchema(BaseSchema):
@@ -65,8 +68,10 @@ class CourseUpdateSchema(BaseSchema):
     description: str | None = None
     price: int | None = None
     cover_url: str | None = None
+    status: CourseStatus | None = None
     is_deleted: datetime | None = None
 
 
 class CourseUserBriefSchema(CourseSchema):
     role: CourseMemberRole
+    progress: int = 0

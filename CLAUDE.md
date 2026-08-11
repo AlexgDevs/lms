@@ -12,7 +12,7 @@ A modern, AI-first **Learning Management System**. Monorepo with three parts:
 | --- | --- | --- |
 | Backend | `backend/` | Python 3.14, FastAPI, SQLAlchemy 2.0 async + asyncpg, Alembic, Pydantic v2, Redis (asyncio), PyJWT + Argon2 (`pwdlib`), object storage (local / S3 via aioboto3), loguru |
 | Frontend | `frontend/` | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, TanStack Router + Query, react-hook-form + zod |
-| Infra | `docker-compose.yaml` | PostgreSQL 18, Redis 7.2 |
+| Infra | `docker-compose.yaml` | PostgreSQL 18, Redis 7.2, MinIO (S3 object storage) |
 
 ## Commands
 
@@ -61,9 +61,10 @@ Run from the repo root unless otherwise noted.
 │   ├── app/providers/      # React Query, theme, layout
 │   ├── client/             # GENERATED typed API client — DO NOT EDIT
 │   ├── components/         # shared UI (components/ui = shadcn) + layout
-│   ├── features/           # auth, dashboard, profile, teaching
+│   ├── features/           # auth, dashboard, media, profile, teaching
 │   │   └── <feature>/      # api/ (useX hooks), pages/, components/, schemas/
-│   ├── lib/                # utils (cn), toast, errors
+│   ├── lib/                # utils (cn), toast, errors, dnd, media
+│   ├── styles/             # Tailwind v4 design system (tokens/semantic/themes)
 │   └── routes/             # TanStack Router route files
 ├── scripts/generate-client.sh
 ├── frontend/openapi.json   # generated OpenAPI snapshot

@@ -1,140 +1,123 @@
-import { useState } from "react";
-import { CourseCard } from "@/features/dashboard/components/CourseCard";
-import { CatalogFilters, type PriceFilter } from "@/features/dashboard/components/CatalogFilters";
-import type { Course } from "@/features/dashboard/types";
+import type { LucideIcon } from "lucide-react";
+import { BookOpen, Loader2, PlusCircle, Sparkles } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { isLoggedIn } from "@/features/auth/api/useAuth";
 import {
-    MY_COURSES_MOCK,
-    CREATED_COURSES_MOCK,
-    RECOMMENDED_COURSES_MOCK,
-} from "@/features/dashboard/data/mocks";
-import { BookOpen, PlusCircle, Sparkles, ArrowRight } from "lucide-react";
+  useCreatedCourses,
+  useEnrolledCourses,
+  useRecommendedCourses,
+} from "@/features/dashboard/api/useCourses";
+import { CourseRowSection } from "@/features/dashboard/components/CourseRowSection";
+import { ROUTES } from "@/routes";
+import type { CourseCardData } from "@/features/dashboard/types";
+
+interface DashboardSection {
+  title: string;
+  icon: LucideIcon;
+  accentClassName?: string;
+  count: number;
+  courses: CourseCardData[];
+}
 
 export function RootPage() {
-    const [recommendations, setRecommendations] = useState<Course[]>(RECOMMENDED_COURSES_MOCK);
+  const navigate = useNavigate();
+  const loggedIn = isLoggedIn();
 
-    // Состояния для фильтров
-    const [filterPrice, setFilterPrice] = useState<PriceFilter>("all");
-    const [onlyRu, setOnlyRu] = useState(false);
-    const [isAiGenerated, setIsAiGenerated] = useState(false);
+  const enrolled = useEnrolledCourses();
+  const created = useCreatedCourses(12);
+  const recommended = useRecommendedCourses(10);
 
-    const handleToggleFavorite = (id: number) => {
-        setRecommendations((prev) =>
-            prev.map((c) => (c.id === id ? { ...c, isFavorite: !c.isFavorite } : c))
-        );
-    };
+  const enrolledCourses = (enrolled.data ?? []) as CourseCardData[];
+  const createdCourses = (created.data ?? []) as CourseCardData[];
+  const recommendedCourses = (recommended.data ?? []) as CourseCardData[];
 
-    return (
-        <div className="max-w-7xl mx-auto space-y-8 py-6 px-4 sm:px-6">
+  const isLoading =
+    recommended.isLoading || (loggedIn && (enrolled.isLoading || created.isLoading));
 
-            {/* ХЕДЕР С ФИЛЬТРАМИ */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-border/40">
+  const sections: DashboardSection[] = [];
+  const pushRecommended = () => {
+    if (recommendedCourses.length > 0 && !sections.some((s) => s.title === "Рекомендуемые")) {
+      sections.push({
+        title: "Рекомендуемые",
+        icon: Sparkles,
+        accentClassName: "text-amber-500",
+        count: recommendedCourses.length,
+        courses: recommendedCourses,
+      });
+    }
+  };
 
-                {/* Заголовок */}
-                <div className="shrink-0">
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                        Актуальные курсы
-                    </h1>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                        С возвращением! У вас 3 активных курса в процессе изучения.
-                    </p>
-                </div>
+  if (loggedIn && enrolledCourses.length > 0) {
+    sections.push({
+      title: "Мои курсы",
+      icon: BookOpen,
+      count: enrolledCourses.length,
+      courses: enrolledCourses,
+    });
+  } else {
+    pushRecommended();
+  }
 
-                {/* ФИЛЬТРЫ */}
-                <CatalogFilters
-                    filterPrice={filterPrice}
-                    onFilterPriceChange={setFilterPrice}
-                    onlyRu={onlyRu}
-                    onOnlyRuChange={setOnlyRu}
-                    isAiGenerated={isAiGenerated}
-                    onAiGeneratedChange={setIsAiGenerated}
-                />
+  if (loggedIn && createdCourses.length > 0) {
+    sections.push({
+      title: "Преподавание и разработка",
+      icon: PlusCircle,
+      count: createdCourses.length,
+      courses: createdCourses,
+    });
+  } else {
+    pushRecommended();
+  }
 
-                {/* Простые действия справа */}
-                <div className="flex items-center gap-2 shrink-0">
-                    <button
-                        type="button"
-                        className="px-3 py-1.5 text-xs font-medium rounded-xl border border-border/60 bg-transparent text-foreground hover:bg-muted/50 transition-colors"
-                    >
-                        Каталог
-                    </button>
-                    <button
-                        type="button"
-                        className="px-3 py-1.5 text-xs font-medium rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition-colors shadow-xs"
-                    >
-                        Продолжить
-                    </button>
-                </div>
+  if (sections.length === 0) pushRecommended();
 
-            </div>
+  const goToCatalog = () => navigate({ to: ROUTES.CATALOG });
 
-            {/* 1. СЕКЦИЯ: МОИ КУРСЫ */}
-            <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-purple-600" />
-                        <h2 className="text-lg font-bold text-foreground">Мои курсы</h2>
-                        <span className="text-xs font-semibold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded-full">
-                            {MY_COURSES_MOCK.length}
-                        </span>
-                    </div>
-                    <button
-                        type="button"
-                        className="flex items-center text-xs text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                        Все мои курсы <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {MY_COURSES_MOCK.map((course) => (
-                        <CourseCard key={course.id} course={course} />
-                    ))}
-                </div>
-            </section>
-
-            {/* 2. СЕКЦИЯ: СОЗДАВАЕМЫЕ КУРСЫ */}
-            <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <PlusCircle className="w-5 h-5 text-purple-600" />
-                        <h2 className="text-lg font-bold text-foreground">Преподавание и разработка</h2>
-                    </div>
-                    <button
-                        type="button"
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium rounded-xl transition-colors"
-                    >
-                        <PlusCircle className="w-3.5 h-3.5" />
-                        <span>Создать курс</span>
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {CREATED_COURSES_MOCK.map((course) => (
-                        <CourseCard key={course.id} course={course} />
-                    ))}
-                </div>
-            </section>
-
-            {/* 3. СЕКЦИЯ: РЕКОМЕНДАЦИИ */}
-            <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-amber-500" />
-                        <h2 className="text-lg font-bold text-foreground">Рекомендуемые курсы</h2>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {recommendations.map((course) => (
-                        <CourseCard
-                            key={course.id}
-                            course={course}
-                            onToggleFavorite={handleToggleFavorite}
-                        />
-                    ))}
-                </div>
-            </section>
-
+  return (
+    <div className="max-w-7xl mx-auto space-y-8 py-2 px-4 sm:px-6">
+      {/* Хедер */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-border/40">
+        <div className="shrink-0">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Актуальные курсы
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {loggedIn
+              ? "С возвращением! Продолжайте обучение и разработку."
+              : "Войдите, чтобы увидеть ваши курсы и прогресс."}
+          </p>
         </div>
-    );
+        <button
+          type="button"
+          onClick={goToCatalog}
+          className="px-3 py-1.5 text-xs font-medium rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition-colors shadow-xs"
+        >
+          Каталог
+        </button>
+      </div>
+
+      {/* Ряды курсов */}
+      {isLoading && sections.length === 0 ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+        </div>
+      ) : sections.length === 0 ? (
+        <div className="text-center py-20 text-muted-foreground text-sm">
+          Курсы пока не найдены.
+        </div>
+      ) : (
+        sections.map((section) => (
+          <CourseRowSection
+            key={section.title}
+            title={section.title}
+            icon={section.icon}
+            accentClassName={section.accentClassName}
+            count={section.count}
+            courses={section.courses}
+            onSeeAll={goToCatalog}
+          />
+        ))
+      )}
+    </div>
+  );
 }

@@ -8,6 +8,7 @@ from src.lesson.lesson_progress.schemas import (
 from src.lesson.enums import LessonProgressType
 from src.lesson.exceptions import LessonNotFoundError, LessonProgressNotFoundError
 from src.course.exceptions import CourseNotFoundError
+from src.course.enums import CourseStatus
 from src.module.exceptions import ModuleNotFoundError
 from src.lesson.schemas import (
     LessonCreateRequestSchema,
@@ -167,10 +168,13 @@ class LessonService(BaseService):
     ) -> list[LessonSchema]:
         course = await self.uow.courses.get_one(
             id=course_id,
-            is_deleted=None,  # TODO: add draft type
+            is_deleted=None,
         )
 
         if not course:
+            raise CourseNotFoundError
+
+        if course.status != CourseStatus.PUBLISHED and course.owner_id != user_id:
             raise CourseNotFoundError
 
         member = await self.uow.courses.get_course_where_user_is_member(

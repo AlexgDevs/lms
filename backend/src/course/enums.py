@@ -5,3 +5,8 @@ class CourseMemberRole(StrEnum):
     MEMBER = "member"
     TEACHER = "teacher"
     SO_OWNER = "so_owner"
+
+
+class CourseStatus(StrEnum):
+    DRAFT = "draft"
+    PUBLISHED = "published"

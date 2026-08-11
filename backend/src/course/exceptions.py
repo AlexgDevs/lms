@@ -19,3 +19,7 @@ class CourseMemberAlredyEnrolledError(CourseError):
 
 class CourseOwnerCannotEnrollError(CourseError):
     detail = "Owner cannot enroll on this course"
+
+
+class CourseNotPublishedError(ObjectNotFoundError, CourseError):
+    detail = "Course is not published yet"

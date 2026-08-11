@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.course.enums import CourseStatus
 from src.course.exceptions import CourseMemberNotFoundError, CourseNotFoundError
 from src.lesson.lesson_progress.schemas import (
     LessonProgressCreateSchema,
@@ -83,6 +84,9 @@ class BlockSubmissionService(BaseService):
         # check user on course
         course = await self.uow.courses.get_one(id=course_id)
         if not course:
+            raise CourseNotFoundError
+
+        if course.status != CourseStatus.PUBLISHED and course.owner_id != user_id:
             raise CourseNotFoundError
 
         member = await self.uow.members.get_one(

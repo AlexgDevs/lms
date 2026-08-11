@@ -53,39 +53,19 @@ async def get_courses(
     limit: int = 10,
     offset: int = 0,
 ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
-    if filter == "created":
-        return await service.uow.courses.get_filtered(  # TODO: add service layer
-            owner_id=user_id,
-            limit=limit,
-            offset=offset,
-        )
-
-    if filter == "my":
-        return await service.get_courses_where_user_member(user_id)
-
-    return await service.uow.courses.get_filtered(
-        limit=limit, offset=offset
-    )  # TODO: add status draft and then who has this status - become vanish
+    return await service.list_courses(
+        filter=filter, user_id=user_id, limit=limit, offset=offset
+    )
 
 
-@router.get("/{course_id}")  # TODO: add course where user is member
+@router.get("/{course_id}")
 async def get_course_by_id(
     course_id: UUID,
     user_id: UserIdDep,
     service: CourseServiceDep,
     filter: Literal["current", "author", "my"] = "current",
 ) -> CourseSchema | CourseUserBriefSchema:
-    match filter:
-        case "author":
-            return await service.get_author_course_by_id(course_id, user_id)
-
-        case "my":
-            return await service.get_course_where_user_member(course_id, user_id)
-
-        case "current" | _:
-            return await service.get_course_by_id(
-                course_id  # TODO: add status published/draft
-            )
+    return await service.get_course(filter=filter, course_id=course_id, user_id=user_id)
 
 
 @router.post("/{course_id}/members")

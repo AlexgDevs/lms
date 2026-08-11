@@ -1,7 +1,7 @@
 # LMS — Dependency / Module Graph
 
 > Auto-generated orientation file. Refresh with `/graphify` after structural
-> changes. Generated: 2026-08-10 (refreshed by agent scan). Convention: `A → B`
+> changes. Generated: 2026-08-11 (refreshed by agent scan). Convention: `A → B`
 > means "A imports/depends on B".
 
 ## 1. Backend — core infrastructure (`backend/src/core/`)
@@ -260,11 +260,14 @@ api/client.ts     HTTP bootstrap: VITE_API_URL, auth interceptor (silent refresh
 client/           GENERATED @hey-api client (sdk.gen.ts, types.gen.ts, schemas.gen.ts,
                   @tanstack/react-query.gen.ts, client.gen.ts) — DO NOT EDIT
 components/       ui/ (shadcn) + layout/ (Header, Footer, UserMenu, CategoryCatalog)
-features/         auth, dashboard, profile, teaching
+features/         auth, dashboard, media, profile, teaching
 lib/              utils (cn), toast, errors, dnd (arrayMove, applyOrderToCache,
-                  useReorderableList for drag-and-drop reordering)
+                  useReorderableList for drag-and-drop reordering), media
+                  (validateMediaFile, MEDIA_ALLOWED_TYPES, resolveMediaUrl)
 routes/           TanStack Router files + routeTree.gen.ts (generated)
 routes.ts         central ROUTES constant
+styles/           Tailwind v4 CSS design system: tokens.css, semantic.css,
+                  global.css, themes/light.css, themes/dark.css
 ```
 
 ### Features → api hooks
@@ -273,7 +276,8 @@ routes.ts         central ROUTES constant
 | auth | `useAuth` | LoginPage, SignupPage | `/login`, `/signup` |
 | dashboard | — (uses course catalog) | RootPage (+ CourseCard, CatalogFilters, types, data/mocks) | `/` |
 | profile | — | ProfilePage (streak, achievements, activity, certificates) | `/profile` |
-| teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`) | TeachingPage, CourseBuilderPage (builder components + block-editors/ incl. Image/File/Code/Audio/Video/QuizSingle/QuizMultiple; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem are drag-reorderable) | `/teaching`, `/teaching/courses/$courseId` |
+| teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`; `useBlocks` also `uploadBlockMediaAsync`), `useCourseMedia` (course cover upload/remove) | TeachingPage, CourseBuilderPage (builder components + block-editors/ incl. Image/File/Code/Audio/Video/QuizSingle/QuizMultiple; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem are drag-reorderable; `MediaUploadControl` validates/uploads media files) | `/teaching`, `/teaching/courses/$courseId` |
+| media | `useMyMedia`, `useMediaUrl`, `useUploadMedia`, `useDeleteMedia`, `useMedia` (aggregate) | — (api hooks only; wired through teaching `MediaUploadControl`) | — |
 
 Route files: `routes/_layout.tsx`, `_layout/index.tsx` (dashboard),
 `_layout/teaching.index.tsx`, `_layout/teaching.courses.$courseId.tsx`,
@@ -290,9 +294,11 @@ Generated services (from `client/index.ts`): `AuthService, BlockService,
 CourseService, DefaultService, LessonService, LessonsProgresService,
 MediaService, ModuleService, SubmissionService, UserService`.
 
-Media in the UI: uploads go through the generated `MediaService`
-(`uploadMediaApiV1MediaPost`, `getMediaUrlApiV1MediaMediaIdUrlGet`, etc.) and the
-course/block media endpoints via `CourseService`/`BlockService`.
+Media in the UI: block editors validate files via `lib/media` +
+`MediaUploadControl`, upload through `useBlocks().uploadBlockMediaAsync`; course
+cover via `useCourseMedia`; standalone media listing/urls/delete via the
+`features/media` hooks (`useMyMedia`/`useMediaUrl`/`useUploadMedia`/
+`useDeleteMedia` on the generated `MediaService`).
 
 ## 5. Key architecture seams (reused everywhere)
 

@@ -531,6 +531,9 @@ export const CourseSchemaSchema = {
             type: 'integer',
             title: 'Price'
         },
+        status: {
+            $ref: '#/components/schemas/CourseStatus'
+        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -545,10 +548,20 @@ export const CourseSchemaSchema = {
         'description',
         'cover_url',
         'price',
+        'status',
         'created_at'
     ],
     title: 'CourseSchema',
     description: 'Full course schema returned to the client (Response model).'
+} as const;
+
+export const CourseStatusSchema = {
+    type: 'string',
+    enum: [
+        'draft',
+        'published'
+    ],
+    title: 'CourseStatus'
 } as const;
 
 export const CourseUpdateRequestSchemaSchema = {
@@ -588,6 +601,16 @@ export const CourseUpdateRequestSchemaSchema = {
                 }
             ],
             title: 'Price'
+        },
+        status: {
+            anyOf: [
+                {
+                    $ref: '#/components/schemas/CourseStatus'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
@@ -637,6 +660,9 @@ export const CourseUserBriefSchemaSchema = {
             type: 'integer',
             title: 'Price'
         },
+        status: {
+            $ref: '#/components/schemas/CourseStatus'
+        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -644,6 +670,11 @@ export const CourseUserBriefSchemaSchema = {
         },
         role: {
             $ref: '#/components/schemas/CourseMemberRole'
+        },
+        progress: {
+            type: 'integer',
+            title: 'Progress',
+            default: 0
         }
     },
     type: 'object',
@@ -654,6 +685,7 @@ export const CourseUserBriefSchemaSchema = {
         'description',
         'cover_url',
         'price',
+        'status',
         'created_at',
         'role'
     ],

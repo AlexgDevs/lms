@@ -362,11 +362,22 @@ export type CourseSchema = {
      * Price
      */
     price: number;
+    status: CourseStatus;
     /**
      * Created At
      */
     created_at: string;
 };
+
+/**
+ * CourseStatus
+ */
+export const CourseStatus = { DRAFT: 'draft', PUBLISHED: 'published' } as const;
+
+/**
+ * CourseStatus
+ */
+export type CourseStatus = typeof CourseStatus[keyof typeof CourseStatus];
 
 /**
  * CourseUpdateRequestSchema
@@ -387,6 +398,7 @@ export type CourseUpdateRequestSchema = {
      * Price
      */
     price?: number | null;
+    status?: CourseStatus | null;
 };
 
 /**
@@ -417,11 +429,16 @@ export type CourseUserBriefSchema = {
      * Price
      */
     price: number;
+    status: CourseStatus;
     /**
      * Created At
      */
     created_at: string;
     role: CourseMemberRole;
+    /**
+     * Progress
+     */
+    progress?: number;
 };
 
 /**

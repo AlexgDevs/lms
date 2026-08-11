@@ -1,10 +1,10 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, UUID as sqlUUID
+from sqlalchemy import DateTime, ForeignKey, Enum as SAEnum, UUID as sqlUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.course.enums import CourseMemberRole
+from src.course.enums import CourseMemberRole, CourseStatus
 from src.core.postgres.base import UUIDBase
 from src.core.postgres.types import str_128, timestamp
 
@@ -22,6 +22,15 @@ class Course(UUIDBase):
     cover_url: Mapped[str | None]
     price: Mapped[int] = mapped_column(default=0)
     member_count: Mapped[int] = mapped_column(server_default="0", default=0)
+    status: Mapped[CourseStatus] = mapped_column(
+        SAEnum(
+            CourseStatus,
+            native_enum=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        server_default="draft",
+        default=CourseStatus.DRAFT,
+    )
 
     # times
     created_at: Mapped[timestamp]

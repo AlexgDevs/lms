@@ -13,6 +13,7 @@ import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutCatalogRouteImport } from './routes/_layout/catalog'
 import { Route as LayoutProfileRouteImport } from './routes/_layout/profile'
 import { Route as LayoutTeachingIndexRouteImport } from './routes/_layout/teaching.index'
 import { Route as LayoutTeachingCoursesCourseIdRouteImport } from './routes/_layout/teaching.courses.$courseId'
@@ -36,6 +37,11 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutCatalogRoute = LayoutCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutProfileRoute = LayoutProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/catalog': typeof LayoutCatalogRoute
   '/profile': typeof LayoutProfileRoute
   '/teaching/': typeof LayoutTeachingIndexRoute
   '/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/catalog': typeof LayoutCatalogRoute
   '/profile': typeof LayoutProfileRoute
   '/': typeof LayoutIndexRoute
   '/teaching': typeof LayoutTeachingIndexRoute
@@ -74,6 +82,7 @@ export interface FileRoutesById {
   '/_layout': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/_layout/catalog': typeof LayoutCatalogRoute
   '/_layout/profile': typeof LayoutProfileRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/teaching/': typeof LayoutTeachingIndexRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/catalog'
     | '/profile'
     | '/teaching/'
     | '/teaching/courses/$courseId'
@@ -92,6 +102,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/signup'
+    | '/catalog'
     | '/profile'
     | '/'
     | '/teaching'
@@ -101,6 +112,7 @@ export interface FileRouteTypes {
     | '/_layout'
     | '/login'
     | '/signup'
+    | '/_layout/catalog'
     | '/_layout/profile'
     | '/_layout/'
     | '/_layout/teaching/'
@@ -143,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/catalog': {
+      id: '/_layout/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof LayoutCatalogRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/profile': {
       id: '/_layout/profile'
       path: '/profile'
@@ -168,6 +187,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface LayoutRouteChildren {
+  LayoutCatalogRoute: typeof LayoutCatalogRoute
   LayoutProfileRoute: typeof LayoutProfileRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutTeachingIndexRoute: typeof LayoutTeachingIndexRoute
@@ -175,6 +195,7 @@ interface LayoutRouteChildren {
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutCatalogRoute: LayoutCatalogRoute,
   LayoutProfileRoute: LayoutProfileRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutTeachingIndexRoute: LayoutTeachingIndexRoute,

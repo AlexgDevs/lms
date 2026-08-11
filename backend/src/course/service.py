@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Literal, Sequence
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,9 +8,11 @@ from src.course.course_member.schemas import (
     CourseMemberSchema,
 )
 from src.core.services.base_service import BaseService
+from src.course.enums import CourseStatus
 from src.course.exceptions import (
     CourseMemberAlredyEnrolledError,
     CourseNotFoundError,
+    CourseNotPublishedError,
     CourseOwnerCannotEnrollError,
 )
 from src.course.schemas import (
@@ -91,11 +94,60 @@ class CourseService(BaseService):
     ) -> list[CourseUserBriefSchema]:
         return await self.uow.courses.get_courses_where_user_is_member(user_id)
 
+    async def list_courses(
+        self,
+        filter: Literal["all", "created", "my"],
+        user_id: UUID,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
+        match filter:
+            case "created":
+                return list(
+                    await self.uow.courses.get_filtered(
+                        owner_id=user_id,
+                        is_deleted=None,
+                        limit=limit,
+                        offset=offset,
+                    )
+                )
+            case "my":
+                return await self.get_courses_where_user_member(user_id)
+            case "all" | _:
+                return list(
+                    await self.uow.courses.get_filtered(
+                        status=CourseStatus.PUBLISHED,
+                        is_deleted=None,
+                        limit=limit,
+                        offset=offset,
+                    )
+                )
+
+    async def get_course(
+        self,
+        filter: Literal["current", "author", "my"],
+        course_id: UUID,
+        user_id: UUID,
+    ) -> CourseSchema | CourseUserBriefSchema:
+        match filter:
+            case "author":
+                return await self.get_author_course_by_id(course_id, user_id)
+            case "my":
+                return await self.get_course_where_user_member(course_id, user_id)
+            case "current" | _:
+                course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+                if not course or course.status != CourseStatus.PUBLISHED:
+                    raise CourseNotFoundError
+                return course
+
     async def enroll(self, course_id: UUID, user_id: UUID) -> CourseMemberSchema:
         course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
 
         if not course:
             raise CourseNotFoundError
+
+        if course.status != CourseStatus.PUBLISHED:
+            raise CourseNotPublishedError
 
         if course.owner_id == user_id:
             raise CourseOwnerCannotEnrollError
@@ -132,19 +184,6 @@ class CourseService(BaseService):
         course = await self.uow.courses.get_one(
             id=course_id, owner_id=user_id, is_deleted=None
         )
-        if not course:
-            raise CourseNotFoundError
-
-        return course
-
-    async def get_course_by_id(
-        self,
-        course_id: UUID,
-    ) -> CourseSchema:
-        course = await self.uow.courses.get_one(
-            id=course_id, is_deleted=None
-        )  # TODO: add type draft for checked
-
         if not course:
             raise CourseNotFoundError
 

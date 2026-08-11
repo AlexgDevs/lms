@@ -29,14 +29,14 @@ interface CourseHeaderProps {
     description?: string | null
     price?: number | null
     cover_url?: string | null
-    is_published?: boolean
+    status?: "draft" | "published"
     created_at?: string
   }
   onUpdateCourse: (data: {
     title?: string
     description?: string | null
     price?: number | null
-    is_published?: boolean
+    status?: "draft" | "published"
   }) => void
   isUpdating?: boolean
   onUploadCover?: (file: File) => void
@@ -132,7 +132,9 @@ export function CourseHeader({
   }
 
   const handleTogglePublish = () => {
-    onUpdateCourse({ is_published: !course.is_published })
+    onUpdateCourse({
+      status: course.status === "published" ? "draft" : "published",
+    })
   }
 
   const descriptionChanged = description.trim() !== (course.description || "")
@@ -251,13 +253,13 @@ export function CourseHeader({
           <Badge
             variant="secondary"
             className={`gap-1 rounded-md px-1.5 py-0 h-4.5 text-[11px] font-normal border-none ${
-              course.is_published
+              course.status === "published"
                 ? "bg-emerald-500/10 text-emerald-600"
                 : "bg-amber-500/10 text-amber-600"
             }`}
           >
-            {course.is_published ? <Globe size={10} /> : <Lock size={10} />}
-            {course.is_published ? "Опубликован" : "Черновик"}
+            {course.status === "published" ? <Globe size={10} /> : <Lock size={10} />}
+            {course.status === "published" ? "Опубликован" : "Черновик"}
           </Badge>
           {course.created_at && (
             <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -271,14 +273,14 @@ export function CourseHeader({
       {/* Публикация */}
       <Button
         type="button"
-        variant={course.is_published ? "outline" : "default"}
+        variant={course.status === "published" ? "outline" : "default"}
         size="sm"
         onClick={handleTogglePublish}
         disabled={isUpdating}
         className="gap-1.5 rounded-xl text-xs font-medium h-8 shrink-0"
       >
         {isUpdating && <Loader2 size={13} className="animate-spin" />}
-        {course.is_published ? "Снять с публикации" : "Опубликовать курс"}
+        {course.status === "published" ? "Снять с публикации" : "Опубликовать курс"}
       </Button>
 
       {/* Настройки: описание + цена в попапе, не занимают место в шапке постоянно */}

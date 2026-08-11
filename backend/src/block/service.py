@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.block.enums import BlockType
 from src.block.exceptions import BlockNotFoundError, BlockTypeNotMediaError
+from src.course.enums import CourseStatus
 from src.course.exceptions import CourseNotFoundError
 from src.lesson.exceptions import LessonNotFoundError
 from src.core.services.base_service import BaseService
@@ -298,10 +299,13 @@ class BlockService(BaseService):
     ) -> list[BlockSchema]:
         course = await self.uow.courses.get_one(
             id=course_id,
-            is_deleted=None,  # TODO: add draft type
+            is_deleted=None,
         )
 
         if not course:
+            raise CourseNotFoundError
+
+        if course.status != CourseStatus.PUBLISHED and course.owner_id != user_id:
             raise CourseNotFoundError
 
         member = await self.uow.courses.get_course_where_user_is_member(
