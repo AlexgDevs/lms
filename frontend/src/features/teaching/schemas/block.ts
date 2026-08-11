@@ -59,23 +59,27 @@ export const quizMultipleBlockPayloadSchema = z
   })
 
 export const imageBlockPayloadSchema = z.object({
-  url: z.string().min(1, "Укажите URL изображения"),
+  url: z.string().nullable().optional(),
+  media_id: z.string().nullable().optional(),
   alt_text: z.string().nullable().optional(),
 })
 
 export const videoBlockPayloadSchema = z.object({
-  url: z.string().min(1, "Укажите URL видео"),
+  url: z.string().nullable().optional(),
+  media_id: z.string().nullable().optional(),
   duration: z.number().int().nonnegative().nullable().optional(),
 })
 
 export const audioBlockPayloadSchema = z.object({
-  url: z.string().min(1, "Укажите URL аудио"),
+  url: z.string().nullable().optional(),
+  media_id: z.string().nullable().optional(),
 })
 
 export const fileBlockPayloadSchema = z.object({
-  url: z.string().min(1, "Укажите URL файла"),
-  file_name: z.string().min(1, "Укажите имя файла"),
-  file_size: z.number().int().nonnegative().default(0),
+  url: z.string().nullable().optional(),
+  media_id: z.string().nullable().optional(),
+  file_name: z.string().nullable().optional(),
+  file_size: z.number().int().nonnegative().nullable().optional(),
 })
 
 // --- TYPES ---
@@ -144,10 +148,10 @@ export const DEFAULT_PAYLOADS: Record<BlockType, BlockPayload> = {
     options: [{ id: 1, text: "Вариант 1" }],
     correct_option_ids: [1],
   },
-  [BlockType.IMAGE]: { url: "", alt_text: null },
-  [BlockType.VIDEO]: { url: "", duration: null },
-  [BlockType.AUDIO]: { url: "" },
-  [BlockType.FILE]: { url: "", file_name: "", file_size: 0 },
+  [BlockType.IMAGE]: { url: "", alt_text: null, media_id: null },
+  [BlockType.VIDEO]: { url: "", duration: null, media_id: null },
+  [BlockType.AUDIO]: { url: "", media_id: null },
+  [BlockType.FILE]: { url: "", file_name: "", file_size: 0, media_id: null },
 }
 
 function clone<T>(value: T): T {
@@ -186,9 +190,13 @@ export function migratePayload(
   const next = createEmptyPayload(toType)
 
   if (MEDIA_BLOCK_TYPES.includes(fromType) && MEDIA_BLOCK_TYPES.includes(toType)) {
-    const candidate = next as { url?: string }
-    const url = (fromPayload as { url?: unknown } | null | undefined)?.url
-    candidate.url = typeof url === "string" ? url : ""
+    const candidate = next as { url?: string; media_id?: string | null }
+    const from = fromPayload as
+      | { url?: unknown; media_id?: unknown }
+      | null
+      | undefined
+    candidate.url = typeof from?.url === "string" ? from.url : ""
+    candidate.media_id = typeof from?.media_id === "string" ? from.media_id : null
   }
 
   return next

@@ -6,6 +6,7 @@ import { BlockItem } from "./BlockItem"
 import { BlockCreateForm } from "./BlockCreateForm"
 import { BlockType } from "@/client"
 import { useReorderableList } from "@/lib/dnd"
+import type { BlockPayload } from "@/features/teaching/schemas/block"
 
 interface CourseBlocksProps {
     courseId: string
@@ -23,6 +24,8 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
         isDeletingBlock,
         reorderBlocksAsync,
         isReordering,
+        uploadBlockMediaAsync,
+        isUploadingBlockMedia,
     } = useBlocks({
         courseId: courseId || undefined,
         lessonId: lessonId || undefined,
@@ -55,8 +58,16 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
         )
     }
 
-    const handleCreateBlock = async (title: string, blockType: BlockType, payload: Record<string, any>) => {
-        await createBlockAsync(title, blockType, payload)
+    const handleCreateBlock = async (
+        title: string,
+        blockType: BlockType,
+        payload: BlockPayload,
+        file: File | null,
+    ) => {
+        const created = await createBlockAsync(title, blockType, payload)
+        if (file && created) {
+            await uploadBlockMediaAsync(created.id, file, false)
+        }
         setIsAdding(false)
     }
 
@@ -95,6 +106,7 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
                             onUpdate={updateBlockAsync}
                             onDelete={deleteBlockAsync}
                             isDeleting={isDeletingBlock}
+                            onUploadMedia={(file) => uploadBlockMediaAsync(block.id, file, false)}
                             onDragStart={(e) => blockList.beginDrag(e, block.id)}
                             onDragEnd={blockList.dragEnd}
                             onDragOver={(e) => blockList.dragOver(e, block.id)}
@@ -116,7 +128,7 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
                 {/* Форма добавления нового блока */}
                 {isAdding && (
                     <BlockCreateForm
-                        isCreating={isCreatingBlock}
+                        isCreating={isCreatingBlock || isUploadingBlockMedia}
                         onCreate={handleCreateBlock}
                         onCancel={() => setIsAdding(false)}
                     />

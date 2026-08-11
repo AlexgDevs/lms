@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Loader2, Image as ImageIcon } from "lucide-react"
 
@@ -13,12 +13,32 @@ import {
   type BlockPayload,
   type ImageBlockPayload,
 } from "@/features/teaching/schemas/block"
+import {
+  AUDIO_TYPES,
+  FILE_TYPES,
+  IMAGE_TYPES,
+  MEDIA_ALLOWED_TYPES,
+  VIDEO_TYPES,
+  validateMediaFile,
+} from "@/lib/media"
 import { BlockType } from "@/client"
 
 interface BlockCreateFormProps {
   isCreating: boolean
-  onCreate: (title: string, blockType: BlockType, payload: BlockPayload) => Promise<void>
+  onCreate: (
+    title: string,
+    blockType: BlockType,
+    payload: BlockPayload,
+    file: File | null,
+  ) => Promise<void>
   onCancel: () => void
+}
+
+const MEDIA_ALLOWED_BY_TYPE: Partial<Record<BlockType, string[]>> = {
+  [BlockType.IMAGE]: IMAGE_TYPES,
+  [BlockType.VIDEO]: VIDEO_TYPES,
+  [BlockType.AUDIO]: AUDIO_TYPES,
+  [BlockType.FILE]: FILE_TYPES,
 }
 
 export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateFormProps) {
@@ -28,8 +48,9 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
     createEmptyPayload(BlockType.TEXT),
   )
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [filePreviewUrl, setFilePreviewUrl] = useState("")
+  const [previewUrl, setPreviewUrl] = useState("")
   const [alt, setAlt] = useState("")
+  const previewUrlRef = useRef<string>("")
 
   const isMediaBlock = MEDIA_BLOCK_TYPES.includes(blockType)
 
@@ -37,52 +58,49 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
   const payloadError = payloadParse.success
     ? null
     : payloadParse.error.issues[0]?.message
-  const isFormValid = Boolean(title.trim()) && payloadParse.success
+  const isFormValid =
+    Boolean(title.trim()) && (isMediaBlock ? Boolean(selectedFile) : payloadParse.success)
 
-  const buildMediaPayload = (type: BlockType, url: string, file: File): BlockPayload => {
-    switch (type) {
-      case BlockType.IMAGE:
-        return { url, alt_text: file.name }
-      case BlockType.VIDEO:
-        return { url, duration: null }
-      case BlockType.AUDIO:
-        return { url }
-      case BlockType.FILE:
-        return { url, file_name: file.name, file_size: file.size }
-      default:
-        return { url }
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
     }
+  }, [])
+
+  const clearFile = () => {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
+    previewUrlRef.current = ""
+    setPreviewUrl("")
+    setSelectedFile(null)
+    setAlt("")
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setSelectedFile(file)
-    setAlt(file.name)
-
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      const url = reader.result as string
-      setFilePreviewUrl(url)
-      setPayload(buildMediaPayload(blockType, url, file))
+    const error = validateMediaFile(
+      file,
+      MEDIA_ALLOWED_BY_TYPE[blockType] ?? MEDIA_ALLOWED_TYPES,
+    )
+    if (error) {
+      e.target.value = ""
+      return
     }
-    reader.readAsDataURL(file)
-  }
 
-  const clearFile = () => {
-    setSelectedFile(null)
-    setFilePreviewUrl("")
-    setAlt("")
-    setPayload(createEmptyPayload(blockType))
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
+    const url = URL.createObjectURL(file)
+    previewUrlRef.current = url
+    setSelectedFile(file)
+    setPreviewUrl(url)
+    setAlt(file.name)
+    e.target.value = ""
   }
 
   const handleTypeChange = (type: BlockType) => {
     setBlockType(type)
     setPayload(createEmptyPayload(type))
-    setSelectedFile(null)
-    setFilePreviewUrl("")
-    setAlt("")
+    clearFile()
   }
 
   const handleAltChange = (value: string) => {
@@ -92,19 +110,23 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
 
   const resetForm = () => {
     setTitle("")
-    setSelectedFile(null)
-    setFilePreviewUrl("")
-    setAlt("")
     setPayload(createEmptyPayload(blockType))
+    clearFile()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const trimmedTitle = title.trim()
-    if (!trimmedTitle || isCreating || !payloadParse.success) return
-    if (isMediaBlock && !filePreviewUrl) return
+    if (!trimmedTitle || isCreating) return
+    if (isMediaBlock && !selectedFile) return
+    if (!isMediaBlock && !payloadParse.success) return
 
-    await onCreate(trimmedTitle, blockType, payloadParse.data)
+    const parsedPayload = !isMediaBlock && payloadParse.success ? payloadParse.data : null
+    const submitPayload: BlockPayload = isMediaBlock
+      ? (blockType === BlockType.IMAGE ? { alt_text: alt || null } : {})
+      : (parsedPayload as BlockPayload)
+
+    await onCreate(trimmedTitle, blockType, submitPayload, isMediaBlock ? selectedFile : null)
     resetForm()
   }
 
@@ -159,7 +181,7 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
             Загрузите файл (обязательно):
           </label>
 
-          {!filePreviewUrl ? (
+          {!previewUrl ? (
             <label className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-input hover:border-primary/60 rounded-xl cursor-pointer bg-background/50 transition-colors p-2 text-center">
               <ImageIcon size={24} className="text-muted-foreground mb-1 opacity-50" />
               <span className="text-xs font-medium text-foreground">
@@ -179,7 +201,7 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
             <div className="flex items-center gap-3 p-2 bg-background border border-border rounded-xl">
               {blockType === BlockType.IMAGE ? (
                 <img
-                  src={filePreviewUrl}
+                  src={previewUrl}
                   alt="Preview"
                   className="w-12 h-12 object-cover rounded-lg border"
                 />
@@ -235,7 +257,7 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
           type="submit"
           size="sm"
           className="h-7 text-xs gap-1"
-          disabled={isCreating || !isFormValid || (isMediaBlock && !filePreviewUrl)}
+          disabled={isCreating || !isFormValid || (isMediaBlock && !selectedFile)}
         >
           {isCreating && <Loader2 size={12} className="animate-spin" />}
           Создать блок

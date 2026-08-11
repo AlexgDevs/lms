@@ -859,7 +859,7 @@ export const LessonUpdateRequestSchemaSchema = {
     title: 'LessonUpdateRequestSchema'
 } as const;
 
-export const MediaSchemaSchema = {
+export const MediaResponseSchemaSchema = {
     properties: {
         id: {
             type: 'string',
@@ -875,9 +875,16 @@ export const MediaSchemaSchema = {
             type: 'string',
             title: 'Original Name'
         },
-        storage_key: {
-            type: 'string',
-            title: 'Storage Key'
+        url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Url'
         },
         content_type: {
             type: 'string',
@@ -919,13 +926,12 @@ export const MediaSchemaSchema = {
         'id',
         'owner_id',
         'original_name',
-        'storage_key',
         'content_type',
         'size_bytes',
         'created_at',
         'updated_at'
     ],
-    title: 'MediaSchema'
+    title: 'MediaResponseSchema'
 } as const;
 
 export const MediaUrlResponseSchemaSchema = {

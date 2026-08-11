@@ -8,6 +8,7 @@ import {
   updateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchMutation,
   deleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteMutation,
   reorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchMutation,
+  uploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostMutation,
 } from "@/client/@tanstack/react-query.gen"
 import type { BlockType } from "@/client" // Импортируй BlockType из твоего сгенерированного клиента (или типов)
 import { applyOrderToCache } from "@/lib/dnd"
@@ -102,6 +103,18 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
     },
   })
 
+  // 5. Загрузка медиа в блок
+  const uploadBlockMediaMutation = useMutation({
+    ...uploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostMutation(),
+    onSuccess: (_, variables) => {
+      showSuccessToast("Файл загружен")
+      invalidateBlocksQuery(variables.path?.course_id, variables.path?.lesson_id)
+    },
+    onError: (err) => {
+      showErrorToast(getErrorMessage(err) || "Ошибка при загрузке файла")
+    },
+  })
+
   // Вспомогательная обёртка для удобного создания блока
   const createBlockAsync = (title: string, blockType: BlockType, payload: Record<string, any>) => {
     if (!isValidParams) throw new Error("Не передан courseId или lessonId")
@@ -145,6 +158,23 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
         course_id: courseId as string,
         lesson_id: lessonId as string,
         block_id: blockId,
+      },
+    })
+  }
+
+  // Вспомогательная обёртка для загрузки медиа в блок
+  const uploadBlockMediaAsync = (blockId: string, file: File, isPublic = false) => {
+    if (!isValidParams) throw new Error("Не передан courseId или lessonId")
+
+    return uploadBlockMediaMutation.mutateAsync({
+      path: {
+        course_id: courseId as string,
+        lesson_id: lessonId as string,
+        block_id: blockId,
+      },
+      body: {
+        file,
+        is_public: isPublic,
       },
     })
   }
@@ -204,6 +234,7 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
     updateBlockAsync,
     deleteBlockAsync,
     reorderBlocksAsync,
+    uploadBlockMediaAsync,
 
     // Raw Mutations & States
     createBlock: createBlockMutation.mutate,
@@ -214,6 +245,9 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
 
     deleteBlock: deleteBlockMutation.mutate,
     isDeletingBlock: deleteBlockMutation.isPending,
+
+    uploadBlockMedia: uploadBlockMediaMutation.mutate,
+    isUploadingBlockMedia: uploadBlockMediaMutation.isPending,
 
     isReordering: reorderBlocksMutation.isPending,
   }

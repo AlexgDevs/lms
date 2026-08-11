@@ -131,14 +131,15 @@ exceptions, enums, dependencies`.
   submission_type, submitted_payload, attempts, is_first_try_correct; unique
   uq_user_block_submission).
 - Media: media block types (`IMAGE/VIDEO/AUDIO/FILE`) carry `media_id` in
-  `payload`; `BlockService` validates ownership, **attaches** a `MediaAttachment`
-  on create, **reconciles** (detach-all + re-attach) on update, **detaches** on
-  delete, and **resolves `payload.url`** on every read (public → storage URL,
-  private → presigned URL). `POST /{block_id}/media` uploads + attaches (old media
-  purged after commit if unreferenced); non-media block types → 
-  `BlockTypeNotMediaError` (422). `BlockUnitOfWork` composes `media` +
-  `media_attachments` repos; `BlockServiceDep` injects `MediaServiceDep` +
-  `StorageDep`.
+  `payload` (cache); `BlockService` validates ownership, **attaches** a
+  `MediaAttachment` on create, **reconciles** (detach-all + re-attach) on update,
+  **detaches** on delete, and on every read **resolves `payload.url` from the
+  block's `MediaAttachment` rows** (attachment is authoritative, not the payload
+  cache): public → storage URL, private → presigned URL. `POST /{block_id}/media`
+  uploads + attaches (old media purged after commit if unreferenced); non-media
+  block types → `BlockTypeNotMediaError` (422). `BlockUnitOfWork` composes
+  `media` + `media_attachments` repos; `BlockServiceDep` injects `MediaServiceDep`
+  + `StorageDep`.
 - Content schemas: `ImageBlockContent`, `VideoBlockContent`, `AudioBlockContent`,
   `FileBlockContent` all have optional `url` + `media_id` (+ type-specific fields).
 - Repository: `set_order_bulk(lesson_id, ordered_ids)`; lists ordered by
@@ -175,22 +176,28 @@ enums, __init__` — **no router/service** (support module).
 - Router prefix `/media`, tags `["Media"]`: `POST ""` (multipart upload, form
   `is_public`), `GET ""` (my media), `GET /{media_id}`,
   `GET /{media_id}/url` (`expires_in`), `DELETE /{media_id}` (204).
+  `POST/GET` respond with `MediaResponseSchema` — public fields + resolved
+  `url` (public → storage URL, private → presigned), **no** `storage_key`.
 - Model: `Media` (owner_id→users CASCADE, original_name, storage_key,
   content_type, size_bytes, etag, is_public).
 - Model: `MediaAttachment` (media_id→media CASCADE, owner_type, owner_id, role,
   position; unique `uq_media_attachment` on media_id+owner_type+owner_id+role;
   indexes on media_id, owner_id) — generic "owner ↔ media" join, reusable for
-  course covers / user avatars later.
+  course covers / user avatars later. **Source of truth** for owner→media
+  resolution (write path mirrors it into `Block.payload.media_id` as a cache).
 - Enums: `MediaAttachmentRole` (content/cover/avatar), `MediaOwnerType`
   (block/course/user).
-- Repository: `attach`, `detach_all`, `get_for_owner`, `is_referenced`,
-  `get_owners` (reverse lookup); `MediaRepository.get_by_ids`.
+- Repository: `attach`, `detach_all`, `get_for_owner`, `get_for_owners`
+  (batch IN), `get_media_ids_for_owner`, `is_referenced`, `get_owners`
+  (reverse lookup); `MediaRepository.get_by_ids`.
 - `MediaService`: `create_media` (size/type validation → upload → DB row with
   orphan cleanup on failure; `commit=False` flag so callers can embed it in their
   UoW transaction), `get_media` (owner/privacy check), `list_my_media`,
-  `get_media_url` (public URL vs presigned), `delete_media` (refuses while
-  referenced by any `MediaAttachment` → `MediaInUseError`),
-  `cleanup_unreferenced(media_ids)` (purges files + rows after commit).
+  `get_media_url` (public URL vs presigned), `to_response`/`to_response_list`
+  (map `MediaSchema` → `MediaResponseSchema` with resolved `url`),
+  `delete_media` (refuses while referenced by any `MediaAttachment` →
+  `MediaInUseError`), `cleanup_unreferenced(media_ids)` (purges files + rows
+  after commit).
 - Exceptions: `MediaNotFoundError` (404), `MediaForbiddenError` (403),
   `MediaTooLargeError` (413), `MediaTypeNotAllowedError` (415),
   `MediaInUseError` (409). Limits/types come from `settings.media`.

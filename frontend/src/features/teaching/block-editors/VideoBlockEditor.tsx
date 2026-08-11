@@ -1,21 +1,40 @@
 import { Input } from "@/components/ui/input"
+import { VIDEO_TYPES, resolveMediaUrl } from "@/lib/media"
+import { MediaUploadControl } from "@/features/teaching/components/MediaUploadControl"
 import type { VideoBlockPayload } from "@/features/teaching/schemas/block"
 
 interface VideoBlockEditorProps {
   payload: VideoBlockPayload
   onChange: (payload: VideoBlockPayload) => void
+  onUploadMedia?: (file: File) => Promise<unknown>
+  isUploading?: boolean
 }
 
-export function VideoBlockEditor({ payload, onChange }: VideoBlockEditorProps) {
+export function VideoBlockEditor({
+  payload,
+  onChange,
+  onUploadMedia,
+  isUploading,
+}: VideoBlockEditorProps) {
   return (
     <div className="space-y-2">
-      <label className="text-[11px] text-muted-foreground font-medium">URL видео:</label>
-      <Input
-        value={payload.url ?? ""}
-        onChange={(e) => onChange({ ...payload, url: e.target.value })}
-        placeholder="https://example.com/video.mp4"
-        className="text-xs"
-      />
+      {onUploadMedia && (
+        <MediaUploadControl
+          accept="video/*"
+          allowedTypes={VIDEO_TYPES}
+          label="Загрузить видео"
+          isUploading={isUploading}
+          onFile={onUploadMedia}
+        />
+      )}
+
+      {payload.url && (
+        <video
+          src={resolveMediaUrl(payload.url)}
+          controls
+          className="max-h-40 rounded-lg border bg-muted/20"
+        />
+      )}
 
       <Input
         type="number"

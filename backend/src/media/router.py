@@ -4,46 +4,51 @@ from uuid import UUID
 from fastapi import APIRouter, File, Form, UploadFile, status
 
 from src.media.dependencies import MediaServiceDep
-from src.media.schemas import MediaSchema, MediaUrlResponseSchema
+from src.media.schemas import MediaResponseSchema, MediaUrlResponseSchema
 from src.user.dependencies import UserIdDep
 
 router = APIRouter(prefix="/media", tags=["Media"])
 
 
-@router.post("", response_model=MediaSchema, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=MediaResponseSchema, status_code=status.HTTP_201_CREATED
+)
 async def upload_media(
     service: MediaServiceDep,
     user_id: UserIdDep,
     file: Annotated[UploadFile, File()],
     is_public: Annotated[bool, Form()] = True,
-) -> MediaSchema:
+) -> MediaResponseSchema:
     data = await file.read()
-    return await service.create_media(
+    media = await service.create_media(
         user_id=user_id,
         data=data,
         original_name=file.filename or "untitled",
         content_type=file.content_type or "application/octet-stream",
         is_public=is_public,
     )
+    return await service.to_response(media)
 
 
-@router.get("", response_model=list[MediaSchema])
+@router.get("", response_model=list[MediaResponseSchema])
 async def get_my_media(
     service: MediaServiceDep,
     user_id: UserIdDep,
     limit: int = 100,
     offset: int = 0,
-) -> list[MediaSchema]:
-    return await service.list_my_media(user_id=user_id, limit=limit, offset=offset)
+) -> list[MediaResponseSchema]:
+    medias = await service.list_my_media(user_id=user_id, limit=limit, offset=offset)
+    return await service.to_response_list(medias)
 
 
-@router.get("/{media_id}", response_model=MediaSchema)
+@router.get("/{media_id}", response_model=MediaResponseSchema)
 async def get_media(
     media_id: UUID,
     service: MediaServiceDep,
     user_id: UserIdDep,
-) -> MediaSchema:
-    return await service.get_media(media_id=media_id, user_id=user_id)
+) -> MediaResponseSchema:
+    media = await service.get_media(media_id=media_id, user_id=user_id)
+    return await service.to_response(media)
 
 
 @router.get("/{media_id}/url", response_model=MediaUrlResponseSchema)

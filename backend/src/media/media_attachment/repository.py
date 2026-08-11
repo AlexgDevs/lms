@@ -49,6 +49,21 @@ class MediaAttachmentRepository(BaseRepository[MediaAttachment, MediaAttachmentS
             limit=1000, offset=0, owner_type=owner_type, owner_id=owner_id
         )
 
+    async def get_for_owners(
+        self, owner_type: str, owner_ids: Sequence[UUID]
+    ) -> Sequence[MediaAttachmentSchema]:
+        statement = select(self.model).where(
+            self.model.owner_type == owner_type,
+            self.model.owner_id.in_(owner_ids),
+        )
+        return await self._execute_and_map_all(statement)
+
+    async def get_media_ids_for_owner(
+        self, owner_type: str, owner_id: UUID
+    ) -> list[UUID]:
+        attachments = await self.get_for_owner(owner_type, owner_id)
+        return [attachment.media_id for attachment in attachments]
+
     async def is_referenced(self, media_id: UUID) -> bool:
         count = await self.session.scalar(
             select(func.count())

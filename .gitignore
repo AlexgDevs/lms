@@ -226,3 +226,6 @@ dist/
 .vite/
 .tanstack/
 *.log
+
+# Local object storage uploads (STORAGE_ROOT_DIR)
+backend/media/

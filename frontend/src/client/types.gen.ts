@@ -548,9 +548,9 @@ export type LessonUpdateRequestSchema = {
 };
 
 /**
- * MediaSchema
+ * MediaResponseSchema
  */
-export type MediaSchema = {
+export type MediaResponseSchema = {
     /**
      * Id
      */
@@ -564,9 +564,9 @@ export type MediaSchema = {
      */
     original_name: string;
     /**
-     * Storage Key
+     * Url
      */
-    storage_key: string;
+    url?: string | null;
     /**
      * Content Type
      */
@@ -1794,7 +1794,7 @@ export type GetMyMediaApiV1MediaGetResponses = {
      *
      * Successful Response
      */
-    200: Array<MediaSchema>;
+    200: Array<MediaResponseSchema>;
 };
 
 export type GetMyMediaApiV1MediaGetResponse = GetMyMediaApiV1MediaGetResponses[keyof GetMyMediaApiV1MediaGetResponses];
@@ -1819,7 +1819,7 @@ export type UploadMediaApiV1MediaPostResponses = {
     /**
      * Successful Response
      */
-    201: MediaSchema;
+    201: MediaResponseSchema;
 };
 
 export type UploadMediaApiV1MediaPostResponse = UploadMediaApiV1MediaPostResponses[keyof UploadMediaApiV1MediaPostResponses];
@@ -1879,7 +1879,7 @@ export type GetMediaApiV1MediaMediaIdGetResponses = {
     /**
      * Successful Response
      */
-    200: MediaSchema;
+    200: MediaResponseSchema;
 };
 
 export type GetMediaApiV1MediaMediaIdGetResponse = GetMediaApiV1MediaMediaIdGetResponses[keyof GetMediaApiV1MediaMediaIdGetResponses];

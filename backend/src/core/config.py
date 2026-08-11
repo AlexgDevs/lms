@@ -1,13 +1,21 @@
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import AnyUrl, BeforeValidator, Field, PostgresDsn, computed_field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 from src.core.utils import parse_cors
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ENV_FILE_PATH = BASE_DIR / ".env"
+
+
+def parse_comma_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(i).strip() for i in value if i]
+    if isinstance(value, str):
+        return [i.strip() for i in value.split(",") if i.strip()]
+    raise ValueError(f"Cannot parse comma-separated list from value: {value}")
 
 
 class PostgresSettings(BaseSettings):
@@ -129,7 +137,9 @@ class MediaSettings(BaseSettings):
     )
 
     MEDIA_MAX_SIZE_MB: int = 20
-    MEDIA_ALLOWED_TYPES: list[str] = [
+    MEDIA_ALLOWED_TYPES: Annotated[
+        list[str], NoDecode, BeforeValidator(parse_comma_list)
+    ] = [
         "image/jpeg",
         "image/png",
         "image/webp",

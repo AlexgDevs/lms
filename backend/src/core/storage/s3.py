@@ -41,6 +41,26 @@ class S3Storage:
         status: Any = exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
         return bool(status == 404)
 
+    @staticmethod
+    def _is_no_such_bucket(exc: ClientError) -> bool:
+        code: Any = exc.response.get("Error", {}).get("Code")
+        return bool(code == "NoSuchBucket")
+
+    async def ensure_bucket(self) -> None:
+        """Create the bucket if it does not exist yet (idempotent)."""
+        try:
+            async with self._session.client(
+                "s3", endpoint_url=self.endpoint_url
+            ) as client:
+                await client.head_bucket(Bucket=self.bucket)
+        except ClientError as exc:
+            if not (self._is_not_found(exc) or self._is_no_such_bucket(exc)):
+                raise StorageError from exc
+            async with self._session.client(
+                "s3", endpoint_url=self.endpoint_url
+            ) as client:
+                await client.create_bucket(Bucket=self.bucket)
+
     async def upload_bytes(
         self,
         key: str,
@@ -54,7 +74,7 @@ class S3Storage:
                 Key=key,
                 Body=data,
                 ContentType=content_type,
-                Metadata=dict(metadata) if metadata else None,
+                Metadata=dict(metadata) if metadata else {},
             )
 
     async def download_bytes(self, key: str) -> bytes:

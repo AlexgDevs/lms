@@ -16,6 +16,7 @@ from src.media.exceptions import (
 )
 from src.media.schemas import (
     MediaCreateSchema,
+    MediaResponseSchema,
     MediaSchema,
     MediaUrlResponseSchema,
 )
@@ -112,14 +113,36 @@ class MediaService(BaseService):
         self, media_id: UUID, user_id: UUID, expires_in: int = 900
     ) -> MediaUrlResponseSchema:
         media = await self.get_media(media_id, user_id)
-        url: str | None
-        if media.is_public:
-            url = self.storage.get_public_url(media.storage_key)
-        else:
-            url = await self.storage.get_presigned_url(
-                media.storage_key, expires_in=expires_in
-            )
+        url = await self._resolve_url(media, expires_in=expires_in)
         return MediaUrlResponseSchema(url=url)
+
+    async def to_response(self, media: MediaSchema) -> MediaResponseSchema:
+        return MediaResponseSchema(
+            id=media.id,
+            owner_id=media.owner_id,
+            original_name=media.original_name,
+            url=await self._resolve_url(media),
+            content_type=media.content_type,
+            size_bytes=media.size_bytes,
+            etag=media.etag,
+            is_public=media.is_public,
+            created_at=media.created_at,
+            updated_at=media.updated_at,
+        )
+
+    async def to_response_list(
+        self, medias: list[MediaSchema]
+    ) -> list[MediaResponseSchema]:
+        return [await self.to_response(media) for media in medias]
+
+    async def _resolve_url(
+        self, media: MediaSchema, expires_in: int = 900
+    ) -> str | None:
+        if media.is_public:
+            return self.storage.get_public_url(media.storage_key)
+        return await self.storage.get_presigned_url(
+            media.storage_key, expires_in=expires_in
+        )
 
     async def _get_owned_media(self, media_id: UUID, user_id: UUID) -> MediaSchema:
         media = await self.uow.media.get_one(id=media_id)

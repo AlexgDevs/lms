@@ -17,6 +17,7 @@ import { BlockEditor } from "@/features/teaching/block-editors/BlockEditor"
 import {
   BLOCK_PAYLOAD_SCHEMAS,
   BLOCK_TYPE_OPTIONS,
+  MEDIA_BLOCK_TYPES,
   migratePayload,
   normalizePayload,
   type BlockPayload,
@@ -35,6 +36,7 @@ interface BlockItemProps {
   onUpdate: (blockId: string, data: BlockItemUpdate) => Promise<unknown>
   onDelete: (blockId: string) => Promise<unknown>
   isDeleting: boolean
+  onUploadMedia?: (file: File) => Promise<unknown>
   onDragStart?: (e: React.DragEvent) => void
   onDragEnd?: () => void
   onDragOver?: (e: React.DragEvent) => void
@@ -49,6 +51,7 @@ export function BlockItem({
   onUpdate,
   onDelete,
   isDeleting,
+  onUploadMedia,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -89,13 +92,35 @@ export function BlockItem({
     setIsSaving(true)
     try {
       const typeChanged = blockType !== block.block_type
+      let payloadToSave = payloadParse.data
+      if (MEDIA_BLOCK_TYPES.includes(blockType)) {
+        const mediaPayload = { ...(payloadToSave as unknown as Record<string, unknown>) }
+        delete mediaPayload.url
+        payloadToSave = mediaPayload as BlockPayload
+      }
       await onUpdate(block.id, {
         title,
         ...(typeChanged ? { block_type: blockType } : {}),
-        payload: payloadParse.data,
+        payload: payloadToSave,
       })
     } catch (err) {
       console.error("Ошибка сохранения блока:", err)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleUploadMedia = async (file: File) => {
+    if (!onUploadMedia) return
+
+    setIsSaving(true)
+    try {
+      const updated = await onUploadMedia(file)
+      if (updated && typeof updated === "object" && "payload" in updated) {
+        setPayload(normalizePayload(blockType, (updated as { payload: unknown }).payload))
+      }
+    } catch (err) {
+      console.error("Ошибка загрузки файла:", err)
     } finally {
       setIsSaving(false)
     }
@@ -165,7 +190,13 @@ export function BlockItem({
 
       {/* Поля редактирования в зависимости от типа блока */}
       <div className="pt-2 border-t border-border/40">
-        <BlockEditor blockType={blockType} payload={payload} onChange={setPayload} />
+        <BlockEditor
+          blockType={blockType}
+          payload={payload}
+          onChange={setPayload}
+          onUploadMedia={onUploadMedia ? handleUploadMedia : undefined}
+          isUploading={isSaving}
+        />
         {payloadError && (
           <p className="mt-2 text-[11px] text-destructive">{payloadError}</p>
         )}

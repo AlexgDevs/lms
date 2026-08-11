@@ -17,6 +17,19 @@ class MediaSchema(BaseSchema):
     updated_at: datetime
 
 
+class MediaResponseSchema(BaseSchema):
+    id: UUID
+    owner_id: UUID
+    original_name: str
+    url: str | None = None
+    content_type: str
+    size_bytes: int
+    etag: str | None = None
+    is_public: bool = True
+    created_at: datetime
+    updated_at: datetime
+
+
 class MediaCreateSchema(BaseSchema):
     id: UUID
     owner_id: UUID

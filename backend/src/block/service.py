@@ -11,6 +11,7 @@ from src.core.services.base_service import BaseService
 from src.core.storage import Storage
 from src.block.unit_of_work import BlockUnitOfWork
 from src.media.exceptions import MediaForbiddenError, MediaNotFoundError
+from src.media.media_attachment.enums import MediaOwnerType
 from src.media.schemas import MediaSchema
 from src.media.service import MediaService
 from src.block.schemas import (
@@ -124,6 +125,13 @@ class BlockService(BaseService):
             user_id=owner_id,
         )
 
+        old_media_ids = [
+            attachment.media_id
+            for attachment in await self.uow.media_attachments.get_for_owner(
+                "block", block_id
+            )
+        ]
+
         updated_block = await self.uow.blocks.update(block_id, update_data)
 
         await self.uow.media_attachments.detach_all(
@@ -139,6 +147,11 @@ class BlockService(BaseService):
             )
 
         await self.uow.commit()
+
+        if old_media_ids:
+            await self.media_service.cleanup_unreferenced(old_media_ids)
+            await self.uow.commit()
+
         return (await self._resolve_block_urls([updated_block]))[0]
 
     async def delete_block(
@@ -164,11 +177,22 @@ class BlockService(BaseService):
         if not block:
             raise BlockNotFoundError
 
+        media_ids = [
+            attachment.media_id
+            for attachment in await self.uow.media_attachments.get_for_owner(
+                "block", block_id
+            )
+        ]
+
         await self.uow.media_attachments.detach_all(
             owner_type="block", owner_id=block_id
         )
         await self.uow.blocks.delete(id_=block_id)
         await self.uow.commit()
+
+        if media_ids:
+            await self.media_service.cleanup_unreferenced(media_ids)
+            await self.uow.commit()
 
     async def upload_media(
         self,
@@ -398,18 +422,16 @@ class BlockService(BaseService):
         return media.id
 
     async def _resolve_block_urls(self, blocks: list[BlockSchema]) -> list[BlockSchema]:
-        media_ids: set[UUID] = set()
-        for block in blocks:
-            if block.block_type not in MEDIA_BLOCK_TYPES:
-                continue
-            raw = block.payload.get("media_id")
-            if not raw:
-                continue
-            try:
-                media_ids.add(UUID(str(raw)))
-            except ValueError:
-                continue
+        media_blocks = [
+            block for block in blocks if block.block_type in MEDIA_BLOCK_TYPES
+        ]
+        if not media_blocks:
+            return blocks
 
+        attachments = await self.uow.media_attachments.get_for_owners(
+            MediaOwnerType.BLOCK.value, [block.id for block in media_blocks]
+        )
+        media_ids = {attachment.media_id for attachment in attachments}
         if not media_ids:
             return blocks
 
@@ -418,16 +440,15 @@ class BlockService(BaseService):
             for media in await self.uow.media.get_by_ids(list(media_ids))
         }
 
-        for block in blocks:
-            if block.block_type not in MEDIA_BLOCK_TYPES:
+        block_media_ids = {
+            attachment.owner_id: attachment.media_id for attachment in attachments
+        }
+
+        for block in media_blocks:
+            media_id = block_media_ids.get(block.id)
+            if media_id is None:
                 continue
-            raw = block.payload.get("media_id")
-            if not raw:
-                continue
-            try:
-                media = medias.get(UUID(str(raw)))
-            except ValueError:
-                continue
+            media = medias.get(media_id)
             if media is None:
                 continue
             if media.is_public:

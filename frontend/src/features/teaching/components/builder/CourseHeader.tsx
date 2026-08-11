@@ -20,6 +20,7 @@ import {
   Pencil,
   Settings2,
 } from "lucide-react"
+import { resolveMediaUrl } from "@/lib/media"
 
 interface CourseHeaderProps {
   course: {
@@ -38,12 +39,18 @@ interface CourseHeaderProps {
     is_published?: boolean
   }) => void
   isUpdating?: boolean
+  onUploadCover?: (file: File) => void
+  onRemoveCover?: () => void
+  isUploadingCover?: boolean
 }
 
 export function CourseHeader({
   course,
   onUpdateCourse,
   isUpdating = false,
+  onUploadCover,
+  onRemoveCover,
+  isUploadingCover = false,
 }: CourseHeaderProps) {
   const [title, setTitle] = useState(course.title)
   const [description, setDescription] = useState(course.description || "")
@@ -55,6 +62,7 @@ export function CourseHeader({
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const coverInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setTitle(course.title)
@@ -134,24 +142,56 @@ export function CourseHeader({
   return (
     <div className="rounded-2xl border border-border/60 bg-card shadow-sm px-4 py-3 flex items-center gap-3">
       {/* Миниатюра обложки — вместо большого баннера, кликабельный триггер загрузки */}
-      <button
-        type="button"
-        className="relative shrink-0 w-11 h-11 rounded-xl border border-border/60 bg-muted/20 overflow-hidden flex items-center justify-center group"
-        title="Изменить обложку"
-      >
-        {course.cover_url ? (
-          <img
-            src={course.cover_url}
-            alt={course.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <BookOpen size={18} className="text-muted-foreground/40" strokeWidth={1.5} />
+      <div className="relative shrink-0">
+        <button
+          type="button"
+          className="relative w-11 h-11 rounded-xl border border-border/60 bg-muted/20 overflow-hidden flex items-center justify-center group"
+          title="Изменить обложку"
+          onClick={() => coverInputRef.current?.click()}
+          disabled={isUploadingCover}
+        >
+          {course.cover_url ? (
+            <img
+              src={resolveMediaUrl(course.cover_url)}
+              alt={course.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <BookOpen size={18} className="text-muted-foreground/40" strokeWidth={1.5} />
+          )}
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            {isUploadingCover ? (
+              <Loader2 size={14} className="text-white animate-spin" />
+            ) : (
+              <Upload size={14} className="text-white" />
+            )}
+          </div>
+        </button>
+
+        {course.cover_url && onRemoveCover && (
+          <button
+            type="button"
+            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-background border border-border/60 text-muted-foreground hover:text-destructive flex items-center justify-center shadow-sm"
+            title="Удалить обложку"
+            disabled={isUploadingCover}
+            onClick={onRemoveCover}
+          >
+            <X size={10} />
+          </button>
         )}
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <Upload size={14} className="text-white" />
-        </div>
-      </button>
+
+        <input
+          ref={coverInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            e.target.value = ""
+            if (file) onUploadCover?.(file)
+          }}
+        />
+      </div>
 
       {/* Название + статус */}
       <div className="flex-1 min-w-0">

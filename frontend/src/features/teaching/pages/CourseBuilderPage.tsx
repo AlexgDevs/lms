@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "@tanstack/react-router"
 import { Loader2, AlertCircle, ArrowLeft, Folder } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCourses } from "@/features/teaching/api/useCourses"
+import { useCourseMedia } from "@/features/teaching/api/useCourseMedia"
 import { CourseHeader } from "@/features/teaching/components/builder/CourseHeader"
 import { CourseSidebar } from "@/features/teaching/components/builder/CourseSidebar"
 import { ROUTES } from "@/routes"
@@ -16,11 +17,6 @@ export function CourseBuilderPage() {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null)
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
 
-  if (!courseId) {
-    navigate({ to: ROUTES.TEACHING })
-    return null
-  }
-
   // Забираем данные из хука
   const {
     authorCourse,
@@ -29,6 +25,19 @@ export function CourseBuilderPage() {
     updateCourseAsync,
     isUpdatingCourse,
   } = useCourses(courseId)
+
+  // Медиа курса: обложка (загрузка / удаление)
+  const {
+    uploadCourseCoverAsync,
+    removeCourseCoverAsync,
+    isUploadingCover,
+    isRemovingCover,
+  } = useCourseMedia(courseId)
+
+  if (!courseId) {
+    navigate({ to: ROUTES.TEACHING })
+    return null
+  }
 
   // 1. Состояние загрузки
   if (isLoadingAuthorCourse) {
@@ -113,6 +122,9 @@ export function CourseBuilderPage() {
             course={authorCourse}
             onUpdateCourse={handleUpdateCourse}
             isUpdating={isUpdatingCourse}
+            onUploadCover={uploadCourseCoverAsync}
+            onRemoveCover={removeCourseCoverAsync}
+            isUploadingCover={isUploadingCover || isRemovingCover}
           />
         </div>
 
