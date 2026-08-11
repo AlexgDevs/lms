@@ -10,7 +10,7 @@ from src.module.schemas import (
     ModuleReorderSchema,
 )
 
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import OptionalUserIdDep, UserIdDep
 
 router = APIRouter(prefix="/courses/{course_id}/modules", tags=["Modules"])
 
@@ -80,7 +80,7 @@ async def delete_module(
 @router.get("")
 async def get_modules(
     course_id: UUID,
-    user_id: UserIdDep,
+    user_id: OptionalUserIdDep,
     service: ModuleServiceDep,
     only_created: bool = False,
     limit: int = 100,

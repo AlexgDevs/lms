@@ -5,5 +5,6 @@ export const ROUTES = {
     PROFILE: "/profile",
     TEACHING: "/teaching",
     TEACHING_COURSE: "/teaching/courses",
+    COURSE_DETAIL: "/courses",
     CATALOG: "/catalog"
 } as const

@@ -1,8 +1,13 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
+  createMemberApiV1CoursesCourseIdMembersPostMutation,
+  getCourseByIdApiV1CoursesCourseIdGetQueryKey,
   getCoursesApiV1CoursesGetInfiniteOptions,
   getCoursesApiV1CoursesGetOptions,
+  getCoursesApiV1CoursesGetQueryKey,
 } from "@/client/@tanstack/react-query.gen"
+import { getErrorMessage } from "@/lib/errors"
+import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
 export const useEnrolledCourses = (enabled = true) => {
   return useQuery({
@@ -25,6 +30,32 @@ export const useRecommendedCourses = (limit = 10) => {
     ...getCoursesApiV1CoursesGetOptions({
       query: { filter: "all", limit, offset: 0 },
     }),
+  })
+}
+
+export const useEnrollCourse = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    ...createMemberApiV1CoursesCourseIdMembersPostMutation(),
+    onSuccess: (_, variables) => {
+      showSuccessToast("Вы успешно записались на курс!")
+      queryClient.invalidateQueries({
+        queryKey: getCoursesApiV1CoursesGetQueryKey(),
+      })
+      const courseId = variables.path?.course_id
+      if (courseId) {
+        queryClient.invalidateQueries({
+          queryKey: getCourseByIdApiV1CoursesCourseIdGetQueryKey({
+            path: { course_id: courseId },
+            query: { filter: "current" },
+          }),
+        })
+      }
+    },
+    onError: (err) => {
+      showErrorToast(getErrorMessage(err) || "Ошибка при записи на курс")
+    },
   })
 }
 

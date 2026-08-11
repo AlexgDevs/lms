@@ -531,6 +531,16 @@ export const CourseSchemaSchema = {
             type: 'integer',
             title: 'Price'
         },
+        member_count: {
+            type: 'integer',
+            title: 'Member Count',
+            default: 0
+        },
+        is_member: {
+            type: 'boolean',
+            title: 'Is Member',
+            default: false
+        },
         status: {
             $ref: '#/components/schemas/CourseStatus'
         },
@@ -659,6 +669,16 @@ export const CourseUserBriefSchemaSchema = {
         price: {
             type: 'integer',
             title: 'Price'
+        },
+        member_count: {
+            type: 'integer',
+            title: 'Member Count',
+            default: 0
+        },
+        is_member: {
+            type: 'boolean',
+            title: 'Is Member',
+            default: false
         },
         status: {
             $ref: '#/components/schemas/CourseStatus'

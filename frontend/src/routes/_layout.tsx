@@ -8,7 +8,10 @@ const PUBLIC_ROUTES = [ROUTES.DASHBOARD, "/about", ROUTES.CATALOG];
 export const Route = createFileRoute("/_layout")({
   beforeLoad: ({ location }) => {
     // Если страница НЕ публичная и юзер НЕ залогинен — отправляем на логин
-    if (!PUBLIC_ROUTES.includes(location.pathname) && !isLoggedIn()) {
+    const isPublicRoute =
+      PUBLIC_ROUTES.includes(location.pathname) ||
+      location.pathname.startsWith(`${ROUTES.COURSE_DETAIL}/`);
+    if (!isPublicRoute && !isLoggedIn()) {
       throw redirect({ to: ROUTES.LOGIN });
     }
   },

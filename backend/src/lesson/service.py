@@ -1,6 +1,7 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from src.auth.exceptions import InvalidAccessTokenError
 from src.lesson.lesson_progress.schemas import (
     LessonProgressCreateSchema,
     LessonProgressSchema,
@@ -162,7 +163,7 @@ class LessonService(BaseService):
         self,
         course_id: UUID,
         module_id: UUID,
-        user_id: UUID,
+        user_id: UUID | None,
         limit: int = 100,
         offset: int = 0,
     ) -> list[LessonSchema]:
@@ -174,16 +175,9 @@ class LessonService(BaseService):
         if not course:
             raise CourseNotFoundError
 
-        if course.status != CourseStatus.PUBLISHED and course.owner_id != user_id:
-            raise CourseNotFoundError
-
-        member = await self.uow.courses.get_course_where_user_is_member(
-            course_id=course_id,
-            user_id=user_id,
-        )
-
-        if not member:
-            raise CourseNotFoundError
+        if course.status != CourseStatus.PUBLISHED:
+            if user_id is None or course.owner_id != user_id:
+                raise CourseNotFoundError
 
         module = await self.uow.modules.get_one(
             id=module_id,
@@ -207,10 +201,13 @@ class LessonService(BaseService):
         self,
         course_id: UUID,
         module_id: UUID,
-        user_id: UUID,
+        user_id: UUID | None,
         limit: int = 100,
         offset: int = 0,
     ) -> list[LessonSchema]:
+        if user_id is None:
+            raise InvalidAccessTokenError
+
         course = await self.uow.courses.get_one(
             id=course_id,
             owner_id=user_id,

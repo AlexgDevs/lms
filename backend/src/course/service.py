@@ -119,7 +119,7 @@ class CourseService(BaseService):
                     raise InvalidAccessTokenError
                 return await self.get_courses_where_user_member(user_id)
             case "all" | _:
-                return list(
+                courses = list(
                     await self.uow.courses.get_filtered(
                         status=CourseStatus.PUBLISHED,
                         is_deleted=None,
@@ -127,6 +127,13 @@ class CourseService(BaseService):
                         offset=offset,
                     )
                 )
+                if user_id is not None:
+                    member_ids = await self.uow.courses.get_member_course_ids(user_id)
+                    return [
+                        course.model_copy(update={"is_member": course.id in member_ids})
+                        for course in courses
+                    ]
+                return courses
 
     async def get_course(
         self,
@@ -147,6 +154,11 @@ class CourseService(BaseService):
                 course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
                 if not course or course.status != CourseStatus.PUBLISHED:
                     raise CourseNotFoundError
+                if user_id is not None:
+                    member_ids = await self.uow.courses.get_member_course_ids(user_id)
+                    course = course.model_copy(
+                        update={"is_member": course.id in member_ids}
+                    )
                 return course
 
     async def enroll(self, course_id: UUID, user_id: UUID) -> CourseMemberSchema:
@@ -171,6 +183,7 @@ class CourseService(BaseService):
 
         data = CourseMemberCreateSchema(course_id=course_id, user_id=user_id)
         new_member = await self.uow.members.create(data=data)
+        await self.uow.courses.increment_member_count(course_id)
 
         await self.uow.commit()
         return new_member

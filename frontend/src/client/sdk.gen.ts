@@ -177,11 +177,7 @@ export class ModuleService {
      * Get Modules
      */
     public static getModulesApiV1CoursesCourseIdModulesGet<ThrowOnError extends boolean = false>(options: Options<GetModulesApiV1CoursesCourseIdModulesGetData, ThrowOnError>): RequestResult<GetModulesApiV1CoursesCourseIdModulesGetResponses, GetModulesApiV1CoursesCourseIdModulesGetErrors, ThrowOnError> {
-        return (options.client ?? client).get<GetModulesApiV1CoursesCourseIdModulesGetResponses, GetModulesApiV1CoursesCourseIdModulesGetErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses/{course_id}/modules',
-            ...options
-        });
+        return (options.client ?? client).get<GetModulesApiV1CoursesCourseIdModulesGetResponses, GetModulesApiV1CoursesCourseIdModulesGetErrors, ThrowOnError>({ url: '/api/v1/courses/{course_id}/modules', ...options });
     }
     
     /**
@@ -246,11 +242,7 @@ export class LessonService {
      * Get Lessons
      */
     public static getLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGet<ThrowOnError extends boolean = false>(options: Options<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, ThrowOnError>): RequestResult<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors, ThrowOnError> {
-        return (options.client ?? client).get<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/courses/{course_id}/modules/{module_id}/lessons',
-            ...options
-        });
+        return (options.client ?? client).get<GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors, ThrowOnError>({ url: '/api/v1/courses/{course_id}/modules/{module_id}/lessons', ...options });
     }
     
     /**

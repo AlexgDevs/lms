@@ -362,6 +362,14 @@ export type CourseSchema = {
      * Price
      */
     price: number;
+    /**
+     * Member Count
+     */
+    member_count?: number;
+    /**
+     * Is Member
+     */
+    is_member?: boolean;
     status: CourseStatus;
     /**
      * Created At
@@ -429,6 +437,14 @@ export type CourseUserBriefSchema = {
      * Price
      */
     price: number;
+    /**
+     * Member Count
+     */
+    member_count?: number;
+    /**
+     * Is Member
+     */
+    is_member?: boolean;
     status: CourseStatus;
     /**
      * Created At

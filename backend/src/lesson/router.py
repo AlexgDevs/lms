@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter, status
 
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import OptionalUserIdDep, UserIdDep
 from src.lesson.dependencies import LessonServiceDep
 from src.lesson.schemas import (
     LessonSchema,
@@ -95,7 +95,7 @@ async def delete_lesson(
 async def get_lessons(
     course_id: UUID,
     module_id: UUID,
-    user_id: UserIdDep,
+    user_id: OptionalUserIdDep,
     service: LessonServiceDep,
     only_created: bool = False,
     limit: int = 100,

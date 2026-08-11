@@ -1,5 +1,7 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.auth.exceptions import InvalidAccessTokenError
+from src.course.enums import CourseStatus
 from src.course.exceptions import CourseNotFoundError
 from src.core.services import BaseService
 from src.module.unit_of_work import ModuleUnitOfWork
@@ -90,8 +92,11 @@ class ModuleService(BaseService):
         await self.uow.commit()
 
     async def get_all_by_owner_course(
-        self, course_id: UUID, user_id: UUID, limit: int = 100, offset: int = 0
+        self, course_id: UUID, user_id: UUID | None, limit: int = 100, offset: int = 0
     ) -> list[ModuleSchema]:
+        if user_id is None:
+            raise InvalidAccessTokenError
+
         course = await self.uow.courses.get_one(
             id=course_id,
             owner_id=user_id,
@@ -110,22 +115,22 @@ class ModuleService(BaseService):
         )
 
     async def get_all_by_course(
-        self, course_id: UUID, user_id: UUID, limit: int = 100, offset: int = 0
+        self,
+        course_id: UUID,
+        user_id: UUID | None,
+        limit: int = 100,
+        offset: int = 0,
     ) -> list[ModuleSchema]:
         course = await self.uow.courses.get_one(
             id=course_id,
-            owner_id=user_id,
             is_deleted=None,
         )
         if not course:
             raise CourseNotFoundError
 
-        member = await self.uow.courses.get_course_where_user_is_member(
-            course_id=course_id, user_id=user_id
-        )
-
-        if not member:
-            raise CourseNotFoundError
+        if course.status != CourseStatus.PUBLISHED:
+            if user_id is None or course.owner_id != user_id:
+                raise CourseNotFoundError
 
         return list(
             await self.uow.modules.get_filtered(

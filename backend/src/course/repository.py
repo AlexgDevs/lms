@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.sql import Select
 
 from src.lesson.enums import LessonProgressType
@@ -77,6 +77,22 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
             .outerjoin(total_subq, total_subq.c.course_id == Course.id)
             .outerjoin(completed_subq, completed_subq.c.course_id == Course.id)
         )
+
+    async def get_member_course_ids(self, user_id: UUID) -> set[UUID]:
+        statement = select(CourseMember.course_id).where(
+            CourseMember.user_id == user_id,
+            CourseMember.left_at.is_(None),
+        )
+        result = await self.session.execute(statement)
+        return set(result.scalars().all())
+
+    async def increment_member_count(self, course_id: UUID) -> None:
+        statement = (
+            update(Course)
+            .where(Course.id == course_id)
+            .values(member_count=Course.member_count + 1)
+        )
+        await self.session.execute(statement)
 
     async def get_courses_where_user_is_member(
         self, user_id: UUID

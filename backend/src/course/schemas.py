@@ -18,6 +18,8 @@ class CourseSchema(BaseSchema):
     description: str | None
     cover_url: str | None
     price: int
+    member_count: int = 0
+    is_member: bool = False
     status: CourseStatus
     created_at: datetime
 

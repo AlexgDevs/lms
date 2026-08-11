@@ -1,8 +1,10 @@
 import { Card } from "@/components/ui/card";
-import { BookOpen } from "lucide-react";
+import { BookOpen, ChevronRight, Users } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { resolveMediaUrl } from "@/lib/media";
 import { CourseStatus } from "@/client";
+import { ROUTES } from "@/routes";
 import type { CourseCardData } from "@/features/dashboard/types";
 
 interface CourseCardProps {
@@ -11,15 +13,38 @@ interface CourseCardProps {
   onClick?: (course: CourseCardData) => void;
 }
 
+function DetailsButton({ course }: { course: CourseCardData }) {
+  const navigate = useNavigate();
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate({
+          to: `${ROUTES.COURSE_DETAIL}/$courseId`,
+          params: { courseId: course.id },
+        });
+      }}
+      className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition-colors shadow-xs"
+    >
+      Подробнее
+      <ChevronRight className="w-3.5 h-3.5" />
+    </button>
+  );
+}
+
 export function CourseCard({ course, className, onClick }: CourseCardProps) {
   const cover = resolveMediaUrl(course.cover_url);
   const showProgress = course.progress !== undefined;
+  const isDraft = course.status === CourseStatus.DRAFT;
+  const memberCount = course.member_count ?? 0;
 
   return (
     <Card
       onClick={() => onClick?.(course)}
       className={cn(
-        "group relative border-border/50 bg-card rounded-2xl p-4 w-full flex flex-col justify-between h-48 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden",
+        "group relative border-border/50 bg-card rounded-2xl p-4 w-full flex flex-col justify-between h-52 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden",
         className
       )}
     >
@@ -48,8 +73,26 @@ export function CourseCard({ course, className, onClick }: CourseCardProps) {
         </div>
       </div>
 
-      {/* Нижняя часть: прогресс / статус / цена */}
-      <div className="pt-2 border-t border-border/30 mt-auto">
+      {/* Нижняя часть: цена + участники, затем прогресс / статус / подробнее */}
+      <div className="pt-2 border-t border-border/30 mt-auto space-y-2">
+        {!isDraft && (
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            {course.price === 0 ? (
+              <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                Бесплатно
+              </span>
+            ) : (
+              <span className="font-bold text-red-500 dark:text-red-400">
+                {course.price.toLocaleString()} ₽
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              <Users className="w-3.5 h-3.5" />
+              {memberCount} участников
+            </span>
+          </div>
+        )}
+
         {showProgress ? (
           <div className="space-y-1">
             <div className="flex justify-between text-[11px] font-medium">
@@ -63,7 +106,7 @@ export function CourseCard({ course, className, onClick }: CourseCardProps) {
               />
             </div>
           </div>
-        ) : course.status === CourseStatus.DRAFT ? (
+        ) : isDraft ? (
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Статус:</span>
             <span className="text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-md font-semibold text-[10px]">
@@ -71,17 +114,7 @@ export function CourseCard({ course, className, onClick }: CourseCardProps) {
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            {course.price === 0 ? (
-              <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
-                Бесплатно
-              </span>
-            ) : (
-              <span className="text-base font-extrabold text-red-500 dark:text-red-400">
-                {course.price.toLocaleString()} ₽
-              </span>
-            )}
-          </div>
+          <DetailsButton course={course} />
         )}
       </div>
     </Card>
