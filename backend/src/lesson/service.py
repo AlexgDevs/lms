@@ -8,7 +8,7 @@ from src.lesson.lesson_progress.schemas import (
 )
 from src.lesson.enums import LessonProgressType
 from src.lesson.exceptions import LessonNotFoundError, LessonProgressNotFoundError
-from src.course.exceptions import CourseNotFoundError
+from src.course.exceptions import CourseMemberNotFoundError, CourseNotFoundError
 from src.course.enums import CourseStatus
 from src.module.exceptions import ModuleNotFoundError
 from src.lesson.schemas import (
@@ -158,6 +158,49 @@ class LessonService(BaseService):
                 raise LessonProgressNotFoundError
 
             return existing_progress
+
+    async def get_course_progress(
+        self, course_id: UUID, user_id: UUID
+    ) -> list[LessonProgressSchema]:
+        """Returns the current user's progress for every lesson of a course.
+
+        Accessible to enrolled members (and the course owner). Completion status is
+        resolved per lesson via the `LessonProgress` rows.
+        """
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+        if not course:
+            raise CourseNotFoundError
+
+        if course.status != CourseStatus.PUBLISHED and course.owner_id != user_id:
+            raise CourseNotFoundError
+
+        member = await self.uow.courses.get_course_where_user_is_member(
+            course_id=course_id, user_id=user_id
+        )
+        if not member:
+            raise CourseMemberNotFoundError
+
+        modules = list(
+            await self.uow.modules.get_filtered(
+                limit=1000, offset=0, course_id=course_id
+            )
+        )
+
+        lesson_ids: list[UUID] = []
+        for module in modules:
+            lessons = await self.uow.lessons.get_filtered(
+                limit=1000, offset=0, course_id=course_id, module_id=module.id
+            )
+            lesson_ids.extend(lesson.id for lesson in lessons)
+
+        if not lesson_ids:
+            return []
+
+        return list(
+            await self.uow.lessons_progress.get_by_user_and_lesson_ids(
+                user_id=user_id, lesson_ids=lesson_ids
+            )
+        )
 
     async def get_all(
         self,

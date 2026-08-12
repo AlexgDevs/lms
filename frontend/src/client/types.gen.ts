@@ -1810,6 +1810,42 @@ export type UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMedi
 
 export type UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponse = UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponses[keyof UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponses];
 
+export type GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/submissions';
+};
+
+export type GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetError = GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetErrors[keyof GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetErrors];
+
+export type GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetResponses = {
+    /**
+     * Response Get Lesson Submissions Api V1 Courses  Course Id  Lessons  Lesson Id  Submissions Get
+     *
+     * Successful Response
+     */
+    200: Array<BlockSubmissionSchema>;
+};
+
+export type GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetResponse = GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetResponses[keyof GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetResponses];
+
 export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData = {
     /**
      * Payload
@@ -1848,6 +1884,44 @@ export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostRespon
 };
 
 export type SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponse = SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses[keyof SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses];
+
+export type SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostData = {
+    body: BlockSubmissionRequestCreateSchema;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+        /**
+         * Block Id
+         */
+        block_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/lessons/{lesson_id}/blocks/{block_id}/submission';
+};
+
+export type SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostError = SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostErrors[keyof SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostErrors];
+
+export type SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: BlockSubmissionSchema;
+};
+
+export type SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostResponse = SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostResponses[keyof SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostResponses];
 
 export type GetMyMediaApiV1MediaGetData = {
     body?: never;
@@ -2034,6 +2108,38 @@ export type CreateLessonApiV1LessonsLessonIdProgressPostResponses = {
 };
 
 export type CreateLessonApiV1LessonsLessonIdProgressPostResponse = CreateLessonApiV1LessonsLessonIdProgressPostResponses[keyof CreateLessonApiV1LessonsLessonIdProgressPostResponses];
+
+export type GetCourseProgressApiV1CoursesCourseIdProgressGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/progress';
+};
+
+export type GetCourseProgressApiV1CoursesCourseIdProgressGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCourseProgressApiV1CoursesCourseIdProgressGetError = GetCourseProgressApiV1CoursesCourseIdProgressGetErrors[keyof GetCourseProgressApiV1CoursesCourseIdProgressGetErrors];
+
+export type GetCourseProgressApiV1CoursesCourseIdProgressGetResponses = {
+    /**
+     * Response Get Course Progress Api V1 Courses  Course Id  Progress Get
+     *
+     * Successful Response
+     */
+    200: Array<LessonProgressSchema>;
+};
+
+export type GetCourseProgressApiV1CoursesCourseIdProgressGetResponse = GetCourseProgressApiV1CoursesCourseIdProgressGetResponses[keyof GetCourseProgressApiV1CoursesCourseIdProgressGetResponses];
 
 export type GetCurrentUserApiV1UsersMeGetData = {
     body?: never;

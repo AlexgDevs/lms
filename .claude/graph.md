@@ -1,7 +1,7 @@
 # LMS — Dependency / Module Graph
 
 > Auto-generated orientation file. Refresh with `/graphify` after structural
-> changes. Generated: 2026-08-11 (refreshed by agent scan). Convention: `A → B`
+> changes. Generated: 2026-08-12 (refreshed by agent scan). Convention: `A → B`
 > means "A imports/depends on B".
 
 ## 1. Backend — core infrastructure (`backend/src/core/`)
@@ -213,18 +213,38 @@ enums, __init__` — **no router/service** (support module).
   and `course`.
 - Deps on: `core.storage`, `user.dependencies` (`UserIdDep`), `core/*`.
 
+### profile (`src/profile/`)
+Files: `router, service, schemas, repository, dependencies`.
+- **Read-only stats module** — no own model/mapper/exceptions/enums/unit_of_work;
+  computes profile activity by aggregating `lesson.models.LessonProgress`
+  (`completed_at`) via the `lesson_progress` mapper + schemas.
+- Router prefix `/users/me`, tags `["Profile"]`: `GET /stats` →
+  `ProfileStatsSchema {streak:{current,longest}, weekly[7], yearly[365]}`.
+  Uses `UserIdDep` + `ProfileServiceDep`.
+- `service.py`: `get_stats` builds weekly (`DayActivitySchema`) and yearly
+  (`ContributionDaySchema`, 365-day heatmap) grids and current/longest streak
+  from the set of days with completed lessons.
+- `repository.py`: `ProfileRepository[LessonProgress, LessonProgressSchema]`
+  with `count_completed_by_day(user_id, since)` and `get_all_completed_days`
+  (GROUP BY `timezone('UTC', completed_at)::date`).
+- **Public seam**: `ProfileServiceDep`, `ProfileRepositoryDep` (`dependencies.py`).
+- Deps on: `lesson` (models + `lesson_progress` mapper/schemas),
+  `user.dependencies` (`UserIdDep`), `core/*`.
+
 ### Cross-module dependency summary
 ```
 auth → user, core
 user → auth (security/exceptions), core
 course → course_member, media (+media_attachment repos, MediaService for covers),
-         user, core
+         user, core        (CourseSchema.is_member resolved per viewer on read)
 module → course (exceptions/repo), user, core
 lesson → course + module (exceptions/repos), user, core
         (lesson_progress reuses LessonServiceDep)
 block  → course + lesson (exceptions/repos), media (+media_attachment repos,
          errors), core.storage (Storage), user, core
 media  → core.storage (Storage), media_attachment (submodule), user, core
+profile → lesson (LessonProgress model + lesson_progress mapper/schemas), user,
+          core
 submissions → block, course (+course_member), lesson (+lesson_progress),
               user, core
 all routers → core.router (app_v1)
@@ -286,16 +306,18 @@ styles/           Tailwind v4 CSS design system: tokens.css, semantic.css,
 | Feature | api/ hooks | pages | main routes |
 | --- | --- | --- | --- |
 | auth | `useAuth` | LoginPage, SignupPage | `/login`, `/signup` |
-| dashboard | `useEnrolledCourses(enabled)`, `useCreatedCourses(limit, enabled)`, `useRecommendedCourses(limit)`, `useCourseCatalog(pageSize)` | RootPage, CatalogPage (+ CourseCard, CourseRow, CourseRowSection, types) | `/`, `/catalog` |
-| profile | — | ProfilePage (streak, achievements, activity, certificates) | `/profile` |
+| dashboard | `useEnrolledCourses(enabled)`, `useCreatedCourses(limit, enabled)`, `useRecommendedCourses(limit)`, `useCourseCatalog(pageSize)` (infinite), `useCourseDetail(courseId)` (course `filter=current` + modules + per-module lessons), `useEnrollCourse` | RootPage, CatalogPage (+ CourseCard, CourseRow, CourseRowSection, types), CoursePage (public course detail w/ enroll) | `/`, `/catalog`, `/courses/$courseId` |
+| profile | `useProfileStats` (→ `GET /users/me/stats`, gated on `isLoggedIn()`) | ProfilePage (streak, weekly/yearly activity, achievements, certificates, "Мои курсы") | `/profile` |
 | teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`; `useBlocks` also `uploadBlockMediaAsync`), `useCourseMedia` (course cover upload/remove) | TeachingPage, CourseBuilderPage (builder components + block-editors/ incl. Image/File/Code/Audio/Video/QuizSingle/QuizMultiple; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem are drag-reorderable; `MediaUploadControl` validates/uploads media files) | `/teaching`, `/teaching/courses/$courseId` |
 | media | `useMyMedia`, `useMediaUrl`, `useUploadMedia`, `useDeleteMedia`, `useMedia` (aggregate) | — (api hooks only; wired through teaching `MediaUploadControl`) | — |
 
 Route files: `routes/_layout.tsx` (Layout shell; redirects logged-out users to
-`/login` on non-public routes — `/`, `/catalog`, `/about` stay public),
+`/login` on non-public routes — `/`, `/catalog`, `/about`, and `/courses/$courseId`
+(`ROUTES.COURSE_DETAIL`) stay public),
 `_layout/index.tsx` (dashboard), `_layout/catalog.tsx` (catalog),
-`_layout/teaching.index.tsx`, `_layout/teaching.courses.$courseId.tsx`,
-`_layout/profile.tsx`, `login.tsx`, `signup.tsx`, `__root.tsx`.
+`_layout/courses.$courseId.tsx` (course detail), `_layout/teaching.index.tsx`,
+`_layout/teaching.courses.$courseId.tsx`, `_layout/profile.tsx`,
+`login.tsx`, `signup.tsx`, `__root.tsx`.
 
 ### Client pipeline
 ```
@@ -306,7 +328,7 @@ backend spec (main.py .openapi())
 ```
 Generated services (from `client/index.ts`): `AuthService, BlockService,
 CourseService, DefaultService, LessonService, LessonsProgresService,
-MediaService, ModuleService, SubmissionService, UserService`.
+MediaService, ModuleService, ProfileService, SubmissionService, UserService`.
 
 Media in the UI: block editors validate files via `lib/media` +
 `MediaUploadControl`, upload through `useBlocks().uploadBlockMediaAsync`; course

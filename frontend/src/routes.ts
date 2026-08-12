@@ -6,5 +6,6 @@ export const ROUTES = {
     TEACHING: "/teaching",
     TEACHING_COURSE: "/teaching/courses",
     COURSE_DETAIL: "/courses",
+    LEARN: "/learn",
     CATALOG: "/catalog"
 } as const

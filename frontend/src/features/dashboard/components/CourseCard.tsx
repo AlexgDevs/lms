@@ -35,14 +35,30 @@ function DetailsButton({ course }: { course: CourseCardData }) {
 }
 
 export function CourseCard({ course, className, onClick }: CourseCardProps) {
+  const navigate = useNavigate();
   const cover = resolveMediaUrl(course.cover_url);
   const showProgress = course.progress !== undefined;
   const isDraft = course.status === CourseStatus.DRAFT;
   const memberCount = course.member_count ?? 0;
 
+  const handleCardClick = () => {
+    onClick?.(course);
+    if (course.is_member) {
+      navigate({
+        to: "/learn/$courseId",
+        params: { courseId: course.id },
+      });
+      return;
+    }
+    navigate({
+      to: `${ROUTES.COURSE_DETAIL}/$courseId`,
+      params: { courseId: course.id },
+    });
+  };
+
   return (
     <Card
-      onClick={() => onClick?.(course)}
+      onClick={handleCardClick}
       className={cn(
         "group relative border-border/50 bg-card rounded-2xl p-4 w-full flex flex-col justify-between h-52 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden",
         className

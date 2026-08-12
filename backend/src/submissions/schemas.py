@@ -34,6 +34,7 @@ class QuizMultipleSubmission(BaseSchema):
 
 PAYLOAD_SUBMISSION_REGISTRY: Dict[BlockType, Type[BaseSchema]] = {
     BlockType.TEXT: VoidBlockSubmission,
+    BlockType.CODE: VoidBlockSubmission,
     BlockType.IMAGE: VoidBlockSubmission,
     BlockType.VIDEO: VoidBlockSubmission,
     BlockType.AUDIO: VoidBlockSubmission,

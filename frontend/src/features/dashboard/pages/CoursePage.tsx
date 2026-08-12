@@ -166,7 +166,22 @@ export function CoursePage() {
                         <span className="text-muted-foreground tabular-nums shrink-0">
                           {lessonIndex + 1}.
                         </span>
-                        <span className="truncate">{lesson.title}</span>
+                        {isMember ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              navigate({
+                                to: "/learn/$courseId/$lessonId",
+                                params: { courseId: course.id, lessonId: lesson.id },
+                              })
+                            }
+                            className="truncate text-left hover:text-primary transition-colors"
+                          >
+                            {lesson.title}
+                          </button>
+                        ) : (
+                          <span className="truncate">{lesson.title}</span>
+                        )}
                       </li>
                     ))}
                   </ul>

@@ -55,7 +55,7 @@ Run from the repo root unless otherwise noted.
 │   │   └── logging/        # loguru setup
 │   └── <feature>/          # auth, user, course (+course_member), module,
 │                           # lesson (+lesson_progress), block, submissions, media
-│                           #   (+media/media_attachment)
+│                           #   (+media/media_attachment), profile (read-only stats)
 ├── frontend/src/
 │   ├── main.tsx, routes.ts, routeTree.gen.ts
 │   ├── app/providers/      # React Query, theme, layout
@@ -108,13 +108,14 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 - `course` + `course/course_member` — courses and enrollment (`CourseMember`);
   `CourseStatus` (draft/published); **anonymous public read** of published courses
   (`GET /courses` with `filter=all`, `GET /courses/{id}` with `filter=current`,
-  via `OptionalUserIdDep`); cover upload/remove
-  (`POST/DELETE /courses/{id}/media`) via `MediaService`.
+  via `OptionalUserIdDep`); `CourseSchema.is_member` resolved per viewer on read;
+  cover upload/remove (`POST/DELETE /courses/{id}/media`) via `MediaService`.
 - `module` — modules within a course.
 - `lesson` + `lesson/lesson_progress` — lessons and per-user progress (`LessonProgress`).
 - `block` — content blocks; `BlockType` covers text/quiz(code...)/media; `payload` is JSONB; media blocks bind a `MediaAttachment` (create/update reconcile, delete detach), resolve `payload.url` on read, and support upload via `POST /blocks/{id}/media`.
 - `submissions` — `BlockSubmission` checking via `BlockChecker` registry (`submissions/checker.py`).
 - `media` + `media/media_attachment` — uploads (local/S3 storage), per-owner listing, presigned URLs, delete protection via generic `MediaAttachment` (owner_type/owner_id/role); service used by `block` and `course`.
+- `profile` — read-only stats (`GET /users/me/stats`): streak, weekly (7-day) and yearly (365-day contribution grid) computed from `lesson_progress.completed_at`; no own tables — reuses `LessonProgress` (router/service/repository/schemas/dependencies only).
 
 ## Frontend architecture
 

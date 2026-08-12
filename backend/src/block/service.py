@@ -284,6 +284,20 @@ class BlockService(BaseService):
             payload["file_size"] = media.size_bytes
         return payload
 
+    @staticmethod
+    def _strip_quiz_answers(block: BlockSchema) -> BlockSchema:
+        """Removes correct answers from quiz payloads on the learner (member) read path.
+
+        Grading stays server-side (`BlockChecker` reads the payload from the DB), so
+        stripping the correct answers from the API response prevents learners from
+        inspecting them in the DOM / network tab.
+        """
+        if block.block_type is BlockType.QUIZ_SINGLE_CHOICE:
+            block.payload.pop("correct_option_id", None)
+        elif block.block_type is BlockType.QUIZ_MULTIPLE_CHOICE:
+            block.payload.pop("correct_option_ids", None)
+        return block
+
     def _media_url(self, media: MediaSchema) -> str | None:
         if media.is_public:
             return self.storage.get_public_url(media.storage_key)
@@ -333,7 +347,8 @@ class BlockService(BaseService):
                 lesson_id=lesson.id,
             )
         )
-        return await self._resolve_block_urls(blocks)
+        resolved = await self._resolve_block_urls(blocks)
+        return [self._strip_quiz_answers(block) for block in resolved]
 
     async def get_all_by_owner(
         self,
