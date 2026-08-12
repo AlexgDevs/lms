@@ -1,8 +1,7 @@
 import dayjs from "dayjs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { User as UserIcon, Calendar, ShieldCheck } from "lucide-react";
+import { User as UserIcon, Calendar } from "lucide-react";
 
 interface ProfileHeaderProps {
   user?: {
@@ -31,12 +30,6 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
             <h1 className="text-2xl font-bold tracking-tight text-foreground truncate">
               {user?.username || "Пользователь"}
             </h1>
-            
-            {/* Заглушка роли */}
-            <Badge variant="secondary" className="w-fit mx-auto md:mx-0 gap-1">
-              <ShieldCheck size={13} className="text-primary" />
-              <span>Студент</span>
-            </Badge>
           </div>
 
           <p className="text-sm text-muted-foreground truncate">

@@ -1,6 +1,5 @@
-import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Loader2 } from "lucide-react";
 
 export interface ContributionDay {
   date: string; // YYYY-MM-DD
@@ -9,30 +8,21 @@ export interface ContributionDay {
 
 interface YearlyActivityProps {
   data?: ContributionDay[];
+  isLoading?: boolean;
 }
 
-function generateMockDays(): ContributionDay[] {
-  const mockDays: ContributionDay[] = [];
-  const today = new Date();
+export function YearlyActivity({ data = [], isLoading = false }: YearlyActivityProps) {
+  const days = data;
 
-  for (let i = 363; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split("T")[0];
-
-    const randomCount = Math.random() > 0.65 ? Math.floor(Math.random() * 8) : 0;
-    mockDays.push({ date: dateStr, count: randomCount });
+  if (isLoading) {
+    return (
+      <Card className="border-border bg-card">
+        <CardContent className="flex items-center justify-center py-10">
+          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    );
   }
-  return mockDays;
-}
-
-const FALLBACK_MOCK_DAYS = generateMockDays();
-
-export function YearlyActivity({ data = [] }: YearlyActivityProps) {
-  const days = useMemo(
-    () => (data.length > 0 ? data : FALLBACK_MOCK_DAYS),
-    [data]
-  );
 
   // Вычисляем уровень подсветки (0..4)
   const getLevelClass = (count: number) => {
@@ -43,10 +33,7 @@ export function YearlyActivity({ data = [] }: YearlyActivityProps) {
     return "bg-primary border-primary shadow-sm shadow-primary/40";
   };
 
-  const totalContributions = useMemo(
-    () => days.reduce((acc, curr) => acc + curr.count, 0),
-    [days]
-  );
+  const totalContributions = days.reduce((acc, curr) => acc + curr.count, 0);
 
   return (
     <Card className="border-border bg-card">

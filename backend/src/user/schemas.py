@@ -11,3 +11,11 @@ class UserSchema(BaseSchema):
     password_hash: str
     avatar_url: str | None
     joined_at: datetime
+
+
+class UserPublicSchema(BaseSchema):
+    id: UUID
+    username: str
+    email: str
+    avatar_url: str | None
+    joined_at: datetime

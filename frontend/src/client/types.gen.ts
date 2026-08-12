@@ -273,6 +273,20 @@ export type BodyUploadMediaApiV1MediaPost = {
 };
 
 /**
+ * ContributionDaySchema
+ */
+export type ContributionDaySchema = {
+    /**
+     * Date
+     */
+    date: string;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * CourseCreateRequestSchema
  *
  * Schema for incoming client request to create a course.
@@ -455,6 +469,20 @@ export type CourseUserBriefSchema = {
      * Progress
      */
     progress?: number;
+};
+
+/**
+ * DayActivitySchema
+ */
+export type DayActivitySchema = {
+    /**
+     * Day
+     */
+    day: string;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -709,6 +737,35 @@ export type ModuleUpdateRequestSchema = {
 };
 
 /**
+ * ProfileStatsSchema
+ */
+export type ProfileStatsSchema = {
+    streak: StreakSchema;
+    /**
+     * Weekly
+     */
+    weekly: Array<DayActivitySchema>;
+    /**
+     * Yearly
+     */
+    yearly: Array<ContributionDaySchema>;
+};
+
+/**
+ * StreakSchema
+ */
+export type StreakSchema = {
+    /**
+     * Current
+     */
+    current: number;
+    /**
+     * Longest
+     */
+    longest: number;
+};
+
+/**
  * TokenPair
  */
 export type TokenPair = {
@@ -727,6 +784,32 @@ export type TokenPair = {
 };
 
 /**
+ * UserPublicSchema
+ */
+export type UserPublicSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Avatar Url
+     */
+    avatar_url: string | null;
+    /**
+     * Joined At
+     */
+    joined_at: string;
+};
+
+/**
  * UserRegisterSchema
  */
 export type UserRegisterSchema = {
@@ -742,36 +825,6 @@ export type UserRegisterSchema = {
      * Password
      */
     password: string;
-};
-
-/**
- * UserSchema
- */
-export type UserSchema = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Username
-     */
-    username: string;
-    /**
-     * Email
-     */
-    email: string;
-    /**
-     * Password Hash
-     */
-    password_hash: string;
-    /**
-     * Avatar Url
-     */
-    avatar_url: string | null;
-    /**
-     * Joined At
-     */
-    joined_at: string;
 };
 
 /**
@@ -822,7 +875,7 @@ export type RegisterApiV1AuthRegisterPostResponses = {
     /**
      * Successful Response
      */
-    201: UserSchema;
+    201: UserPublicSchema;
 };
 
 export type RegisterApiV1AuthRegisterPostResponse = RegisterApiV1AuthRegisterPostResponses[keyof RegisterApiV1AuthRegisterPostResponses];
@@ -1993,7 +2046,7 @@ export type GetCurrentUserApiV1UsersMeGetResponses = {
     /**
      * Successful Response
      */
-    200: UserSchema;
+    200: UserPublicSchema;
 };
 
 export type GetCurrentUserApiV1UsersMeGetResponse = GetCurrentUserApiV1UsersMeGetResponses[keyof GetCurrentUserApiV1UsersMeGetResponses];
@@ -2023,10 +2076,26 @@ export type GetUserByIdApiV1UsersUserIdGetResponses = {
     /**
      * Successful Response
      */
-    200: UserSchema;
+    200: UserPublicSchema;
 };
 
 export type GetUserByIdApiV1UsersUserIdGetResponse = GetUserByIdApiV1UsersUserIdGetResponses[keyof GetUserByIdApiV1UsersUserIdGetResponses];
+
+export type GetProfileStatsApiV1UsersMeStatsGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/stats';
+};
+
+export type GetProfileStatsApiV1UsersMeStatsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProfileStatsSchema;
+};
+
+export type GetProfileStatsApiV1UsersMeStatsGetResponse = GetProfileStatsApiV1UsersMeStatsGetResponses[keyof GetProfileStatsApiV1UsersMeStatsGetResponses];
 
 export type SayHelloGetData = {
     body?: never;

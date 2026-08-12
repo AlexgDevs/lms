@@ -9,7 +9,7 @@ from src.auth.schemas import (
     TokenPair,
 )
 
-from src.user.schemas import UserSchema
+from src.user.schemas import UserPublicSchema
 
 router = APIRouter(
     prefix="/auth",
@@ -20,16 +20,17 @@ router = APIRouter(
 @router.post(
     "/register",
     status_code=status.HTTP_201_CREATED,
+    response_model=UserPublicSchema,
 )
 async def register(
     form_data: UserRegisterSchema,
     service: AuthServiceDep,
     request: Request,
     response: Response,
-) -> UserSchema:
+) -> UserPublicSchema:
     user = await service.register(form_data)
     response.headers["location"] = f"{request.url.path}/{user.id}"
-    return UserSchema.model_validate(user)
+    return UserPublicSchema.model_validate(user)
 
 
 @router.post("/login")

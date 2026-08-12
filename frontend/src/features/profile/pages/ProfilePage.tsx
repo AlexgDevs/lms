@@ -1,38 +1,61 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Award, BookOpen, ChevronRight } from "lucide-react";
 import useAuth from "@/features/auth/api/useAuth";
 import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
 import { ProfileStreak } from "@/features/profile/components/ProfileStreak";
 import { WeeklyActivity } from "@/features/profile/components/WeeklyActivity";
 import { YearlyActivity } from "@/features/profile/components/YearlyActivity";
-import { ProfileAchievements } from "@/features/profile/components/ProfileAchievements"; // <-- Импортируем
+import { ProfileAchievements } from "@/features/profile/components/ProfileAchievements";
 import { CertificatesModal } from "@/features/profile/components/CertificatesModal";
+import { useProfileStats } from "@/features/profile/api/useProfileStats";
+import { useEnrolledCourses } from "@/features/dashboard/api/useCourses";
+import { CourseRowSection } from "@/features/dashboard/components/CourseRowSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Award, ChevronRight } from "lucide-react";
+import { ROUTES } from "@/routes";
 
 export function ProfilePage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const stats = useProfileStats();
+  const enrolled = useEnrolledCourses(true);
   const [isCertificatesOpen, setIsCertificatesOpen] = useState(false);
+
+  const enrolledCourses = enrolled.data ?? [];
+
+  const goToCatalog = () => navigate({ to: ROUTES.CATALOG });
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 py-2">
-      
+      <ProfileHeader user={user} />
+
+      {enrolledCourses.length > 0 && (
+        <CourseRowSection
+          title="Мои курсы"
+          icon={BookOpen}
+          count={enrolledCourses.length}
+          courses={enrolledCourses}
+          onSeeAll={goToCatalog}
+          onCourseClick={(course) =>
+            navigate({
+              to: `${ROUTES.COURSE_DETAIL}/$courseId`,
+              params: { courseId: course.id },
+            })
+          }
+        />
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
-        {/* ЛЕВАЯ КОЛОНКА (2/3) */}
         <div className="lg:col-span-2 space-y-6">
-          <ProfileHeader user={user} />
-          <WeeklyActivity />
-          <YearlyActivity />
+          <WeeklyActivity activity={stats.data?.weekly} />
+          <YearlyActivity data={stats.data?.yearly} isLoading={stats.isLoading} />
         </div>
 
-        {/* ПРАВАЯ КОЛОНКА (1/3) */}
         <div className="space-y-6">
-          {/* 1. Стрик */}
-          <ProfileStreak streakDays={5} />
+          <ProfileStreak streakDays={stats.data?.streak.current} />
 
-          {/* 2. Сертификаты */}
-          <Card 
+          <Card
             className="border-border bg-card hover:border-primary/50 transition-colors cursor-pointer group"
             onClick={() => setIsCertificatesOpen(true)}
           >
@@ -46,22 +69,20 @@ export function ProfilePage() {
                   <p className="text-xs text-muted-foreground">Просмотр и скачивание</p>
                 </div>
               </div>
-              
+
               <Button variant="ghost" size="icon" className="text-muted-foreground group-hover:text-foreground shrink-0">
                 <ChevronRight size={18} />
               </Button>
             </CardContent>
           </Card>
 
-          {/* 3. Достижения (Ачивки) */}
           <ProfileAchievements />
         </div>
-
       </div>
 
-      <CertificatesModal 
-        open={isCertificatesOpen} 
-        onOpenChange={setIsCertificatesOpen} 
+      <CertificatesModal
+        open={isCertificatesOpen}
+        onOpenChange={setIsCertificatesOpen}
       />
     </div>
   );

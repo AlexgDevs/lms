@@ -411,6 +411,26 @@ export const Body_upload_media_api_v1_media_postSchema = {
     title: 'Body_upload_media_api_v1_media_post'
 } as const;
 
+export const ContributionDaySchemaSchema = {
+    properties: {
+        date: {
+            type: 'string',
+            format: 'date',
+            title: 'Date'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: [
+        'date',
+        'count'
+    ],
+    title: 'ContributionDaySchema'
+} as const;
+
 export const CourseCreateRequestSchemaSchema = {
     properties: {
         title: {
@@ -710,6 +730,25 @@ export const CourseUserBriefSchemaSchema = {
         'role'
     ],
     title: 'CourseUserBriefSchema'
+} as const;
+
+export const DayActivitySchemaSchema = {
+    properties: {
+        day: {
+            type: 'string',
+            title: 'Day'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: [
+        'day',
+        'count'
+    ],
+    title: 'DayActivitySchema'
 } as const;
 
 export const HTTPValidationErrorSchema = {
@@ -1130,6 +1169,54 @@ export const ModuleUpdateRequestSchemaSchema = {
     title: 'ModuleUpdateRequestSchema'
 } as const;
 
+export const ProfileStatsSchemaSchema = {
+    properties: {
+        streak: {
+            $ref: '#/components/schemas/StreakSchema'
+        },
+        weekly: {
+            items: {
+                $ref: '#/components/schemas/DayActivitySchema'
+            },
+            type: 'array',
+            title: 'Weekly'
+        },
+        yearly: {
+            items: {
+                $ref: '#/components/schemas/ContributionDaySchema'
+            },
+            type: 'array',
+            title: 'Yearly'
+        }
+    },
+    type: 'object',
+    required: [
+        'streak',
+        'weekly',
+        'yearly'
+    ],
+    title: 'ProfileStatsSchema'
+} as const;
+
+export const StreakSchemaSchema = {
+    properties: {
+        current: {
+            type: 'integer',
+            title: 'Current'
+        },
+        longest: {
+            type: 'integer',
+            title: 'Longest'
+        }
+    },
+    type: 'object',
+    required: [
+        'current',
+        'longest'
+    ],
+    title: 'StreakSchema'
+} as const;
+
 export const TokenPairSchema = {
     properties: {
         access_token: {
@@ -1152,6 +1239,49 @@ export const TokenPairSchema = {
         'refresh_token'
     ],
     title: 'TokenPair'
+} as const;
+
+export const UserPublicSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        username: {
+            type: 'string',
+            title: 'Username'
+        },
+        email: {
+            type: 'string',
+            title: 'Email'
+        },
+        avatar_url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Avatar Url'
+        },
+        joined_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Joined At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'username',
+        'email',
+        'avatar_url',
+        'joined_at'
+    ],
+    title: 'UserPublicSchema'
 } as const;
 
 export const UserRegisterSchemaSchema = {
@@ -1177,54 +1307,6 @@ export const UserRegisterSchemaSchema = {
         'password'
     ],
     title: 'UserRegisterSchema'
-} as const;
-
-export const UserSchemaSchema = {
-    properties: {
-        id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Id'
-        },
-        username: {
-            type: 'string',
-            title: 'Username'
-        },
-        email: {
-            type: 'string',
-            title: 'Email'
-        },
-        password_hash: {
-            type: 'string',
-            title: 'Password Hash'
-        },
-        avatar_url: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Avatar Url'
-        },
-        joined_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Joined At'
-        }
-    },
-    type: 'object',
-    required: [
-        'id',
-        'username',
-        'email',
-        'password_hash',
-        'avatar_url',
-        'joined_at'
-    ],
-    title: 'UserSchema'
 } as const;
 
 export const ValidationErrorSchema = {

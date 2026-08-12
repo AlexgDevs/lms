@@ -30,7 +30,7 @@ export function WeeklyActivity({
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <BookCheck size={18} className="text-primary" />
-          3D-Активность за неделю
+          Активность за неделю
         </CardTitle>
         <CardDescription className="text-xs">
           Высота столбика зависит от количества пройденных материалов
