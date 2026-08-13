@@ -15,6 +15,11 @@ export const createCourseSchema = z.object({
     .number({ message: "Price must be a number" })
     .min(0, { message: "Price cannot be negative" })
     .optional(),
+  category_id: z
+    .string()
+    .uuid({ message: "Invalid category" })
+    .nullable()
+    .optional(),
 });
 
 // --- UPDATE COURSE SCHEMA (CourseUpdateRequestSchema) ---

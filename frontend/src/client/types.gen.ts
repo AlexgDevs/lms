@@ -273,6 +273,36 @@ export type BodyUploadMediaApiV1MediaPost = {
 };
 
 /**
+ * CategorySchema
+ */
+export type CategorySchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Icon
+     */
+    icon: string | null;
+    /**
+     * Parent Id
+     */
+    parent_id: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+};
+
+/**
  * ContributionDaySchema
  */
 export type ContributionDaySchema = {
@@ -311,6 +341,12 @@ export type CourseCreateRequestSchema = {
      * Цена курса (не может быть отрицательной)
      */
     price?: number;
+    /**
+     * Category Id
+     *
+     * ID категории курса
+     */
+    category_id?: string | null;
 };
 
 /**
@@ -377,6 +413,10 @@ export type CourseSchema = {
      */
     price: number;
     /**
+     * Category Id
+     */
+    category_id?: string | null;
+    /**
      * Member Count
      */
     member_count?: number;
@@ -420,6 +460,10 @@ export type CourseUpdateRequestSchema = {
      * Price
      */
     price?: number | null;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
     status?: CourseStatus | null;
 };
 
@@ -451,6 +495,10 @@ export type CourseUserBriefSchema = {
      * Price
      */
     price: number;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
     /**
      * Member Count
      */
@@ -989,6 +1037,10 @@ export type GetCoursesApiV1CoursesGetData = {
          * Offset
          */
         offset?: number;
+        /**
+         * Category
+         */
+        category?: string | null;
     };
     url: '/api/v1/courses';
 };
@@ -1224,6 +1276,24 @@ export type UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses = {
 };
 
 export type UploadCourseCoverApiV1CoursesCourseIdMediaPostResponse = UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses[keyof UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses];
+
+export type ListCategoriesApiV1CategoriesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/categories';
+};
+
+export type ListCategoriesApiV1CategoriesGetResponses = {
+    /**
+     * Response List Categories Api V1 Categories Get
+     *
+     * Successful Response
+     */
+    200: Array<CategorySchema>;
+};
+
+export type ListCategoriesApiV1CategoriesGetResponse = ListCategoriesApiV1CategoriesGetResponses[keyof ListCategoriesApiV1CategoriesGetResponses];
 
 export type GetModulesApiV1CoursesCourseIdModulesGetData = {
     body?: never;

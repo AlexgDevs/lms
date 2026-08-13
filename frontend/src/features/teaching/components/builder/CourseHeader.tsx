@@ -19,8 +19,10 @@ import {
   X,
   Pencil,
   Settings2,
+  Tag,
 } from "lucide-react"
 import { resolveMediaUrl } from "@/lib/media"
+import { CategoryPicker } from "@/features/teaching/components/CategoryPicker"
 
 interface CourseHeaderProps {
   course: {
@@ -30,6 +32,7 @@ interface CourseHeaderProps {
     price?: number | null
     cover_url?: string | null
     status?: "draft" | "published"
+    category_id?: string | null
     created_at?: string
   }
   onUpdateCourse: (data: {
@@ -37,6 +40,7 @@ interface CourseHeaderProps {
     description?: string | null
     price?: number | null
     status?: "draft" | "published"
+    category_id?: string | null
   }) => void
   isUpdating?: boolean
   onUploadCover?: (file: File) => void
@@ -56,6 +60,7 @@ export function CourseHeader({
   const [description, setDescription] = useState(course.description || "")
   const [price, setPrice] = useState<number | "">(course.price ?? 0)
   const [isFree, setIsFree] = useState((course.price ?? 0) === 0)
+  const [categoryId, setCategoryId] = useState<string | null>(course.category_id ?? null)
 
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [savedField, setSavedField] = useState<string | null>(null)
@@ -71,6 +76,7 @@ export function CourseHeader({
     setDescription(course.description || "")
     setPrice(course.price ?? 0)
     setIsFree((course.price ?? 0) === 0)
+    setCategoryId(course.category_id ?? null)
   }
 
   useEffect(() => {
@@ -126,6 +132,15 @@ export function CourseHeader({
   const handleCancelPrice = () => {
     setPrice(course.price ?? 0)
     setIsFree((course.price ?? 0) === 0)
+  }
+
+  // --- Категория ---
+  const handleSelectCategory = (id: string | null) => {
+    setCategoryId(id)
+    if (id !== (course.category_id ?? null)) {
+      onUpdateCourse({ category_id: id })
+      triggerSavedAnimation("category")
+    }
   }
 
   const handleFreeToggle = (checked: boolean) => {

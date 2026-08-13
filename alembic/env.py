@@ -19,6 +19,7 @@ from src.core.postgres import Base
 from src.auth import models as auth_models  # noqa: F401
 from src.user import models as user_models  # noqa: F401
 from src.course import models as course_models  # noqa: F401
+from src.course.category import models as category_models  # noqa: F401
 from src.module import models as module_models  # noqa: F401
 from src.lesson import models as lesson_models  # noqa: F401
 from src.block import models as block_models  # noqa: F401

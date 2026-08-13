@@ -21,6 +21,11 @@ class Course(UUIDBase):
     description: Mapped[str_128 | None]
     cover_url: Mapped[str | None]
     price: Mapped[int] = mapped_column(default=0)
+    category_id: Mapped[UUID | None] = mapped_column(
+        sqlUUID(as_uuid=True),
+        ForeignKey("categories.id", ondelete="SET NULL"),
+        index=True,
+    )
     member_count: Mapped[int] = mapped_column(server_default="0", default=0)
     status: Mapped[CourseStatus] = mapped_column(
         SAEnum(

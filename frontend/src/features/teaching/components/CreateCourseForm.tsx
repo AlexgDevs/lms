@@ -19,8 +19,18 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectGroupLabel,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { createCourseSchema, type CreateCourseFormData } from "@/features/teaching/schemas/course"
 import { useCourses } from "@/features/teaching/api/useCourses"
+import { useCategoryTree } from "@/features/dashboard/api/useCategories"
 import { ROUTES } from "@/routes"
 
 interface CreateCourseFormProps {
@@ -31,6 +41,7 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
   const navigate = useNavigate()
   // Достаём те названия, которые реально возвращаются из useCourses
   const { createCourseAsync, isCreatingCourse } = useCourses()
+  const { tree } = useCategoryTree()
 
   const form = useForm<CreateCourseFormData>({
     resolver: zodResolver(createCourseSchema),
@@ -39,6 +50,7 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
       title: "",
       description: "",
       price: 0,
+      category_id: null,
     },
   })
 
@@ -146,6 +158,45 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
                         field.onChange(Number.isNaN(val) ? 0 : val)
                       }}
                     />
+                    {fieldState.invalid && (
+                      <FieldError
+                        errors={fieldState.error ? [fieldState.error] : []}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              {/* Категория курса */}
+              <Controller
+                name="category_id"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Категория</FieldLabel>
+                    <Select
+                      value={field.value ?? undefined}
+                      onValueChange={(value) => field.onChange(value || null)}
+                    >
+                      <SelectTrigger id={field.name}>
+                        <SelectValue placeholder="Выберите категорию" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tree.map((parent) => (
+                          <SelectGroup key={parent.id}>
+                            <SelectGroupLabel>
+                              {parent.icon && <span className="mr-1">{parent.icon}</span>}
+                              {parent.name}
+                            </SelectGroupLabel>
+                            {parent.children.map((child) => (
+                              <SelectItem key={child.id} value={child.id}>
+                                {child.name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {fieldState.invalid && (
                       <FieldError
                         errors={fieldState.error ? [fieldState.error] : []}

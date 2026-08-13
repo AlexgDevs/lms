@@ -2,6 +2,8 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
+from src.course.category.dependencies import CategoryRepositoryDep
+from src.course.category.repository import CategoryRepository
 from src.course.course_member.repository import CourseMemberRepository
 from src.core.dependencies import SessionDep
 from src.course.repository import CourseRepository
@@ -36,6 +38,7 @@ async def get_course_uow(
     course_member_repository: CourseMemberRepositoryDep,
     media_attachment_repository: MediaAttachmentRepositoryDep,
     media_repository: MediaRepositoryDep,
+    category_repository: CategoryRepositoryDep,
 ) -> AsyncGenerator[CourseUnitOfWork]:
     async with CourseUnitOfWork(
         session,
@@ -43,6 +46,7 @@ async def get_course_uow(
         course_member_repository,
         media_attachment_repository,
         media_repository,
+        category_repository,
     ) as uow:
         yield uow
 

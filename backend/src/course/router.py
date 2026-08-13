@@ -52,9 +52,14 @@ async def get_courses(
     filter: Literal["all", "created", "my"] = "all",
     limit: int = 10,
     offset: int = 0,
+    category: str | None = None,
 ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
     return await service.list_courses(
-        filter=filter, user_id=user_id, limit=limit, offset=offset
+        filter=filter,
+        user_id=user_id,
+        limit=limit,
+        offset=offset,
+        category=category,
     )
 
 

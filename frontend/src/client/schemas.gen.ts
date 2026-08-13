@@ -411,6 +411,61 @@ export const Body_upload_media_api_v1_media_postSchema = {
     title: 'Body_upload_media_api_v1_media_post'
 } as const;
 
+export const CategorySchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        slug: {
+            type: 'string',
+            title: 'Slug'
+        },
+        icon: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Icon'
+        },
+        parent_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Parent Id'
+        },
+        sort_order: {
+            type: 'integer',
+            title: 'Sort Order'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'name',
+        'slug',
+        'icon',
+        'parent_id',
+        'sort_order'
+    ],
+    title: 'CategorySchema'
+} as const;
+
 export const ContributionDaySchemaSchema = {
     properties: {
         date: {
@@ -458,6 +513,19 @@ export const CourseCreateRequestSchemaSchema = {
             title: 'Price',
             description: 'Цена курса (не может быть отрицательной)',
             default: 0
+        },
+        category_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Category Id',
+            description: 'ID категории курса'
         }
     },
     type: 'object',
@@ -551,6 +619,18 @@ export const CourseSchemaSchema = {
             type: 'integer',
             title: 'Price'
         },
+        category_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Category Id'
+        },
         member_count: {
             type: 'integer',
             title: 'Member Count',
@@ -632,6 +712,18 @@ export const CourseUpdateRequestSchemaSchema = {
             ],
             title: 'Price'
         },
+        category_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Category Id'
+        },
         status: {
             anyOf: [
                 {
@@ -689,6 +781,18 @@ export const CourseUserBriefSchemaSchema = {
         price: {
             type: 'integer',
             title: 'Price'
+        },
+        category_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Category Id'
         },
         member_count: {
             type: 'integer',

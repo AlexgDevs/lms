@@ -72,7 +72,9 @@ class CourseService(BaseService):
         if not course:
             raise CourseNotFoundError
 
-        course = await self.uow.courses.update(course_id, update_data)
+        course = await self.uow.courses.update(
+            course_id, update_data, exclude_none=False
+        )
         await self.uow.commit()
         return course
 
@@ -101,6 +103,7 @@ class CourseService(BaseService):
         user_id: UUID | None,
         limit: int = 10,
         offset: int = 0,
+        category: str | None = None,
     ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
         match filter:
             case "created":
@@ -119,12 +122,16 @@ class CourseService(BaseService):
                     raise InvalidAccessTokenError
                 return await self.get_courses_where_user_member(user_id)
             case "all" | _:
+                category_ids = await self._resolve_category_ids(category)
+                if category is not None and not category_ids:
+                    return []
                 courses = list(
                     await self.uow.courses.get_filtered(
-                        status=CourseStatus.PUBLISHED,
-                        is_deleted=None,
                         limit=limit,
                         offset=offset,
+                        category_ids=category_ids,
+                        status=CourseStatus.PUBLISHED,
+                        is_deleted=None,
                     )
                 )
                 if user_id is not None:
@@ -134,6 +141,17 @@ class CourseService(BaseService):
                         for course in courses
                     ]
                 return courses
+
+    async def _resolve_category_ids(
+        self, category: str | None
+    ) -> Sequence[UUID] | None:
+        if category is None:
+            return None
+        found = await self.uow.categories.get_one(slug=category)
+        if not found:
+            return []
+        children = await self.uow.categories.get_by_parent_id(found.id)
+        return [found.id, *[child.id for child in children]]
 
     async def get_course(
         self,

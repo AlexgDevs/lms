@@ -18,6 +18,7 @@ class CourseSchema(BaseSchema):
     description: str | None
     cover_url: str | None
     price: int
+    category_id: UUID | None = None
     member_count: int = 0
     is_member: bool = False
     status: CourseStatus
@@ -33,6 +34,7 @@ class CourseCreateRequestSchema(BaseSchema):
     title: str = Field(..., max_length=128, description="Название курса")
     description: str | None = Field(None, max_length=128, description="Описание курса")
     price: int = Field(0, ge=0, description="Цена курса (не может быть отрицательной)")
+    category_id: UUID | None = Field(None, description="ID категории курса")
 
 
 class CourseCreateSchema(BaseSchema):
@@ -46,6 +48,7 @@ class CourseCreateSchema(BaseSchema):
     description: str | None
     price: int
     cover_url: str | None = None
+    category_id: UUID | None = None
     status: CourseStatus = CourseStatus.DRAFT
 
 
@@ -58,6 +61,7 @@ class CourseUpdateRequestSchema(BaseSchema):
     title: str | None = Field(None, max_length=128)
     description: str | None = Field(None, max_length=128)
     price: int | None = Field(None, ge=0)
+    category_id: UUID | None = None
     status: CourseStatus | None = None
 
 
@@ -70,6 +74,7 @@ class CourseUpdateSchema(BaseSchema):
     description: str | None = None
     price: int | None = None
     cover_url: str | None = None
+    category_id: UUID | None = None
     status: CourseStatus | None = None
     is_deleted: datetime | None = None
 

@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCourseCatalog } from "@/features/dashboard/api/useCourses";
+import { useCategoryBySlug } from "@/features/dashboard/api/useCategories";
 import { CourseCard } from "@/features/dashboard/components/CourseCard";
 import { CourseFilters } from "@/features/dashboard/components/CourseFilters";
+import { CategoryChips } from "@/features/dashboard/components/CategoryChips";
 import type { CourseCardData } from "@/features/dashboard/types";
 
 const PAGE_SIZE = 12;
 
 export function CatalogPage() {
+  const navigate = useNavigate();
+  const search = useSearch({ from: "/_layout/catalog" });
+  const categorySlug = search.category;
+  const activeCategory = useCategoryBySlug(categorySlug);
   const [freeOnly, setFreeOnly] = useState(false);
 
   const {
@@ -16,7 +23,7 @@ export function CatalogPage() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useCourseCatalog(PAGE_SIZE);
+  } = useCourseCatalog(PAGE_SIZE, categorySlug);
 
   const courses = (data?.pages.flat() ?? []) as CourseCardData[];
   const visibleCourses = freeOnly
@@ -40,18 +47,40 @@ export function CatalogPage() {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const clearCategory = () => {
+    navigate({ to: "/catalog", search: {} });
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 py-2 px-4 sm:px-6">
       <div className="pb-4 space-y-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Каталог курсов
+            {activeCategory ? activeCategory.name : "Каталог курсов"}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Все опубликованные курсы платформы
+            {activeCategory
+              ? "Курсы выбранной категории"
+              : "Все опубликованные курсы платформы"}
           </p>
         </div>
-        <CourseFilters freeOnly={freeOnly} onFreeOnlyChange={setFreeOnly} />
+
+        <CategoryChips activeSlug={categorySlug} />
+
+        <div className="flex flex-wrap items-center gap-3">
+          <CourseFilters freeOnly={freeOnly} onFreeOnlyChange={setFreeOnly} />
+          {activeCategory && (
+            <button
+              type="button"
+              onClick={clearCategory}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            >
+              {activeCategory.icon && <span>{activeCategory.icon}</span>}
+              {activeCategory.name}
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {isLoading ? (
@@ -60,8 +89,8 @@ export function CatalogPage() {
         </div>
       ) : visibleCourses.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground text-sm">
-          {courses.length > 0
-            ? "Бесплатных курсов пока нет."
+          {freeOnly
+            ? "Бесплатных курсов в этой категории пока нет."
             : "Курсы пока не найдены."}
         </div>
       ) : (

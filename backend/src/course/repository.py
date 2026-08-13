@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, Sequence
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import ColumnElement, func, select, update
 from sqlalchemy.sql import Select
 
 from src.lesson.enums import LessonProgressType
@@ -16,6 +16,22 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
     model = Course
     schema = CourseSchema
     mapper = CourseMapper
+
+    async def get_filtered(
+        self,
+        limit: int,
+        offset: int,
+        order_by: ColumnElement[Any] | None = None,
+        category_ids: Sequence[UUID] | None = None,
+        **filter_by: Any,
+    ) -> Sequence[CourseSchema]:
+        query = select(self.model).filter_by(**filter_by)
+        if category_ids:
+            query = query.where(self.model.category_id.in_(list(category_ids)))
+        if order_by is not None:
+            query = query.order_by(order_by)
+        query = query.limit(limit).offset(offset)
+        return await self._execute_and_map_all(query)
 
     async def get_course_by_lesson_where_user_is_member(
         self, user_id: UUID, course_id: UUID, lesson_id: UUID
