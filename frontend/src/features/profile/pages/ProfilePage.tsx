@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { Award, BookOpen, ChevronRight } from "lucide-react";
 import useAuth from "@/features/auth/api/useAuth";
 import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
@@ -13,18 +12,14 @@ import { useEnrolledCourses } from "@/features/dashboard/api/useCourses";
 import { CourseRowSection } from "@/features/dashboard/components/CourseRowSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/routes";
 
 export function ProfilePage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const stats = useProfileStats();
   const enrolled = useEnrolledCourses(true);
   const [isCertificatesOpen, setIsCertificatesOpen] = useState(false);
 
   const enrolledCourses = enrolled.data ?? [];
-
-  const goToCatalog = () => navigate({ to: ROUTES.CATALOG });
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 py-2">
@@ -36,13 +31,7 @@ export function ProfilePage() {
           icon={BookOpen}
           count={enrolledCourses.length}
           courses={enrolledCourses}
-          onSeeAll={goToCatalog}
-          onCourseClick={(course) =>
-            navigate({
-              to: `${ROUTES.COURSE_DETAIL}/$courseId`,
-              params: { courseId: course.id },
-            })
-          }
+          alwaysOpenLearn
         />
       )}
 
@@ -56,12 +45,12 @@ export function ProfilePage() {
           <ProfileStreak streakDays={stats.data?.streak.current} />
 
           <Card
-            className="border-border bg-card hover:border-primary/50 transition-colors cursor-pointer group"
+            className="bg-card hover:shadow-glow-primary transition-all cursor-pointer group"
             onClick={() => setIsCertificatesOpen(true)}
           >
             <CardContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                <div className="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                   <Award size={20} />
                 </div>
                 <div>

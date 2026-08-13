@@ -130,8 +130,8 @@ export function BlockItem({
     <div
       onDragOver={onDragOver}
       onDrop={onDrop}
-      className={`border border-border/60 rounded-xl bg-background p-4 space-y-3 shadow-2xs transition-colors ${
-        isDragging ? "opacity-40" : isDragOver ? "border-primary/60 ring-1 ring-primary/30" : ""
+      className={`rounded-xl bg-background p-4 space-y-3 shadow-2xs transition-colors ${
+        isDragging ? "opacity-40" : isDragOver ? "ring-1 ring-primary/30" : ""
       }`}
     >
       <div className="flex items-center justify-between gap-2">
@@ -150,14 +150,14 @@ export function BlockItem({
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="h-7 text-xs font-medium border-transparent hover:border-input focus:border-input transition-colors max-w-xs"
+            className="h-7 text-xs font-medium max-w-xs bg-transparent"
           />
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <select
             value={blockType}
             onChange={(e) => handleTypeChange(e.target.value as BlockType)}
-            className="h-7 text-[11px] rounded-md border border-input bg-background px-1.5 text-muted-foreground"
+            className="h-7 text-[11px] rounded-md bg-input/40 px-1.5 text-muted-foreground"
             title="Изменить тип блока"
           >
             {BLOCK_TYPE_OPTIONS.map((option) => (
@@ -189,7 +189,7 @@ export function BlockItem({
       </div>
 
       {/* Поля редактирования в зависимости от типа блока */}
-      <div className="pt-2 border-t border-border/40">
+      <div className="pt-2">
         <BlockEditor
           blockType={blockType}
           payload={payload}

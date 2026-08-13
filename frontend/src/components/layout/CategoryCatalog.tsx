@@ -15,12 +15,12 @@ const CATEGORIES = [
     title: "Программирование",
     icon: "💻",
     subcategories: [
-      { name: "Python", href: "/courses?category=python" },
-      { name: "FastAPI & Web", href: "/courses?category=fastapi" },
-      { name: "JavaScript / TypeScript", href: "/courses?category=javascript" },
-      { name: "React & Frontend", href: "/courses?category=react" },
-      { name: "Базы данных и SQL", href: "/courses?category=databases" },
-      { name: "Docker & DevOps", href: "/courses?category=devops" },
+      { name: "Python", href: "/catalog" },
+      { name: "FastAPI & Web", href: "/catalog" },
+      { name: "JavaScript / TypeScript", href: "/catalog" },
+      { name: "React & Frontend", href: "/catalog" },
+      { name: "Базы данных и SQL", href: "/catalog" },
+      { name: "Docker & DevOps", href: "/catalog" },
     ],
   },
   {
@@ -28,10 +28,10 @@ const CATEGORIES = [
     title: "Математика и Физика",
     icon: "📐",
     subcategories: [
-      { name: "Высшая математика", href: "/courses?category=math" },
-      { name: "Линейная алгебра", href: "/courses?category=linear-algebra" },
-      { name: "Теория вероятностей", href: "/courses?category=probability" },
-      { name: "Физика", href: "/courses?category=physics" },
+      { name: "Высшая математика", href: "/catalog" },
+      { name: "Линейная алгебра", href: "/catalog" },
+      { name: "Теория вероятностей", href: "/catalog" },
+      { name: "Физика", href: "/catalog" },
     ],
   },
   {
@@ -39,9 +39,9 @@ const CATEGORIES = [
     title: "Дизайн и Графика",
     icon: "🎨",
     subcategories: [
-      { name: "UI/UX Дизайн", href: "/courses?category=ui-ux" },
-      { name: "2D / 3D Иллюстрация", href: "/courses?category=illustration" },
-      { name: "Paint Tool SAI & Цифровой рисунок", href: "/courses?category=digital-art" },
+      { name: "UI/UX Дизайн", href: "/catalog" },
+      { name: "2D / 3D Иллюстрация", href: "/catalog" },
+      { name: "Paint Tool SAI & Цифровой рисунок", href: "/catalog" },
     ],
   },
   {
@@ -49,9 +49,9 @@ const CATEGORIES = [
     title: "Разработка игр",
     icon: "🎮",
     subcategories: [
-      { name: "Unity & C#", href: "/courses?category=unity" },
-      { name: "Unreal Engine & C++", href: "/courses?category=unreal" },
-      { name: "3D Моделирование", href: "/courses?category=3d-modeling" },
+      { name: "Unity & C#", href: "/catalog" },
+      { name: "Unreal Engine & C++", href: "/catalog" },
+      { name: "3D Моделирование", href: "/catalog" },
     ],
   },
 ];
@@ -84,11 +84,11 @@ export function CategoryCatalog() {
       <PopoverContent
         align="start"
         sideOffset={12}
-        className="w-[600px] p-0 border border-border bg-card shadow-2xl rounded-2xl overflow-hidden"
+        className="w-[600px] p-0 bg-card overflow-hidden"
       >
         <div className="grid grid-cols-12 min-h-[320px]">
           {/* Левая колонка: Главные категории */}
-          <div className="col-span-5 bg-muted/30 border-r border-border p-2 space-y-1">
+          <div className="col-span-5 bg-muted/40 p-2 space-y-1">
             <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Категории
             </div>
@@ -101,7 +101,7 @@ export function CategoryCatalog() {
                   onClick={() => setActiveCategory(cat)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all text-left cursor-pointer ${
                     isActive
-                      ? "bg-card text-primary shadow-sm border border-border/50"
+                      ? "bg-card text-primary shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                   }`}
                 >
@@ -123,7 +123,7 @@ export function CategoryCatalog() {
           {/* Правая колонка: Подкатегории текущего направления */}
           <div className="col-span-7 p-4 bg-card flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2 pb-3 mb-3 border-b border-border">
+              <div className="flex items-center gap-2 pb-3 mb-3">
                 <span className="text-lg">{activeCategory.icon}</span>
                 <h3 className="font-semibold text-sm text-foreground">
                   {activeCategory.title}
@@ -144,13 +144,13 @@ export function CategoryCatalog() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-border mt-4">
+            <div className="pt-3 mt-4">
               <Link
-                to={"/courses" as string}
+                to={"/catalog" as string}
                 onClick={() => setOpen(false)}
                 className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
               >
-                Все курсы категории &rarr;
+                Все курсы &rarr;
               </Link>
             </div>
           </div>

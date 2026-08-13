@@ -48,7 +48,7 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
     // Если урок не выбран
     if (!lessonId) {
         return (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted-foreground bg-card rounded-2xl border border-border/60 shadow-sm">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted-foreground bg-card rounded-xl shadow-[var(--shadow-card)]">
                 <FileText size={40} className="mb-2 opacity-30" />
                 <p className="text-sm font-medium">Выберите урок в боковой панели</p>
                 <p className="text-xs text-muted-foreground/70 mt-1">
@@ -72,9 +72,9 @@ export function CourseBlocks({ courseId, lessonId }: CourseBlocksProps) {
     }
 
     return (
-        <div className="flex-1 flex flex-col h-[calc(100vh-140px)] bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+        <div className="flex-1 flex flex-col h-[calc(100vh-140px)] bg-card rounded-xl shadow-[var(--shadow-card)] overflow-hidden">
             {/* Шапка */}
-            <div className="p-4 border-b border-border/60 flex items-center justify-between bg-muted/20">
+            <div className="p-4 flex items-center justify-between bg-muted/20">
                 <div>
                     <h2 className="font-semibold text-sm">Содержимое урока</h2>
                     <p className="text-xs text-muted-foreground">Управляйте информационными блоками</p>

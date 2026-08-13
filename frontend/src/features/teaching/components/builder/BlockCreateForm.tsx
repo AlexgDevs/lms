@@ -142,7 +142,7 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-4 border border-dashed border-primary/40 rounded-xl bg-primary/5 space-y-3"
+      className="p-4 rounded-xl bg-primary/5 space-y-3"
     >
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-primary">Новый блок</span>
@@ -161,7 +161,7 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
         <select
           value={blockType}
           onChange={(e) => handleTypeChange(e.target.value as BlockType)}
-          className="w-full h-8 px-2 text-xs rounded-md border border-input bg-background"
+          className="w-full h-8 px-2 text-xs rounded-md bg-input/40"
         >
           {BLOCK_TYPE_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -182,7 +182,7 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
           </label>
 
           {!previewUrl ? (
-            <label className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-input hover:border-primary/60 rounded-xl cursor-pointer bg-background/50 transition-colors p-2 text-center">
+            <label className="flex flex-col items-center justify-center h-28 rounded-xl cursor-pointer bg-background/50 hover:bg-muted/40 transition-colors p-2 text-center">
               <ImageIcon size={24} className="text-muted-foreground mb-1 opacity-50" />
               <span className="text-xs font-medium text-foreground">
                 Нажмите для выбора файла
@@ -198,15 +198,15 @@ export function BlockCreateForm({ isCreating, onCreate, onCancel }: BlockCreateF
               />
             </label>
           ) : (
-            <div className="flex items-center gap-3 p-2 bg-background border border-border rounded-xl">
+            <div className="flex items-center gap-3 p-2 bg-background rounded-xl">
               {blockType === BlockType.IMAGE ? (
                 <img
                   src={previewUrl}
                   alt="Preview"
-                  className="w-12 h-12 object-cover rounded-lg border"
+                  className="w-12 h-12 object-cover rounded-md"
                 />
               ) : (
-                <div className="w-12 h-12 flex items-center justify-center bg-muted rounded-lg text-xs font-bold uppercase">
+                <div className="w-12 h-12 flex items-center justify-center bg-muted rounded-md text-xs font-bold uppercase">
                   {blockType.slice(0, 3)}
                 </div>
               )}

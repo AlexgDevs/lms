@@ -144,12 +144,12 @@ export function CourseHeader({
   const settingsDirty = descriptionChanged || priceChanged
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card shadow-sm px-4 py-3 flex items-center gap-3">
+    <div className="rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-3 flex items-center gap-3">
       {/* Миниатюра обложки — вместо большого баннера, кликабельный триггер загрузки */}
       <div className="relative shrink-0">
         <button
           type="button"
-          className="relative w-11 h-11 rounded-xl border border-border/60 bg-muted/20 overflow-hidden flex items-center justify-center group"
+          className="relative w-11 h-11 rounded-md bg-muted/30 overflow-hidden flex items-center justify-center group"
           title="Изменить обложку"
           onClick={() => coverInputRef.current?.click()}
           disabled={isUploadingCover}
@@ -175,7 +175,7 @@ export function CourseHeader({
         {course.cover_url && onRemoveCover && (
           <button
             type="button"
-            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-background border border-border/60 text-muted-foreground hover:text-destructive flex items-center justify-center shadow-sm"
+            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-background text-muted-foreground hover:text-destructive flex items-center justify-center shadow-sm"
             title="Удалить обложку"
             disabled={isUploadingCover}
             onClick={onRemoveCover}
@@ -210,7 +210,7 @@ export function CourseHeader({
                 if (e.key === "Escape") handleCancelTitle()
               }}
               onBlur={handleSaveTitle}
-              className="h-8 font-medium text-[15px] rounded-lg bg-muted/20 border-border/60"
+              className="h-8 font-medium text-[15px] rounded-md bg-muted/20"
             />
             <Button
               type="button"
@@ -218,7 +218,7 @@ export function CourseHeader({
               variant="default"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleSaveTitle}
-              className="h-8 w-8 shrink-0 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="h-8 w-8 shrink-0 rounded-md bg-success hover:bg-success/85 text-white"
               title="Сохранить"
             >
               <Check size={14} />
@@ -229,7 +229,7 @@ export function CourseHeader({
               variant="ghost"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleCancelTitle}
-              className="h-8 w-8 shrink-0 rounded-lg text-muted-foreground"
+              className="h-8 w-8 shrink-0 rounded-md text-muted-foreground"
               title="Отмена"
             >
               <X size={14} />
@@ -246,7 +246,7 @@ export function CourseHeader({
             </span>
             <Pencil size={12} className="text-muted-foreground/50 shrink-0 group-hover:text-muted-foreground transition-colors" />
             {savedField === "title" && (
-              <Check size={13} className="text-emerald-500 shrink-0 animate-in fade-in" />
+              <Check size={13} className="text-success shrink-0 animate-in fade-in" />
             )}
           </button>
         )}
@@ -256,8 +256,8 @@ export function CourseHeader({
             variant="secondary"
             className={`gap-1 rounded-md px-1.5 py-0 h-4.5 text-[11px] font-normal border-none ${
               course.status === "published"
-                ? "bg-emerald-500/10 text-emerald-600"
-                : "bg-amber-500/10 text-amber-600"
+                ? "bg-success/10 text-success"
+                : "bg-reward/10 text-reward"
             }`}
           >
             {course.status === "published" ? <Globe size={10} /> : <Lock size={10} />}
@@ -279,7 +279,7 @@ export function CourseHeader({
         size="sm"
         onClick={handleTogglePublish}
         disabled={isUpdating}
-        className="gap-1.5 rounded-xl text-xs font-medium h-8 shrink-0"
+        className="gap-1.5 text-xs font-medium h-8 shrink-0"
       >
         {isUpdating && <Loader2 size={13} className="animate-spin" />}
         {course.status === "published" ? "Снять с публикации" : "Опубликовать курс"}
@@ -292,7 +292,7 @@ export function CourseHeader({
             type="button"
             size="icon"
             variant="outline"
-            className="h-8 w-8 shrink-0 rounded-xl relative"
+            className="h-8 w-8 shrink-0 rounded-md relative"
             title="Настройки курса"
           >
             <Settings2 size={15} />
@@ -301,7 +301,7 @@ export function CourseHeader({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-80 rounded-2xl p-4 space-y-4">
+        <PopoverContent align="end" className="w-80 rounded-xl p-4 space-y-4">
           {/* Описание */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
@@ -309,7 +309,7 @@ export function CourseHeader({
                 Описание
               </Label>
               {savedField === "description" && (
-                <span className="text-emerald-500 text-xs flex items-center gap-1 animate-in fade-in">
+                <span className="text-success text-xs flex items-center gap-1 animate-in fade-in">
                   <Check size={12} /> Сохранено
                 </span>
               )}
@@ -322,14 +322,14 @@ export function CourseHeader({
                 if (e.key === "Escape") handleCancelDescription()
               }}
               placeholder="О чём этот курс..."
-              className="text-xs min-h-[72px] resize-none leading-relaxed rounded-xl bg-muted/20 border-border/60 focus-visible:ring-1"
+              className="text-xs min-h-[72px] resize-none leading-relaxed rounded-md bg-muted/20"
             />
           </div>
 
           {/* Цена */}
           <div className="space-y-2">
             <Label htmlFor="course-price" className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Coins size={13} className="text-amber-500" />
+              <Coins size={13} className="text-reward" />
               Стоимость (₽)
             </Label>
             <Input
@@ -342,7 +342,7 @@ export function CourseHeader({
                 setPrice(e.target.value === "" ? "" : Number(e.target.value))
               }
               placeholder="0"
-              className="h-9 font-mono font-semibold rounded-lg bg-muted/20 border-border/60"
+              className="h-9 font-mono font-semibold rounded-md bg-muted/20"
             />
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -359,7 +359,7 @@ export function CourseHeader({
               </label>
             </div>
             {savedField === "price" && (
-              <span className="text-emerald-500 text-xs flex items-center gap-1 animate-in fade-in">
+              <span className="text-success text-xs flex items-center gap-1 animate-in fade-in">
                 <Check size={12} /> Сохранено
               </span>
             )}
@@ -367,7 +367,7 @@ export function CourseHeader({
 
           {/* Единая панель сохранения для обоих полей попапа */}
           {settingsDirty && (
-            <div className="flex items-center gap-2 pt-1 border-t border-border/60">
+            <div className="flex items-center gap-2 pt-1">
               <Button
                 type="button"
                 size="sm"
@@ -375,7 +375,7 @@ export function CourseHeader({
                   if (descriptionChanged) handleSaveDescription()
                   if (priceChanged) handleSavePrice()
                 }}
-                className="h-8 flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5"
+                className="h-8 flex-1 rounded-full bg-success hover:bg-success/85 text-white text-xs gap-1.5"
               >
                 <Check size={13} /> Сохранить
               </Button>
@@ -387,7 +387,7 @@ export function CourseHeader({
                   handleCancelDescription()
                   handleCancelPrice()
                 }}
-                className="h-8 rounded-lg text-xs text-muted-foreground"
+                className="h-8 rounded-md text-xs text-muted-foreground"
               >
                 Отмена
               </Button>

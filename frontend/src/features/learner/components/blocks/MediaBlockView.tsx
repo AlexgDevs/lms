@@ -14,7 +14,7 @@ export function MediaBlockView({ block }: { block: BlockSchema }) {
           <img
             src={url}
             alt={altText}
-            className="w-full rounded-xl border border-border/40 object-contain"
+            className="w-full rounded-xl object-contain"
           />
           {altText && (
             <figcaption className="text-xs text-muted-foreground">{altText}</figcaption>
@@ -29,7 +29,7 @@ export function MediaBlockView({ block }: { block: BlockSchema }) {
         <video
           controls
           src={url}
-          className="w-full rounded-xl border border-border/40 bg-black"
+          className="w-full rounded-xl bg-black"
         />
       ) : (
         <p className="text-sm text-muted-foreground">Видео недоступно.</p>
@@ -53,7 +53,7 @@ export function MediaBlockView({ block }: { block: BlockSchema }) {
         <a
           href={url}
           download
-          className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/40 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+          className="inline-flex items-center gap-2 rounded-md bg-secondary/40 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
         >
           <span aria-hidden>📄</span>
           {fileName}

@@ -11,7 +11,8 @@
   --popover-foreground: var(--text);
 
   --primary: var(--mauve);
-  --primary-foreground: var(--base);
+  --primary-hover: var(--blue);
+  --primary-foreground: #FFFFFF;
 
   --secondary: var(--surface0);
   --secondary-foreground: var(--text);
@@ -24,6 +25,11 @@
 
   --destructive: var(--red);
   --destructive-foreground: var(--crust);
+
+  --reward: var(--yellow);
+  --reward-hover: #B45309;
+  --success: var(--green);
+  --success-foreground: #FFFFFF;
 
   --border: var(--surface1);
   --input: var(--surface0);
@@ -38,7 +44,7 @@
   --sidebar-border: var(--surface1);
   --sidebar-ring: var(--mauve);
 
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 
   --layout-server-rail-width: 3.5rem;
   --layout-left-sidebar-width: 13.75rem;

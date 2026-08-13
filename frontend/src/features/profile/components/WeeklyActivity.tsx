@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BookCheck } from "lucide-react";
+import { DuotoneIcon } from "@/components/ui/duotone-icon";
 
 export interface DayActivity {
   day: string;
@@ -26,10 +27,10 @@ export function WeeklyActivity({
   maxCount = 10 
 }: WeeklyActivityProps) {
   return (
-    <Card className="border-border bg-card md:col-span-2 flex flex-col justify-between">
+    <Card className="bg-card md:col-span-2 flex flex-col justify-between">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <BookCheck size={18} className="text-primary" />
+          <DuotoneIcon icon={BookCheck} size={16} />
           Активность за неделю
         </CardTitle>
         <CardDescription className="text-xs">
@@ -58,9 +59,9 @@ export function WeeklyActivity({
                   >
                     {/* Передняя грань */}
                     <div 
-                      className={`absolute inset-0 rounded-sm border-t border-l border-white/20 transition-colors ${
+                      className={`absolute inset-0 rounded-sm transition-colors ${
                         isActive 
-                          ? "bg-primary shadow-lg shadow-primary/20" 
+                          ? "bg-primary shadow-[var(--shadow-glow-primary)]" 
                           : "bg-muted-foreground/10"
                       }`} 
                     />
@@ -68,19 +69,19 @@ export function WeeklyActivity({
                     {/* Правая (боковая) грань */}
                     <div 
                       className={`absolute top-0 right-0 bottom-0 w-3 origin-right [transform:rotateY(90deg)] rounded-r-sm transition-colors ${
-                        isActive ? "bg-primary/70" : "bg-muted-foreground/20"
+                        isActive ? "bg-primary/50" : "bg-muted-foreground/20"
                       }`} 
                     />
 
                     {/* Верхняя грань (крышка 3D столбика) */}
                     <div 
                       className={`absolute top-0 left-0 right-0 h-3 origin-top [transform:rotateX(90deg)] rounded-t-sm transition-colors ${
-                        isActive ? "bg-primary-foreground/30" : "bg-muted-foreground/30"
+                        isActive ? "bg-primary-foreground/20" : "bg-muted-foreground/30"
                       }`} 
                     />
 
                     {/* Тултип с количеством при наведении */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-[10px] font-bold px-1.5 py-0.5 rounded shadow pointer-events-none whitespace-nowrap border border-border">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-[10px] font-bold px-1.5 py-0.5 rounded shadow pointer-events-none whitespace-nowrap">
                       {item.count} ур.
                     </div>
                   </div>

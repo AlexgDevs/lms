@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { BookOpen, Loader2, PlusCircle, Sparkles } from "lucide-react";
+import { Loader2, PlusCircle, Sparkles } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { isLoggedIn } from "@/features/auth/api/useAuth";
 import {
@@ -7,6 +7,8 @@ import {
   useEnrolledCourses,
   useRecommendedCourses,
 } from "@/features/dashboard/api/useCourses";
+import { ContinueLearningSection } from "@/features/dashboard/components/ContinueLearningSection";
+import { CourseFilters } from "@/features/dashboard/components/CourseFilters";
 import { CourseRowSection } from "@/features/dashboard/components/CourseRowSection";
 import { ROUTES } from "@/routes";
 import type { CourseCardData } from "@/features/dashboard/types";
@@ -34,27 +36,22 @@ export function RootPage() {
   const isLoading =
     recommended.isLoading || (loggedIn && (enrolled.isLoading || created.isLoading));
 
+  const hasEnrolled = loggedIn && enrolledCourses.length > 0;
+
   const sections: DashboardSection[] = [];
   const pushRecommended = () => {
     if (recommendedCourses.length > 0 && !sections.some((s) => s.title === "Рекомендуемые")) {
       sections.push({
         title: "Рекомендуемые",
         icon: Sparkles,
-        accentClassName: "text-amber-500",
+        accentClassName: "text-reward",
         count: recommendedCourses.length,
         courses: recommendedCourses,
       });
     }
   };
 
-  if (loggedIn && enrolledCourses.length > 0) {
-    sections.push({
-      title: "Мои курсы",
-      icon: BookOpen,
-      count: enrolledCourses.length,
-      courses: enrolledCourses,
-    });
-  } else {
+  if (!hasEnrolled) {
     pushRecommended();
   }
 
@@ -76,7 +73,7 @@ export function RootPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 py-2 px-4 sm:px-6">
       {/* Хедер */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-border/40">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4">
         <div className="shrink-0">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Актуальные курсы
@@ -90,33 +87,47 @@ export function RootPage() {
         <button
           type="button"
           onClick={goToCatalog}
-          className="px-3 py-1.5 text-xs font-medium rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition-colors shadow-xs"
+          className="px-4 py-1.5 text-xs font-medium rounded-full bg-primary hover:bg-primary-hover text-white transition-colors shadow-sm"
         >
           Каталог
         </button>
       </div>
 
       {/* Ряды курсов */}
-      {isLoading && sections.length === 0 ? (
+      {isLoading && !hasEnrolled && sections.length === 0 ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
-      ) : sections.length === 0 ? (
+      ) : !hasEnrolled && sections.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground text-sm">
           Курсы пока не найдены.
         </div>
       ) : (
-        sections.map((section) => (
-          <CourseRowSection
-            key={section.title}
-            title={section.title}
-            icon={section.icon}
-            accentClassName={section.accentClassName}
-            count={section.count}
-            courses={section.courses}
-            onSeeAll={goToCatalog}
-          />
-        ))
+        <>
+          {hasEnrolled && (
+            <ContinueLearningSection
+              title="Мои курсы"
+              count={enrolledCourses.length}
+              courses={enrolledCourses}
+              filters={<CourseFilters />}
+            />
+          )}
+          {sections.map((section) => (
+            <CourseRowSection
+              key={section.title}
+              title={section.title}
+              icon={section.icon}
+              accentClassName={section.accentClassName}
+              count={section.count}
+              courses={section.courses}
+              className={
+                section.title === "Преподавание и разработка"
+                  ? "lg:max-w-[66.67%]"
+                  : undefined
+              }
+            />
+          ))}
+        </>
       )}
     </div>
   );

@@ -186,14 +186,14 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
               key={module.id}
               onDragOver={(e) => moduleList.dragOver(e, module.id)}
               onDrop={(e) => moduleList.drop(e, module.id)}
-              className={`border rounded-xl transition-colors overflow-hidden ${
+              className={`rounded-xl transition-colors overflow-hidden shadow-[var(--shadow-card)] ${
                 moduleList.draggingId === module.id
                   ? "opacity-40"
                   : moduleList.overId === module.id
-                    ? "border-primary/60 ring-1 ring-primary/30"
+                    ? "bg-primary/5 ring-1 ring-primary/30"
                     : isActive
-                      ? "border-primary/50 bg-primary/5"
-                      : "border-border/60 bg-card hover:border-border"
+                      ? "bg-primary/5"
+                      : "bg-card hover:bg-muted/20"
               }`}
             >
               {/* Шапка модуля */}
@@ -227,7 +227,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
                     {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   </Button>
 
-                  <Folder size={16} className="text-amber-500 shrink-0" />
+                  <Folder size={16} className="text-reward shrink-0" />
 
                   {isEditing ? (
                     <form 
@@ -248,7 +248,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
                         type="submit"
                         size="icon"
                         variant="ghost"
-                        className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50 shrink-0"
+                        className="h-7 w-7 text-success hover:text-success/80 hover:bg-success/10 shrink-0"
                       >
                         <Check size={14} />
                       </Button>
@@ -324,7 +324,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
 
               {/* Уроки модуля */}
               {isExpanded && (
-                <div className="border-t border-border/40 bg-muted/10 pb-1">
+                <div className="bg-muted/10 pb-1">
                   <CourseLessonsList
                     courseId={courseId}
                     moduleId={module.id}
@@ -346,7 +346,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
         {isCreatingNew ? (
           <form
             onSubmit={handleCreateModule}
-            className="p-2 border border-dashed border-primary/40 rounded-xl bg-primary/5 space-y-2"
+            className="p-2 rounded-xl bg-primary/5 space-y-2"
           >
             <Input
               placeholder="Название нового модуля..."
@@ -392,7 +392,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
             type="button"
             size="sm"
             variant="ghost"
-            className="w-full justify-start text-xs text-primary hover:text-primary hover:bg-primary/5 gap-1.5 border border-dashed border-border/80 rounded-xl py-2"
+            className="w-full justify-start text-xs text-primary hover:text-primary hover:bg-primary/5 gap-1.5 rounded-md py-2 bg-muted/30 hover:bg-muted/50"
             onClick={() => setIsCreatingNew(true)}
           >
             <Plus size={14} />

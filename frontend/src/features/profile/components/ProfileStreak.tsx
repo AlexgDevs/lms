@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Flame } from "lucide-react";
+import { DuotoneIcon } from "@/components/ui/duotone-icon";
 
 interface ProfileStreakProps {
   streakDays?: number;
@@ -7,11 +8,11 @@ interface ProfileStreakProps {
 
 export function ProfileStreak({ streakDays = 0 }: ProfileStreakProps) {
   return (
-    <Card className="border-border bg-card flex flex-col justify-between">
+    <Card className="bg-card flex flex-col justify-between">
       <CardHeader className="pb-2">
         <CardDescription>Ударный режим</CardDescription>
-        <CardTitle className="text-3xl font-extrabold flex items-center gap-2 text-orange-500">
-          <Flame size={28} className="fill-orange-500 animate-pulse shrink-0" />
+        <CardTitle className="text-3xl font-extrabold flex items-center gap-2 text-reward">
+          <DuotoneIcon icon={Flame} tone="reward" size={28} className="animate-pulse" />
           <span>{streakDays} {getDaysDeclension(streakDays)}</span>
         </CardTitle>
       </CardHeader>

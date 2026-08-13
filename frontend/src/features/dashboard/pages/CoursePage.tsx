@@ -19,7 +19,7 @@ export function CoursePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -64,16 +64,16 @@ export function CoursePage() {
       </button>
 
       {/* Обложка + основная информация */}
-      <Card className="rounded-2xl border-border/50 overflow-hidden">
+      <Card className="rounded-xl overflow-hidden">
         <div className="flex flex-col md:flex-row gap-5 p-5">
           {cover ? (
             <img
               src={cover}
               alt={course.title}
-              className="w-full md:w-56 h-40 rounded-xl object-cover border border-border/40 shadow-xs shrink-0"
+              className="w-full md:w-56 h-40 rounded-md object-cover shadow-xs shrink-0"
             />
           ) : (
-            <div className="w-full md:w-56 h-40 rounded-xl bg-muted/60 border border-border/40 flex items-center justify-center text-muted-foreground shrink-0">
+            <div className="w-full md:w-56 h-40 rounded-md bg-muted/60 flex items-center justify-center text-muted-foreground shrink-0">
               <BookOpen className="w-10 h-10" />
             </div>
           )}
@@ -91,11 +91,11 @@ export function CoursePage() {
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
               {course.price === 0 ? (
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="font-bold text-success">
                   Бесплатно
                 </span>
               ) : (
-                <span className="font-bold text-red-500 dark:text-red-400">
+                <span className="font-bold text-destructive">
                   {course.price.toLocaleString()} ₽
                 </span>
               )}
@@ -107,11 +107,11 @@ export function CoursePage() {
 
             <div className="pt-1">
               {isMember ? (
-                <span className="inline-flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-lg">
+                <span className="inline-flex items-center text-sm font-semibold text-success bg-success/10 px-4 py-2 rounded-md">
                   Вы записаны
                 </span>
               ) : isOwner ? (
-                <span className="inline-flex items-center text-xs font-semibold text-purple-600 bg-purple-500/10 px-4 py-2 rounded-lg">
+                <span className="inline-flex items-center text-xs font-semibold text-primary bg-primary/10 px-4 py-2 rounded-md">
                   Это ваш курс
                 </span>
               ) : (
@@ -119,7 +119,7 @@ export function CoursePage() {
                   size="lg"
                   disabled={enroll.isPending}
                   onClick={handleEnroll}
-                  className="bg-purple-600 hover:bg-purple-500 text-white"
+                  className="bg-primary hover:bg-primary-hover text-white"
                 >
                   {enroll.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                   {enroll.isPending ? "Запись..." : "Записаться на курс"}
@@ -135,16 +135,16 @@ export function CoursePage() {
         <h2 className="text-lg font-bold text-foreground">Содержание курса</h2>
 
         {modules.length === 0 ? (
-          <Card className="rounded-2xl border-border/50 p-8 text-center text-sm text-muted-foreground">
+          <Card className="rounded-xl p-8 text-center text-sm text-muted-foreground">
             Модули пока не добавлены.
           </Card>
         ) : (
           modules.map((module, moduleIndex) => {
             const lessons = lessonsByModule.get(module.id) ?? [];
             return (
-              <Card key={module.id} className="rounded-2xl border-border/50 p-4 sm:p-5">
+              <Card key={module.id} className="rounded-xl p-4 sm:p-5">
                 <div className="flex items-center gap-3">
-                  <span className="w-7 h-7 shrink-0 rounded-lg bg-purple-600/10 text-purple-600 flex items-center justify-center text-xs font-bold">
+                  <span className="w-7 h-7 shrink-0 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
                     {moduleIndex + 1}
                   </span>
                   <h3 className="font-bold text-sm sm:text-base text-foreground leading-snug">

@@ -18,9 +18,9 @@ export function CourseSidebar({
   onSelectLesson 
 }: CourseSidebarProps) {
   return (
-    <aside className="w-80 shrink-0 border border-border/60 bg-card rounded-2xl flex flex-col h-[calc(100vh-140px)] overflow-hidden shadow-sm">
+    <aside className="w-80 shrink-0 bg-card rounded-xl flex flex-col h-[calc(100vh-140px)] overflow-hidden shadow-[var(--shadow-card)]">
       {/* Шапка сайдбара */}
-      <div className="p-3.5 border-b border-border/60 flex items-center justify-between bg-muted/20">
+      <div className="p-3.5 flex items-center justify-between bg-muted/20">
         <div className="flex items-center gap-2">
           <Layers size={16} className="text-primary" />
           <span className="font-semibold text-xs tracking-wider uppercase">

@@ -58,7 +58,7 @@ export function Header() {
               <Input
                 type="search"
                 placeholder="Поиск курсов..."
-                className="w-full pl-9 bg-background/50 border-border focus-visible:bg-background rounded-full text-sm"
+                className="w-full pl-9 rounded-full text-sm focus-visible:bg-background"
               />
             </div>
           </div>

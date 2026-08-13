@@ -33,7 +33,7 @@ export function CertificatesModal({
 }: CertificatesModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-card border-border">
+      <DialogContent className="max-w-2xl bg-card">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Award className="text-primary" size={22} />
@@ -50,7 +50,7 @@ export function CertificatesModal({
               {certificates.map((cert) => (
                 <div
                   key={cert.id}
-                  className="flex flex-col justify-between p-4 rounded-xl border border-border bg-background/60 hover:border-primary/50 transition-colors group space-y-3"
+                  className="flex flex-col justify-between p-4 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors group space-y-3"
                 >
                   <div className="space-y-1">
                     <h4 className="font-semibold text-sm text-foreground line-clamp-2">
@@ -62,7 +62,7 @@ export function CertificatesModal({
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs">
+                  <div className="flex items-center justify-between pt-2 text-xs">
                     <span className="font-mono text-muted-foreground/80">{cert.code}</span>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="icon-sm" title="Открыть">
@@ -78,7 +78,7 @@ export function CertificatesModal({
             </div>
           ) : (
             /* Состояние, когда сертификатов нет */
-            <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 rounded-xl border border-dashed border-border bg-muted/20">
+            <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 rounded-xl bg-muted/30">
               <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                 <Award size={24} />
               </div>

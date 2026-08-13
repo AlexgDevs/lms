@@ -14,7 +14,7 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ user }: ProfileHeaderProps) {
   return (
-    <Card className="border-border bg-card overflow-hidden">
+    <Card className="bg-card overflow-hidden">
       <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
         {/* Аватар пользователя */}
         <Avatar className="w-24 h-24 border-4 border-primary/20 text-xl shadow-md shrink-0">

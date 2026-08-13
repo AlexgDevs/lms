@@ -6,9 +6,15 @@ interface CourseRowProps {
   courses: CourseCardData[];
   className?: string;
   onCourseClick?: (course: CourseCardData) => void;
+  alwaysOpenLearn?: boolean;
 }
 
-export function CourseRow({ courses, className, onCourseClick }: CourseRowProps) {
+export function CourseRow({
+  courses,
+  className,
+  onCourseClick,
+  alwaysOpenLearn,
+}: CourseRowProps) {
   return (
     <div
       className={cn(
@@ -18,7 +24,11 @@ export function CourseRow({ courses, className, onCourseClick }: CourseRowProps)
     >
       {courses.map((course) => (
         <div key={course.id} className="snap-start shrink-0 w-72 max-w-[80vw]">
-          <CourseCard course={course} onClick={onCourseClick} />
+          <CourseCard
+            course={course}
+            onClick={onCourseClick}
+            alwaysOpenLearn={alwaysOpenLearn}
+          />
         </div>
       ))}
     </div>

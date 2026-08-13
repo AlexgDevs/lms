@@ -70,7 +70,7 @@ export function QuizMultipleBlockEditor({
             onClick={() => handleToggleCorrect(option.id)}
             className={`flex items-center justify-center h-7 w-7 rounded-lg border transition-colors shrink-0 ${
               isCorrect
-                ? "bg-purple-500/10 border-purple-500 text-purple-600 dark:text-purple-400"
+                ? "bg-primary/10 border-primary text-primary"
                 : "border-input bg-background text-muted-foreground hover:border-muted-foreground/60"
             }`}
             title={isCorrect ? "Правильный ответ (включен)" : "Сделать правильным"}

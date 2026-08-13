@@ -1,0 +1,124 @@
+import type { ReactNode } from "react";
+import { ArrowRight, BookOpen } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
+import { resolveMediaUrl } from "@/lib/media";
+import { CourseCard } from "@/features/dashboard/components/CourseCard";
+import type { CourseCardData } from "@/features/dashboard/types";
+
+interface ContinueLearningSectionProps {
+  title: string;
+  count?: number;
+  courses: CourseCardData[];
+  filters?: ReactNode;
+  className?: string;
+}
+
+const FEATURED_LIMIT = 2;
+
+export function ContinueLearningSection({
+  title,
+  count,
+  courses,
+  filters,
+  className,
+}: ContinueLearningSectionProps) {
+  const navigate = useNavigate();
+  const featured = courses.slice(0, FEATURED_LIMIT);
+  const rest = courses.slice(FEATURED_LIMIT);
+
+  const handleContinue = (course: CourseCardData) => {
+    navigate({
+      to: "/learn/$courseId",
+      params: { courseId: course.id },
+    });
+  };
+
+  return (
+    <section className={cn("space-y-3", className)}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-bold text-foreground">{title}</h2>
+          {count !== undefined && (
+            <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+              {count}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {filters && <div className="pt-1">{filters}</div>}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {featured.map((course) => (
+          <CourseCard key={course.id} course={course} alwaysOpenLearn />
+        ))}
+      </div>
+
+      {rest.length > 0 && (
+        <div className="space-y-2 pt-2 lg:max-w-[66.67%]">
+          <p className="text-xs font-medium text-muted-foreground">
+            Ещё {rest.length}{" "}
+            {rest.length % 10 === 1 && rest.length % 100 !== 11
+              ? "курс"
+              : rest.length % 10 >= 2 && rest.length % 10 <= 4 && (rest.length % 100 < 12 || rest.length % 100 > 14)
+                ? "курса"
+                : "курсов"}
+          </p>
+
+          <div className="space-y-2">
+            {rest.map((course) => (
+              <div
+                key={course.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleContinue(course)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") handleContinue(course);
+                }}
+                className="group flex items-center gap-3 bg-card rounded-xl shadow-[var(--shadow-card)] px-4 py-3 hover:shadow-glow-primary transition-all duration-200 cursor-pointer"
+              >
+                {course.cover_url ? (
+                  <img
+                    src={resolveMediaUrl(course.cover_url)}
+                    alt={course.title}
+                    className="w-10 h-10 rounded-md object-cover shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-md bg-muted/60 flex items-center justify-center text-muted-foreground shrink-0">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                )}
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                    {course.title}
+                  </p>
+                  {course.progress !== undefined && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-24 bg-muted rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${course.progress}%` }}
+                        />
+                      </div>
+                      <span className="text-[11px] font-semibold text-primary tabular-nums">
+                        {course.progress}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold transition-colors group-hover:bg-primary group-hover:text-white shrink-0">
+                  Продолжить
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}

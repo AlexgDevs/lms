@@ -47,7 +47,7 @@ export function LearnPage() {
   if (data.isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     )
   }
@@ -253,7 +253,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
         </div>
 
         {isLessonCompleted && (
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-xs font-semibold text-success shrink-0">
             <CheckCircle2 className="h-3.5 w-3.5" />
             Урок пройден
           </span>
@@ -261,7 +261,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
       </div>
 
       {totalSteps === 0 ? (
-        <Card className="rounded-2xl border-border/50 p-8 text-center text-sm text-muted-foreground">
+        <Card className="rounded-xl p-8 text-center text-sm text-muted-foreground">
           В этом уроке пока нет материалов.
         </Card>
       ) : (
@@ -273,7 +273,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
             onSelect={goToStep}
           />
 
-          <Card className="rounded-2xl border-border/50 overflow-hidden">
+          <Card className="rounded-xl overflow-hidden">
             {currentBlock && (
               <div className="px-5 py-5 sm:px-6">
                 <BlockView
@@ -291,7 +291,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
 
           <div className="flex items-center justify-between gap-3">
             {completedFooter ? (
-              <p className="flex items-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-700 dark:text-emerald-300">
+              <p className="flex items-center gap-2 rounded-xl bg-success/10 px-4 py-3 text-sm font-medium text-success">
                 <Sparkles className="h-4 w-4" />
                 Урок завершён
               </p>
@@ -306,7 +306,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
               )}
               {isQuiz && !isStepDone ? (
                 <Button
-                  className="bg-purple-600 hover:bg-purple-500 text-white"
+                  className="bg-primary hover:bg-primary-hover text-white"
                   disabled={data.isSubmittingStep || quizNeedsAnswer}
                   onClick={handleCheck}
                 >
@@ -315,7 +315,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
                 </Button>
               ) : primaryLabel ? (
                 <Button
-                  className="bg-purple-600 hover:bg-purple-500 text-white"
+                  className="bg-primary hover:bg-primary-hover text-white"
                   disabled={data.isSubmittingStep}
                   onClick={primaryAction}
                 >
@@ -377,9 +377,9 @@ function StepDot({
       className={cn(
         "h-2 w-2 rounded-full transition-colors cursor-pointer",
         active
-          ? "bg-purple-600 w-4 rounded-full"
+          ? "bg-primary w-4 rounded-full"
           : done
-            ? "bg-emerald-500/80"
+            ? "bg-success/80"
             : "bg-muted hover:bg-muted-foreground/50",
       )}
     />
@@ -406,7 +406,7 @@ function NotMember({ courseId }: { courseId: string }) {
       <BookOpen className="mx-auto h-10 w-10 text-muted-foreground" />
       <p className="text-sm text-foreground">Чтобы проходить уроки, сначала запишитесь на курс.</p>
       <Button
-        className="bg-purple-600 hover:bg-purple-500 text-white"
+        className="bg-primary hover:bg-primary-hover text-white"
         disabled={enroll.isPending}
         onClick={() => enroll.mutate({ path: { course_id: courseId } })}
       >

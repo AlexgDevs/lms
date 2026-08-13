@@ -7,9 +7,9 @@ export function CodeBlockView({ block }: { block: BlockSchema }) {
   const language = typeof payload.language === "string" ? payload.language : ""
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/60 bg-[color-mix(in_oklch,var(--secondary),var(--background)_40%)]">
+    <div className="overflow-hidden rounded-xl bg-[color-mix(in_oklch,var(--secondary),var(--background)_40%)]">
       {language && (
-        <div className="flex items-center justify-between border-b border-border/60 bg-secondary/50 px-3 py-1.5">
+        <div className="flex items-center justify-between bg-secondary/60 px-3 py-1.5">
           <span className="text-xs font-medium text-muted-foreground">{language}</span>
           {block.block_type === BlockType.CODE && (
             <CodeCopy code={code} />

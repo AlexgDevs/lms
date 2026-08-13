@@ -68,7 +68,7 @@ export function QuizOptionsEditor({
         ))}
 
         {options.length === 0 && (
-          <div className="text-center py-4 border border-dashed border-border rounded-lg text-xs text-muted-foreground">
+          <div className="text-center py-4 rounded-md bg-muted/30 text-xs text-muted-foreground">
             Нет добавленных вариантов. Нажмите «Добавить вариант».
           </div>
         )}

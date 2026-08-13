@@ -140,7 +140,7 @@ export function CourseLessonsList({
                   <GripVertical size={13} className="text-muted-foreground/30" />
                 </span>
 
-                <FileText size={14} className="text-blue-500 shrink-0" />
+                <FileText size={14} className="text-muted-foreground shrink-0" />
 
                 <span className="truncate flex-1">
                   {index + 1}. {lesson.title}
@@ -173,7 +173,7 @@ export function CourseLessonsList({
       {isAddingLesson ? (
         <form
           onSubmit={handleCreateLesson}
-          className="p-2 border border-dashed border-primary/40 rounded-xl bg-primary/5 space-y-2 mt-1"
+          className="p-2 rounded-xl bg-primary/5 space-y-2 mt-1"
         >
           <Input
             placeholder="Название урока..."

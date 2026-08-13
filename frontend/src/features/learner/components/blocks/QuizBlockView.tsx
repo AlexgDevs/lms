@@ -44,7 +44,7 @@ export function QuizBlockView({ block, selected, onSelect, result, locked }: Qui
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-        <span className={cn("rounded-full border px-2.5 py-0.5", "border-border/60 bg-secondary/40")}>
+        <span className={cn("rounded-full px-2.5 py-0.5", "bg-secondary/40")}>
           {multiple ? "Выберите несколько вариантов" : "Выберите один вариант"}
         </span>
       </div>
@@ -61,9 +61,9 @@ export function QuizBlockView({ block, selected, onSelect, result, locked }: Qui
                 className={cn(
                   "w-full text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors cursor-pointer disabled:cursor-default",
                   isCorrect && isSelected
-                    ? "border-emerald-500/60 bg-emerald-500/10 text-foreground"
+                    ? "border-success/60 bg-success/10 text-foreground"
                     : isWrong && isSelected
-                      ? "border-red-500/60 bg-red-500/10 text-foreground"
+                      ? "border-destructive/60 bg-destructive/10 text-foreground"
                       : isSelected
                         ? "border-primary bg-primary/10 text-foreground"
                         : "border-border/60 bg-background/40 text-foreground/90 hover:border-border hover:bg-muted/50",
@@ -88,13 +88,13 @@ export function QuizBlockView({ block, selected, onSelect, result, locked }: Qui
       </ul>
 
       {isCorrect && (
-        <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+        <p className="flex items-center gap-1.5 text-sm font-medium text-success">
           <CheckCircle2 className="h-4 w-4" />
           Верно!
         </p>
       )}
       {isWrong && (
-        <p className="flex items-center gap-1.5 text-sm font-medium text-red-500 dark:text-red-400">
+        <p className="flex items-center gap-1.5 text-sm font-medium text-destructive">
           <XCircle className="h-4 w-4" />
           Неверно. Попробуйте ещё раз.
         </p>

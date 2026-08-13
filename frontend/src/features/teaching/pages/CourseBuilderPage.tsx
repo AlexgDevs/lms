@@ -98,7 +98,7 @@ export function CourseBuilderPage() {
     <div className="h-screen w-full bg-background text-foreground flex flex-col overflow-hidden">
       
       {/* Верхний тулбар: кнопка назад + ID */}
-      <div className="shrink-0 border-b border-border/40 bg-muted/30 px-4 py-1.5 flex items-center justify-between">
+      <div className="shrink-0 bg-muted/30 px-4 py-1.5 flex items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
@@ -148,7 +148,7 @@ export function CourseBuilderPage() {
 
           {/* Центральный редактор контента */}
           {/* Центральный редактор контента */}
-          <main className="flex-1 rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm flex flex-col">
+          <main className="flex-1 rounded-xl bg-card overflow-hidden shadow-[var(--shadow-card)] flex flex-col">
             {selectedLessonId ? (
               // СНАЧАЛА проверяем урок, так как он приоритетнее
               <CourseBlocks
@@ -159,12 +159,12 @@ export function CourseBuilderPage() {
               // ПОТОМ проверяем модуль, если урок не выбран
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
                 <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+                  <div className="w-10 h-10 rounded-md bg-reward/10 text-reward flex items-center justify-center mx-auto">
                     <Folder size={20} />
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-lg font-bold">Редактирование модуля</h3>
-                    <p className="text-xs font-mono text-muted-foreground bg-muted/30 px-3 py-1 rounded-lg">
+                    <p className="text-xs font-mono text-muted-foreground bg-muted/30 px-3 py-1 rounded-md">
                       Module ID: {selectedModuleId}
                     </p>
                   </div>

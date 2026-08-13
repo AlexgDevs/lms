@@ -27,7 +27,7 @@ export function LearnSidebar({
 
   return (
     <div className="flex flex-col gap-4">
-      <aside className="rounded-2xl border border-border/50 bg-card p-4">
+      <aside className="rounded-xl bg-card p-4 shadow-[var(--shadow-card)]">
         <h2 className="text-sm font-bold text-foreground leading-snug line-clamp-2">{courseTitle}</h2>
 
         <div className="mt-3 flex items-center gap-2">
@@ -43,7 +43,7 @@ export function LearnSidebar({
         </div>
       </aside>
 
-      <nav className="rounded-2xl border border-border/50 bg-card p-2 space-y-3 max-h-[calc(100vh-17rem)] overflow-y-auto">
+      <nav className="rounded-xl bg-card p-2 space-y-3 max-h-[calc(100vh-17rem)] overflow-y-auto shadow-[var(--shadow-card)]">
         {modules.map((module, moduleIndex) => {
           const lessons = lessonsByModule.get(module.id) ?? []
           return (
@@ -104,7 +104,7 @@ function LessonItem({ lesson, isActive, isCompleted, onClick }: LessonItemProps)
           isActive
             ? "text-primary"
             : isCompleted
-              ? "text-emerald-600/80 dark:text-emerald-400/80"
+              ? "text-success/80"
               : "text-muted-foreground/50",
         )}
       />

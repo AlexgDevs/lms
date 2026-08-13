@@ -68,7 +68,7 @@ export function QuizSingleBlockEditor({ payload, onChange }: QuizSingleBlockEdit
             onClick={() => handleSelectCorrect(option.id)}
             className={`flex items-center justify-center h-7 w-7 rounded-lg border transition-colors shrink-0 ${
               isCorrect
-                ? "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                ? "bg-success/10 border-success text-success"
                 : "border-input bg-background text-muted-foreground hover:border-muted-foreground/60"
             }`}
             title={isCorrect ? "Правильный ответ" : "Сделать правильным"}
