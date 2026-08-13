@@ -1309,6 +1309,47 @@ export const UserRegisterSchemaSchema = {
     title: 'UserRegisterSchema'
 } as const;
 
+export const UserUpdateRequestSchemaSchema = {
+    properties: {
+        username: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Username'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'email'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        avatar_url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Avatar Url'
+        }
+    },
+    type: 'object',
+    title: 'UserUpdateRequestSchema'
+} as const;
+
 export const ValidationErrorSchema = {
     properties: {
         loc: {

@@ -828,6 +828,24 @@ export type UserRegisterSchema = {
 };
 
 /**
+ * UserUpdateRequestSchema
+ */
+export type UserUpdateRequestSchema = {
+    /**
+     * Username
+     */
+    username?: string | null;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Avatar Url
+     */
+    avatar_url?: string | null;
+};
+
+/**
  * ValidationError
  */
 export type ValidationError = {
@@ -2156,6 +2174,31 @@ export type GetCurrentUserApiV1UsersMeGetResponses = {
 };
 
 export type GetCurrentUserApiV1UsersMeGetResponse = GetCurrentUserApiV1UsersMeGetResponses[keyof GetCurrentUserApiV1UsersMeGetResponses];
+
+export type UpdateCurrentUserApiV1UsersMePatchData = {
+    body: UserUpdateRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me';
+};
+
+export type UpdateCurrentUserApiV1UsersMePatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateCurrentUserApiV1UsersMePatchError = UpdateCurrentUserApiV1UsersMePatchErrors[keyof UpdateCurrentUserApiV1UsersMePatchErrors];
+
+export type UpdateCurrentUserApiV1UsersMePatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserPublicSchema;
+};
+
+export type UpdateCurrentUserApiV1UsersMePatchResponse = UpdateCurrentUserApiV1UsersMePatchResponses[keyof UpdateCurrentUserApiV1UsersMePatchResponses];
 
 export type GetUserByIdApiV1UsersUserIdGetData = {
     body?: never;

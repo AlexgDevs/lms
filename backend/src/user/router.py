@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter
 
 from src.user.dependencies import CurrentUserDep, UserIdDep, UserServiceDep
-from src.user.schemas import UserPublicSchema
+from src.user.schemas import UserPublicSchema, UserUpdateRequestSchema
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -15,6 +15,20 @@ router = APIRouter(prefix="/users", tags=["Users"])
 )
 async def get_current_user(user: CurrentUserDep) -> UserPublicSchema:
     return UserPublicSchema.model_validate(user)
+
+
+@router.patch(
+    "/me",
+    summary="Update current user",
+    response_model=UserPublicSchema,
+)
+async def update_current_user(
+    user: CurrentUserDep,
+    payload: UserUpdateRequestSchema,
+    service: UserServiceDep,
+) -> UserPublicSchema:
+    updated = await service.update_user(user.id, payload)
+    return UserPublicSchema.model_validate(updated)
 
 
 @router.get(

@@ -11,3 +11,9 @@ export function showErrorToast(description: string): void {
         description,
     });
 }
+
+export function showInfoToast(description: string): void {
+    toast.info("Info", {
+        description,
+    });
+}

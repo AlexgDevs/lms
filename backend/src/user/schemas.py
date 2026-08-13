@@ -1,6 +1,8 @@
 from datetime import datetime
 from uuid import UUID
 
+from pydantic import EmailStr
+
 from src.core.schemas.base_schema import BaseSchema
 
 
@@ -19,3 +21,9 @@ class UserPublicSchema(BaseSchema):
     email: str
     avatar_url: str | None
     joined_at: datetime
+
+
+class UserUpdateRequestSchema(BaseSchema):
+    username: str | None = None
+    email: EmailStr | None = None
+    avatar_url: str | None = None

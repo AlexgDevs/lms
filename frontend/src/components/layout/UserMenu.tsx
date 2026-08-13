@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogIn } from "lucide-react";
+import { User, LogIn, Settings } from "lucide-react";
 import useAuth from "@/features/auth/api/useAuth";
 
 export function UserMenu() {
@@ -30,13 +30,13 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="outline-none ml-1 cursor-pointer rounded-full focus:ring-2 focus:ring-primary/40">
-          <Avatar>
+        <button className="outline-none ml-1 cursor-pointer rounded-full">
+          <Avatar className="h-11 w-11">
             <AvatarImage
               src={user?.avatar_url ?? undefined}
               alt={user?.username || "Аватар"}
             />
-            <AvatarFallback>
+            <AvatarFallback className="text-sm">
               {user?.username?.[0]?.toUpperCase() || <User size={16} />}
             </AvatarFallback>
           </Avatar>
@@ -51,7 +51,14 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/profile" className="cursor-pointer">
+            <User className="w-4 h-4 mr-2" />
             Профиль
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/settings" className="cursor-pointer">
+            <Settings className="w-4 h-4 mr-2" />
+            Настройки
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
