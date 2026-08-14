@@ -158,12 +158,49 @@ class MediaSettings(BaseSettings):
     ]
 
 
+class AIGatewaySettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    AI_API_KEY: str | None = Field(default=None)
+    AI_BASE_URL: str = "https://openai.api.proxyapi.ru/v1"
+    AI_MODEL: str = "openai/gpt-4o"
+
+
+class TgpSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    TGP_MIN_MODULES: int = 5
+    TGP_QUESTIONS_PER_MODULE_MIN: int = 2
+    TGP_QUESTIONS_PER_MODULE_MAX: int = 3
+    TGP_QUESTION_REGENERATION_COOLDOWN_HOURS: int = 1
+    TGP_GENERATION_LOCK_TTL_SECONDS: int = 900
+    # AI gateway client
+    TGP_AI_TIMEOUT_SECONDS: float = 60.0
+    TGP_AI_MAX_RETRIES: int = 2
+    # Retry policy for transient failures (rate limits / network / 5xx)
+    TGP_RETRY_MAX_RETRIES: int = 8
+    TGP_RATE_LIMIT_DEFAULT_RETRY_SECONDS: int = 30
+    TGP_RATE_LIMIT_MAX_RETRY_COUNTDOWN: int = 300
+    TGP_NETWORK_RETRY_BACKOFF: int = 10
+    TGP_NETWORK_RETRY_BACKOFF_MAX: int = 45
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
     app: AppSettings = Field(default_factory=AppSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
     storage: StorageSettings = Field(default_factory=StorageSettings)
     media: MediaSettings = Field(default_factory=MediaSettings)
+    ai: AIGatewaySettings = Field(default_factory=AIGatewaySettings)
+    tgp: TgpSettings = Field(default_factory=TgpSettings)
 
 
 settings = Settings()

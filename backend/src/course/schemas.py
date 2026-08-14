@@ -23,6 +23,9 @@ class CourseSchema(BaseSchema):
     is_member: bool = False
     status: CourseStatus
     created_at: datetime
+    tgp_enabled: bool = False
+    tgp_last_full_generated_at: datetime | None = None
+    tgp_cooldown_hours: int = 24
 
 
 class CourseCreateRequestSchema(BaseSchema):
@@ -63,6 +66,8 @@ class CourseUpdateRequestSchema(BaseSchema):
     price: int | None = Field(None, ge=0)
     category_id: UUID | None = None
     status: CourseStatus | None = None
+    tgp_enabled: bool | None = None
+    tgp_cooldown_hours: int | None = Field(None, ge=0)
 
 
 class CourseUpdateSchema(BaseSchema):
@@ -76,6 +81,9 @@ class CourseUpdateSchema(BaseSchema):
     cover_url: str | None = None
     category_id: UUID | None = None
     status: CourseStatus | None = None
+    tgp_enabled: bool | None = None
+    tgp_cooldown_hours: int | None = None
+    tgp_last_full_generated_at: datetime | None = None
     is_deleted: datetime | None = None
 
 

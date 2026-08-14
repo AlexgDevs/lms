@@ -25,6 +25,13 @@ Run from the repo root unless otherwise noted.
 - Migrations: `uv run alembic revision --autogenerate -m "<msg>"`, `uv run alembic upgrade head` (from `backend/`)
 - Deps: `pyproject.toml` + `uv.lock` (managed with uv).
 
+### AI worker (Celery)
+- Run (from `backend/`, Redis required — `docker compose up -d redis`):
+  `uv run celery -A src.core.celery_app worker --loglevel=info`
+  (or `.\scripts\run-worker.ps1` on Windows). Consumes `ai.tgp.*` tasks (Redis broker).
+- AI gateway: OpenRouter via `OPENROUTER_API_KEY`/`OPENROUTER_BASE_URL`/`OPENROUTER_MODEL`
+  (default model `google/gemma-4-31b-it:free`). Without a key, TGP generation returns 503.
+
 ### Frontend (`frontend/`)
 - Install: `pnpm install` (from `frontend/`)
 - Dev: `pnpm dev`

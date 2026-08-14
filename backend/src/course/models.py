@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, Enum as SAEnum, UUID as sqlUUID
+from sqlalchemy import Boolean, DateTime, ForeignKey, Enum as SAEnum, UUID as sqlUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.course.enums import CourseMemberRole, CourseStatus
@@ -36,6 +36,15 @@ class Course(UUIDBase):
         server_default="draft",
         default=CourseStatus.DRAFT,
     )
+
+    # AI TGP (The Golden Path) pre-testing
+    tgp_enabled: Mapped[bool] = mapped_column(
+        Boolean(), server_default="false", default=False
+    )
+    tgp_last_full_generated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+    tgp_cooldown_hours: Mapped[int] = mapped_column(server_default="24", default=24)
 
     # times
     created_at: Mapped[timestamp]
