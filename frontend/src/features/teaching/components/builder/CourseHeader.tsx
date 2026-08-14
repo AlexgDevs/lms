@@ -19,7 +19,7 @@ import {
   X,
   Pencil,
   Settings2,
-  Tag,
+  Folder,
 } from "lucide-react"
 import { resolveMediaUrl } from "@/lib/media"
 import { CategoryPicker } from "@/features/teaching/components/CategoryPicker"
@@ -134,6 +134,11 @@ export function CourseHeader({
     setIsFree((course.price ?? 0) === 0)
   }
 
+  const handleFreeToggle = (checked: boolean) => {
+    setIsFree(checked)
+    if (checked) setPrice(0)
+  }
+
   // --- Категория ---
   const handleSelectCategory = (id: string | null) => {
     setCategoryId(id)
@@ -141,11 +146,6 @@ export function CourseHeader({
       onUpdateCourse({ category_id: id })
       triggerSavedAnimation("category")
     }
-  }
-
-  const handleFreeToggle = (checked: boolean) => {
-    setIsFree(checked)
-    if (checked) setPrice(0)
   }
 
   const handleTogglePublish = () => {
@@ -374,6 +374,24 @@ export function CourseHeader({
               </label>
             </div>
             {savedField === "price" && (
+              <span className="text-success text-xs flex items-center gap-1 animate-in fade-in">
+                <Check size={12} /> Сохранено
+              </span>
+            )}
+          </div>
+
+          {/* Категория */}
+          <div className="space-y-1.5">
+            <Label htmlFor="course-category" className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <Folder size={13} className="text-primary" />
+              Категория
+            </Label>
+            <CategoryPicker
+              value={categoryId}
+              onChange={handleSelectCategory}
+              disabled={isUpdating}
+            />
+            {savedField === "category" && (
               <span className="text-success text-xs flex items-center gap-1 animate-in fade-in">
                 <Check size={12} /> Сохранено
               </span>

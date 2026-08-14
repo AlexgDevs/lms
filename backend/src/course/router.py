@@ -1,6 +1,6 @@
 from typing import Annotated, Literal, Sequence
 
-from fastapi import APIRouter, File, Form, UploadFile, status
+from fastapi import APIRouter, File, Form, Query, UploadFile, status
 from src.course.course_member.schemas import CourseMemberSchema
 from src.course.schemas import (
     CourseSchema,
@@ -53,6 +53,7 @@ async def get_courses(
     limit: int = 10,
     offset: int = 0,
     category: str | None = None,
+    q: str | None = Query(None, max_length=100),
 ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
     return await service.list_courses(
         filter=filter,
@@ -60,6 +61,7 @@ async def get_courses(
         limit=limit,
         offset=offset,
         category=category,
+        q=q,
     )
 
 

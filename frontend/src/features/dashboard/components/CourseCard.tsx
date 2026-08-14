@@ -29,7 +29,10 @@ export function CourseCard({
   const memberCount = course.member_count ?? 0;
 
   const handleCardClick = () => {
-    onClick?.(course);
+    if (onClick) {
+      onClick(course);
+      return;
+    }
     if (alwaysOpenLearn) {
       navigate({
         to: "/learn/$courseId",

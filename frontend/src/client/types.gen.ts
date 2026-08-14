@@ -1041,6 +1041,10 @@ export type GetCoursesApiV1CoursesGetData = {
          * Category
          */
         category?: string | null;
+        /**
+         * Q
+         */
+        q?: string | null;
     };
     url: '/api/v1/courses';
 };

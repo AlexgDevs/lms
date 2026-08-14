@@ -79,7 +79,6 @@ export function CategoryCatalog() {
                     }`}
                   >
                     <span className="flex items-center gap-2.5 truncate">
-                      {cat.icon && <span>{cat.icon}</span>}
                       <span className="truncate">{cat.name}</span>
                     </span>
                     <ChevronRight
@@ -97,7 +96,6 @@ export function CategoryCatalog() {
             <div className="col-span-7 p-4 bg-card flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 pb-3 mb-3">
-                  {activeCategory?.icon && <span className="text-lg">{activeCategory.icon}</span>}
                   <h3 className="font-semibold text-sm text-foreground">
                     {activeCategory?.name ?? ""}
                   </h3>

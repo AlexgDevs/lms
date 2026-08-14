@@ -59,10 +59,15 @@ export const useEnrollCourse = () => {
   })
 }
 
-export const useCourseCatalog = (pageSize = 12, category?: string) => {
+export const useCourseCatalog = (pageSize = 12, category?: string, q?: string) => {
   return useInfiniteQuery({
     ...getCoursesApiV1CoursesGetInfiniteOptions({
-      query: { filter: "all", limit: pageSize, category: category || undefined },
+      query: {
+        filter: "all",
+        limit: pageSize,
+        category: category || undefined,
+        q: q || undefined,
+      },
     }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) =>

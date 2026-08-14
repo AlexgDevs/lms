@@ -1,7 +1,7 @@
 from typing import Any, Sequence
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, func, select, update
+from sqlalchemy import ColumnElement, case, func, or_, select, update
 from sqlalchemy.sql import Select
 
 from src.lesson.enums import LessonProgressType
@@ -10,6 +10,27 @@ from src.core.repositories.base_repository import BaseRepository
 from src.course.mapper import CourseMapper, CourseUserBriefMapper
 from src.course.models import Course, CourseMember
 from src.course.schemas import CourseSchema, CourseUserBriefSchema
+
+
+def _escape_like(term: str) -> str:
+    return term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _search_order(search_term: str) -> tuple[Any, ...]:
+    escaped = _escape_like(search_term)
+    search_vector = func.to_tsvector(
+        "simple",
+        func.concat(Course.title, " ", func.coalesce(Course.description, "")),
+    )
+    return (
+        case((Course.title.ilike(f"{escaped}%", escape="\\"), 0), else_=1),
+        func.ts_rank(
+            search_vector,
+            func.plainto_tsquery("simple", search_term),
+        ).desc(),
+        func.word_similarity(Course.title, search_term).desc(),
+        Course.member_count.desc(),
+    )
 
 
 class CourseRepository(BaseRepository[Course, CourseSchema]):
@@ -23,12 +44,22 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
         offset: int,
         order_by: ColumnElement[Any] | None = None,
         category_ids: Sequence[UUID] | None = None,
+        search_term: str | None = None,
         **filter_by: Any,
     ) -> Sequence[CourseSchema]:
         query = select(self.model).filter_by(**filter_by)
         if category_ids:
             query = query.where(self.model.category_id.in_(list(category_ids)))
-        if order_by is not None:
+        if search_term:
+            escaped = _escape_like(search_term)
+            query = query.where(
+                or_(
+                    self.model.title.ilike(f"%{escaped}%", escape="\\"),
+                    self.model.description.ilike(f"%{escaped}%", escape="\\"),
+                )
+            )
+            query = query.order_by(*_search_order(search_term))
+        elif order_by is not None:
             query = query.order_by(order_by)
         query = query.limit(limit).offset(offset)
         return await self._execute_and_map_all(query)

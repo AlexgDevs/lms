@@ -185,7 +185,6 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
                         {tree.map((parent) => (
                           <SelectGroup key={parent.id}>
                             <SelectGroupLabel>
-                              {parent.icon && <span className="mr-1">{parent.icon}</span>}
                               {parent.name}
                             </SelectGroupLabel>
                             {parent.children.map((child) => (

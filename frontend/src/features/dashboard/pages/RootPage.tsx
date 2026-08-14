@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Loader2, PlusCircle, Sparkles } from "lucide-react";
+import { Edit3, Loader2, PlusCircle, Sparkles } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { isLoggedIn } from "@/features/auth/api/useAuth";
 import {
@@ -37,6 +37,7 @@ export function RootPage() {
     recommended.isLoading || (loggedIn && (enrolled.isLoading || created.isLoading));
 
   const hasEnrolled = loggedIn && enrolledCourses.length > 0;
+  const hasTeaching = loggedIn && createdCourses.length > 0;
 
   const sections: DashboardSection[] = [];
   const pushRecommended = () => {
@@ -55,20 +56,22 @@ export function RootPage() {
     pushRecommended();
   }
 
-  if (loggedIn && createdCourses.length > 0) {
-    sections.push({
-      title: "Преподавание и разработка",
-      icon: PlusCircle,
-      count: createdCourses.length,
-      courses: createdCourses,
-    });
-  } else {
+  if (hasEnrolled && !hasTeaching) {
     pushRecommended();
   }
 
   if (sections.length === 0) pushRecommended();
 
+  const hasContent = hasEnrolled || hasTeaching || sections.length > 0;
+
   const goToCatalog = () => navigate({ to: ROUTES.CATALOG });
+
+  const goToEditCourse = (course: CourseCardData) => {
+    navigate({
+      to: `${ROUTES.TEACHING_COURSE}/$courseId`,
+      params: { courseId: course.id },
+    });
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 py-2 px-4 sm:px-6">
@@ -94,11 +97,11 @@ export function RootPage() {
       </div>
 
       {/* Ряды курсов */}
-      {isLoading && !hasEnrolled && sections.length === 0 ? (
+      {isLoading && !hasContent ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
-      ) : !hasEnrolled && sections.length === 0 ? (
+      ) : !hasContent ? (
         <div className="text-center py-20 text-muted-foreground text-sm">
           Курсы пока не найдены.
         </div>
@@ -112,6 +115,18 @@ export function RootPage() {
               filters={<CourseFilters />}
             />
           )}
+          {hasTeaching && (
+            <ContinueLearningSection
+              title="Преподавание и разработка"
+              icon={PlusCircle}
+              count={createdCourses.length}
+              courses={createdCourses}
+              onCourseClick={goToEditCourse}
+              rowActionLabel="Редактировать"
+              rowActionIcon={Edit3}
+              showProgress={false}
+            />
+          )}
           {sections.map((section) => (
             <CourseRowSection
               key={section.title}
@@ -120,11 +135,6 @@ export function RootPage() {
               accentClassName={section.accentClassName}
               count={section.count}
               courses={section.courses}
-              className={
-                section.title === "Преподавание и разработка"
-                  ? "lg:max-w-[66.67%]"
-                  : undefined
-              }
             />
           ))}
         </>

@@ -1,17 +1,31 @@
-import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useLayout } from "@/app/providers/useLayout";
 import { useTheme } from "@/app/providers/useTheme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoryCatalog } from "@/components/layout/CategoryCatalog";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { ROUTES } from "@/routes";
 import { Search, Bell, Moon, Sun } from "lucide-react";
 
 export function Header() {
   const { header } = useLayout();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
 
   if (!header.visible) return null;
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    navigate({
+      to: ROUTES.CATALOG,
+      search: trimmed ? { q: trimmed } : {},
+    });
+    setQuery("");
+  };
 
   return (
     <header className="sticky top-0 z-50 h-16 w-full border-b border-border bg-card/80 backdrop-blur-md px-4 md:px-8 flex items-center justify-between gap-4 shrink-0 transition-colors">
@@ -53,14 +67,16 @@ export function Header() {
           <div className="flex-1 max-w-lg hidden sm:flex items-center gap-2">
             <CategoryCatalog />
 
-            <div className="relative flex-1">
+            <form role="search" onSubmit={handleSearchSubmit} className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Поиск курсов..."
                 className="w-full pl-9 rounded-full text-sm focus-visible:bg-background"
               />
-            </div>
+            </form>
           </div>
         </>
       )}

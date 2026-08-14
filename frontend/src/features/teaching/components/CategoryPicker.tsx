@@ -47,7 +47,6 @@ export function CategoryPicker({
         >
           {current ? (
             <span className="flex items-center gap-1.5 truncate">
-              {current.icon && <span>{current.icon}</span>}
               <span className="truncate">{current.name}</span>
               {currentParent && (
                 <span className="text-muted-foreground/60">· {currentParent.name}</span>
@@ -97,7 +96,6 @@ export function CategoryPicker({
                     )}
                   >
                     <span className="flex items-center gap-1.5 truncate">
-                      {block.icon && <span>{block.icon}</span>}
                       <span className="truncate">{block.name}</span>
                     </span>
                     {value === block.id && (

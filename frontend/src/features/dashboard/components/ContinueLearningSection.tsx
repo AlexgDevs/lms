@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
@@ -8,26 +9,42 @@ import type { CourseCardData } from "@/features/dashboard/types";
 
 interface ContinueLearningSectionProps {
   title: string;
+  icon?: LucideIcon;
+  accentClassName?: string;
   count?: number;
   courses: CourseCardData[];
   filters?: ReactNode;
   className?: string;
+  onCourseClick?: (course: CourseCardData) => void;
+  rowActionLabel?: string;
+  rowActionIcon?: LucideIcon;
+  showProgress?: boolean;
 }
 
 const FEATURED_LIMIT = 2;
 
 export function ContinueLearningSection({
   title,
+  icon: Icon = BookOpen,
+  accentClassName,
   count,
   courses,
   filters,
   className,
+  onCourseClick,
+  rowActionLabel = "Продолжить",
+  rowActionIcon: RowActionIcon = ArrowRight,
+  showProgress = true,
 }: ContinueLearningSectionProps) {
   const navigate = useNavigate();
   const featured = courses.slice(0, FEATURED_LIMIT);
   const rest = courses.slice(FEATURED_LIMIT);
 
-  const handleContinue = (course: CourseCardData) => {
+  const handleNavigate = (course: CourseCardData) => {
+    if (onCourseClick) {
+      onCourseClick(course);
+      return;
+    }
     navigate({
       to: "/learn/$courseId",
       params: { courseId: course.id },
@@ -38,7 +55,7 @@ export function ContinueLearningSection({
     <section className={cn("space-y-3", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-primary" />
+          <Icon className={cn("w-5 h-5 text-primary", accentClassName)} />
           <h2 className="text-lg font-bold text-foreground">{title}</h2>
           {count !== undefined && (
             <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
@@ -52,7 +69,7 @@ export function ContinueLearningSection({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {featured.map((course) => (
-          <CourseCard key={course.id} course={course} alwaysOpenLearn />
+          <CourseCard key={course.id} course={course} onClick={handleNavigate} />
         ))}
       </div>
 
@@ -73,9 +90,9 @@ export function ContinueLearningSection({
                 key={course.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => handleContinue(course)}
+                onClick={() => handleNavigate(course)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") handleContinue(course);
+                  if (e.key === "Enter" || e.key === " ") handleNavigate(course);
                 }}
                 className="group flex items-center gap-3 bg-card rounded-xl shadow-[var(--shadow-card)] px-4 py-3 hover:shadow-glow-primary transition-all duration-200 cursor-pointer"
               >
@@ -95,7 +112,7 @@ export function ContinueLearningSection({
                   <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                     {course.title}
                   </p>
-                  {course.progress !== undefined && (
+                  {showProgress && course.progress !== undefined && (
                     <div className="flex items-center gap-2 mt-1">
                       <div className="w-24 bg-muted rounded-full h-1.5 overflow-hidden">
                         <div
@@ -111,8 +128,8 @@ export function ContinueLearningSection({
                 </div>
 
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold transition-colors group-hover:bg-primary group-hover:text-white shrink-0">
-                  Продолжить
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  {rowActionLabel}
+                  <RowActionIcon className="w-3.5 h-3.5" />
                 </span>
               </div>
             ))}

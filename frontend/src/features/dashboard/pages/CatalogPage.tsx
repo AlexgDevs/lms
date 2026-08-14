@@ -5,7 +5,6 @@ import { useCourseCatalog } from "@/features/dashboard/api/useCourses";
 import { useCategoryBySlug } from "@/features/dashboard/api/useCategories";
 import { CourseCard } from "@/features/dashboard/components/CourseCard";
 import { CourseFilters } from "@/features/dashboard/components/CourseFilters";
-import { CategoryChips } from "@/features/dashboard/components/CategoryChips";
 import type { CourseCardData } from "@/features/dashboard/types";
 
 const PAGE_SIZE = 12;
@@ -14,6 +13,7 @@ export function CatalogPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/_layout/catalog" });
   const categorySlug = search.category;
+  const query = search.q;
   const activeCategory = useCategoryBySlug(categorySlug);
   const [freeOnly, setFreeOnly] = useState(false);
 
@@ -23,7 +23,7 @@ export function CatalogPage() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useCourseCatalog(PAGE_SIZE, categorySlug);
+  } = useCourseCatalog(PAGE_SIZE, categorySlug, query);
 
   const courses = (data?.pages.flat() ?? []) as CourseCardData[];
   const visibleCourses = freeOnly
@@ -48,7 +48,11 @@ export function CatalogPage() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const clearCategory = () => {
-    navigate({ to: "/catalog", search: {} });
+    navigate({ to: "/catalog", search: query ? { q: query } : {} });
+  };
+
+  const clearQuery = () => {
+    navigate({ to: "/catalog", search: categorySlug ? { category: categorySlug } : {} });
   };
 
   return (
@@ -56,26 +60,41 @@ export function CatalogPage() {
       <div className="pb-4 space-y-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {activeCategory ? activeCategory.name : "Каталог курсов"}
+            {activeCategory
+              ? activeCategory.name
+              : query
+                ? "Поиск курсов"
+                : "Каталог курсов"}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             {activeCategory
-              ? "Курсы выбранной категории"
-              : "Все опубликованные курсы платформы"}
+              ? query
+                ? `Результаты по запросу «${query}» в категории «${activeCategory.name}»`
+                : "Курсы выбранной категории"
+              : query
+                ? `Результаты по запросу «${query}»`
+                : "Все опубликованные курсы платформы"}
           </p>
         </div>
 
-        <CategoryChips activeSlug={categorySlug} />
-
         <div className="flex flex-wrap items-center gap-3">
           <CourseFilters freeOnly={freeOnly} onFreeOnlyChange={setFreeOnly} />
+          {query && (
+            <button
+              type="button"
+              onClick={clearQuery}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            >
+              {query}
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
           {activeCategory && (
             <button
               type="button"
               onClick={clearCategory}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
             >
-              {activeCategory.icon && <span>{activeCategory.icon}</span>}
               {activeCategory.name}
               <X className="w-3.5 h-3.5" />
             </button>
@@ -91,7 +110,9 @@ export function CatalogPage() {
         <div className="text-center py-20 text-muted-foreground text-sm">
           {freeOnly
             ? "Бесплатных курсов в этой категории пока нет."
-            : "Курсы пока не найдены."}
+            : query
+              ? "По вашему запросу ничего не найдено."
+              : "Курсы пока не найдены."}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

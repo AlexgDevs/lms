@@ -104,7 +104,9 @@ class CourseService(BaseService):
         limit: int = 10,
         offset: int = 0,
         category: str | None = None,
+        q: str | None = None,
     ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
+        search_term = q.strip()[:100] if q and q.strip() else None
         match filter:
             case "created":
                 if user_id is None:
@@ -130,6 +132,7 @@ class CourseService(BaseService):
                         limit=limit,
                         offset=offset,
                         category_ids=category_ids,
+                        search_term=search_term,
                         status=CourseStatus.PUBLISHED,
                         is_deleted=None,
                     )

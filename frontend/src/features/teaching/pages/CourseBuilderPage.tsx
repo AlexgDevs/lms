@@ -87,6 +87,7 @@ export function CourseBuilderPage() {
     description?: string | null
     price?: number | null
     status?: "draft" | "published"
+    category_id?: string | null
   }) => {
     await updateCourseAsync({
       path: { course_id: String(authorCourse.id) },
