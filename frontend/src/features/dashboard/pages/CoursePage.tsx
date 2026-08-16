@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { notFound, useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, BookOpen, Loader2, Play, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,7 +13,7 @@ export function CoursePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const enroll = useEnrollCourse();
-  const { course, modules, lessonsByModule, isLoading, isError } =
+  const { course, modules, lessonsByModule, isLoading } =
     useCourseDetail(courseId);
 
   if (isLoading) {
@@ -24,18 +24,8 @@ export function CoursePage() {
     );
   }
 
-  if (isError || !course) {
-    return (
-      <div className="max-w-5xl mx-auto py-24 text-center space-y-4">
-        <BookOpen className="w-10 h-10 mx-auto text-muted-foreground" />
-        <p className="text-muted-foreground text-sm">
-          Курс не найден или ещё не опубликован.
-        </p>
-        <Button variant="outline" size="sm" onClick={() => navigate({ to: ROUTES.CATALOG })}>
-          Вернуться в каталог
-        </Button>
-      </div>
-    );
+  if (!course) {
+    throw notFound();
   }
 
   const cover = resolveMediaUrl(course.cover_url);

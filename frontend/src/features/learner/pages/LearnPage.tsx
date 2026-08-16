@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "@tanstack/react-router"
+import { notFound, useNavigate, useParams } from "@tanstack/react-router"
 import {
   ArrowLeft,
   BookOpen,
@@ -16,7 +16,6 @@ import { useLearnData } from "@/features/learner/api/useLearnData"
 import { useEnrollCourse } from "@/features/dashboard/api/useCourses"
 import type { BlockSchema, BlockSubmissionSchema } from "@/client"
 import { BlockSubmissionType, BlockType } from "@/client"
-import { ROUTES } from "@/routes"
 import { cn } from "@/lib/utils"
 
 export function LearnPage() {
@@ -52,6 +51,10 @@ export function LearnPage() {
     )
   }
 
+  if (!course) {
+    throw notFound()
+  }
+
   return (
     <div className="grid grid-cols-1 gap-6 items-start lg:grid-cols-[300px_1fr]">
       <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-7rem)]">
@@ -72,16 +75,12 @@ export function LearnPage() {
       </div>
 
       <div className="min-w-0">
-        {course ? (
-          <LessonStepper
-            data={data}
-            courseId={courseId as string}
-            lessonId={lessonId as string}
-            goToLesson={goToLesson}
-          />
-        ) : (
-          <NotFoundState />
-        )}
+        <LessonStepper
+          data={data}
+          courseId={courseId as string}
+          lessonId={lessonId as string}
+          goToLesson={goToLesson}
+        />
       </div>
     </div>
   )
@@ -387,19 +386,6 @@ function StepDot({
             : "bg-muted hover:bg-muted-foreground/50",
       )}
     />
-  )
-}
-
-function NotFoundState() {
-  const navigate = useNavigate()
-  return (
-    <div className="mx-auto max-w-2xl py-24 text-center space-y-4">
-      <BookOpen className="mx-auto h-10 w-10 text-muted-foreground" />
-      <p className="text-sm text-muted-foreground">Курс не найден или ещё не опубликован.</p>
-      <Button variant="outline" size="sm" onClick={() => navigate({ to: ROUTES.CATALOG })}>
-        Вернуться в каталог
-      </Button>
-    </div>
   )
 }
 

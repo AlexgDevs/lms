@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "@tanstack/react-router"
+import { notFound, useNavigate, useParams } from "@tanstack/react-router"
 import {
   AlertCircle,
   BookOpen,
@@ -99,12 +99,16 @@ export function LearnRedirectPage() {
     setPreTestAnswers([])
   }
 
-  if (data.isLoading || !course) {
+if (data.isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     )
+  }
+
+  if (!course) {
+    throw notFound()
   }
 
   if (!firstLessonId) {

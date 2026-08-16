@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { NotFoundPage } from "@/components/NotFoundPage";
 import "@/styles/global.css";
 
 export const Route = createRootRoute({
@@ -12,4 +13,5 @@ export const Route = createRootRoute({
       <TanStackRouterDevtools position="bottom-right" />
     </>
   ),
+  notFoundComponent: NotFoundPage,
 });

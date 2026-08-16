@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { useParams, useNavigate } from "@tanstack/react-router"
-import { Loader2, AlertCircle, ArrowLeft, Folder } from "lucide-react"
+import { notFound, useParams, useNavigate } from "@tanstack/react-router"
+import { Loader2, ArrowLeft, Folder } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCourses } from "@/features/teaching/api/useCourses"
 import { useCourseMedia } from "@/features/teaching/api/useCourseMedia"
@@ -25,7 +25,6 @@ export function CourseBuilderPage() {
   const {
     authorCourse,
     isLoadingAuthorCourse,
-    authorCourseError,
     updateCourseAsync,
     isUpdatingCourse,
   } = useCourses(courseId)
@@ -62,31 +61,8 @@ export function CourseBuilderPage() {
   }
 
   // 2. Обработка ошибки
-  if (authorCourseError || !authorCourse) {
-    return (
-      <div className="h-screen w-full flex flex-col items-center justify-center gap-4 bg-background p-4">
-        <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
-          <AlertCircle size={24} />
-        </div>
-        <div className="text-center space-y-1">
-          <h2 className="text-lg font-bold text-foreground">
-            Курс не найден
-          </h2>
-          <p className="text-xs text-muted-foreground max-w-sm">
-            Не удалось загрузить курс. Возможно, он был удален или у вас нет прав автора.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate({ to: ROUTES.TEACHING })}
-          className="gap-2"
-        >
-          <ArrowLeft size={14} />
-          <span>Вернуться к спискам курсов</span>
-        </Button>
-      </div>
-    )
+  if (!authorCourse) {
+    throw notFound()
   }
 
   // Хендлер обновления курса
