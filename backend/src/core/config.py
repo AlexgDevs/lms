@@ -181,6 +181,9 @@ class TgpSettings(BaseSettings):
     TGP_QUESTIONS_PER_MODULE_MIN: int = 2
     TGP_QUESTIONS_PER_MODULE_MAX: int = 3
     TGP_QUESTION_REGENERATION_COOLDOWN_HOURS: int = 1
+    TGP_SUBMIT_COOLDOWN_HOURS: int = 24
+    # Floor for the per-course full-regeneration cooldown.
+    TGP_GENERATION_COOLDOWN_HOURS: int = 24
     TGP_GENERATION_LOCK_TTL_SECONDS: int = 900
     # AI gateway client
     TGP_AI_TIMEOUT_SECONDS: float = 60.0

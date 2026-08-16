@@ -59,3 +59,8 @@ class CourseMember(UUIDBase):
 
     role: Mapped[str_128] = mapped_column(default=CourseMemberRole.MEMBER)
     left_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    # AI TGP (The Golden Path): last pre-test submission (roadmap regeneration cooldown)
+    tgp_last_submitted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )

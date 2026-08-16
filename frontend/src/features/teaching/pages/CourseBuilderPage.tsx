@@ -4,8 +4,12 @@ import { Loader2, AlertCircle, ArrowLeft, Folder } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCourses } from "@/features/teaching/api/useCourses"
 import { useCourseMedia } from "@/features/teaching/api/useCourseMedia"
+import { useModules } from "@/features/teaching/api/useModules"
+import { useTgp, TGP_MIN_MODULES } from "@/features/teaching/api/useTgp"
+import { TGP_GENERATION_COOLDOWN_HOURS } from "@/lib/tgp"
 import { CourseHeader } from "@/features/teaching/components/builder/CourseHeader"
 import { CourseSidebar } from "@/features/teaching/components/builder/CourseSidebar"
+import { TgpPanel } from "@/features/teaching/components/builder/TgpPanel"
 import { ROUTES } from "@/routes"
 import { CourseBlocks } from "@/features/teaching/components/builder/CourseBlocks"
 
@@ -26,13 +30,17 @@ export function CourseBuilderPage() {
     isUpdatingCourse,
   } = useCourses(courseId)
 
-  // Медиа курса: обложка (загрузка / удаление)
+   // Медиа курса: обложка (загрузка / удаление)
   const {
     uploadCourseCoverAsync,
     removeCourseCoverAsync,
     isUploadingCover,
     isRemovingCover,
   } = useCourseMedia(courseId)
+
+  // TGP (The Gold Path) — pre-testing hooks
+  const tgp = useTgp({ courseId })
+  const { modules } = useModules({ courseId: courseId ?? "", onlyCreated: true })
 
   if (!courseId) {
     navigate({ to: ROUTES.TEACHING })
@@ -88,6 +96,8 @@ export function CourseBuilderPage() {
     price?: number | null
     status?: "draft" | "published"
     category_id?: string | null
+    tgp_enabled?: boolean
+    tgp_cooldown_hours?: number
   }) => {
     await updateCourseAsync({
       path: { course_id: String(authorCourse.id) },
@@ -95,9 +105,40 @@ export function CourseBuilderPage() {
     })
   }
 
+  // --- TGP handlers ---
+  const handleToggleTgp = async (enabled: boolean) => {
+    await handleUpdateCourse({ tgp_enabled: enabled })
+  }
+
+  const handleGenerate = async () => {
+    await tgp.generateAsync()
+  }
+
+  const handleSaveQuestion = async (
+    questionId: string,
+    data: {
+      question_text: string
+      options: string[]
+      correct_option: number
+    }
+  ) => {
+    await tgp.updateAsync(questionId, data)
+  }
+
+  const handleRegenerate = async (questionId: string) => {
+    await tgp.regenerateAsync(questionId)
+  }
+
+  const handleRefetchTgp = async () => {
+    const res = await tgp.refetchQuestions()
+    return res.data
+  }
+
+  const tgpEnabled = Boolean(authorCourse?.tgp_enabled)
+
   return (
     <div className="h-screen w-full bg-background text-foreground flex flex-col overflow-hidden">
-      
+       
       {/* Верхний тулбар: кнопка назад + ID */}
       <div className="shrink-0 bg-muted/30 px-4 py-1.5 flex items-center justify-between">
         <Button
@@ -129,6 +170,34 @@ export function CourseBuilderPage() {
           />
         </div>
 
+        {/* TGP Panel */}
+        <TgpPanel
+          courseId={String(authorCourse.id)}
+          tgpEnabled={tgpEnabled}
+          tgpLastGeneratedAt={
+            authorCourse?.tgp_last_full_generated_at ??
+            tgp.optimisticGeneratedAt ??
+            null
+          }
+          tgpCooldownHours={Math.max(
+            authorCourse?.tgp_cooldown_hours ?? TGP_GENERATION_COOLDOWN_HOURS,
+            TGP_GENERATION_COOLDOWN_HOURS,
+          )}
+          moduleCount={modules.length}
+          minModules={TGP_MIN_MODULES}
+          questions={tgp.questions ?? []}
+          isLoadingQuestions={tgp.isLoadingQuestions}
+          isGenerating={tgp.isGenerating}
+          isUpdatingCourse={tgp.isTogglingTgp || isUpdatingCourse}
+          isSavingQuestion={tgp.isUpdatingQuestion}
+          isRegenerating={tgp.isRegenerating}
+          onToggleTgp={handleToggleTgp}
+          onGenerate={handleGenerate}
+          onSaveQuestion={handleSaveQuestion}
+          onRegenerate={handleRegenerate}
+          onRefetch={handleRefetchTgp}
+        />
+
         {/* Рабочая область: Сайдбар + Центральный холст */}
         <div className="flex-1 flex gap-4 overflow-hidden">
           
@@ -148,8 +217,7 @@ export function CourseBuilderPage() {
           />
 
           {/* Центральный редактор контента */}
-          {/* Центральный редактор контента */}
-          <main className="flex-1 rounded-xl bg-card overflow-hidden shadow-[var(--shadow-card)] flex flex-col">
+          <main className="flex-1 min-w-0 rounded-xl bg-card overflow-hidden shadow-[var(--shadow-card)] flex flex-col">
             {selectedLessonId ? (
               // СНАЧАЛА проверяем урок, так как он приоритетнее
               <CourseBlocks

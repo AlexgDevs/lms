@@ -5,12 +5,26 @@ from fastapi import APIRouter, status
 from src.ai.dependencies import AiServiceDep
 from src.ai.schemas import (
     TgpGenerateResponseSchema,
+    TgpQuestionSchema,
+    TgpQuestionUpdateSchema,
     TgpSubmitRequestSchema,
     TgpSubmitResponseSchema,
 )
 from src.user.dependencies import UserIdDep
 
 router = APIRouter(prefix="/ai/tgp", tags=["AI TGP"])
+
+
+@router.get(
+    "/{course_id}/questions",
+    response_model=list[TgpQuestionSchema],
+)
+async def list_tgp_questions(
+    course_id: UUID,
+    service: AiServiceDep,
+    user_id: UserIdDep,
+) -> list[TgpQuestionSchema]:
+    return await service.get_questions(course_id=course_id, user_id=user_id)
 
 
 @router.post(
@@ -37,6 +51,21 @@ async def regenerate_tgp_question(
     owner_id: UserIdDep,
 ) -> TgpGenerateResponseSchema:
     return await service.regenerate_question(question_id=question_id, owner_id=owner_id)
+
+
+@router.patch(
+    "/questions/{question_id}",
+    response_model=TgpQuestionSchema,
+)
+async def update_tgp_question(
+    question_id: UUID,
+    payload: TgpQuestionUpdateSchema,
+    service: AiServiceDep,
+    owner_id: UserIdDep,
+) -> TgpQuestionSchema:
+    return await service.update_question(
+        question_id=question_id, owner_id=owner_id, data=payload
+    )
 
 
 @router.post("/{course_id}/submit", response_model=TgpSubmitResponseSchema)

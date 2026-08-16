@@ -18,7 +18,7 @@ export function CourseSidebar({
   onSelectLesson 
 }: CourseSidebarProps) {
   return (
-    <aside className="w-80 shrink-0 bg-card rounded-xl flex flex-col h-[calc(100vh-140px)] overflow-hidden shadow-[var(--shadow-card)]">
+    <aside className="w-max min-w-72 max-w-[20rem] shrink-0 bg-card rounded-xl flex flex-col h-full min-h-0 overflow-hidden shadow-[var(--shadow-card)]">
       {/* Шапка сайдбара */}
       <div className="p-3.5 flex items-center justify-between bg-muted/20">
         <div className="flex items-center gap-2">
@@ -30,7 +30,7 @@ export function CourseSidebar({
       </div>
 
       {/* Прокручиваемая область с модулями и уроками */}
-      <ScrollArea className="flex-1 p-2">
+      <ScrollArea className="flex-1 p-2 min-h-0">
         <CourseModulesList
           courseId={courseId}
           activeModuleId={selectedModuleId || undefined}

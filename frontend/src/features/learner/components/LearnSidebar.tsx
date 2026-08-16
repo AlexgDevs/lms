@@ -1,6 +1,21 @@
-import { CheckCircle2, ChevronRight } from "lucide-react"
+import { useState } from "react"
+import { ChevronRight, Map as MapIcon, Sparkles } from "lucide-react"
 import type { LessonSchema, ModuleSchema } from "@/client"
 import { cn } from "@/lib/utils"
+import { formatCooldown } from "@/lib/tgp"
+import { Button } from "@/components/ui/button"
+import { useNavigate } from "@tanstack/react-router"
+import {
+  useLearnerTgp,
+  type TgpPreTestAnswer,
+} from "@/features/learner/api/useTgp"
+import {
+  PreTestModal,
+  ResultsModal,
+} from "@/features/learner/components/TgpModals"
+import type { FlatLearningUnit } from "@/features/learner/api/useLearnData"
+import { isLoggedIn } from "@/features/auth/api/useAuth"
+import { TgpDecision } from "@/client"
 
 interface LearnSidebarProps {
   courseTitle: string
@@ -11,6 +26,10 @@ interface LearnSidebarProps {
   completedCount: number
   isCompleted: (lessonId: string) => boolean
   onSelectLesson: (lessonId: string) => void
+  courseId?: string
+  tgpEnabled?: boolean
+  isMember?: boolean
+  flatUnits?: FlatLearningUnit[]
 }
 
 export function LearnSidebar({
@@ -22,8 +41,69 @@ export function LearnSidebar({
   completedCount,
   isCompleted,
   onSelectLesson,
+  courseId,
+  tgpEnabled,
+  isMember,
+  flatUnits,
 }: LearnSidebarProps) {
   const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
+  const navigate = useNavigate()
+
+  const canTakeTgp = Boolean(courseId && tgpEnabled && isMember && isLoggedIn())
+  const tgp = useLearnerTgp({ courseId, enabled: canTakeTgp })
+
+  const [showPreTest, setShowPreTest] = useState(false)
+  const [showRoadmap, setShowRoadmap] = useState(false)
+  const [preTestAnswers, setPreTestAnswers] = useState<TgpPreTestAnswer[]>([])
+
+  const handleSelectAnswer = (questionId: string, answerIndex: number) => {
+    setPreTestAnswers((prev) => {
+      const existing = prev.find((a) => a.question_id === questionId)
+      if (existing) {
+        return prev.map((a) =>
+          a.question_id === questionId
+            ? { question_id: questionId, answer_index: answerIndex }
+            : a,
+        )
+      }
+      return [...prev, { question_id: questionId, answer_index: answerIndex }]
+    })
+  }
+
+  const handleSubmit = async () => {
+    if (preTestAnswers.length === 0) return
+    try {
+      await tgp.submit(preTestAnswers)
+      setShowPreTest(false)
+      setShowRoadmap(true)
+    } catch {
+      // error toast is handled inside the hook
+    }
+  }
+
+  const handleStartLearning = () => {
+    if (!courseId) return
+    const recommendedModuleId = tgp.result?.modules.find(
+      (m) => m.decision === TgpDecision.RECOMMENDED,
+    )?.module_id
+    const targetLessonId = recommendedModuleId
+      ? flatUnits?.find((u) => u.module.id === recommendedModuleId)?.lesson.id
+      : flatUnits?.[0]?.lesson.id
+    setShowRoadmap(false)
+    if (targetLessonId) {
+      navigate({
+        to: "/learn/$courseId/$lessonId",
+        params: { courseId, lessonId: targetLessonId },
+      })
+    }
+  }
+
+  const handleRetake = () => {
+    tgp.reset()
+    setShowRoadmap(false)
+    setShowPreTest(true)
+    setPreTestAnswers([])
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -41,6 +121,54 @@ export function LearnSidebar({
             {completedCount}/{totalLessons}
           </span>
         </div>
+
+        {canTakeTgp && (
+          <div className="mt-2 space-y-2">
+            {!tgp.taken ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full py-2 text-sm"
+                onClick={() => setShowPreTest(true)}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Пройти предварительное тестирование
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full py-2 text-sm"
+                onClick={() => setShowPreTest(true)}
+                disabled={!tgp.canRetake}
+                title={
+                  !tgp.canRetake
+                    ? "Тест можно пройти заново позже"
+                    : undefined
+                }
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Пройти тестирование заново
+              </Button>
+            )}
+            {!tgp.canRetake && (
+              <span className="block text-xs text-muted-foreground tabular-nums text-center">
+                Тест доступен через {formatCooldown(tgp.retakeRemainingMs)}
+              </span>
+            )}
+            {tgp.result && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full py-2 text-sm"
+                onClick={() => setShowRoadmap(true)}
+              >
+                <MapIcon className="w-4 h-4 mr-2" />
+                Просмотреть роадмап
+              </Button>
+            )}
+          </div>
+        )}
       </aside>
 
       <nav className="rounded-xl bg-card p-2 space-y-3 max-h-[calc(100vh-17rem)] overflow-y-auto shadow-[var(--shadow-card)]">
@@ -73,6 +201,32 @@ export function LearnSidebar({
           )
         })}
       </nav>
+
+      {showPreTest && tgp.questions.length > 0 && (
+        <PreTestModal
+          questions={tgp.questions}
+          answers={preTestAnswers}
+          isSubmitting={tgp.isSubmitting}
+          onSelectAnswer={handleSelectAnswer}
+          onSubmit={handleSubmit}
+          onClose={() => setShowPreTest(false)}
+        />
+      )}
+
+      {showRoadmap && (
+        <ResultsModal
+          result={tgp.result}
+          isSubmitting={tgp.isSubmitting}
+          onStart={handleStartLearning}
+          onRetake={handleRetake}
+          canRetake={tgp.canRetake}
+          retakeCooldownText={
+            !tgp.canRetake
+              ? `Роадмап можно перегенерировать через ${formatCooldown(tgp.retakeRemainingMs)}`
+              : undefined
+          }
+        />
+      )}
     </div>
   )
 }
@@ -98,17 +252,9 @@ function LessonItem({ lesson, isActive, isCompleted, onClick }: LessonItemProps)
             : "text-foreground/75 hover:bg-muted/60 hover:text-foreground",
       )}
     >
-      <CheckCircle2
-        className={cn(
-          "mt-0.5 h-4 w-4 shrink-0",
-          isActive
-            ? "text-primary"
-            : isCompleted
-              ? "text-success/80"
-              : "text-muted-foreground/50",
-        )}
-      />
       <span className={cn("truncate", isActive && "text-foreground")}>{lesson.title}</span>
     </button>
   )
 }
+
+export { LessonItem }

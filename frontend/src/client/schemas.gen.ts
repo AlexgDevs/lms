@@ -565,6 +565,18 @@ export const CourseMemberSchemaSchema = {
         },
         role: {
             $ref: '#/components/schemas/CourseMemberRole'
+        },
+        tgp_last_submitted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tgp Last Submitted At'
         }
     },
     type: 'object',
@@ -648,6 +660,28 @@ export const CourseSchemaSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Created At'
+        },
+        tgp_enabled: {
+            type: 'boolean',
+            title: 'Tgp Enabled',
+            default: false
+        },
+        tgp_last_full_generated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tgp Last Full Generated At'
+        },
+        tgp_cooldown_hours: {
+            type: 'integer',
+            title: 'Tgp Cooldown Hours',
+            default: 24
         }
     },
     type: 'object',
@@ -733,6 +767,29 @@ export const CourseUpdateRequestSchemaSchema = {
                     type: 'null'
                 }
             ]
+        },
+        tgp_enabled: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tgp Enabled'
+        },
+        tgp_cooldown_hours: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tgp Cooldown Hours'
         }
     },
     type: 'object',
@@ -811,6 +868,28 @@ export const CourseUserBriefSchemaSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Created At'
+        },
+        tgp_enabled: {
+            type: 'boolean',
+            title: 'Tgp Enabled',
+            default: false
+        },
+        tgp_last_full_generated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tgp Last Full Generated At'
+        },
+        tgp_cooldown_hours: {
+            type: 'integer',
+            title: 'Tgp Cooldown Hours',
+            default: 24
         },
         role: {
             $ref: '#/components/schemas/CourseMemberRole'
@@ -1319,6 +1398,249 @@ export const StreakSchemaSchema = {
         'longest'
     ],
     title: 'StreakSchema'
+} as const;
+
+export const TgpDecisionSchema = {
+    type: 'string',
+    enum: [
+        'RECOMMENDED',
+        'OPTIONAL'
+    ],
+    title: 'TgpDecision'
+} as const;
+
+export const TgpGenerateResponseSchemaSchema = {
+    properties: {
+        task_id: {
+            type: 'string',
+            title: 'Task Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        }
+    },
+    type: 'object',
+    required: [
+        'task_id',
+        'course_id'
+    ],
+    title: 'TgpGenerateResponseSchema'
+} as const;
+
+export const TgpModuleRecommendationSchemaSchema = {
+    properties: {
+        module_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Module Id'
+        },
+        module_title: {
+            type: 'string',
+            title: 'Module Title'
+        },
+        score: {
+            type: 'integer',
+            maximum: 100,
+            minimum: 0,
+            title: 'Score'
+        },
+        decision: {
+            $ref: '#/components/schemas/TgpDecision'
+        },
+        reasoning: {
+            type: 'string',
+            title: 'Reasoning'
+        }
+    },
+    type: 'object',
+    required: [
+        'module_id',
+        'module_title',
+        'score',
+        'decision',
+        'reasoning'
+    ],
+    title: 'TgpModuleRecommendationSchema'
+} as const;
+
+export const TgpQuestionSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        module_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Module Id'
+        },
+        question_text: {
+            type: 'string',
+            title: 'Question Text'
+        },
+        options: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Options'
+        },
+        correct_option: {
+            type: 'integer',
+            title: 'Correct Option'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'course_id',
+        'module_id',
+        'question_text',
+        'options',
+        'correct_option',
+        'created_at',
+        'updated_at'
+    ],
+    title: 'TgpQuestionSchema'
+} as const;
+
+export const TgpQuestionUpdateSchemaSchema = {
+    properties: {
+        question_text: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Question Text'
+        },
+        options: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Options'
+        },
+        correct_option: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Correct Option'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    title: 'TgpQuestionUpdateSchema'
+} as const;
+
+export const TgpSubmitAnswerSchemaSchema = {
+    properties: {
+        question_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Question Id'
+        },
+        answer_index: {
+            type: 'integer',
+            title: 'Answer Index'
+        }
+    },
+    type: 'object',
+    required: [
+        'question_id',
+        'answer_index'
+    ],
+    title: 'TgpSubmitAnswerSchema'
+} as const;
+
+export const TgpSubmitRequestSchemaSchema = {
+    properties: {
+        answers: {
+            items: {
+                $ref: '#/components/schemas/TgpSubmitAnswerSchema'
+            },
+            type: 'array',
+            minItems: 1,
+            title: 'Answers'
+        }
+    },
+    type: 'object',
+    required: [
+        'answers'
+    ],
+    title: 'TgpSubmitRequestSchema'
+} as const;
+
+export const TgpSubmitResponseSchemaSchema = {
+    properties: {
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        modules: {
+            items: {
+                $ref: '#/components/schemas/TgpModuleRecommendationSchema'
+            },
+            type: 'array',
+            title: 'Modules'
+        },
+        verdict: {
+            type: 'string',
+            title: 'Verdict'
+        }
+    },
+    type: 'object',
+    required: [
+        'course_id',
+        'modules',
+        'verdict'
+    ],
+    title: 'TgpSubmitResponseSchema'
 } as const;
 
 export const TokenPairSchema = {

@@ -29,6 +29,7 @@ from src.ai.schemas import (
     TgpGenerateResponseSchema,
     TgpModuleRecommendationSchema,
     TgpQuestionSchema,
+    TgpQuestionUpdateSchema,
     TgpSubmitRequestSchema,
     TgpSubmitResponseSchema,
 )
@@ -40,6 +41,7 @@ from src.ai.tasks import (
 from src.ai.unit_of_work import AiUnitOfWork
 from src.core.config import settings
 from src.core.services import BaseService
+from src.course.course_member.schemas import CourseMemberUpdateSchema
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseMemberNotFoundError, CourseNotFoundError
 
@@ -92,8 +94,14 @@ class AiService(BaseService):
 
         now = datetime.now(timezone.utc)
         if course.tgp_last_full_generated_at:
+            # The per-course value may be tuned up, but never below the global
+            # minimum — regeneration is at most 1x per cooldown floor.
+            cooldown_hours = max(
+                course.tgp_cooldown_hours,
+                settings.tgp.TGP_GENERATION_COOLDOWN_HOURS,
+            )
             cooldown_end = course.tgp_last_full_generated_at + timedelta(
-                hours=course.tgp_cooldown_hours
+                hours=cooldown_hours
             )
             if now < cooldown_end:
                 retry_after = int((cooldown_end - now).total_seconds())
@@ -150,6 +158,44 @@ class AiService(BaseService):
         task = regenerate_single_question_task.delay(str(question_id))
         return TgpGenerateResponseSchema(task_id=task.id, course_id=course.id)
 
+    async def get_questions(
+        self, course_id: UUID, user_id: UUID | None = None
+    ) -> list[TgpQuestionSchema]:
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+        if not course:
+            raise CourseNotFoundError
+        if not course.tgp_enabled:
+            raise TgpNotEnabledError
+        if user_id is not None:
+            if course.owner_id != user_id:
+                if course.status != CourseStatus.PUBLISHED:
+                    raise CourseNotFoundError
+                member = await self.uow.members.get_one(
+                    user_id=user_id, course_id=course.id, left_at=None
+                )
+                if not member:
+                    raise CourseMemberNotFoundError
+        return await self.uow.questions.get_by_course(course_id)
+
+    async def update_question(
+        self, question_id: UUID, owner_id: UUID, data: TgpQuestionUpdateSchema
+    ) -> TgpQuestionSchema:
+        question = await self.uow.questions.get_one(id=question_id)
+        if not question:
+            raise TgpQuestionNotFoundError
+
+        course = await self.uow.courses.get_one(
+            id=question.course_id, owner_id=owner_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+        if not course.tgp_enabled:
+            raise TgpNotEnabledError
+
+        updated = await self.uow.questions.update(question_id, data)
+        await self.uow.commit()
+        return updated
+
     async def submit(
         self, course_id: UUID, user_id: UUID, payload: TgpSubmitRequestSchema
     ) -> TgpSubmitResponseSchema:
@@ -166,6 +212,18 @@ class AiService(BaseService):
         )
         if not member:
             raise CourseMemberNotFoundError
+
+        now = datetime.now(timezone.utc)
+        if member.tgp_last_submitted_at:
+            cooldown_end = member.tgp_last_submitted_at + timedelta(
+                hours=settings.tgp.TGP_SUBMIT_COOLDOWN_HOURS
+            )
+            if now < cooldown_end:
+                retry_after = int((cooldown_end - now).total_seconds())
+                raise TgpCooldownError(
+                    f"Roadmap was already regenerated recently. "
+                    f"Retry-After: {retry_after} seconds"
+                )
 
         questions = await self.uow.questions.get_by_course(course_id)
         if not questions:
@@ -208,6 +266,12 @@ class AiService(BaseService):
 
         result = await self._evaluate_with_fallback(course, module_stats)
         recommendations = self._build_recommendations(module_stats, result)
+
+        await self.uow.members.update(
+            member.id,
+            CourseMemberUpdateSchema(tgp_last_submitted_at=now),
+        )
+        await self.uow.commit()
 
         return TgpSubmitResponseSchema(
             course_id=course_id,

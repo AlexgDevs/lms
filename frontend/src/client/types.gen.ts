@@ -380,6 +380,10 @@ export type CourseMemberSchema = {
      */
     user_id: string;
     role: CourseMemberRole;
+    /**
+     * Tgp Last Submitted At
+     */
+    tgp_last_submitted_at?: string | null;
 };
 
 /**
@@ -429,6 +433,18 @@ export type CourseSchema = {
      * Created At
      */
     created_at: string;
+    /**
+     * Tgp Enabled
+     */
+    tgp_enabled?: boolean;
+    /**
+     * Tgp Last Full Generated At
+     */
+    tgp_last_full_generated_at?: string | null;
+    /**
+     * Tgp Cooldown Hours
+     */
+    tgp_cooldown_hours?: number;
 };
 
 /**
@@ -465,6 +481,14 @@ export type CourseUpdateRequestSchema = {
      */
     category_id?: string | null;
     status?: CourseStatus | null;
+    /**
+     * Tgp Enabled
+     */
+    tgp_enabled?: boolean | null;
+    /**
+     * Tgp Cooldown Hours
+     */
+    tgp_cooldown_hours?: number | null;
 };
 
 /**
@@ -512,6 +536,18 @@ export type CourseUserBriefSchema = {
      * Created At
      */
     created_at: string;
+    /**
+     * Tgp Enabled
+     */
+    tgp_enabled?: boolean;
+    /**
+     * Tgp Last Full Generated At
+     */
+    tgp_last_full_generated_at?: string | null;
+    /**
+     * Tgp Cooldown Hours
+     */
+    tgp_cooldown_hours?: number;
     role: CourseMemberRole;
     /**
      * Progress
@@ -811,6 +847,155 @@ export type StreakSchema = {
      * Longest
      */
     longest: number;
+};
+
+/**
+ * TgpDecision
+ */
+export const TgpDecision = { RECOMMENDED: 'RECOMMENDED', OPTIONAL: 'OPTIONAL' } as const;
+
+/**
+ * TgpDecision
+ */
+export type TgpDecision = typeof TgpDecision[keyof typeof TgpDecision];
+
+/**
+ * TgpGenerateResponseSchema
+ */
+export type TgpGenerateResponseSchema = {
+    /**
+     * Task Id
+     */
+    task_id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+};
+
+/**
+ * TgpModuleRecommendationSchema
+ */
+export type TgpModuleRecommendationSchema = {
+    /**
+     * Module Id
+     */
+    module_id: string;
+    /**
+     * Module Title
+     */
+    module_title: string;
+    /**
+     * Score
+     */
+    score: number;
+    decision: TgpDecision;
+    /**
+     * Reasoning
+     */
+    reasoning: string;
+};
+
+/**
+ * TgpQuestionSchema
+ */
+export type TgpQuestionSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Module Id
+     */
+    module_id: string;
+    /**
+     * Question Text
+     */
+    question_text: string;
+    /**
+     * Options
+     */
+    options: Array<string>;
+    /**
+     * Correct Option
+     */
+    correct_option: number;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * TgpQuestionUpdateSchema
+ */
+export type TgpQuestionUpdateSchema = {
+    /**
+     * Question Text
+     */
+    question_text?: string | null;
+    /**
+     * Options
+     */
+    options?: Array<string> | null;
+    /**
+     * Correct Option
+     */
+    correct_option?: number | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+};
+
+/**
+ * TgpSubmitAnswerSchema
+ */
+export type TgpSubmitAnswerSchema = {
+    /**
+     * Question Id
+     */
+    question_id: string;
+    /**
+     * Answer Index
+     */
+    answer_index: number;
+};
+
+/**
+ * TgpSubmitRequestSchema
+ */
+export type TgpSubmitRequestSchema = {
+    /**
+     * Answers
+     */
+    answers: Array<TgpSubmitAnswerSchema>;
+};
+
+/**
+ * TgpSubmitResponseSchema
+ */
+export type TgpSubmitResponseSchema = {
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Modules
+     */
+    modules: Array<TgpModuleRecommendationSchema>;
+    /**
+     * Verdict
+     */
+    verdict: string;
 };
 
 /**
@@ -2319,6 +2504,158 @@ export type GetProfileStatsApiV1UsersMeStatsGetResponses = {
 };
 
 export type GetProfileStatsApiV1UsersMeStatsGetResponse = GetProfileStatsApiV1UsersMeStatsGetResponses[keyof GetProfileStatsApiV1UsersMeStatsGetResponses];
+
+export type ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/tgp/{course_id}/questions';
+};
+
+export type ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetError = ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetErrors[keyof ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetErrors];
+
+export type ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetResponses = {
+    /**
+     * Response List Tgp Questions Api V1 Ai Tgp  Course Id  Questions Get
+     *
+     * Successful Response
+     */
+    200: Array<TgpQuestionSchema>;
+};
+
+export type ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetResponse = ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetResponses[keyof ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetResponses];
+
+export type GenerateTgpApiV1AiTgpCourseIdGeneratePostData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/tgp/{course_id}/generate';
+};
+
+export type GenerateTgpApiV1AiTgpCourseIdGeneratePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GenerateTgpApiV1AiTgpCourseIdGeneratePostError = GenerateTgpApiV1AiTgpCourseIdGeneratePostErrors[keyof GenerateTgpApiV1AiTgpCourseIdGeneratePostErrors];
+
+export type GenerateTgpApiV1AiTgpCourseIdGeneratePostResponses = {
+    /**
+     * Successful Response
+     */
+    202: TgpGenerateResponseSchema;
+};
+
+export type GenerateTgpApiV1AiTgpCourseIdGeneratePostResponse = GenerateTgpApiV1AiTgpCourseIdGeneratePostResponses[keyof GenerateTgpApiV1AiTgpCourseIdGeneratePostResponses];
+
+export type RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostData = {
+    body?: never;
+    path: {
+        /**
+         * Question Id
+         */
+        question_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/tgp/questions/{question_id}/regenerate';
+};
+
+export type RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostError = RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostErrors[keyof RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostErrors];
+
+export type RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostResponses = {
+    /**
+     * Successful Response
+     */
+    202: TgpGenerateResponseSchema;
+};
+
+export type RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostResponse = RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostResponses[keyof RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostResponses];
+
+export type UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchData = {
+    body: TgpQuestionUpdateSchema;
+    path: {
+        /**
+         * Question Id
+         */
+        question_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/tgp/questions/{question_id}';
+};
+
+export type UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchError = UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchErrors[keyof UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchErrors];
+
+export type UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: TgpQuestionSchema;
+};
+
+export type UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchResponse = UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchResponses[keyof UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchResponses];
+
+export type SubmitTgpApiV1AiTgpCourseIdSubmitPostData = {
+    body: TgpSubmitRequestSchema;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/tgp/{course_id}/submit';
+};
+
+export type SubmitTgpApiV1AiTgpCourseIdSubmitPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SubmitTgpApiV1AiTgpCourseIdSubmitPostError = SubmitTgpApiV1AiTgpCourseIdSubmitPostErrors[keyof SubmitTgpApiV1AiTgpCourseIdSubmitPostErrors];
+
+export type SubmitTgpApiV1AiTgpCourseIdSubmitPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TgpSubmitResponseSchema;
+};
+
+export type SubmitTgpApiV1AiTgpCourseIdSubmitPostResponse = SubmitTgpApiV1AiTgpCourseIdSubmitPostResponses[keyof SubmitTgpApiV1AiTgpCourseIdSubmitPostResponses];
 
 export type SayHelloGetData = {
     body?: never;

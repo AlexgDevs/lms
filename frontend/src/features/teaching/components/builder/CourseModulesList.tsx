@@ -37,6 +37,14 @@ interface CourseModulesListProps {
   onSelectLesson?: (moduleId: string, lessonId: string) => void
 }
 
+const MAX_MODULE_TITLE_LENGTH = 17
+
+function truncateTitle(title: string): string {
+  return title.length > MAX_MODULE_TITLE_LENGTH
+    ? `${title.slice(0, MAX_MODULE_TITLE_LENGTH).trimEnd()}...`
+    : title
+}
+
 export const CourseModulesList: React.FC<CourseModulesListProps> = ({
   courseId,
   activeModuleId,
@@ -263,8 +271,11 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
                       </Button>
                     </form>
                   ) : (
-                    <span className="text-xs font-semibold truncate flex-1">
-                      {index + 1}. {module.title}
+                    <span
+                      className="text-xs font-semibold truncate flex-1"
+                      title={module.title}
+                    >
+                      {index + 1}. {truncateTitle(module.title)}
                     </span>
                   )}
                 </div>

@@ -64,6 +64,10 @@ export function LearnPage() {
           completedCount={data.progress.filter((item) => item.status === "completed").length}
           isCompleted={data.isCompleted}
           onSelectLesson={goToLesson}
+          courseId={course?.id ?? undefined}
+          tgpEnabled={course?.tgp_enabled ?? false}
+          isMember={data.isCourseMember}
+          flatUnits={data.flatUnits}
         />
       </div>
 

@@ -1,5 +1,6 @@
 import asyncio
 import random
+from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
@@ -18,7 +19,11 @@ from sqlalchemy.pool import NullPool
 from src.ai.exceptions import TgpGeminiRateLimitError
 from src.ai.gemini import GeminiService, ModuleStructure
 from src.ai.repository import TgpQuestionRepository
-from src.ai.schemas import TgpQuestionCreateSchema, TgpQuestionUpdateSchema
+from src.ai.schemas import (
+    TgpQuestionCreateSchema,
+    TgpQuestionSchema,
+    TgpQuestionUpdateSchema,
+)
 from src.ai.unit_of_work import AiUnitOfWork
 from src.core.celery_app import celery_app
 from src.core.config import settings
@@ -158,23 +163,61 @@ async def _run_generate(course_id_str: str, lock_token: str | None = None) -> No
                     await _release_lock_if_owned(redis, lock_key, lock_token)
                 return
 
-            await uow.questions.delete_by_course(course_id)
-            for question in questions:
-                await uow.questions.create(
-                    TgpQuestionCreateSchema(
-                        course_id=course_id,
-                        module_id=UUID(question.module_id),
-                        question_text=question.question_text,
-                        options=question.options,
-                        correct_option=question.correct_option,
-                    )
+            now = datetime.now(timezone.utc)
+
+            # Patch existing questions in place (stable ids) so already-loaded
+            # frontends never hit "question not found" after a regeneration.
+            # New questions beyond the existing count are created, leftovers are
+            # removed — all within the same transaction.
+            existing = list(await uow.questions.get_by_course(course_id))
+            existing_by_module: dict[UUID, list[TgpQuestionSchema]] = defaultdict(list)
+            for existing_question in existing:
+                existing_by_module[existing_question.module_id].append(
+                    existing_question
                 )
+
+            new_by_module: dict[UUID, list[Any]] = defaultdict(list)
+            for generated_question in questions:
+                new_by_module[UUID(generated_question.module_id)].append(
+                    generated_question
+                )
+
+            for module_id, new_questions in new_by_module.items():
+                old_questions = existing_by_module.get(module_id, [])
+                for index, new_question in enumerate(new_questions):
+                    if index < len(old_questions):
+                        await uow.questions.update(
+                            old_questions[index].id,
+                            TgpQuestionUpdateSchema(
+                                question_text=new_question.question_text,
+                                options=new_question.options,
+                                correct_option=new_question.correct_option,
+                                updated_at=now,
+                            ),
+                        )
+                    else:
+                        await uow.questions.create(
+                            TgpQuestionCreateSchema(
+                                course_id=course_id,
+                                module_id=module_id,
+                                question_text=new_question.question_text,
+                                options=new_question.options,
+                                correct_option=new_question.correct_option,
+                            )
+                        )
+                for old_question in old_questions[len(new_questions) :]:
+                    await uow.questions.delete(old_question.id)
+
+            # Drop questions for modules that produced no new questions.
+            generated_module_ids = set(new_by_module.keys())
+            for module_id, old_questions in existing_by_module.items():
+                if module_id not in generated_module_ids:
+                    for old_question in old_questions:
+                        await uow.questions.delete(old_question.id)
 
             await uow.courses.update(
                 course_id,
-                CourseUpdateSchema(
-                    tgp_last_full_generated_at=datetime.now(timezone.utc)
-                ),
+                CourseUpdateSchema(tgp_last_full_generated_at=now),
             )
             await uow.commit()
             logger.info("TGP generation completed for course {}", course_id)
