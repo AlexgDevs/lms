@@ -41,7 +41,7 @@ export function Header() {
               to="/"
               className="flex items-center gap-2 font-bold text-xl text-foreground tracking-tight hover:opacity-90 transition-opacity"
             >
-              <span className="text-2xl text-primary">♾️</span> PLECTIX
+              <img src="/logo.png" alt="PLECTIX" className="h-8 w-auto" />
             </Link>
 
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
