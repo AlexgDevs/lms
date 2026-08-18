@@ -15,6 +15,7 @@ export type QuizOption = z.infer<typeof quizOptionSchema>
 
 export const textBlockPayloadSchema = z.object({
   text: z.string(),
+  html: z.string().optional(),
 })
 
 export const codeBlockPayloadSchema = z.object({
@@ -138,7 +139,7 @@ export const BLOCK_TYPE_OPTIONS: { value: BlockType; label: string }[] = [
 ]
 
 export const DEFAULT_PAYLOADS: Record<BlockType, BlockPayload> = {
-  [BlockType.TEXT]: { text: "" },
+  [BlockType.TEXT]: { text: "", html: "" },
   [BlockType.CODE]: { code: "", language: "python" },
   [BlockType.QUIZ_SINGLE_CHOICE]: {
     options: [{ id: 1, text: "Вариант 1" }],

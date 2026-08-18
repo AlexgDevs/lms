@@ -62,3 +62,88 @@ body {
         @apply font-sans;
     }
 }
+
+/* Rich-text content (learner view + author editor) */
+.rich-text,
+.rich-text-editor {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text);
+    word-break: break-word;
+}
+
+.rich-text p,
+.rich-text-editor p {
+    margin: 0 0 0.75em;
+}
+
+.rich-text p:last-child,
+.rich-text-editor p:last-child {
+    margin-bottom: 0;
+}
+
+.rich-text h2,
+.rich-text-editor h2 {
+    margin: 1em 0 0.5em;
+    font-size: 1.125rem;
+    font-weight: 650;
+    line-height: 1.3;
+}
+
+.rich-text h3,
+.rich-text-editor h3 {
+    margin: 0.9em 0 0.45em;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.rich-text h2:first-child,
+.rich-text h3:first-child,
+.rich-text-editor h2:first-child,
+.rich-text-editor h3:first-child {
+    margin-top: 0;
+}
+
+.rich-text blockquote,
+.rich-text-editor blockquote {
+    margin: 0.75em 0;
+    padding: 0.25em 1em;
+    border-left: 3px solid var(--surface2);
+    font-style: italic;
+    color: var(--subtext0);
+}
+
+.rich-text ul,
+.rich-text ol,
+.rich-text-editor ul,
+.rich-text-editor ol {
+    margin: 0 0 0.75em;
+    padding-left: 1.5em;
+}
+
+.rich-text li,
+.rich-text-editor li {
+    margin: 0.25em 0;
+}
+
+.rich-text a,
+.rich-text-editor a {
+    color: var(--blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.rich-text code,
+.rich-text-editor code {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    background: var(--surface0);
+    padding: 0.15em 0.4em;
+    border-radius: 0.25rem;
+}
+
+.rich-text-editor {
+    min-height: 100px;
+    outline: none;
+}

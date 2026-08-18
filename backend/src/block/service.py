@@ -1,6 +1,7 @@
 from typing import Any
 from uuid import UUID
 
+import nh3
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.block.enums import BlockType
@@ -27,6 +28,18 @@ from src.block.schemas import (
 MEDIA_BLOCK_TYPES = frozenset(
     {BlockType.IMAGE, BlockType.VIDEO, BlockType.AUDIO, BlockType.FILE}
 )
+
+MAX_RICH_TEXT_LENGTH = 100_000
+
+
+def _sanitize_text_payload(payload: dict[str, Any]) -> None:
+    """Sanitizes rich-text HTML to prevent XSS on the learner read path.
+
+    Mutates the payload in place so callers keep a single source of truth.
+    """
+    html = payload.get("html")
+    if isinstance(html, str) and html:
+        payload["html"] = nh3.clean(html)[:MAX_RICH_TEXT_LENGTH]
 
 
 class BlockService(BaseService):
@@ -66,6 +79,9 @@ class BlockService(BaseService):
             payload_data=payload.payload,
             user_id=user_id,
         )
+
+        if payload.block_type is BlockType.TEXT:
+            _sanitize_text_payload(payload.payload)
 
         create_data = BlockCreateSchema(
             **payload.model_dump(),
@@ -119,6 +135,8 @@ class BlockService(BaseService):
         effective_payload = block.payload
         if update_data.payload is not None:
             effective_payload = {**block.payload, **update_data.payload}
+            if effective_type is BlockType.TEXT:
+                _sanitize_text_payload(update_data.payload)
 
         media_id = await self._validate_and_prepare_media(
             block_type=effective_type,

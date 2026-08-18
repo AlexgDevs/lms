@@ -1,6 +1,8 @@
 from uuid import UUID
 from datetime import datetime
-from typing import Any, ClassVar, Dict, Type
+from typing import Any, ClassVar, Dict, Self, Type
+
+from pydantic import model_validator
 
 from src.core.schemas.mixin import PolymorphicPayloadMixin
 from src.core.schemas.base_schema import BaseSchema
@@ -20,7 +22,14 @@ class BlockSchema(BaseSchema):
 
 
 class TextBlockContent(BaseSchema):
-    text: str
+    text: str | None = None
+    html: str | None = None
+
+    @model_validator(mode="after")
+    def _ensure_content(self) -> Self:
+        if self.text is None and self.html is None:
+            raise ValueError("text или html должны быть заполнены")
+        return self
 
 
 class QuizOption(BaseSchema):
