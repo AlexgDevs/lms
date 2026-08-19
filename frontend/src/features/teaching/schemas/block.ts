@@ -18,10 +18,23 @@ export const textBlockPayloadSchema = z.object({
   html: z.string().optional(),
 })
 
+export const codeTestCaseSchema = z.object({
+  input: z.string(),
+  output: z.string(),
+})
+
 export const codeBlockPayloadSchema = z.object({
   code: z.string(),
   language: z.string().min(1, "Укажите язык программирования"),
+  test_cases: z.array(codeTestCaseSchema),
 })
+
+export const CODE_LANGUAGES: { value: string; label: string }[] = [
+  { value: "python", label: "Python" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "go", label: "Go" },
+]
 
 export const quizSingleBlockPayloadSchema = z
   .object({
@@ -86,6 +99,7 @@ export const fileBlockPayloadSchema = z.object({
 // --- TYPES ---
 
 export type TextBlockPayload = z.infer<typeof textBlockPayloadSchema>
+export type CodeTestCase = z.infer<typeof codeTestCaseSchema>
 export type CodeBlockPayload = z.infer<typeof codeBlockPayloadSchema>
 export type QuizSingleBlockPayload = z.infer<typeof quizSingleBlockPayloadSchema>
 export type QuizMultipleBlockPayload = z.infer<typeof quizMultipleBlockPayloadSchema>
@@ -140,7 +154,7 @@ export const BLOCK_TYPE_OPTIONS: { value: BlockType; label: string }[] = [
 
 export const DEFAULT_PAYLOADS: Record<BlockType, BlockPayload> = {
   [BlockType.TEXT]: { text: "", html: "" },
-  [BlockType.CODE]: { code: "", language: "python" },
+  [BlockType.CODE]: { code: "", language: "python", test_cases: [] },
   [BlockType.QUIZ_SINGLE_CHOICE]: {
     options: [{ id: 1, text: "Вариант 1" }],
     correct_option_id: 1,

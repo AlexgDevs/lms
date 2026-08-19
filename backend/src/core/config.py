@@ -196,6 +196,22 @@ class TgpSettings(BaseSettings):
     TGP_NETWORK_RETRY_BACKOFF_MAX: int = 45
 
 
+class CodeExecSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    CODEEXEC_BASE_URL: str = "http://localhost:2000"
+    CODEEXEC_TIMEOUT_SECONDS: float = 10.0
+    CODEEXEC_MAX_TEST_CASES: int = 10
+    CODEEXEC_PER_CASE_RUN_TIMEOUT_MS: int = 2000
+    CODEEXEC_COMPILE_TIMEOUT_MS: int = 2000
+    CODEEXEC_MEMORY_LIMIT_MB: int = 128
+    CODEEXEC_MAX_CODE_CHARS: int = 64_000
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
     app: AppSettings = Field(default_factory=AppSettings)
@@ -204,6 +220,7 @@ class Settings(BaseSettings):
     media: MediaSettings = Field(default_factory=MediaSettings)
     ai: AIGatewaySettings = Field(default_factory=AIGatewaySettings)
     tgp: TgpSettings = Field(default_factory=TgpSettings)
+    codeexec: CodeExecSettings = Field(default_factory=CodeExecSettings)
 
 
 settings = Settings()

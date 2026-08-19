@@ -1,7 +1,7 @@
 # LMS — Dependency / Module Graph
 
 > Auto-generated orientation file. Refresh with `/graphify` after structural
-> changes. Generated: 2026-08-12 (refreshed by agent scan). Convention: `A → B`
+> changes. Generated: 2026-08-19 (refreshed by agent scan). Convention: `A → B`
 > means "A imports/depends on B".
 
 ## 1. Backend — core infrastructure (`backend/src/core/`)
@@ -10,9 +10,10 @@ No business logic. Everything below is shared infrastructure.
 
 | Path | Purpose |
 | --- | --- |
-| `core/config.py` | pydantic-settings: `PostgresSettings`, `AppSettings`, `RedisSettings`, `StorageSettings`, `MediaSettings`, root `settings` |
+| `core/config.py` | pydantic-settings: `PostgresSettings`, `AppSettings`, `RedisSettings`, `StorageSettings`, `MediaSettings`, `AIGatewaySettings` (`AI_API_KEY`/`AI_BASE_URL`/`AI_MODEL`), `TgpSettings` (cooldowns, retries, question counts), root `settings` |
 | `main.py` (`src/main.py`, entry) | FastAPI app factory, lifespan (redis + storage init/close), CORS, static `/media` mount (local backend), error handler registration |
 | `core/router.py` | `app_v1` — registers ALL feature routers (`/api/v1` prefix) |
+| `core/celery_app.py` | Celery app (`broker`/`backend` = Redis; `worker_pool="solo"` for Windows dev; includes `src.ai.tasks`) |
 | `core/dependencies.py` | `SessionDep`, `RedisDep`, `StorageDep`, `AccessTokenDep`, `reusable_oauth2` |
 | `core/postgres/engine.py` | async engine (asyncpg) |
 | `core/postgres/session.py` | `session_maker`, `get_session` |
@@ -43,6 +44,10 @@ Storage note: object storage mirrors the `core/redis` pattern — a `Storage`
 abstraction with pluggable backends (`STORAGE_BACKEND=local|s3`). No business
 logic; keys are built by callers (e.g. `media/<uuid><ext>` in the media service).
 
+Celery note: `core/celery_app.py` is the single Celery entrypoint; `ai/tasks.py`
+registers the `ai.tgp.*` tasks and builds its own engine/session factory
+(`NullPool`) + Redis client inside the worker process (separate from FastAPI).
+
 ## 2. Backend — feature modules (`backend/src/<feature>/`)
 
 ### Dependency direction
@@ -63,7 +68,8 @@ security, utils, exceptions, dependencies`.
 
 ### user (`src/user/`)
 Files: `router, service, repository, mappers, schemas, models, exceptions, dependencies`.
-- Router prefix `/users`, tags `["Users"]`: `GET /me`, `GET /{user_id}`.
+- Router prefix `/users`, tags `["Users"]`: `GET /me`, `PATCH /me`
+  (`UserUpdateRequestSchema` → `update_user`), `GET /{user_id}`.
 - Model: `User` (username/email unique, password_hash, avatar_url, joined_at,
   is_active, refresh_tokens relationship).
 - **Public seam**: `UserIdDep`, `OptionalUserIdDep`, `CurrentUserDep`,
@@ -71,13 +77,16 @@ Files: `router, service, repository, mappers, schemas, models, exceptions, depen
   other features.
 - Deps on: `auth.security`/`auth.exceptions` (token decode), `core/*`.
 
-### course (`src/course/`) + `course/course_member`
+### course (`src/course/`) + `course/course_member` + `course/category`
 Files (course): `router, service, unit_of_work, repository, mapper, schemas,
 models, exceptions, enums, dependencies`.
 Files (course_member): `schemas, service, repository, mappers, unit_of_work`.
+Files (category): `router, service, repository, mapper, schemas, models,
+dependencies` — standalone read-only router (`GET /categories`).
 - Router prefix `/courses`, tags `["Courses"]`:
   `POST ""` (create), `PATCH /{course_id}`, `DELETE /{course_id}`,
-  `GET ""` (filter=all|created|my), `GET /{course_id}` (filter=current|author|my),
+  `GET ""` (filter=all|created|my, `limit`/`offset`, `category` slug,
+  `q` search), `GET /{course_id}` (filter=current|author|my),
   `POST /{course_id}/members` (enroll), `POST /{course_id}/media` (upload cover,
   multipart `file` + `is_public` → `CourseSchema`), `DELETE /{course_id}/media`
   (remove cover, 204).
@@ -85,19 +94,30 @@ Files (course_member): `schemas, service, repository, mappers, unit_of_work`.
   and `filter=current` return only `status=published` courses and work with no
   token (no security scheme in OpenAPI); `filter=created|my|author` require a
   token (`user_id=None` → `InvalidAccessTokenError` 401).
+- **Search**: `q` (≤100 chars) → `CourseRepository.get_filtered(search_term=...)`
+  with pg_trgm relevance ordering (prefix `ilike` first, then `ts_rank`, then
+  `word_similarity`, then `member_count`). GIN trgm indexes on title/description
+  (migration `4b7d1c9e2f8a`).
+- **Categories**: `Course.category_id` (FK SET NULL). `category=<slug>` resolves
+  the category + its children (`_resolve_category_ids`) and filters `filter=all`.
+  Category tree is seeded via Alembic (uuid5 slugs).
 - Models: `Course` (owner_id→users, title, description, cover_url, price,
-  member_count, status, is_deleted), `CourseMember` (user_id, course_id, role,
-  left_at).
+  category_id, member_count, status, is_deleted, `tgp_enabled`,
+  `tgp_last_full_generated_at`, `tgp_cooldown_hours`), `CourseMember`
+  (user_id, course_id, role, left_at, `tgp_last_submitted_at`),
+  `Category` (name, slug unique, icon, parent_id self-FK CASCADE, sort_order).
 - Enums: `CourseMemberRole` (member/teacher/so_owner), `CourseStatus`
   (draft/published).
 - Media cover: `cover_url` is a server-generated public storage URL. Upload
   attaches a `MediaAttachment(owner_type=course, role=cover)` and replaces the
   previous cover (old media purged after commit if unreferenced); remove detaches
-  and purges. `CourseUnitOfWork` now composes `media` + `media_attachments` repos;
-  `CourseServiceDep` injects `MediaServiceDep`.
-- **Public seam**: `CourseServiceDep` (`dependencies.py`).
-- Deps on: `course_member` (submodule), `media` (+`media_attachment` repos,
-  `MediaService`), `user.dependencies` (`UserIdDep`), `core/*`.
+  and purges. `CourseUnitOfWork` composes `media` + `media_attachments` +
+  `categories` repos; `CourseServiceDep` injects `MediaServiceDep`.
+- **Public seam**: `CourseServiceDep` (`course/dependencies.py`),
+  `CategoryServiceDep` (`course/category/dependencies.py`).
+- Deps on: `course_member` (submodule), `course/category` (submodule), `media`
+  (+`media_attachment` repos, `MediaService`), `user.dependencies`
+  (`UserIdDep`/`OptionalUserIdDep`), `core/*`.
 
 ### module (`src/module/`)
 Files: `router, service, unit_of_work, repository, mapper, schemas, models,
@@ -117,12 +137,14 @@ Files (lesson_progress): `router, schemas, repository, mapper, dependencies`.
   tags `["Lessons"]`: `POST ""`, `PATCH /reorder` (`LessonReorderSchema`),
   `PATCH /{lesson_id}`, `DELETE /{lesson_id}`, `GET ""` (only_created).
 - Repository: `set_order_bulk(module_id, ordered_ids)`.
-- Progress router prefix `/lessons/{lesson_id}/progress`,
-  tags `["Lessons Progress"]`: `POST ""` → `get_or_create_lesson_progress`.
+- Progress routers (tags `["Lessons Progress"]`):
+  `POST /lessons/{lesson_id}/progress` → `get_or_create_lesson_progress`;
+  `GET /courses/{course_id}/progress` (`course_progress_router`) →
+  `LessonService.get_course_progress` (all per-user progress in a course).
 - Models: `Lesson` (module_id→modules, course_id, title, order),
   `LessonProgress` (user_id, lesson_id, status, completed_at; unique uq_user_lesson_progress).
 - Enums: `LessonProgressType` (not_started/in_progress/completed).
-- **LessonServiceDep** also powers the lesson_progress router.
+- **LessonServiceDep** also powers the lesson_progress routers.
 - Deps on: `user.dependencies` (`UserIdDep`), `core/*`.
 
 ### block (`src/block/`)
@@ -130,13 +152,17 @@ Files: `router, service, unit_of_work, repository, mapper, schemas, models,
 exceptions, enums, dependencies`.
 - Router prefix `/courses/{course_id}/lessons/{lesson_id}/blocks`,
   tags `["Blocks"]`: `POST ""`, `PATCH /reorder` (`BlockReorderSchema`),
-  `PATCH /{block_id}`, `DELETE /{block_id}`, `GET ""` (`only_created` → owner path),
-  `POST /{block_id}/media` (multipart upload → `BlockSchema`; only for media block
-  types).
+  `PATCH /{block_id}`, `DELETE /{block_id}`, `GET ""` (`only_created` → owner path,
+  otherwise member path), `POST /{block_id}/media` (multipart upload →
+  `BlockSchema`; only for media block types).
 - Model: `Block` (lesson_id→lessons, course_id, title, `block_type`, `order`,
   `payload` JSONB). `BlockSubmission` (lesson_id, block_id, user_id,
   submission_type, submitted_payload, attempts, is_first_try_correct; unique
   uq_user_block_submission).
+- **Text blocks (TipTap)**: `TextBlockContent` accepts `text` **or** `html`
+  (at least one required). On create/update of `TEXT` blocks, `payload.html` is
+  sanitized via `nh3.clean` (max 100k chars) to prevent XSS on the learner read
+  path (`_sanitize_text_payload`). BlockType enum is unchanged.
 - Media: media block types (`IMAGE/VIDEO/AUDIO/FILE`) carry `media_id` in
   `payload` (cache); `BlockService` validates ownership, **attaches** a
   `MediaAttachment` on create, **reconciles** (detach-all + re-attach) on update,
@@ -146,9 +172,12 @@ exceptions, enums, dependencies`.
   uploads + attaches (old media purged after commit if unreferenced); non-media
   block types → `BlockTypeNotMediaError` (422). `BlockUnitOfWork` composes
   `media` + `media_attachments` repos; `BlockServiceDep` injects `MediaServiceDep`
-  + `StorageDep`.
-- Content schemas: `ImageBlockContent`, `VideoBlockContent`, `AudioBlockContent`,
-  `FileBlockContent` all have optional `url` + `media_id` (+ type-specific fields).
+  + `StorageDep`. Learner read path also **strips correct answers** from quiz
+  payloads (`_strip_quiz_answers`).
+- Content schemas: `TextBlockContent` (text|html), `ImageBlockContent`,
+  `VideoBlockContent`, `AudioBlockContent`, `FileBlockContent` (all media ones
+  with optional `url` + `media_id`), quiz schemas (`QuizSingleBlockContent`,
+  `QuizMultipleBlockContent`).
 - Repository: `set_order_bulk(lesson_id, ordered_ids)`; lists ordered by
   `order.asc()`.
 - Enums: `BlockType` (text/quiz_single_choice/quiz_multiple_choice/code/image/
@@ -161,14 +190,21 @@ exceptions, enums, dependencies`.
 ### submissions (`src/submissions/`)
 Files: `router, service, unit_of_work, repository, mapper, schemas, exceptions, dependencies, checker`.
 - Router prefix `/courses/{course_id}/lessons/{lesson_id}`, tags `["Submissions"]`:
-  `POST /submissions` (batch submit blocks).
+  `POST /submissions` (batch submit blocks),
+  `POST /blocks/{block_id}/submission` (**single-step submit**, Stepik-style),
+  `GET /submissions` (current user's submissions for a lesson).
 - `checker.py`: `BlockChecker` registry (`@BlockChecker.register(BlockType)`)
   — checks quiz payloads against correct answers.
-- `service.py` `submit_blocks`: validates course membership + full lesson block
-  set, checks each block via `BlockChecker`, upserts `BlockSubmission` records
-  (attempts++, `submission_type` correct/wrong, `is_first_try_correct`), then
-  recalculates `LessonProgress` (COMPLETED only if no wrong; persistent green
-  checkmark — once completed, stays completed).
+- `service.py`:
+  - `submit_blocks` (batch): validates course membership + full lesson block
+    set, checks each block via `BlockChecker`, upserts `BlockSubmission` records
+    (attempts++, `submission_type` correct/wrong, `is_first_try_correct`), then
+    recalculates `LessonProgress` (COMPLETED only if no wrong; persistent green
+    checkmark — once completed, stays completed).
+  - `submit_block` (single): grades one block, persists attempt history,
+    re-computes lesson progress; reports the fresh evaluation to the learner
+    even when the persisted status stays green.
+  - `get_lesson_submissions`: returns the user's submissions for a lesson.
 - `BlockSubmissionUnitOfWork` composes: submissions, blocks, lessons,
   lessons_progress, courses, course_members.
 - Deps on: `block` schemas/enums (BlockSchema, BlockType, quiz payload schemas),
@@ -213,6 +249,51 @@ enums, __init__` — **no router/service** (support module).
   and `course`.
 - Deps on: `core.storage`, `user.dependencies` (`UserIdDep`), `core/*`.
 
+### ai (`src/ai/`) — AI TGP (The Golden Path) pre-course testing
+Files: `router, service, tasks, gemini, unit_of_work, repository, mapper,
+schemas, models, enums, exceptions, dependencies`.
+- Router prefix `/ai/tgp`, tags `["AI TGP"]`:
+  `GET /{course_id}/questions` (list, member/owner gated),
+  `POST /{course_id}/generate` (202, **queues a Celery task**; owner only),
+  `POST /questions/{question_id}/regenerate` (202, queues Celery task; owner only),
+  `PATCH /questions/{question_id}` (manual edit; owner only),
+  `POST /{course_id}/submit` (answers → per-module recommendations + verdict).
+- Model: `TgpQuestion` (course_id→courses, module_id→modules, question_text,
+  `options` JSONB, correct_option; ix on course_id).
+- Enums: `TgpDecision` (RECOMMENDED/OPTIONAL).
+- Celery tasks (`ai/tasks.py`, consumed by worker):
+  `ai.tgp.generate` (`generate_tgp_test_task`) — patches existing questions in
+  place (stable ids), creates new / deletes leftovers per module, updates
+  `tgp_last_full_generated_at`; `ai.tgp.regenerate_question`
+  (`regenerate_single_question_task`). Both build a private engine/session +
+  Redis inside the worker, hold a Redis lock `tgp:generating:{course_id}`
+  (Lua release/extend scripts), and retry on rate-limit (Retry-After) / network
+  errors with backoff.
+- `gemini.py`: `GeminiService` — OpenAI-compatible chat client
+  (`settings.ai.AI_API_KEY`/`AI_BASE_URL`/`AI_MODEL`); generates question banks,
+  regenerates single questions, evaluates submissions; dataclasses
+  `ModuleStructure`/`GeneratedQuestion`/`ModuleStat`/`ModuleRecommendation`/
+  `EvaluationResult`; strict JSON validation.
+- `service.py` `AiService`: `generate` (course + TGP enabled + AI key checks,
+  full-regeneration cooldown [max of `tgp_cooldown_hours` and the 24h floor],
+  ≥`TGP_MIN_MODULES`, Redis lock → `.delay`), `regenerate_question`
+  (per-question 1h cooldown), `get_questions` (owner or published-member),
+  `update_question`, `submit` (24h submit cooldown via
+  `CourseMember.tgp_last_submitted_at`, exact answer-set validation, per-module
+  scores → Gemini evaluation with deterministic threshold fallback →
+  `TgpSubmitResponseSchema {modules[], verdict}`).
+- `AiUnitOfWork` composes: questions, courses, modules, members.
+- Exceptions (`TgpError` hierarchy): `TgpNotEnabledError` (404),
+  `TgpQuestionNotFoundError` (404), `TgpNoQuestionsError` (409),
+  `TgpInvalidAnswersError` (422), `NotEnoughModulesError` (422),
+  `TgpCooldownError` (425), `TgpGenerationInProgressError` (425),
+  `TgpAiNotConfiguredError` (503), `TgpAiUnavailableError` (503),
+  `TgpGeminiRateLimitError` (503, `retry_after`), `TgpAiResponseError` (502).
+- **Public seam**: `AiServiceDep` (`ai/dependencies.py`).
+- Deps on: `course` (+`course_member` repo/schemas, enums, exceptions), `module`
+  (repo, models), `user.dependencies` (`UserIdDep`), `core.config`, `core.redis`,
+  `core.celery_app`, `core/*`.
+
 ### profile (`src/profile/`)
 Files: `router, service, schemas, repository, dependencies`.
 - **Read-only stats module** — no own model/mapper/exceptions/enums/unit_of_work;
@@ -235,11 +316,12 @@ Files: `router, service, schemas, repository, dependencies`.
 ```
 auth → user, core
 user → auth (security/exceptions), core
-course → course_member, media (+media_attachment repos, MediaService for covers),
-         user, core        (CourseSchema.is_member resolved per viewer on read)
+course → course_member, course/category, media (+media_attachment repos,
+         MediaService for covers), user, core     (is_member per viewer; search;
+         category filter)
 module → course (exceptions/repo), user, core
 lesson → course + module (exceptions/repos), user, core
-        (lesson_progress reuses LessonServiceDep)
+         (lesson_progress reuses LessonServiceDep)
 block  → course + lesson (exceptions/repos), media (+media_attachment repos,
          errors), core.storage (Storage), user, core
 media  → core.storage (Storage), media_attachment (submodule), user, core
@@ -247,6 +329,8 @@ profile → lesson (LessonProgress model + lesson_progress mapper/schemas), user
           core
 submissions → block, course (+course_member), lesson (+lesson_progress),
               user, core
+ai     → course (+course_member, enums/exceptions), module (repo/models),
+         core.celery_app, core.config, core.redis, user, core
 all routers → core.router (app_v1)
 ```
 
@@ -256,8 +340,9 @@ all routers → core.router (app_v1)
 | --- | --- | --- |
 | `users` | `User` (`user/models.py`) | username/email unique; is_active; ↔ refresh_tokens |
 | `refresh_tokens` | `RefreshToken` (`auth/models.py`) | FK users.id ON DELETE CASCADE |
-| `courses` | `Course` (`course/models.py`) | FK users.id (owner_id); title/description/cover_url/price/member_count/status; soft delete is_deleted |
-| `course_members` | `CourseMember` (`course/models.py`) | FK users.id, courses.id; role, left_at |
+| `categories` | `Category` (`course/category/models.py`) | slug unique + ix; parent_id self-FK CASCADE; sort_order |
+| `courses` | `Course` (`course/models.py`) | FK users.id (owner_id), categories.id (category_id, SET NULL); title/description/cover_url/price/member_count/status; soft delete is_deleted; TGP: tgp_enabled, tgp_last_full_generated_at, tgp_cooldown_hours; pg_trgm GIN ix on title/description |
+| `course_members` | `CourseMember` (`course/models.py`) | FK users.id, courses.id; role, left_at; TGP: tgp_last_submitted_at |
 | `modules` | `Module` (`module/models.py`) | FK courses.id ON DELETE CASCADE |
 | `lessons` | `Lesson` (`lesson/models.py`) | FK modules.id (CASCADE), courses.id |
 | `lesson_progress` | `LessonProgress` (`lesson/models.py`) | FK users.id, lessons.id; uq_user_lesson_progress |
@@ -265,6 +350,7 @@ all routers → core.router (app_v1)
 | `block_submissions` | `BlockSubmission` (`block/models.py`) | FK lessons/blocks/users; submitted_payload JSONB; attempts, is_first_try_correct; uq_user_block_submission |
 | `media` | `Media` (`media/models.py`) | FK users.id (owner_id) ON DELETE CASCADE; storage_key, content_type, size_bytes, etag, is_public |
 | `media_attachments` | `MediaAttachment` (`media/media_attachment/models.py`) | FK media.id ON DELETE CASCADE; uq_media_attachment (media_id, owner_type, owner_id, role); ix on media_id, owner_id |
+| `tgp_questions` | `TgpQuestion` (`ai/models.py`) | FK courses.id, modules.id ON DELETE CASCADE; ix on course_id; options JSONB |
 
 Alembic revision chain (linear, `down_revision` → `revision`):
 `719d57e141c5` (base: users/courses/refresh_tokens/modules/lessons/blocks/
@@ -276,7 +362,13 @@ renames) → `a4e1ff2972d3` (submission attr rename) → `cf704b7d5f64`
 (lesson_progress constraint) → `f547cd198dee` (course_members table,
 courses.member_count) → `a1b2c3d4e5f6` (blocks.order, server default 0) →
 `0af48c677726` (media table) → `56787d9db8f1` (media_attachments table,
-uq_media_attachment, indexes) → `ff5277c7f3ec` (**HEAD**: courses.status).
+uq_media_attachment, indexes) → `ff5277c7f3ec` (courses.status) →
+`c4e309b8d939` (categories table + seed, courses.category_id SET NULL) →
+`2146ce932eb4` (expanded ~160-category seed, replaces the initial one) →
+`4b7d1c9e2f8a` (pg_trgm extension + GIN indexes on courses.title/description) →
+`0fc64b968676` (tgp_questions table; courses.tgp_enabled /
+tgp_last_full_generated_at / tgp_cooldown_hours) →
+`979626edf2ea` (**HEAD**: course_members.tgp_last_submitted_at).
 Run `uv run alembic upgrade head` from `backend/`.
 
 ## 4. Frontend (`frontend/src/`)
@@ -291,13 +383,16 @@ api/client.ts     HTTP bootstrap: VITE_API_URL, auth interceptor (silent refresh
 client/           GENERATED @hey-api client (sdk.gen.ts, types.gen.ts, schemas.gen.ts,
                   @tanstack/react-query.gen.ts, client.gen.ts) — DO NOT EDIT
 components/       ui/ (shadcn) + layout/ (Header, Footer, UserMenu, CategoryCatalog,
-                  Layout — mounted by routes/_layout.tsx)
-features/         auth, dashboard, media, profile, teaching
+                  Layout — mounted by routes/_layout.tsx); NotFoundPage (404 maskot)
+features/         auth, dashboard, learner, media, profile, settings, teaching
 lib/              utils (cn), toast, errors, dnd (arrayMove, applyOrderToCache,
                   useReorderableList for drag-and-drop reordering), media
-                  (validateMediaFile, MEDIA_ALLOWED_TYPES, resolveMediaUrl)
+                  (validateMediaFile, MEDIA_ALLOWED_TYPES, resolveMediaUrl),
+                  tgp (cooldown helpers: getCooldownEnd, getRemainingMs,
+                  formatCooldown, useCountdown)
 routes/           TanStack Router files + routeTree.gen.ts (generated)
-routes.ts         central ROUTES constant
+routes.ts         central ROUTES constant (DASHBOARD, LOGIN, SIGNUP, PROFILE,
+                  SETTINGS, TEACHING, TEACHING_COURSE, COURSE_DETAIL, LEARN, CATALOG)
 styles/           Tailwind v4 CSS design system: tokens.css, semantic.css,
                   global.css, themes/light.css, themes/dark.css
 ```
@@ -306,29 +401,36 @@ styles/           Tailwind v4 CSS design system: tokens.css, semantic.css,
 | Feature | api/ hooks | pages | main routes |
 | --- | --- | --- | --- |
 | auth | `useAuth` | LoginPage, SignupPage | `/login`, `/signup` |
-| dashboard | `useEnrolledCourses(enabled)`, `useCreatedCourses(limit, enabled)`, `useRecommendedCourses(limit)`, `useCourseCatalog(pageSize)` (infinite), `useCourseDetail(courseId)` (course `filter=current` + modules + per-module lessons), `useEnrollCourse` | RootPage, CatalogPage (+ CourseCard, CourseRow, CourseRowSection, types), CoursePage (public course detail w/ enroll) | `/`, `/catalog`, `/courses/$courseId` |
+| dashboard | `useEnrolledCourses(enabled)`, `useCreatedCourses(limit, enabled)`, `useRecommendedCourses(limit)`, `useCourseCatalog(pageSize)` (infinite), `useCourseDetail(courseId)` (course `filter=current` + modules + per-module lessons), `useCategories`, `useEnrollCourse` | RootPage, CatalogPage (+ CourseCard, CourseRow, CourseRowSection, CourseFilters, ContinueLearningSection, types), CoursePage (public course detail w/ enroll) | `/`, `/catalog`, `/courses/$courseId` |
+| learner | `useLearnData` (course filter=current + modules + per-module lessons + blocks + lesson submissions + course progress + `submitBlock` single-step mutation w/ invalidation), `useLearnerTgp` (list questions, submit answers; localStorage-persisted taken/result/lastSubmitted; retake cooldown via `lib/tgp`) | LearnPage (step-by-step: prev/next, LearnSidebar, per-block `blocks/BlockView` variants — Text/Quiz/Media/Code, TgpModals pre-test + result) | `/learn/$courseId`, `/learn/$courseId/$lessonId` |
 | profile | `useProfileStats` (→ `GET /users/me/stats`, gated on `isLoggedIn()`) | ProfilePage (streak, weekly/yearly activity, achievements, certificates, "Мои курсы") | `/profile` |
-| teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`; `useBlocks` also `uploadBlockMediaAsync`), `useCourseMedia` (course cover upload/remove) | TeachingPage, CourseBuilderPage (builder components + block-editors/ incl. Image/File/Code/Audio/Video/QuizSingle/QuizMultiple; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem are drag-reorderable; `MediaUploadControl` validates/uploads media files) | `/teaching`, `/teaching/courses/$courseId` |
+| settings | `useUpdateProfile` (→ `PATCH /users/me`) | SettingsPage (ProfileSettingsForm, PasswordChangePanel, NotificationsPanel, PaymentDetailsPanel, AvatarSettingsSection) | `/settings` |
+| teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`; `useBlocks` also `uploadBlockMediaAsync`), `useCourseMedia` (course cover upload/remove), `useTgp` (toggle tgp_enabled, generate/regenerate/update/submit questions; optimistic generation cooldown + polling for Celery completion) | TeachingPage, CourseBuilderPage (builder components incl. TgpPanel/TgpQuestionEditor; block-editors/ incl. TipTap-based TextBlockEditor, Image/File/Code/Audio/Video/QuizSingle/QuizMultiple; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem drag-reorderable; `MediaUploadControl` validates/uploads media files) | `/teaching`, `/teaching/courses/$courseId` |
 | media | `useMyMedia`, `useMediaUrl`, `useUploadMedia`, `useDeleteMedia`, `useMedia` (aggregate) | — (api hooks only; wired through teaching `MediaUploadControl`) | — |
 
-Route files: `routes/_layout.tsx` (Layout shell; redirects logged-out users to
-`/login` on non-public routes — `/`, `/catalog`, `/about`, and `/courses/$courseId`
+Route files: `routes/__root.tsx` (`notFoundComponent: NotFoundPage`),
+`routes/_layout.tsx` (Layout shell; redirects logged-out users to `/login` on
+non-public routes — `/`, `/catalog`, `/about`, and `/courses/$courseId`
 (`ROUTES.COURSE_DETAIL`) stay public),
 `_layout/index.tsx` (dashboard), `_layout/catalog.tsx` (catalog),
 `_layout/courses.$courseId.tsx` (course detail), `_layout/teaching.index.tsx`,
-`_layout/teaching.courses.$courseId.tsx`, `_layout/profile.tsx`,
-`login.tsx`, `signup.tsx`, `__root.tsx`.
+`_layout/teaching.courses.$courseId.tsx` (course builder),
+`_layout/settings.tsx`, `_layout/profile.tsx`,
+`_layout/learn.$courseId.tsx` (+ `.index` redirect → first incomplete lesson,
+`_layout/learn.$courseId.$lessonId.tsx` step view),
+`login.tsx`, `signup.tsx`.
 
 ### Client pipeline
 ```
 backend spec (main.py .openapi())
    └─ scripts/generate-client.sh → frontend/openapi.json
        └─ pnpm --filter frontend generate-client (@hey-api/openapi-ts)
-           └─ frontend/src/client/**  (byTags → AuthService, CourseService, ...)
+           └─ frontend/src/client/**  (byTags → XxxService)
 ```
-Generated services (from `client/index.ts`): `AuthService, BlockService,
-CourseService, DefaultService, LessonService, LessonsProgresService,
-MediaService, ModuleService, ProfileService, SubmissionService, UserService`.
+Generated services (from `client/index.ts`): `AiTgpService, AuthService,
+BlockService, CategorieService, CourseService, DefaultService, LessonService,
+LessonsProgresService, MediaService, ModuleService, ProfileService,
+SubmissionService, UserService`.
 
 Media in the UI: block editors validate files via `lib/media` +
 `MediaUploadControl`, upload through `useBlocks().uploadBlockMediaAsync`; course
@@ -345,3 +447,4 @@ cover via `useCourseMedia`; standalone media listing/urls/delete via the
 - `core.router.app_v1` — single registration point for all feature routers
 - Generic CRUD via `core.repositories.BaseRepository` + `core.unit_of_work.BaseUnitOfWork`
 - `core.storage.Storage` — pluggable object-storage abstraction (local/S3)
+- Celery (`core.celery_app`) + Redis locks for async AI work (`ai/tasks.py`)

@@ -12,7 +12,7 @@ A modern, AI-first **Learning Management System**. Monorepo with three parts:
 | --- | --- | --- |
 | Backend | `backend/` | Python 3.14, FastAPI, SQLAlchemy 2.0 async + asyncpg, Alembic, Pydantic v2, Redis (asyncio), PyJWT + Argon2 (`pwdlib`), object storage (local / S3 via aioboto3), loguru |
 | Frontend | `frontend/` | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, TanStack Router + Query, react-hook-form + zod |
-| Infra | `docker-compose.yaml` | PostgreSQL 18, Redis 7.2, MinIO (S3 object storage) |
+| Infra | `docker-compose.yaml` | PostgreSQL 18, Redis 7.2, MinIO (S3 object storage), Piston (code execution, profile `codeexec`) |
 
 ## Commands
 
@@ -29,8 +29,16 @@ Run from the repo root unless otherwise noted.
 - Run (from `backend/`, Redis required — `docker compose up -d redis`):
   `uv run celery -A src.core.celery_app worker --loglevel=info`
   (or `.\scripts\run-worker.ps1` on Windows). Consumes `ai.tgp.*` tasks (Redis broker).
-- AI gateway: OpenRouter via `OPENROUTER_API_KEY`/`OPENROUTER_BASE_URL`/`OPENROUTER_MODEL`
-  (default model `google/gemma-4-31b-it:free`). Without a key, TGP generation returns 503.
+- AI gateway: OpenAI-compatible endpoint via `AI_API_KEY`/`AI_BASE_URL`/`AI_MODEL`
+  (default `https://openai.api.proxyapi.ru/v1`, model `openai/gpt-4o`). Without a
+  key, TGP generation returns 503.
+
+### Code execution (Piston)
+- Start the sandbox (heavy image): `docker compose --profile codeexec up -d piston`.
+  Piston v2 needs a cgroup v2 Docker host — on WSL2 add to `%UserProfile%\.wslconfig`
+  `[wsl2] kernelCommandLine=cgroup_no_v1=all`, then `wsl --shutdown` and restart Docker.
+- The backend talks to Piston via `CODEEXEC_BASE_URL` (default `http://localhost:2000`).
+  Without it, CODE submissions with test cases return 503.
 
 ### Frontend (`frontend/`)
 - Install: `pnpm install` (from `frontend/`)
@@ -48,6 +56,7 @@ Run from the repo root unless otherwise noted.
 │   ├── core/               # Shared infrastructure — no business logic
 │   │   ├── config.py       # pydantic-settings: postgres / app / redis / storage / media
 │   │   ├── router.py       # app_v1; registers ALL feature routers
+│   │   ├── celery_app.py   # Celery app (Redis broker; ai.tgp.* tasks)
 │   │   ├── dependencies.py # SessionDep, RedisDep, StorageDep, AccessTokenDep
 │   │   ├── postgres/       # engine, session, Base/UUIDBase, types, mixins
 │   │   ├── redis/          # asyncio redis client
@@ -60,17 +69,18 @@ Run from the repo root unless otherwise noted.
 │   │   ├── errors/         # AppException, ObjectNotFoundError, ObjectAlreadyExistsError
 │   │   ├── handlers/       # error handler → {error, detail}
 │   │   └── logging/        # loguru setup
-│   └── <feature>/          # auth, user, course (+course_member), module,
-│                           # lesson (+lesson_progress), block, submissions, media
-│                           #   (+media/media_attachment), profile (read-only stats)
+│   └── <feature>/          # auth, user, course (+course_member, +category),
+│                           # module, lesson (+lesson_progress), block, submissions,
+│                           # codeexec (Piston client), media (+media/media_attachment),
+│                           # profile (read-only stats), ai (TGP Celery worker)
 ├── frontend/src/
 │   ├── main.tsx, routes.ts, routeTree.gen.ts
 │   ├── app/providers/      # React Query, theme, layout
 │   ├── client/             # GENERATED typed API client — DO NOT EDIT
 │   ├── components/         # shared UI (components/ui = shadcn) + layout
-│   ├── features/           # auth, dashboard, media, profile, teaching
+│   ├── features/           # auth, dashboard, learner, media, profile, settings, teaching
 │   │   └── <feature>/      # api/ (useX hooks), pages/, components/, schemas/
-│   ├── lib/                # utils (cn), toast, errors, dnd, media
+│   ├── lib/                # utils (cn), toast, errors, dnd, media, tgp (cooldowns)
 │   ├── styles/             # Tailwind v4 design system (tokens/semantic/themes)
 │   └── routes/             # TanStack Router route files
 ├── scripts/generate-client.sh
@@ -112,17 +122,39 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 ### Feature modules (full graph in `.claude/graph.md`)
 - `auth` — register/login/refresh/logout, `RefreshToken` model, security utils.
 - `user` — profiles; exposes `UserIdDep` / `CurrentUserDep`.
-- `course` + `course/course_member` — courses and enrollment (`CourseMember`);
+- `course` + `course/course_member` + `course/category` — courses, enrollment
+  (`CourseMember`), and the category tree (`Category`, seeded via Alembic);
   `CourseStatus` (draft/published); **anonymous public read** of published courses
   (`GET /courses` with `filter=all`, `GET /courses/{id}` with `filter=current`,
   via `OptionalUserIdDep`); `CourseSchema.is_member` resolved per viewer on read;
-  cover upload/remove (`POST/DELETE /courses/{id}/media`) via `MediaService`.
+  search via `q` (pg_trgm GIN indexes on title/description) and category filter by
+  `category=<slug>` (parent + children); cover upload/remove
+  (`POST/DELETE /courses/{id}/media`) via `MediaService`.
 - `module` — modules within a course.
-- `lesson` + `lesson/lesson_progress` — lessons and per-user progress (`LessonProgress`).
-- `block` — content blocks; `BlockType` covers text/quiz(code...)/media; `payload` is JSONB; media blocks bind a `MediaAttachment` (create/update reconcile, delete detach), resolve `payload.url` on read, and support upload via `POST /blocks/{id}/media`.
-- `submissions` — `BlockSubmission` checking via `BlockChecker` registry (`submissions/checker.py`).
+- `lesson` + `lesson/lesson_progress` — lessons and per-user progress
+  (`LessonProgress`); progress endpoints also include `GET /courses/{id}/progress`.
+- `block` — content blocks; `BlockType` covers text/quiz(code...)/media; `payload`
+  is JSONB; text blocks accept `text` or rich-text `html` (TipTap, sanitized via
+  nh3); media blocks bind a `MediaAttachment` (create/update reconcile, delete
+  detach), resolve `payload.url` on read, and support upload via `POST /blocks/{id}/media`.
+- `submissions` — `BlockSubmission` checking via `BlockChecker` registry
+  (`submissions/checker.py`); batch lesson submit, single-step block submit, and
+  per-lesson submission listing. CODE blocks are auto-graded: the registered
+  `check_code` runs the student's solution against the block's `test_cases`
+  (stdin → expected stdout) via `codeexec`.
+- `codeexec` — Piston (engine-manager) HTTP client (`/api/v2/execute`); used by the
+  CODE `BlockChecker`. Language aliases python/javascript/typescript/go, per-case
+  run/compile timeouts and memory limits from `CodeExecSettings`
+  (`CODEEXEC_*` env). No DB tables or routes. Requires Piston reachable at
+  `CODEEXEC_BASE_URL` (docker-compose profile `codeexec`; dev needs cgroup v2,
+  e.g. `.wslconfig` → `kernelCommandLine=cgroup_no_v1=all`).
 - `media` + `media/media_attachment` — uploads (local/S3 storage), per-owner listing, presigned URLs, delete protection via generic `MediaAttachment` (owner_type/owner_id/role); service used by `block` and `course`.
 - `profile` — read-only stats (`GET /users/me/stats`): streak, weekly (7-day) and yearly (365-day contribution grid) computed from `lesson_progress.completed_at`; no own tables — reuses `LessonProgress` (router/service/repository/schemas/dependencies only).
+- `ai` — AI TGP (The Golden Path) pre-course placement testing: `TgpQuestion`
+  bank per course/module; async generation via Celery (`ai.tgp.generate`,
+  `ai.tgp.regenerate_question`, Redis broker + `tgp:generating:{course_id}` lock)
+  through `core/celery_app.py`; `submit` → per-module scores → Gemini evaluation
+  (RECOMMENDED/OPTIONAL + verdict) with a deterministic threshold fallback.
 
 ## Frontend architecture
 

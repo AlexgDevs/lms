@@ -101,6 +101,36 @@ services:
     networks:
       - app_network
 
+  # Isolated code execution (Piston). Requires access to the host Docker socket to
+  # spawn per-job execution containers. Heavy image — opt-in via:
+  #   docker compose --profile codeexec up -d piston
+  piston:
+    image: ghcr.io/engineer-man/piston:latest
+    container_name: lms_piston
+    restart: unless-stopped
+    profiles:
+      - codeexec
+    ports:
+      - "2000:2000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - PISTON_PORT=2000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+
 volumes:
   redis_data:
     driver: local

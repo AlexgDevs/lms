@@ -12,6 +12,10 @@ interface BlockViewProps {
   onQuizSelect?: (blockId: string, selected: number[]) => void
   quizResult?: BlockSubmissionType
   quizLocked?: boolean
+  codeValue?: string
+  onCodeChange?: (blockId: string, value: string) => void
+  codeResult?: BlockSubmissionType
+  codeLocked?: boolean
 }
 
 export function BlockView({ block, ...quizProps }: BlockViewProps) {
@@ -20,7 +24,15 @@ export function BlockView({ block, ...quizProps }: BlockViewProps) {
       case BlockType.TEXT:
         return <TextBlockView payload={block.payload} />
       case BlockType.CODE:
-        return <CodeBlockView block={block} />
+        return (
+          <CodeBlockView
+            block={block}
+            value={quizProps.codeValue ?? ""}
+            onChange={(blockId, value) => quizProps.onCodeChange?.(blockId, value)}
+            result={quizProps.codeResult}
+            locked={quizProps.codeLocked ?? false}
+          />
+        )
       case BlockType.IMAGE:
       case BlockType.VIDEO:
       case BlockType.AUDIO:

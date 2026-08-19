@@ -47,9 +47,15 @@ class QuizMultipleBlockContent(BaseSchema):
     correct_option_ids: list[int]
 
 
+class CodeTestCase(BaseSchema):
+    input: str = ""
+    output: str = ""
+
+
 class CodeBlockContent(BaseSchema):
     code: str
     language: str
+    test_cases: list[CodeTestCase] = []
 
 
 class ImageBlockContent(BaseSchema):

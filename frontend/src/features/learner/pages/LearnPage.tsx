@@ -100,6 +100,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
   const [step, setStep] = useState(0)
   const [seededKey, setSeededKey] = useState<string | null>(null)
   const [selected, setSelected] = useState<Record<string, number[]>>({})
+  const [codeByBlock, setCodeByBlock] = useState<Record<string, string>>({})
   const [resultsByBlock, setResultsByBlock] = useState<Record<string, BlockSubmissionSchema>>({})
   const [retrying, setRetrying] = useState<Record<string, boolean>>({})
 
@@ -142,6 +143,13 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
   const isQuiz =
     currentBlock?.block_type === BlockType.QUIZ_SINGLE_CHOICE ||
     currentBlock?.block_type === BlockType.QUIZ_MULTIPLE_CHOICE
+  const isCode = currentBlock?.block_type === BlockType.CODE
+  const starterCode =
+    isCode && currentBlock && typeof currentBlock.payload?.code === "string"
+      ? currentBlock.payload.code
+      : ""
+  const codeValue =
+    isCode && currentBlock ? (codeByBlock[currentBlock.id] ?? starterCode) : ""
   const isStepDone = currentBlock ? isDone(currentBlock.id) : false
   const stepResult = currentBlock
     ? isRetrying(currentBlock.id)
@@ -153,6 +161,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
   const completedFooter = isLessonCompleted && !(currentBlock && isRetrying(currentBlock.id))
   const quizNeedsAnswer =
     isQuiz && !isStepDone && (currentBlock ? (selected[currentBlock.id]?.length ?? 0) === 0 : false)
+  const codeNeedsAnswer = isCode && !isStepDone && codeValue.trim() === ""
 
   const goToStep = (index: number) => {
     setStep(index)
@@ -188,12 +197,18 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
   }
 
   const handleCheck = () => {
-    if (!currentBlock || !isQuiz) return
-    const payload: Record<string, unknown> =
-      currentBlock.block_type === BlockType.QUIZ_MULTIPLE_CHOICE
-        ? { selected_option_ids: selected[currentBlock.id] ?? [] }
-        : { selected_option_id: (selected[currentBlock.id] ?? [])[0] }
-    submitStep(payload)
+    if (!currentBlock) return
+    if (isQuiz) {
+      const payload: Record<string, unknown> =
+        currentBlock.block_type === BlockType.QUIZ_MULTIPLE_CHOICE
+          ? { selected_option_ids: selected[currentBlock.id] ?? [] }
+          : { selected_option_id: (selected[currentBlock.id] ?? [])[0] }
+      submitStep(payload)
+      return
+    }
+    if (isCode) {
+      submitStep({ code: codeValue })
+    }
   }
 
   const handleNext = () => {
@@ -202,13 +217,18 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
       goNext()
       return
     }
-    if (isQuiz) return
+    if (isQuiz || isCode) return
     submitStep({})
   }
 
   const handleRetry = () => {
     if (!currentBlock) return
-    setSelected((prev) => ({ ...prev, [currentBlock.id]: [] }))
+    if (isQuiz) {
+      setSelected((prev) => ({ ...prev, [currentBlock.id]: [] }))
+    }
+    if (isCode) {
+      setCodeByBlock((prev) => ({ ...prev, [currentBlock.id]: starterCode }))
+    }
     setResultsByBlock((prev) => {
       const next = { ...prev }
       delete next[currentBlock.id]
@@ -287,6 +307,12 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
                   }
                   quizResult={stepResult}
                   quizLocked={isStepDone}
+                  codeValue={isCode ? codeValue : undefined}
+                  onCodeChange={(blockId, value) =>
+                    setCodeByBlock((prev) => ({ ...prev, [blockId]: value }))
+                  }
+                  codeResult={stepResult}
+                  codeLocked={isStepDone}
                 />
               </div>
             )}
@@ -302,15 +328,15 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
               <span />
             )}
             <div className="flex items-center gap-3">
-              {isQuiz && isStepDone && (
+              {(isQuiz || isCode) && isStepDone && (
                 <Button variant="outline" onClick={handleRetry}>
                   Решить снова
                 </Button>
               )}
-              {isQuiz && !isStepDone ? (
+              {(isQuiz || isCode) && !isStepDone ? (
                 <Button
                   className="bg-primary hover:bg-primary-hover text-white"
-                  disabled={data.isSubmittingStep || quizNeedsAnswer}
+                  disabled={data.isSubmittingStep || quizNeedsAnswer || codeNeedsAnswer}
                   onClick={handleCheck}
                 >
                   {data.isSubmittingStep && <Loader2 className="h-4 w-4 animate-spin" />}
