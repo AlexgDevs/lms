@@ -89,7 +89,12 @@ dependencies` — standalone read-only router (`GET /categories`).
   `q` search), `GET /{course_id}` (filter=current|author|my),
   `POST /{course_id}/members` (enroll), `POST /{course_id}/media` (upload cover,
   multipart `file` + `is_public` → `CourseSchema`), `DELETE /{course_id}/media`
-  (remove cover, 204).
+  (remove cover, 204), `POST /{course_id}/submit` (owner → completeness check +
+  enqueue Celery `ai.course_review.review`), `GET /moderation/queue` (staff,
+  under_review courses with owner username + counts + `moderation_reason`),
+  `POST /{course_id}/moderation/approve` (staff → published),
+  `POST /{course_id}/moderation/reject` (staff, body `reason` → `moderation_reason`,
+  course → rejected).
 - **Public read (anonymous)**: both GETs take `OptionalUserIdDep` — `filter=all`
   and `filter=current` return only `status=published` courses and work with no
   token (no security scheme in OpenAPI); `filter=created|my|author` require a
@@ -103,11 +108,12 @@ dependencies` — standalone read-only router (`GET /categories`).
   Category tree is seeded via Alembic (uuid5 slugs).
 - Models: `Course` (owner_id→users, title, description, cover_url, price,
   category_id, member_count, status, is_deleted, `tgp_enabled`,
-  `tgp_last_full_generated_at`, `tgp_cooldown_hours`), `CourseMember`
+  `tgp_last_full_generated_at`, `tgp_cooldown_hours`, `moderation_reason`),
+  `CourseMember`
   (user_id, course_id, role, left_at, `tgp_last_submitted_at`),
   `Category` (name, slug unique, icon, parent_id self-FK CASCADE, sort_order).
 - Enums: `CourseMemberRole` (member/teacher/so_owner), `CourseStatus`
-  (draft/published).
+  (draft/under_review/published/rejected).
 - Media cover: `cover_url` is a server-generated public storage URL. Upload
   attaches a `MediaAttachment(owner_type=course, role=cover)` and replaces the
   previous cover (old media purged after commit if unreferenced); remove detaches
@@ -405,8 +411,9 @@ styles/           Tailwind v4 CSS design system: tokens.css, semantic.css,
 | learner | `useLearnData` (course filter=current + modules + per-module lessons + blocks + lesson submissions + course progress + `submitBlock` single-step mutation w/ invalidation), `useLearnerTgp` (list questions, submit answers; localStorage-persisted taken/result/lastSubmitted; retake cooldown via `lib/tgp`) | LearnPage (step-by-step: prev/next, LearnSidebar, per-block `blocks/BlockView` variants — Text/Quiz/Media/Code, TgpModals pre-test + result) | `/learn/$courseId`, `/learn/$courseId/$lessonId` |
 | profile | `useProfileStats` (→ `GET /users/me/stats`, gated on `isLoggedIn()`) | ProfilePage (streak, weekly/yearly activity, achievements, certificates, "Мои курсы") | `/profile` |
 | settings | `useUpdateProfile` (→ `PATCH /users/me`) | SettingsPage (ProfileSettingsForm, PasswordChangePanel, NotificationsPanel, PaymentDetailsPanel, AvatarSettingsSection) | `/settings` |
-| teaching | `useCourses`, `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`; `useBlocks` also `uploadBlockMediaAsync`), `useCourseMedia` (course cover upload/remove), `useTgp` (toggle tgp_enabled, generate/regenerate/update/submit questions; optimistic generation cooldown + polling for Celery completion) | TeachingPage, CourseBuilderPage (builder components incl. TgpPanel/TgpQuestionEditor; block-editors/ incl. TipTap-based TextBlockEditor, Image/File/Code/Audio/Video/QuizSingle/QuizMultiple; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem drag-reorderable; `MediaUploadControl` validates/uploads media files) | `/teaching`, `/teaching/courses/$courseId` |
+| teaching | `useCourses` (incl. `submitCourseForReview` mutation), `useModules`, `useLessons`, `useBlocks` (each exposes `reorderXAsync` + optimistic cache update via `lib/dnd`; `useBlocks` also `uploadBlockMediaAsync`), `useCourseMedia` (course cover upload/remove), `useTgp` (toggle tgp_enabled, generate/regenerate/update/submit questions; optimistic generation cooldown + polling for Celery completion) | TeachingPage, CourseBuilderPage (builder components incl. TgpPanel/TgpQuestionEditor; block-editors/ incl. TipTap-based TextBlockEditor, Image/File/Code/Audio/Video/QuizSingle/QuizMultiple; CourseModulesList/CourseLessonsList/CourseBlocks/BlockItem drag-reorderable; `MediaUploadControl` validates/uploads media files; CourseHeader w/ 4 statuses + «Отправить на модерацию» + `moderation_reason` banner) | `/teaching`, `/teaching/courses/$courseId` |
 | media | `useMyMedia`, `useMediaUrl`, `useUploadMedia`, `useDeleteMedia`, `useMedia` (aggregate) | — (api hooks only; wired through teaching `MediaUploadControl`) | — |
+| admin | `useModeration` (queue query `GET /courses/moderation/queue` + approve/reject mutations w/ invalidations) | ModerationPage (staff-only: queue cards w/ owner/counts/reason, Approve, Reject w/ reason dialog) | `/admin/moderation` (link in `UserMenu` when `user.is_staff`) |
 
 Route files: `routes/__root.tsx` (`notFoundComponent: NotFoundPage`),
 `routes/_layout.tsx` (Layout shell; redirects logged-out users to `/login` on

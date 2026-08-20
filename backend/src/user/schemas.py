@@ -13,6 +13,7 @@ class UserSchema(BaseSchema):
     password_hash: str
     avatar_url: str | None
     joined_at: datetime
+    is_staff: bool = False
 
 
 class UserPublicSchema(BaseSchema):
@@ -21,6 +22,10 @@ class UserPublicSchema(BaseSchema):
     email: str
     avatar_url: str | None
     joined_at: datetime
+
+
+class UserMeSchema(UserPublicSchema):
+    is_staff: bool = False
 
 
 class UserUpdateRequestSchema(BaseSchema):

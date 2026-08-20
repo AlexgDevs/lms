@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.ai.repository import TgpQuestionRepository
+from src.ai.tgp.repository import TgpQuestionRepository
 from src.core.unit_of_work.base_unit_of_work import BaseUnitOfWork
 from src.course.course_member.repository import CourseMemberRepository
 from src.course.repository import CourseRepository

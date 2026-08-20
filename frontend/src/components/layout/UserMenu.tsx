@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogIn, Settings } from "lucide-react";
+import { User, LogIn, Settings, ShieldCheck } from "lucide-react";
 import useAuth from "@/features/auth/api/useAuth";
 
 export function UserMenu() {
@@ -61,6 +61,17 @@ export function UserMenu() {
             Настройки
           </Link>
         </DropdownMenuItem>
+        {user?.is_staff && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/admin/moderation" className="cursor-pointer">
+                <ShieldCheck className="w-4 h-4 mr-2" />
+                Модерация
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout} className="text-destructive cursor-pointer">
           Выйти

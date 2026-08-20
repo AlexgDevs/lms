@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from src.ai.enums import TgpDecision
+from src.ai.tgp.enums import TgpDecision
 from src.core.schemas import BaseSchema
 
 

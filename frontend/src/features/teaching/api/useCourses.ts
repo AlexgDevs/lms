@@ -10,6 +10,7 @@ import {
   updateCourseApiV1CoursesCourseIdPatchMutation,
   deleteCourseApiV1CoursesCourseIdDeleteMutation,
   createMemberApiV1CoursesCourseIdMembersPostMutation,
+  submitCourseForReviewApiV1CoursesCourseIdSubmitPostMutation,
 } from "@/client/@tanstack/react-query.gen"
 
 export const useCourses = (courseId?: string) => {
@@ -145,6 +146,29 @@ export const useCourses = (courseId?: string) => {
     },
   })
 
+  // Отправка курса на модерацию
+  const submitCourseForReviewMutation = useMutation({
+    ...submitCourseForReviewApiV1CoursesCourseIdSubmitPostMutation(),
+    onSuccess: (_, variables) => {
+      showSuccessToast("Курс отправлен на модерацию")
+      const targetCourseId = variables.path?.course_id
+
+      if (targetCourseId) {
+        queryClient.invalidateQueries({
+          queryKey: getCourseByIdApiV1CoursesCourseIdGetQueryKey({
+            path: { course_id: targetCourseId },
+          }),
+        })
+      }
+      queryClient.invalidateQueries({
+        queryKey: getCoursesApiV1CoursesGetQueryKey(),
+      })
+    },
+    onError: (err) => {
+      showErrorToast(getErrorMessage(err) || "Ошибка при отправке на модерацию")
+    },
+  })
+
   return {
     // Data
     courses,
@@ -180,5 +204,9 @@ export const useCourses = (courseId?: string) => {
     enrollCourse: enrollCourseMutation.mutate,
     enrollCourseAsync: enrollCourseMutation.mutateAsync,
     isEnrollingCourse: enrollCourseMutation.isPending,
+
+    submitCourseForReview: submitCourseForReviewMutation.mutate,
+    submitCourseForReviewAsync: submitCourseForReviewMutation.mutateAsync,
+    isSubmittingCourseForReview: submitCourseForReviewMutation.isPending,
   }
 }

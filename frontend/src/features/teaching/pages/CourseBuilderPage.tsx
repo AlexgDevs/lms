@@ -27,6 +27,8 @@ export function CourseBuilderPage() {
     isLoadingAuthorCourse,
     updateCourseAsync,
     isUpdatingCourse,
+    submitCourseForReviewAsync,
+    isSubmittingCourseForReview,
   } = useCourses(courseId)
 
    // Медиа курса: обложка (загрузка / удаление)
@@ -70,7 +72,7 @@ export function CourseBuilderPage() {
     title?: string
     description?: string | null
     price?: number | null
-    status?: "draft" | "published"
+    status?: "draft"
     category_id?: string | null
     tgp_enabled?: boolean
     tgp_cooldown_hours?: number
@@ -78,6 +80,12 @@ export function CourseBuilderPage() {
     await updateCourseAsync({
       path: { course_id: String(authorCourse.id) },
       body: data,
+    })
+  }
+
+  const handleSubmitReview = async () => {
+    await submitCourseForReviewAsync({
+      path: { course_id: String(authorCourse.id) },
     })
   }
 
@@ -140,6 +148,8 @@ export function CourseBuilderPage() {
             course={authorCourse}
             onUpdateCourse={handleUpdateCourse}
             isUpdating={isUpdatingCourse}
+            onSubmitReview={handleSubmitReview}
+            isSubmittingReview={isSubmittingCourseForReview}
             onUploadCover={uploadCourseCoverAsync}
             onRemoveCover={removeCourseCoverAsync}
             isUploadingCover={isUploadingCover || isRemovingCover}

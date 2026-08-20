@@ -196,6 +196,56 @@ class TgpSettings(BaseSettings):
     TGP_NETWORK_RETRY_BACKOFF_MAX: int = 45
 
 
+class AssistantSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    # Number of failed attempts on a block that triggers the mascot offer.
+    ASSISTANT_ATTEMPT_THRESHOLD: int = 3
+    # How long a generated hint ladder stays cached per user x block.
+    ASSISTANT_LADDER_TTL_HOURS: int = 24
+    # Max assistant calls (hint ladder + free questions) per user x block per day.
+    ASSISTANT_DAILY_CALL_LIMIT: int = 10
+    # AI gateway client
+    ASSISTANT_AI_TIMEOUT_SECONDS: float = 60.0
+    ASSISTANT_AI_MAX_RETRIES: int = 2
+    # Concurrency guard for ladder generation.
+    ASSISTANT_GENERATION_LOCK_TTL_SECONDS: int = 120
+    # How many previous user/assistant messages are sent on a free question.
+    ASSISTANT_MAX_HISTORY_MESSAGES: int = 6
+    # Number of scaffolding levels in the hint ladder (level 0..N-1).
+    ASSISTANT_LEVELS_COUNT: int = 5
+
+
+class CourseReviewSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    # Minimum content required for a course to be sent for review.
+    COURSE_REVIEW_MIN_MODULES: int = 1
+    COURSE_REVIEW_MIN_LESSONS: int = 1
+    COURSE_REVIEW_MIN_BLOCKS: int = 3
+    # AI gateway client for the review task.
+    COURSE_REVIEW_AI_TIMEOUT_SECONDS: float = 60.0
+    COURSE_REVIEW_AI_MAX_RETRIES: int = 2
+    # Concurrency guard (one review per course at a time).
+    COURSE_REVIEW_LOCK_TTL_SECONDS: int = 600
+    # Retry policy for transient failures (rate limits / network / 5xx).
+    COURSE_REVIEW_RETRY_MAX_RETRIES: int = 5
+    COURSE_REVIEW_RATE_LIMIT_DEFAULT_RETRY_SECONDS: int = 30
+    COURSE_REVIEW_RATE_LIMIT_MAX_RETRY_COUNTDOWN: int = 300
+    COURSE_REVIEW_NETWORK_RETRY_BACKOFF: int = 10
+    COURSE_REVIEW_NETWORK_RETRY_BACKOFF_MAX: int = 45
+    # Total amount of course content text sent to the AI reviewer.
+    COURSE_REVIEW_MAX_TEXT_CHARS: int = 6000
+
+
 class CodeExecSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=ENV_FILE_PATH,
@@ -220,6 +270,8 @@ class Settings(BaseSettings):
     media: MediaSettings = Field(default_factory=MediaSettings)
     ai: AIGatewaySettings = Field(default_factory=AIGatewaySettings)
     tgp: TgpSettings = Field(default_factory=TgpSettings)
+    assistant: AssistantSettings = Field(default_factory=AssistantSettings)
+    course_review: CourseReviewSettings = Field(default_factory=CourseReviewSettings)
     codeexec: CodeExecSettings = Field(default_factory=CodeExecSettings)
 
 

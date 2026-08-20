@@ -1,4 +1,10 @@
-from src.core.errors import AppException, ObjectNotFoundError, ObjectAlreadyExistsError
+from fastapi import status
+
+from src.core.errors import (
+    AppException,
+    ObjectAlreadyExistsError,
+    ObjectNotFoundError,
+)
 
 
 class UserError(AppException):
@@ -11,3 +17,8 @@ class UserNotFoundError(ObjectNotFoundError, UserError):
 
 class UserAlreadyExistsError(ObjectAlreadyExistsError, UserError):
     detail = "User already exit"
+
+
+class UserNotStaffError(UserError):
+    detail = "Staff privileges required"
+    status_code = status.HTTP_403_FORBIDDEN

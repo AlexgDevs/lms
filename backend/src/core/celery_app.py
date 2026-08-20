@@ -6,7 +6,7 @@ celery_app = Celery(
     "lms",
     broker=settings.redis.REDIS_URL,
     backend=settings.redis.REDIS_URL,
-    include=["src.ai.tasks"],
+    include=["src.ai.tgp.tasks", "src.ai.course_review.tasks"],
 )
 
 celery_app.conf.update(

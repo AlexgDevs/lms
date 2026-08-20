@@ -8,5 +8,6 @@ export const ROUTES = {
     TEACHING_COURSE: "/teaching/courses",
     COURSE_DETAIL: "/courses",
     LEARN: "/learn",
-    CATALOG: "/catalog"
+    CATALOG: "/catalog",
+    ADMIN_MODERATION: "/admin/moderation"
 } as const

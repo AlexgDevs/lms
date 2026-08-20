@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.postgres.base import UUIDBase
@@ -19,6 +20,9 @@ class User(UUIDBase):
     joined_at: Mapped[timestamp]
     updated_at: Mapped[timestamp]
     is_active: Mapped[bool] = mapped_column(default=True)
+    is_staff: Mapped[bool] = mapped_column(
+        sa.Boolean(), server_default="false", default=False
+    )
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         back_populates="user",

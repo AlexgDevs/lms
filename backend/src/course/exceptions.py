@@ -1,3 +1,5 @@
+from fastapi import status
+
 from src.core.errors import AppException, ObjectNotFoundError
 
 
@@ -23,3 +25,23 @@ class CourseOwnerCannotEnrollError(CourseError):
 
 class CourseNotPublishedError(ObjectNotFoundError, CourseError):
     detail = "Course is not published yet"
+
+
+class CourseAlreadyPublishedError(CourseError):
+    detail = "Course is already published"
+    status_code = status.HTTP_409_CONFLICT
+
+
+class CourseNotUnderReviewError(CourseError):
+    detail = "Course is not under review"
+    status_code = status.HTTP_409_CONFLICT
+
+
+class CourseIncompleteError(CourseError):
+    detail = "Course does not meet the minimum requirements to be published"
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+class CourseStatusNotAllowedError(CourseError):
+    detail = "Course status can only be changed via the moderation flow"
+    status_code = status.HTTP_403_FORBIDDEN

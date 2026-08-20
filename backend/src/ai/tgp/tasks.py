@@ -16,15 +16,15 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import NullPool
 
-from src.ai.exceptions import TgpGeminiRateLimitError
+from src.ai.tgp.exceptions import TgpGeminiRateLimitError
 from src.ai.gemini import GeminiService, ModuleStructure
-from src.ai.repository import TgpQuestionRepository
-from src.ai.schemas import (
+from src.ai.tgp.repository import TgpQuestionRepository
+from src.ai.tgp.schemas import (
     TgpQuestionCreateSchema,
     TgpQuestionSchema,
     TgpQuestionUpdateSchema,
 )
-from src.ai.unit_of_work import AiUnitOfWork
+from src.ai.tgp.unit_of_work import AiUnitOfWork
 from src.core.celery_app import celery_app
 from src.core.config import settings
 from src.course.course_member.repository import CourseMemberRepository

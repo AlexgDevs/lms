@@ -5,6 +5,163 @@ export type ClientOptions = {
 };
 
 /**
+ * AssistantAction
+ */
+export const AssistantAction = {
+    SIMPLER_EXAMPLE: 'simpler_example',
+    DIAGNOSE_CODE: 'diagnose_code',
+    WHY_WRONG: 'why_wrong',
+    FIRST_STEP: 'first_step',
+    EXPLAIN_AGAIN: 'explain_again'
+} as const;
+
+/**
+ * AssistantAction
+ */
+export type AssistantAction = typeof AssistantAction[keyof typeof AssistantAction];
+
+/**
+ * AssistantAngle
+ */
+export const AssistantAngle = {
+    SIMPLER: 'simpler',
+    MORE_EXAMPLES: 'more_examples',
+    DIFFERENT_EXAMPLE: 'different_example',
+    ANOTHER_APPROACH: 'another_approach'
+} as const;
+
+/**
+ * AssistantAngle
+ */
+export type AssistantAngle = typeof AssistantAngle[keyof typeof AssistantAngle];
+
+/**
+ * AssistantAskRequestSchema
+ */
+export type AssistantAskRequestSchema = {
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Lesson Id
+     */
+    lesson_id: string;
+    /**
+     * Block Id
+     */
+    block_id: string;
+    /**
+     * Question
+     */
+    question: string;
+    /**
+     * History
+     */
+    history?: Array<AssistantMessageSchema>;
+    /**
+     * Revealed Levels
+     */
+    revealed_levels?: number;
+    action?: AssistantAction | null;
+    /**
+     * Current Code
+     */
+    current_code?: string | null;
+};
+
+/**
+ * AssistantFocus
+ */
+export const AssistantFocus = {
+    CONFUSED: 'confused',
+    THEORY: 'theory',
+    CODE_ERROR: 'code_error',
+    STEPS: 'steps'
+} as const;
+
+/**
+ * AssistantFocus
+ */
+export type AssistantFocus = typeof AssistantFocus[keyof typeof AssistantFocus];
+
+/**
+ * AssistantHintRequestSchema
+ */
+export type AssistantHintRequestSchema = {
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Lesson Id
+     */
+    lesson_id: string;
+    /**
+     * Block Id
+     */
+    block_id: string;
+    focus?: AssistantFocus;
+};
+
+/**
+ * AssistantHintResponseSchema
+ */
+export type AssistantHintResponseSchema = {
+    /**
+     * Levels
+     */
+    levels: Array<string>;
+};
+
+/**
+ * AssistantLevelResponseSchema
+ */
+export type AssistantLevelResponseSchema = {
+    /**
+     * Level
+     */
+    level: string;
+};
+
+/**
+ * AssistantMessageSchema
+ */
+export type AssistantMessageSchema = {
+    /**
+     * Role
+     */
+    role: string;
+    /**
+     * Content
+     */
+    content: string;
+};
+
+/**
+ * AssistantRegenerateRequestSchema
+ */
+export type AssistantRegenerateRequestSchema = {
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Lesson Id
+     */
+    lesson_id: string;
+    /**
+     * Block Id
+     */
+    block_id: string;
+    /**
+     * Level Index
+     */
+    level_index: number;
+    angle?: AssistantAngle;
+};
+
+/**
  * BlockCreateRequestSchema
  */
 export type BlockCreateRequestSchema = {
@@ -387,6 +544,67 @@ export type CourseMemberSchema = {
 };
 
 /**
+ * CourseModerationQueueSchema
+ */
+export type CourseModerationQueueSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Cover Url
+     */
+    cover_url: string | null;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
+    /**
+     * Owner Username
+     */
+    owner_username: string;
+    status: CourseStatus;
+    /**
+     * Moderation Reason
+     */
+    moderation_reason: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Module Count
+     */
+    module_count: number;
+    /**
+     * Lesson Count
+     */
+    lesson_count: number;
+    /**
+     * Block Count
+     */
+    block_count: number;
+};
+
+/**
+ * CourseModerationRejectSchema
+ */
+export type CourseModerationRejectSchema = {
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
  * CourseSchema
  *
  * Full course schema returned to the client (Response model).
@@ -430,6 +648,10 @@ export type CourseSchema = {
     is_member?: boolean;
     status: CourseStatus;
     /**
+     * Moderation Reason
+     */
+    moderation_reason?: string | null;
+    /**
      * Created At
      */
     created_at: string;
@@ -450,7 +672,12 @@ export type CourseSchema = {
 /**
  * CourseStatus
  */
-export const CourseStatus = { DRAFT: 'draft', PUBLISHED: 'published' } as const;
+export const CourseStatus = {
+    DRAFT: 'draft',
+    UNDER_REVIEW: 'under_review',
+    PUBLISHED: 'published',
+    REJECTED: 'rejected'
+} as const;
 
 /**
  * CourseStatus
@@ -532,6 +759,10 @@ export type CourseUserBriefSchema = {
      */
     is_member?: boolean;
     status: CourseStatus;
+    /**
+     * Moderation Reason
+     */
+    moderation_reason?: string | null;
     /**
      * Created At
      */
@@ -1017,6 +1248,36 @@ export type TokenPair = {
 };
 
 /**
+ * UserMeSchema
+ */
+export type UserMeSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Avatar Url
+     */
+    avatar_url: string | null;
+    /**
+     * Joined At
+     */
+    joined_at: string;
+    /**
+     * Is Staff
+     */
+    is_staff?: boolean;
+};
+
+/**
  * UserPublicSchema
  */
 export type UserPublicSchema = {
@@ -1375,6 +1636,132 @@ export type UpdateCourseApiV1CoursesCourseIdPatchResponses = {
 };
 
 export type UpdateCourseApiV1CoursesCourseIdPatchResponse = UpdateCourseApiV1CoursesCourseIdPatchResponses[keyof UpdateCourseApiV1CoursesCourseIdPatchResponses];
+
+export type SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/submit';
+};
+
+export type SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostError = SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostErrors[keyof SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostErrors];
+
+export type SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseSchema;
+};
+
+export type SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponse = SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponses[keyof SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponses];
+
+export type GetModerationQueueApiV1CoursesModerationQueueGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/v1/courses/moderation/queue';
+};
+
+export type GetModerationQueueApiV1CoursesModerationQueueGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetModerationQueueApiV1CoursesModerationQueueGetError = GetModerationQueueApiV1CoursesModerationQueueGetErrors[keyof GetModerationQueueApiV1CoursesModerationQueueGetErrors];
+
+export type GetModerationQueueApiV1CoursesModerationQueueGetResponses = {
+    /**
+     * Response Get Moderation Queue Api V1 Courses Moderation Queue Get
+     *
+     * Successful Response
+     */
+    200: Array<CourseModerationQueueSchema>;
+};
+
+export type GetModerationQueueApiV1CoursesModerationQueueGetResponse = GetModerationQueueApiV1CoursesModerationQueueGetResponses[keyof GetModerationQueueApiV1CoursesModerationQueueGetResponses];
+
+export type ApproveCourseApiV1CoursesCourseIdModerationApprovePostData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/moderation/approve';
+};
+
+export type ApproveCourseApiV1CoursesCourseIdModerationApprovePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ApproveCourseApiV1CoursesCourseIdModerationApprovePostError = ApproveCourseApiV1CoursesCourseIdModerationApprovePostErrors[keyof ApproveCourseApiV1CoursesCourseIdModerationApprovePostErrors];
+
+export type ApproveCourseApiV1CoursesCourseIdModerationApprovePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseSchema;
+};
+
+export type ApproveCourseApiV1CoursesCourseIdModerationApprovePostResponse = ApproveCourseApiV1CoursesCourseIdModerationApprovePostResponses[keyof ApproveCourseApiV1CoursesCourseIdModerationApprovePostResponses];
+
+export type RejectCourseApiV1CoursesCourseIdModerationRejectPostData = {
+    body: CourseModerationRejectSchema;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/moderation/reject';
+};
+
+export type RejectCourseApiV1CoursesCourseIdModerationRejectPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RejectCourseApiV1CoursesCourseIdModerationRejectPostError = RejectCourseApiV1CoursesCourseIdModerationRejectPostErrors[keyof RejectCourseApiV1CoursesCourseIdModerationRejectPostErrors];
+
+export type RejectCourseApiV1CoursesCourseIdModerationRejectPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseSchema;
+};
+
+export type RejectCourseApiV1CoursesCourseIdModerationRejectPostResponse = RejectCourseApiV1CoursesCourseIdModerationRejectPostResponses[keyof RejectCourseApiV1CoursesCourseIdModerationRejectPostResponses];
 
 export type CreateMemberApiV1CoursesCourseIdMembersPostData = {
     body?: never;
@@ -2429,7 +2816,7 @@ export type GetCurrentUserApiV1UsersMeGetResponses = {
     /**
      * Successful Response
      */
-    200: UserPublicSchema;
+    200: UserMeSchema;
 };
 
 export type GetCurrentUserApiV1UsersMeGetResponse = GetCurrentUserApiV1UsersMeGetResponses[keyof GetCurrentUserApiV1UsersMeGetResponses];
@@ -2454,7 +2841,7 @@ export type UpdateCurrentUserApiV1UsersMePatchResponses = {
     /**
      * Successful Response
      */
-    200: UserPublicSchema;
+    200: UserMeSchema;
 };
 
 export type UpdateCurrentUserApiV1UsersMePatchResponse = UpdateCurrentUserApiV1UsersMePatchResponses[keyof UpdateCurrentUserApiV1UsersMePatchResponses];
@@ -2656,6 +3043,79 @@ export type SubmitTgpApiV1AiTgpCourseIdSubmitPostResponses = {
 };
 
 export type SubmitTgpApiV1AiTgpCourseIdSubmitPostResponse = SubmitTgpApiV1AiTgpCourseIdSubmitPostResponses[keyof SubmitTgpApiV1AiTgpCourseIdSubmitPostResponses];
+
+export type AssistantHintApiV1AiAssistantHintPostData = {
+    body: AssistantHintRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/assistant/hint';
+};
+
+export type AssistantHintApiV1AiAssistantHintPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AssistantHintApiV1AiAssistantHintPostError = AssistantHintApiV1AiAssistantHintPostErrors[keyof AssistantHintApiV1AiAssistantHintPostErrors];
+
+export type AssistantHintApiV1AiAssistantHintPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AssistantHintResponseSchema;
+};
+
+export type AssistantHintApiV1AiAssistantHintPostResponse = AssistantHintApiV1AiAssistantHintPostResponses[keyof AssistantHintApiV1AiAssistantHintPostResponses];
+
+export type AssistantRegenerateApiV1AiAssistantRegeneratePostData = {
+    body: AssistantRegenerateRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/assistant/regenerate';
+};
+
+export type AssistantRegenerateApiV1AiAssistantRegeneratePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AssistantRegenerateApiV1AiAssistantRegeneratePostError = AssistantRegenerateApiV1AiAssistantRegeneratePostErrors[keyof AssistantRegenerateApiV1AiAssistantRegeneratePostErrors];
+
+export type AssistantRegenerateApiV1AiAssistantRegeneratePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AssistantLevelResponseSchema;
+};
+
+export type AssistantRegenerateApiV1AiAssistantRegeneratePostResponse = AssistantRegenerateApiV1AiAssistantRegeneratePostResponses[keyof AssistantRegenerateApiV1AiAssistantRegeneratePostResponses];
+
+export type AssistantAskApiV1AiAssistantAskPostData = {
+    body: AssistantAskRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/assistant/ask';
+};
+
+export type AssistantAskApiV1AiAssistantAskPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AssistantAskApiV1AiAssistantAskPostError = AssistantAskApiV1AiAssistantAskPostErrors[keyof AssistantAskApiV1AiAssistantAskPostErrors];
+
+export type AssistantAskApiV1AiAssistantAskPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type SayHelloGetData = {
     body?: never;

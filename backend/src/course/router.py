@@ -5,11 +5,13 @@ from src.course.course_member.schemas import CourseMemberSchema
 from src.course.schemas import (
     CourseSchema,
     CourseCreateRequestSchema,
+    CourseModerationQueueSchema,
+    CourseModerationRejectSchema,
     CourseUpdateRequestSchema,
     CourseUserBriefSchema,
 )
 from src.course.dependencies import CourseServiceDep
-from src.user.dependencies import OptionalUserIdDep, UserIdDep
+from src.user.dependencies import OptionalUserIdDep, StaffDep, UserIdDep
 from uuid import UUID
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
@@ -43,6 +45,46 @@ async def delete_course(
     owner_id: UserIdDep,
 ) -> None:
     await course_service.delete_course(course_id=course_id, owner_id=owner_id)
+
+
+@router.post("/{course_id}/submit", response_model=CourseSchema)
+async def submit_course_for_review(
+    course_id: UUID,
+    course_service: CourseServiceDep,
+    owner_id: UserIdDep,
+) -> CourseSchema:
+    return await course_service.submit_for_review(
+        course_id=course_id, owner_id=owner_id
+    )
+
+
+@router.get("/moderation/queue", response_model=list[CourseModerationQueueSchema])
+async def get_moderation_queue(
+    staff: StaffDep,
+    course_service: CourseServiceDep,
+    limit: int = 20,
+    offset: int = 0,
+) -> list[CourseModerationQueueSchema]:
+    return await course_service.get_moderation_queue(limit=limit, offset=offset)
+
+
+@router.post("/{course_id}/moderation/approve", response_model=CourseSchema)
+async def approve_course(
+    course_id: UUID,
+    staff: StaffDep,
+    course_service: CourseServiceDep,
+) -> CourseSchema:
+    return await course_service.approve_course(course_id=course_id)
+
+
+@router.post("/{course_id}/moderation/reject", response_model=CourseSchema)
+async def reject_course(
+    course_id: UUID,
+    payload: CourseModerationRejectSchema,
+    staff: StaffDep,
+    course_service: CourseServiceDep,
+) -> CourseSchema:
+    return await course_service.reject_course(course_id=course_id, payload=payload)
 
 
 @router.get("")

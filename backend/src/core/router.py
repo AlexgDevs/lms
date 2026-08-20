@@ -14,7 +14,8 @@ from src.submissions import router as submissions_router
 from src.media import router as media_router
 from src.profile import router as profile_router
 from src.user.router import router as user_router
-from src.ai import router as ai_router
+from src.ai.tgp.router import router as ai_tgp_router
+from src.ai.assistant import router as ai_assistant_router
 from src.core.config import settings
 
 app_v1 = APIRouter(prefix=settings.app.API_V1_STR)
@@ -30,4 +31,5 @@ app_v1.include_router(lesson_prorgress_router)
 app_v1.include_router(lesson_course_progress_router)
 app_v1.include_router(user_router)
 app_v1.include_router(profile_router)
-app_v1.include_router(ai_router)
+app_v1.include_router(ai_tgp_router)
+app_v1.include_router(ai_assistant_router)

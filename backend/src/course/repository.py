@@ -1,7 +1,7 @@
 from typing import Any, Sequence
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, case, func, or_, select, update
+from sqlalchemy import ColumnElement, Integer, case, cast, func, or_, select, update
 from sqlalchemy.sql import Select
 
 from src.lesson.enums import LessonProgressType
@@ -114,9 +114,14 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
                 Course.status,
                 CourseMember.role,
                 func.coalesce(
-                    completed_subq.c.completed_lessons
-                    * 100
-                    / total_subq.c.total_lessons,
+                    cast(
+                        func.round(
+                            completed_subq.c.completed_lessons
+                            * 100.0
+                            / total_subq.c.total_lessons
+                        ),
+                        Integer,
+                    ),
                     0,
                 ).label("progress"),
             )

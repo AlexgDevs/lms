@@ -2,9 +2,9 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
-from src.ai.repository import TgpQuestionRepository
-from src.ai.service import AiService
-from src.ai.unit_of_work import AiUnitOfWork
+from src.ai.tgp.repository import TgpQuestionRepository
+from src.ai.tgp.service import AiService
+from src.ai.tgp.unit_of_work import AiUnitOfWork
 from src.core.dependencies import RedisDep, SessionDep
 from src.course.course_member.repository import CourseMemberRepository
 from src.course.dependencies import CourseRepositoryDep

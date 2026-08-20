@@ -1,5 +1,5 @@
-from src.ai.models import TgpQuestion
-from src.ai.schemas import TgpQuestionSchema
+from src.ai.tgp.models import TgpQuestion
+from src.ai.tgp.schemas import TgpQuestionSchema
 from src.core.mappers import BaseMapper
 
 

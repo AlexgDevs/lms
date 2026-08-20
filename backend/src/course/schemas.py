@@ -22,6 +22,7 @@ class CourseSchema(BaseSchema):
     member_count: int = 0
     is_member: bool = False
     status: CourseStatus
+    moderation_reason: str | None = None
     created_at: datetime
     tgp_enabled: bool = False
     tgp_last_full_generated_at: datetime | None = None
@@ -81,6 +82,7 @@ class CourseUpdateSchema(BaseSchema):
     cover_url: str | None = None
     category_id: UUID | None = None
     status: CourseStatus | None = None
+    moderation_reason: str | None = None
     tgp_enabled: bool | None = None
     tgp_cooldown_hours: int | None = None
     tgp_last_full_generated_at: datetime | None = None
@@ -90,3 +92,22 @@ class CourseUpdateSchema(BaseSchema):
 class CourseUserBriefSchema(CourseSchema):
     role: CourseMemberRole
     progress: int = 0
+
+
+class CourseModerationRejectSchema(BaseSchema):
+    reason: str = Field(..., min_length=1, max_length=1000)
+
+
+class CourseModerationQueueSchema(BaseSchema):
+    id: UUID
+    title: str
+    description: str | None
+    cover_url: str | None
+    owner_id: UUID
+    owner_username: str
+    status: CourseStatus
+    moderation_reason: str | None
+    created_at: datetime
+    module_count: int
+    lesson_count: int
+    block_count: int

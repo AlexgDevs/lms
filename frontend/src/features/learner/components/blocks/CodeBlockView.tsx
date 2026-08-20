@@ -15,6 +15,9 @@ interface CodeBlockViewProps {
 export function CodeBlockView({ block, value, onChange, result, locked }: CodeBlockViewProps) {
   const payload = block.payload ?? {}
   const language = typeof payload.language === "string" ? payload.language : ""
+  const testCases = Array.isArray(payload.test_cases)
+    ? (payload.test_cases as Array<{ input?: unknown; output?: unknown }>)
+    : []
 
   const isCorrect = result === "correct" || result === "completed"
   const isWrong = result === "wrong"
@@ -42,6 +45,23 @@ export function CodeBlockView({ block, value, onChange, result, locked }: CodeBl
         )}
       />
 
+      {testCases.length > 0 && (
+        <div className="border-t border-secondary/60 px-4 py-3 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Тесты
+          </p>
+          {testCases.map((testCase, index) => (
+            <div key={index} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-start">
+              <span className="mt-1 rounded bg-secondary/60 px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                Тест {index + 1}
+              </span>
+              <TestCaseCell label="Вход" value={testCase.input} />
+              <TestCaseCell label="Ожидаемый вывод" value={testCase.output} />
+            </div>
+          ))}
+        </div>
+      )}
+
       {isCorrect && (
         <p className="flex items-center gap-1.5 px-4 pb-3 text-sm font-medium text-success">
           <CheckCircle2 className="h-4 w-4" />
@@ -54,6 +74,18 @@ export function CodeBlockView({ block, value, onChange, result, locked }: CodeBl
           Неверно. Попробуйте ещё раз.
         </p>
       )}
+    </div>
+  )
+}
+
+function TestCaseCell({ label, value }: { label: string; value: unknown }) {
+  const text = value === undefined || value === null ? "" : String(value)
+  return (
+    <div className="min-w-0 rounded-lg bg-background/60 px-2.5 py-1.5">
+      <p className="text-[10px] font-medium text-muted-foreground uppercase">{label}</p>
+      <pre className="mt-0.5 whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-foreground">
+        {text || "—"}
+      </pre>
     </div>
   )
 }

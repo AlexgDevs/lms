@@ -2,8 +2,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
-from src.ai.dependencies import AiServiceDep
-from src.ai.schemas import (
+from src.ai.tgp.dependencies import AiServiceDep
+from src.ai.tgp.schemas import (
     TgpGenerateResponseSchema,
     TgpQuestionSchema,
     TgpQuestionUpdateSchema,

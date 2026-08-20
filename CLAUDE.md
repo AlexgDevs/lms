@@ -72,13 +72,14 @@ Run from the repo root unless otherwise noted.
 │   └── <feature>/          # auth, user, course (+course_member, +category),
 │                           # module, lesson (+lesson_progress), block, submissions,
 │                           # codeexec (Piston client), media (+media/media_attachment),
-│                           # profile (read-only stats), ai (TGP Celery worker)
+│                           # profile (read-only stats), ai (+ai/tgp, +ai/assistant,
+│                           # +ai/course_review)
 ├── frontend/src/
 │   ├── main.tsx, routes.ts, routeTree.gen.ts
 │   ├── app/providers/      # React Query, theme, layout
 │   ├── client/             # GENERATED typed API client — DO NOT EDIT
 │   ├── components/         # shared UI (components/ui = shadcn) + layout
-│   ├── features/           # auth, dashboard, learner, media, profile, settings, teaching
+│   ├── features/           # admin, auth, dashboard, learner, media, profile, settings, teaching
 │   │   └── <feature>/      # api/ (useX hooks), pages/, components/, schemas/
 │   ├── lib/                # utils (cn), toast, errors, dnd, media, tgp (cooldowns)
 │   ├── styles/             # Tailwind v4 design system (tokens/semantic/themes)
@@ -121,10 +122,20 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 
 ### Feature modules (full graph in `.claude/graph.md`)
 - `auth` — register/login/refresh/logout, `RefreshToken` model, security utils.
-- `user` — profiles; exposes `UserIdDep` / `CurrentUserDep`.
+- `user` — profiles; exposes `UserIdDep` / `CurrentUserDep`; `is_staff` flag on
+  `User` + `StaffDep` (403 `UserNotStaffError`); `GET/PATCH /users/me` return
+  `UserMeSchema` (includes `is_staff`, not `password_hash`); promote the first
+  admin via `scripts/promote_admin.py <email-or-username>`.
 - `course` + `course/course_member` + `course/category` — courses, enrollment
   (`CourseMember`), and the category tree (`Category`, seeded via Alembic);
-  `CourseStatus` (draft/published); **anonymous public read** of published courses
+  `CourseStatus` (draft/under_review/published/rejected) and moderation:
+  owner `PATCH /courses/{id}` may only set `status=draft`; owner
+  `POST /courses/{id}/submit` runs a completeness check (description, ≥1
+  module/lesson, ≥`course_review.min_blocks` blocks) then enqueues Celery
+  `ai.course_review.review`; staff `GET /courses/moderation/queue`,
+  `POST /courses/{id}/moderation/approve|reject` (reject requires `reason` →
+  `courses.moderation_reason`, visible to the owner in the builder).
+  **anonymous public read** of published courses
   (`GET /courses` with `filter=all`, `GET /courses/{id}` with `filter=current`,
   via `OptionalUserIdDep`); `CourseSchema.is_member` resolved per viewer on read;
   search via `q` (pg_trgm GIN indexes on title/description) and category filter by
@@ -150,11 +161,23 @@ router → service → repository / unit_of_work → mapper → schemas → mode
   e.g. `.wslconfig` → `kernelCommandLine=cgroup_no_v1=all`).
 - `media` + `media/media_attachment` — uploads (local/S3 storage), per-owner listing, presigned URLs, delete protection via generic `MediaAttachment` (owner_type/owner_id/role); service used by `block` and `course`.
 - `profile` — read-only stats (`GET /users/me/stats`): streak, weekly (7-day) and yearly (365-day contribution grid) computed from `lesson_progress.completed_at`; no own tables — reuses `LessonProgress` (router/service/repository/schemas/dependencies only).
-- `ai` — AI TGP (The Golden Path) pre-course placement testing: `TgpQuestion`
-  bank per course/module; async generation via Celery (`ai.tgp.generate`,
-  `ai.tgp.regenerate_question`, Redis broker + `tgp:generating:{course_id}` lock)
-  through `core/celery_app.py`; `submit` → per-module scores → Gemini evaluation
-  (RECOMMENDED/OPTIONAL + verdict) with a deterministic threshold fallback.
+- `ai` — shared Gemini/OpenAI-compatible client (`ai/gemini.py`, `src/ai/exceptions.py`
+  with generic `AiError`/`AiNotConfiguredError`/`AiRateLimitError`/`AiUnavailableError`)
+  plus three features:
+  - `ai/tgp` — TGP (The Golden Path) pre-course placement testing: `TgpQuestion`
+    bank per course/module; async generation via Celery (`ai.tgp.generate`,
+    `ai.tgp.regenerate_question`, Redis broker + `tgp:generating:{course_id}` lock)
+    through `core/celery_app.py`; `submit` → per-module scores → Gemini evaluation
+    (RECOMMENDED/OPTIONAL + verdict) with a deterministic threshold fallback.
+  - `ai/assistant` — inline learner assistant (hint / streaming `ask` via SSE /
+    level regeneration) with Redis cooldowns, per-user rate limits and a cached
+    "ladder" of hint levels.
+  - `ai/course_review` — moderation pre-screen: Celery task `ai.course_review.review`
+    (Redis lock `course_review:{course_id}`, retries on rate-limit/network, heuristic
+    fallback when no AI key) runs `GeminiService.review_course` over gathered text/
+    quiz/code content; AI `approved` → auto-publish, AI `flagged` → stays `under_review`
+    with `moderation_reason` for the manual queue (thresholds via
+    `settings.course_review`).
 
 ## Frontend architecture
 

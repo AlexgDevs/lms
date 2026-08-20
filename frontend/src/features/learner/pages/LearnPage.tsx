@@ -12,10 +12,12 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { BlockView } from "@/features/learner/components/blocks/BlockView"
 import { LearnSidebar } from "@/features/learner/components/LearnSidebar"
+import { IrbisDialogue } from "@/features/learner/components/assistant/IrbisDialogue"
 import { useLearnData } from "@/features/learner/api/useLearnData"
 import { useEnrollCourse } from "@/features/dashboard/api/useCourses"
 import type { BlockSchema, BlockSubmissionSchema } from "@/client"
 import { BlockSubmissionType, BlockType } from "@/client"
+import { ASSISTANT_ATTEMPT_THRESHOLD } from "@/lib/assistant"
 import { cn } from "@/lib/utils"
 
 export function LearnPage() {
@@ -103,6 +105,8 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
   const [codeByBlock, setCodeByBlock] = useState<Record<string, string>>({})
   const [resultsByBlock, setResultsByBlock] = useState<Record<string, BlockSubmissionSchema>>({})
   const [retrying, setRetrying] = useState<Record<string, boolean>>({})
+  const [assistantBlockId, setAssistantBlockId] = useState<string | null>(null)
+  const [assistantFromOffer, setAssistantFromOffer] = useState(false)
 
   const totalSteps = blocks.length
   const resumeIndex = data.firstIncompleteIndex >= 0 ? data.firstIncompleteIndex : totalSteps - 1
@@ -140,6 +144,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
   const allStepsDone = totalSteps > 0 && lastIncomplete === -1
 
   const currentBlock = blocks[Math.min(step, totalSteps - 1)]
+  const assistantBlock = blocks.find((block) => block.id === assistantBlockId)
   const isQuiz =
     currentBlock?.block_type === BlockType.QUIZ_SINGLE_CHOICE ||
     currentBlock?.block_type === BlockType.QUIZ_MULTIPLE_CHOICE
@@ -166,6 +171,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
   const goToStep = (index: number) => {
     setStep(index)
     setRetrying({})
+    setAssistantBlockId(null)
   }
 
   const goNext = () => goToStep(Math.min(step + 1, totalSteps - 1))
@@ -189,7 +195,17 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
               delete next[currentBlock.id]
               return next
             })
+            if (assistantBlockId === currentBlock.id) {
+              setAssistantBlockId(null)
+            }
             goNext()
+          } else if (
+            submission.submission_type === BlockSubmissionType.WRONG &&
+            submission.attempts >= ASSISTANT_ATTEMPT_THRESHOLD &&
+            assistantBlockId !== currentBlock.id
+          ) {
+            setAssistantBlockId(currentBlock.id)
+            setAssistantFromOffer(true)
           }
         },
       },
@@ -334,14 +350,28 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
                 </Button>
               )}
               {(isQuiz || isCode) && !isStepDone ? (
-                <Button
-                  className="bg-primary hover:bg-primary-hover text-white"
-                  disabled={data.isSubmittingStep || quizNeedsAnswer || codeNeedsAnswer}
-                  onClick={handleCheck}
-                >
-                  {data.isSubmittingStep && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Проверить
-                </Button>
+                <>
+                  {stepResult === BlockSubmissionType.WRONG && assistantBlockId !== currentBlock.id && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setAssistantBlockId(currentBlock.id)
+                        setAssistantFromOffer(false)
+                      }}
+                    >
+                      <Sparkles className="h-4 w-4 mr-1.5" />
+                      Подсказка
+                    </Button>
+                  )}
+                  <Button
+                    className="bg-primary hover:bg-primary-hover text-white"
+                    disabled={data.isSubmittingStep || quizNeedsAnswer || codeNeedsAnswer}
+                    onClick={handleCheck}
+                  >
+                    {data.isSubmittingStep && <Loader2 className="h-4 w-4 animate-spin" />}
+                    Проверить
+                  </Button>
+                </>
               ) : primaryLabel ? (
                 <Button
                   className="bg-primary hover:bg-primary-hover text-white"
@@ -356,6 +386,28 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
             </div>
           </div>
         </>
+      )}
+
+      {assistantBlock && (
+        <IrbisDialogue
+          open
+          block={assistantBlock}
+          courseId={courseId as string}
+          lessonId={lessonId as string}
+          attempts={
+            resultsByBlock[assistantBlock.id]?.attempts ??
+            data.submissionsByBlock.get(assistantBlock.id)?.attempts ??
+            ASSISTANT_ATTEMPT_THRESHOLD
+          }
+          initialStage={assistantFromOffer ? "offer" : "focus"}
+          currentCode={
+            assistantBlock.id === currentBlock?.id && currentBlock.block_type === BlockType.CODE
+              ? codeValue
+              : undefined
+          }
+          solved={isDone(assistantBlock.id)}
+          onClose={() => setAssistantBlockId(null)}
+        />
       )}
     </div>
   )

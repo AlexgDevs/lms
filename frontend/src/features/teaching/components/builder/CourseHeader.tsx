@@ -20,9 +20,35 @@ import {
   Pencil,
   Settings2,
   Folder,
+  Clock3,
+  AlertTriangle,
 } from "lucide-react"
 import { resolveMediaUrl } from "@/lib/media"
 import { CategoryPicker } from "@/features/teaching/components/CategoryPicker"
+
+type CourseStatus = "draft" | "under_review" | "published" | "rejected"
+
+const STATUS_META: Record<
+  CourseStatus,
+  { label: string; icon: typeof Globe; className: string }
+> = {
+  draft: { label: "Черновик", icon: Lock, className: "bg-reward/10 text-reward" },
+  under_review: {
+    label: "На модерации",
+    icon: Clock3,
+    className: "bg-primary/10 text-primary",
+  },
+  published: {
+    label: "Опубликован",
+    icon: Globe,
+    className: "bg-success/10 text-success",
+  },
+  rejected: {
+    label: "Отклонено",
+    icon: AlertTriangle,
+    className: "bg-destructive/10 text-destructive",
+  },
+}
 
 interface CourseHeaderProps {
   course: {
@@ -31,7 +57,8 @@ interface CourseHeaderProps {
     description?: string | null
     price?: number | null
     cover_url?: string | null
-    status?: "draft" | "published"
+    status?: CourseStatus
+    moderation_reason?: string | null
     category_id?: string | null
     created_at?: string
   }
@@ -39,10 +66,12 @@ interface CourseHeaderProps {
     title?: string
     description?: string | null
     price?: number | null
-    status?: "draft" | "published"
+    status?: "draft"
     category_id?: string | null
   }) => void
   isUpdating?: boolean
+  onSubmitReview?: () => void
+  isSubmittingReview?: boolean
   onUploadCover?: (file: File) => void
   onRemoveCover?: () => void
   isUploadingCover?: boolean
@@ -52,6 +81,8 @@ export function CourseHeader({
   course,
   onUpdateCourse,
   isUpdating = false,
+  onSubmitReview,
+  isSubmittingReview = false,
   onUploadCover,
   onRemoveCover,
   isUploadingCover = false,
@@ -66,6 +97,9 @@ export function CourseHeader({
   const [savedField, setSavedField] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [courseSnapshot, setCourseSnapshot] = useState(course)
+
+  const status: CourseStatus = course.status ?? "draft"
+  const StatusIcon = STATUS_META[status].icon
 
   const titleInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
@@ -150,7 +184,7 @@ export function CourseHeader({
 
   const handleTogglePublish = () => {
     onUpdateCourse({
-      status: course.status === "published" ? "draft" : "published",
+      status: "draft",
     })
   }
 
@@ -159,7 +193,8 @@ export function CourseHeader({
   const settingsDirty = descriptionChanged || priceChanged
 
   return (
-    <div className="rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-3 flex items-center gap-3">
+    <>
+      <div className="rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-3 flex items-center gap-3">
       {/* Миниатюра обложки — вместо большого баннера, кликабельный триггер загрузки */}
       <div className="relative shrink-0">
         <button
@@ -270,13 +305,11 @@ export function CourseHeader({
           <Badge
             variant="secondary"
             className={`gap-1 rounded-md px-1.5 py-0 h-4.5 text-[11px] font-normal border-none ${
-              course.status === "published"
-                ? "bg-success/10 text-success"
-                : "bg-reward/10 text-reward"
+              STATUS_META[status].className
             }`}
           >
-            {course.status === "published" ? <Globe size={10} /> : <Lock size={10} />}
-            {course.status === "published" ? "Опубликован" : "Черновик"}
+            <StatusIcon size={10} />
+            {STATUS_META[status].label}
           </Badge>
           {course.created_at && (
             <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -287,18 +320,41 @@ export function CourseHeader({
         </div>
       </div>
 
-      {/* Публикация */}
-      <Button
-        type="button"
-        variant={course.status === "published" ? "outline" : "default"}
-        size="sm"
-        onClick={handleTogglePublish}
-        disabled={isUpdating}
-        className="gap-1.5 text-xs font-medium h-8 shrink-0"
-      >
-        {isUpdating && <Loader2 size={13} className="animate-spin" />}
-        {course.status === "published" ? "Снять с публикации" : "Опубликовать курс"}
-      </Button>
+      {/* Публикация / модерация */}
+      {status === "published" ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleTogglePublish}
+          disabled={isUpdating}
+          className="gap-1.5 text-xs font-medium h-8 shrink-0"
+        >
+          {isUpdating && <Loader2 size={13} className="animate-spin" />}
+          Снять с публикации
+        </Button>
+      ) : (
+        <Button
+          type="button"
+          variant="default"
+          size="sm"
+          onClick={onSubmitReview}
+          disabled={isSubmittingReview || status === "under_review"}
+          className="gap-1.5 text-xs font-medium h-8 shrink-0"
+          title={
+            status === "under_review"
+              ? "Курс уже отправлен на модерацию"
+              : "Отправить курс на модерацию"
+          }
+        >
+          {isSubmittingReview && <Loader2 size={13} className="animate-spin" />}
+          {status === "under_review"
+            ? "На модерации..."
+            : status === "rejected"
+              ? "Отправить заново"
+              : "Отправить на модерацию"}
+        </Button>
+      )}
 
       {/* Настройки: описание + цена в попапе, не занимают место в шапке постоянно */}
       <Popover open={settingsOpen} onOpenChange={setSettingsOpen}>
@@ -428,6 +484,37 @@ export function CourseHeader({
           )}
         </PopoverContent>
       </Popover>
-    </div>
+      </div>
+
+      {(status === "under_review" || status === "rejected") && (
+        <div className="mt-2 rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-2.5 flex items-start gap-2 border border-dashed">
+          <AlertTriangle
+            size={14}
+            className={`mt-0.5 shrink-0 ${
+              status === "rejected" ? "text-destructive" : "text-primary"
+            }`}
+          />
+          <div className="text-xs leading-relaxed text-muted-foreground min-w-0">
+            {status === "rejected" ? (
+              <>
+                <span className="font-medium text-foreground">
+                  Курс отклонён модерацией.
+                </span>{" "}
+                {course.moderation_reason || "Причина не указана."}
+              </>
+            ) : (
+              <>
+                <span className="font-medium text-foreground">
+                  Курс на модерации.
+                </span>{" "}
+                {course.moderation_reason
+                  ? `Причина проверки: ${course.moderation_reason}`
+                  : "Проверка может занять несколько минут."}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   )
 }

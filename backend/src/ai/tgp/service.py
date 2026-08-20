@@ -8,8 +8,8 @@ from loguru import logger
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.ai.enums import TgpDecision
-from src.ai.exceptions import (
+from src.ai.tgp.enums import TgpDecision
+from src.ai.tgp.exceptions import (
     NotEnoughModulesError,
     TgpAiNotConfiguredError,
     TgpCooldownError,
@@ -25,7 +25,7 @@ from src.ai.gemini import (
     ModuleRecommendation,
     ModuleStat,
 )
-from src.ai.schemas import (
+from src.ai.tgp.schemas import (
     TgpGenerateResponseSchema,
     TgpModuleRecommendationSchema,
     TgpQuestionSchema,
@@ -33,12 +33,12 @@ from src.ai.schemas import (
     TgpSubmitRequestSchema,
     TgpSubmitResponseSchema,
 )
-from src.ai.tasks import (
+from src.ai.tgp.tasks import (
     TGP_LOCK_KEY,
     generate_tgp_test_task,
     regenerate_single_question_task,
 )
-from src.ai.unit_of_work import AiUnitOfWork
+from src.ai.tgp.unit_of_work import AiUnitOfWork
 from src.core.config import settings
 from src.core.services import BaseService
 from src.course.course_member.schemas import CourseMemberUpdateSchema

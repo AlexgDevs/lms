@@ -1,7 +1,14 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Enum as SAEnum, UUID as sqlUUID
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Enum as SAEnum,
+    Text,
+    UUID as sqlUUID,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.course.enums import CourseMemberRole, CourseStatus
@@ -36,6 +43,7 @@ class Course(UUIDBase):
         server_default="draft",
         default=CourseStatus.DRAFT,
     )
+    moderation_reason: Mapped[str | None] = mapped_column(Text)
 
     # AI TGP (The Golden Path) pre-testing
     tgp_enabled: Mapped[bool] = mapped_column(

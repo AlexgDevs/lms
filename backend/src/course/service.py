@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
-from typing import Literal, Sequence
+from typing import TYPE_CHECKING, Any, Literal, Sequence
 from uuid import UUID
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.course.course_member.schemas import (
@@ -8,17 +9,24 @@ from src.course.course_member.schemas import (
     CourseMemberSchema,
 )
 from src.auth.exceptions import InvalidAccessTokenError
+from src.core.config import settings
 from src.core.services.base_service import BaseService
 from src.course.enums import CourseStatus
 from src.course.exceptions import (
+    CourseAlreadyPublishedError,
+    CourseIncompleteError,
     CourseMemberAlredyEnrolledError,
     CourseNotFoundError,
     CourseNotPublishedError,
+    CourseNotUnderReviewError,
     CourseOwnerCannotEnrollError,
+    CourseStatusNotAllowedError,
 )
 from src.course.schemas import (
     CourseCreateRequestSchema,
     CourseCreateSchema,
+    CourseModerationQueueSchema,
+    CourseModerationRejectSchema,
     CourseSchema,
     CourseUpdateRequestSchema,
     CourseUpdateSchema,
@@ -26,6 +34,12 @@ from src.course.schemas import (
 )
 from src.course.unit_of_work import CourseUnitOfWork
 from src.media.service import MediaService
+
+if TYPE_CHECKING:
+    from src.block.models import Block
+    from src.lesson.models import Lesson
+    from src.module.models import Module
+    from src.user.models import User
 
 COVER_ROLE = "cover"
 
@@ -66,6 +80,9 @@ class CourseService(BaseService):
             **update_data_dict,
         )
 
+        if payload.status is not None and payload.status != CourseStatus.DRAFT:
+            raise CourseStatusNotAllowedError
+
         course = await self.uow.courses.get_one(
             id=course_id, owner_id=owner_id, is_deleted=None
         )
@@ -96,6 +113,166 @@ class CourseService(BaseService):
         self, user_id: UUID
     ) -> list[CourseUserBriefSchema]:
         return await self.uow.courses.get_courses_where_user_is_member(user_id)
+
+    async def _count(self, model: Any, course_id: UUID) -> int:
+        result = await self.session.execute(
+            select(func.count()).select_from(model).where(model.course_id == course_id)
+        )
+        return int(result.scalar_one())
+
+    async def submit_for_review(self, course_id: UUID, owner_id: UUID) -> CourseSchema:
+        from src.block.models import Block
+        from src.lesson.models import Lesson
+        from src.module.models import Module
+
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=owner_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+        if course.status == CourseStatus.PUBLISHED:
+            raise CourseAlreadyPublishedError
+        if not (course.description or "").strip():
+            raise CourseIncompleteError(detail="Course description is required")
+
+        module_count = await self._count(Module, course_id)
+        lesson_count = await self._count(Lesson, course_id)
+        block_count = await self._count(Block, course_id)
+        missing: list[str] = []
+        if module_count < settings.course_review.COURSE_REVIEW_MIN_MODULES:
+            missing.append("at least 1 module")
+        if lesson_count < settings.course_review.COURSE_REVIEW_MIN_LESSONS:
+            missing.append("at least 1 lesson")
+        if block_count < settings.course_review.COURSE_REVIEW_MIN_BLOCKS:
+            missing.append("at least 3 content blocks")
+        if missing:
+            raise CourseIncompleteError(
+                detail=f"Course is missing: {', '.join(missing)}"
+            )
+
+        course = await self.uow.courses.update(
+            course_id,
+            CourseUpdateSchema(
+                status=CourseStatus.UNDER_REVIEW,
+                moderation_reason=None,
+            ),
+            exclude_none=False,
+        )
+        await self.uow.commit()
+
+        from src.ai.course_review.tasks import review_course_task
+
+        review_course_task.delay(str(course_id))
+        return course
+
+    async def approve_course(self, course_id: UUID) -> CourseSchema:
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+        if not course:
+            raise CourseNotFoundError
+        if course.status != CourseStatus.UNDER_REVIEW:
+            raise CourseNotUnderReviewError
+        course = await self.uow.courses.update(
+            course_id,
+            CourseUpdateSchema(
+                status=CourseStatus.PUBLISHED,
+                moderation_reason=None,
+            ),
+            exclude_none=False,
+        )
+        await self.uow.commit()
+        return course
+
+    async def reject_course(
+        self, course_id: UUID, payload: CourseModerationRejectSchema
+    ) -> CourseSchema:
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+        if not course:
+            raise CourseNotFoundError
+        if course.status != CourseStatus.UNDER_REVIEW:
+            raise CourseNotUnderReviewError
+        course = await self.uow.courses.update(
+            course_id,
+            CourseUpdateSchema(
+                status=CourseStatus.REJECTED,
+                moderation_reason=payload.reason,
+            ),
+            exclude_none=False,
+        )
+        await self.uow.commit()
+        return course
+
+    async def get_moderation_queue(
+        self, limit: int, offset: int
+    ) -> list[CourseModerationQueueSchema]:
+        from src.block.models import Block
+        from src.lesson.models import Lesson
+        from src.module.models import Module
+        from src.user.models import User
+
+        courses = list(
+            await self.uow.courses.get_filtered(
+                status=CourseStatus.UNDER_REVIEW,
+                is_deleted=None,
+                limit=limit,
+                offset=offset,
+            )
+        )
+        if not courses:
+            return []
+
+        course_ids = [course.id for course in courses]
+        owner_ids = {course.owner_id for course in courses}
+
+        users = (
+            (await self.session.execute(select(User).where(User.id.in_(owner_ids))))
+            .scalars()
+            .all()
+        )
+        usernames = {user.id: user.username for user in users}
+
+        module_rows = (
+            await self.session.execute(
+                select(Module.course_id, func.count())
+                .where(Module.course_id.in_(course_ids))
+                .group_by(Module.course_id)
+            )
+        ).all()
+        lesson_rows = (
+            await self.session.execute(
+                select(Lesson.course_id, func.count())
+                .where(Lesson.course_id.in_(course_ids))
+                .group_by(Lesson.course_id)
+            )
+        ).all()
+        block_rows = (
+            await self.session.execute(
+                select(Block.course_id, func.count())
+                .where(Block.course_id.in_(course_ids))
+                .group_by(Block.course_id)
+            )
+        ).all()
+
+        module_counts = {row[0]: int(row[1]) for row in module_rows}
+        lesson_counts = {row[0]: int(row[1]) for row in lesson_rows}
+        block_counts = {row[0]: int(row[1]) for row in block_rows}
+
+        return [
+            CourseModerationQueueSchema(
+                id=course.id,
+                title=course.title,
+                description=course.description,
+                cover_url=course.cover_url,
+                owner_id=course.owner_id,
+                owner_username=usernames.get(course.owner_id, ""),
+                status=course.status,
+                moderation_reason=course.moderation_reason,
+                created_at=course.created_at,
+                module_count=module_counts.get(course.id, 0),
+                lesson_count=lesson_counts.get(course.id, 0),
+                block_count=block_counts.get(course.id, 0),
+            )
+            for course in courses
+        ]
 
     async def list_courses(
         self,

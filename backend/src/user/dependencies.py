@@ -9,6 +9,7 @@ from src.core.dependencies import (
     SessionDep,
 )
 from src.auth.security import decode_access_token
+from src.user.exceptions import UserNotStaffError
 from src.user.repository import UserRepository
 from src.user.schemas import UserSchema
 from src.user.service import UserService
@@ -54,8 +55,19 @@ async def get_current_user(
     return await user_service.get_user(user_id)
 
 
+async def get_current_staff(
+    user_id: UserIdDep,
+    user_service: UserServiceDep,
+) -> UserSchema:
+    user = await user_service.get_user(user_id)
+    if not user.is_staff:
+        raise UserNotStaffError
+    return user
+
+
 UserRepositoryDep = Annotated[UserRepository, Depends(get_user_repository)]
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 UserIdDep = Annotated[UUID, Depends(get_current_user_id)]
 OptionalUserIdDep = Annotated[UUID | None, Depends(get_optional_current_user_id)]
 CurrentUserDep = Annotated[UserSchema, Depends(get_current_user)]
+StaffDep = Annotated[UserSchema, Depends(get_current_staff)]
