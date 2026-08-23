@@ -114,7 +114,7 @@ export function TgpPanel({
         </div>
 
         {!canGenerate && tgpEnabled && (
-          <div className="flex items-start gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 rounded-md mb-3">
+          <div className="flex items-start gap-2 text-xs text-destructive/80 bg-destructive/5 px-3 py-2 rounded-md mb-3">
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <span>
               Для генерации теста нужно минимум {minModules} модулей.

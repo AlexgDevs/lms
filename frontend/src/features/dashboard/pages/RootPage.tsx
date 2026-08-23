@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Edit3, Loader2, PlusCircle, Sparkles } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { isLoggedIn } from "@/features/auth/api/useAuth";
 import {
   useCreatedCourses,
@@ -87,13 +88,11 @@ export function RootPage() {
               : "Войдите, чтобы увидеть ваши курсы и прогресс."}
           </p>
         </div>
-        <button
-          type="button"
+        <Button
           onClick={goToCatalog}
-          className="px-4 py-1.5 text-xs font-medium rounded-full bg-primary hover:bg-primary-hover text-white transition-colors shadow-sm"
         >
           Каталог
-        </button>
+        </Button>
       </div>
 
       {/* Ряды курсов */}

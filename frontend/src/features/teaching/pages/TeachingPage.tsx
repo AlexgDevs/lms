@@ -13,6 +13,7 @@ import {
   Loader2,
   BookOpen
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { useNavigate } from "@tanstack/react-router"
 import { useCourses } from "@/features/teaching/api/useCourses"
 import { CreateCourseForm } from "@/features/teaching/components/CreateCourseForm"
@@ -118,14 +119,13 @@ export function TeachingPage() {
               Начните с нуля или воспользуйтесь AI Copilot для генерации структуры вашего первого обучающего модуля.
             </p>
           </div>
-          <button
-            type="button"
+          <Button
             onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white font-semibold text-xs rounded-full transition-all shadow-[var(--shadow-glow-primary)] active:scale-95 cursor-pointer"
+            className="shadow-[var(--shadow-glow-primary)] active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span>Создать первый курс</span>
-          </button>
+          </Button>
         </div>
       ) : (
         <>
@@ -174,27 +174,25 @@ export function TeachingPage() {
 
                 {/* Действия с выбранным курсом */}
                 <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 justify-center">
-                  <button
-                    type="button"
+                  <Button
                     onClick={() => {
                       navigate({
                         to: `${ROUTES.TEACHING_COURSE}/$courseId`,
                         params: { courseId: String(mainCourse.id) },
                       })
                     }}
-                    className="flex items-center justify-center gap-2 px-5 py-3 bg-primary hover:bg-primary-hover text-white font-semibold text-xs rounded-full shadow-[var(--shadow-glow-primary)] transition-all active:scale-95 cursor-pointer"
+                    className="shadow-[var(--shadow-glow-primary)] active:scale-95"
                   >
                     <Edit3 className="w-4 h-4" />
                     <span>Открыть конструктор уроков</span>
-                  </button>
+                  </Button>
 
-                  <button
-                    type="button"
-                    className="flex items-center justify-center gap-2 px-5 py-2.5 bg-background/60 hover:bg-background text-foreground text-xs font-medium rounded-md transition-all"
+                  <Button
+                    variant="outline"
                   >
                     <BarChart2 className="w-4 h-4 text-primary" />
                     <span>Аналитика и отзывы</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -289,13 +287,12 @@ export function TeachingPage() {
                     placeholder="Например: Продвинутый Kubernetes..."
                     className="w-full bg-muted/40 rounded-md px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors"
                   />
-                  <button
-                    type="button"
-                    className="w-full py-2 px-3 bg-primary hover:bg-primary-hover text-white font-semibold text-xs rounded-full flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  <Button
+                    className="w-full"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Создать структуру</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
 

@@ -149,7 +149,7 @@ export function ModerationPage() {
                   size="sm"
                   disabled={isApproving}
                   onClick={() => approveCourse(course.id)}
-                  className="gap-1.5 text-xs h-8 bg-success hover:bg-success/85 text-white"
+                  className="gap-1.5 text-xs h-8"
                 >
                   {isApproving ? (
                     <Loader2 size={13} className="animate-spin" />

@@ -683,6 +683,10 @@ export type CourseSchema = {
      */
     owner_id: string;
     /**
+     * Owner Username
+     */
+    owner_username?: string;
+    /**
      * Title
      */
     title: string;
@@ -794,6 +798,10 @@ export type CourseUserBriefSchema = {
      * Owner Id
      */
     owner_id: string;
+    /**
+     * Owner Username
+     */
+    owner_username?: string;
     /**
      * Title
      */

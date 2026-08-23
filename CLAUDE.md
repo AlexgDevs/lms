@@ -28,7 +28,7 @@ Run from the repo root unless otherwise noted.
 ### AI worker (Celery)
 - Run (from `backend/`, Redis required — `docker compose up -d redis`):
   `uv run celery -A src.core.celery_app worker --loglevel=info`
-  (or `.\scripts\run-worker.ps1` on Windows). Consumes `ai.tgp.*` tasks (Redis broker).
+  (or `.\scripts\run-worker.ps1` on Windows). Consumes `ai.tgp.*` and `ai.course_review.*` tasks (Redis broker).
 - AI gateway: OpenAI-compatible endpoint via `AI_API_KEY`/`AI_BASE_URL`/`AI_MODEL`
   (default `https://openai.api.proxyapi.ru/v1`, model `openai/gpt-4o`). Without a
   key, TGP generation returns 503.
@@ -56,7 +56,7 @@ Run from the repo root unless otherwise noted.
 │   ├── core/               # Shared infrastructure — no business logic
 │   │   ├── config.py       # pydantic-settings: postgres / app / redis / storage / media
 │   │   ├── router.py       # app_v1; registers ALL feature routers
-│   │   ├── celery_app.py   # Celery app (Redis broker; ai.tgp.* tasks)
+│   │   ├── celery_app.py   # Celery app (Redis broker; ai.tgp.* + ai.course_review.* tasks)
 │   │   ├── dependencies.py # SessionDep, RedisDep, StorageDep, AccessTokenDep
 │   │   ├── postgres/       # engine, session, Base/UUIDBase, types, mixins
 │   │   ├── redis/          # asyncio redis client
@@ -128,6 +128,7 @@ router → service → repository / unit_of_work → mapper → schemas → mode
   admin via `scripts/promote_admin.py <email-or-username>`.
 - `course` + `course/course_member` + `course/category` — courses, enrollment
   (`CourseMember`), and the category tree (`Category`, seeded via Alembic);
+  `CourseSchema` includes `owner_username` (resolved by service on read);
   `CourseStatus` (draft/under_review/published/rejected) and moderation:
   owner `PATCH /courses/{id}` may only set `status=draft`; owner
   `POST /courses/{id}/submit` runs a completeness check (description, ≥1

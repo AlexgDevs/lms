@@ -268,7 +268,7 @@ export function CourseHeader({
               variant="default"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleSaveTitle}
-              className="h-8 w-8 shrink-0 rounded-md bg-success hover:bg-success/85 text-white"
+              className="h-8 w-8 shrink-0 rounded-md"
               title="Сохранить"
             >
               <Check size={14} />
@@ -464,7 +464,7 @@ export function CourseHeader({
                   if (descriptionChanged) handleSaveDescription()
                   if (priceChanged) handleSavePrice()
                 }}
-                className="h-8 flex-1 rounded-full bg-success hover:bg-success/85 text-white text-xs gap-1.5"
+                className="h-8 flex-1 rounded-full text-xs gap-1.5"
               >
                 <Check size={13} /> Сохранить
               </Button>
@@ -487,7 +487,7 @@ export function CourseHeader({
       </div>
 
       {(status === "under_review" || status === "rejected") && (
-        <div className="mt-2 rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-2.5 flex items-start gap-2 border border-dashed">
+        <div className="mt-2 rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-2.5 flex items-start gap-2 border">
           <AlertTriangle
             size={14}
             className={`mt-0.5 shrink-0 ${

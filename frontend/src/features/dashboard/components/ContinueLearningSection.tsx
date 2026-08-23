@@ -1,9 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { resolveMediaUrl } from "@/lib/media";
+import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/features/dashboard/components/CourseCard";
 import type { CourseCardData } from "@/features/dashboard/types";
 
@@ -22,6 +24,7 @@ interface ContinueLearningSectionProps {
 }
 
 const FEATURED_LIMIT = 2;
+const VISIBLE_REST_LIMIT = 4;
 
 export function ContinueLearningSection({
   title,
@@ -36,9 +39,12 @@ export function ContinueLearningSection({
   rowActionIcon: RowActionIcon = ArrowRight,
   showProgress = true,
 }: ContinueLearningSectionProps) {
+  const [showAll, setShowAll] = useState(false);
   const navigate = useNavigate();
   const featured = courses.slice(0, FEATURED_LIMIT);
   const rest = courses.slice(FEATURED_LIMIT);
+  const visibleRest = showAll ? rest : rest.slice(0, VISIBLE_REST_LIMIT);
+  const hiddenCount = rest.length - VISIBLE_REST_LIMIT;
 
   const handleNavigate = (course: CourseCardData) => {
     if (onCourseClick) {
@@ -75,17 +81,8 @@ export function ContinueLearningSection({
 
       {rest.length > 0 && (
         <div className="space-y-2 pt-2 lg:max-w-[66.67%]">
-          <p className="text-xs font-medium text-muted-foreground">
-            Ещё {rest.length}{" "}
-            {rest.length % 10 === 1 && rest.length % 100 !== 11
-              ? "курс"
-              : rest.length % 10 >= 2 && rest.length % 10 <= 4 && (rest.length % 100 < 12 || rest.length % 100 > 14)
-                ? "курса"
-                : "курсов"}
-          </p>
-
           <div className="space-y-2">
-            {rest.map((course) => (
+            {visibleRest.map((course) => (
               <div
                 key={course.id}
                 role="button"
@@ -134,6 +131,27 @@ export function ContinueLearningSection({
               </div>
             ))}
           </div>
+
+          {!showAll && hiddenCount > 0 && (
+            <Button
+              variant="ghost"
+              className="w-full text-xs text-muted-foreground"
+              onClick={() => setShowAll(true)}
+            >
+              <ChevronDown className="w-3.5 h-3.5 mr-1" />
+              Показать ещё {hiddenCount} курс{hiddenCount % 10 === 1 && hiddenCount % 100 !== 11 ? "" : hiddenCount % 10 >= 2 && hiddenCount % 10 <= 4 && (hiddenCount % 100 < 12 || hiddenCount % 100 > 14) ? "а" : "ов"}
+            </Button>
+          )}
+          {showAll && rest.length > VISIBLE_REST_LIMIT && (
+            <Button
+              variant="ghost"
+              className="w-full text-xs text-muted-foreground"
+              onClick={() => setShowAll(false)}
+            >
+              <ChevronUp className="w-3.5 h-3.5 mr-1" />
+              Свернуть
+            </Button>
+          )}
         </div>
       )}
     </section>

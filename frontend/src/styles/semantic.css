@@ -26,9 +26,9 @@
   --destructive: var(--red);
   --destructive-foreground: var(--crust);
 
-  --reward: var(--yellow);
-  --reward-hover: #B45309;
-  --success: var(--green);
+  --reward: var(--blue);
+  --reward-hover: var(--mauve);
+  --success: var(--mauve);
   --success-foreground: #FFFFFF;
 
   --border: var(--surface1);

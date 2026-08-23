@@ -1014,6 +1014,11 @@ export const CourseSchemaSchema = {
             format: 'uuid',
             title: 'Owner Id'
         },
+        owner_username: {
+            type: 'string',
+            title: 'Owner Username',
+            default: ''
+        },
         title: {
             type: 'string',
             title: 'Title'
@@ -1234,6 +1239,11 @@ export const CourseUserBriefSchemaSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Owner Id'
+        },
+        owner_username: {
+            type: 'string',
+            title: 'Owner Username',
+            default: ''
         },
         title: {
             type: 'string',

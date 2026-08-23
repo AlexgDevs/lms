@@ -1,5 +1,5 @@
 import { notFound, useNavigate, useParams } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, Loader2, Play, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, Loader2, Play, User, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { resolveMediaUrl } from "@/lib/media";
@@ -80,6 +80,12 @@ export function CoursePage() {
             )}
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
+              {course.owner_username && (
+                <span className="flex items-center gap-1">
+                  <User className="w-3.5 h-3.5" />
+                  {course.owner_username}
+                </span>
+              )}
               {course.price === 0 ? (
                 <span className="font-bold text-success">
                   Бесплатно
@@ -109,7 +115,6 @@ export function CoursePage() {
                   size="lg"
                   disabled={enroll.isPending}
                   onClick={handleEnroll}
-                  className="bg-primary hover:bg-primary-hover text-white"
                 >
                   {enroll.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                   {enroll.isPending ? "Запись..." : "Записаться на курс"}

@@ -60,6 +60,14 @@ class CourseService(BaseService):
         self.media_service = media_service
         super().__init__(session)
 
+    async def _resolve_owner_username(self, owner_id: UUID) -> str:
+        from src.user.models import User
+
+        user = (
+            await self.session.execute(select(User).where(User.id == owner_id))
+        ).scalar_one_or_none()
+        return user.username if user else ""
+
     async def create_course(
         self,
         owner_id: UUID,
@@ -409,11 +417,12 @@ class CourseService(BaseService):
                 course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
                 if not course or course.status != CourseStatus.PUBLISHED:
                     raise CourseNotFoundError
+                owner_username = await self._resolve_owner_username(course.owner_id)
+                update: dict[str, Any] = {"owner_username": owner_username}
                 if user_id is not None:
                     member_ids = await self.uow.courses.get_member_course_ids(user_id)
-                    course = course.model_copy(
-                        update={"is_member": course.id in member_ids}
-                    )
+                    update["is_member"] = course.id in member_ids
+                course = course.model_copy(update=update)
                 return course
 
     async def enroll(self, course_id: UUID, user_id: UUID) -> CourseMemberSchema:
@@ -453,7 +462,8 @@ class CourseService(BaseService):
         if not course:
             raise CourseNotFoundError
 
-        return course
+        owner_username = await self._resolve_owner_username(course.owner_id)
+        return course.model_copy(update={"owner_username": owner_username})
 
     async def get_author_course_by_id(
         self, course_id: UUID, user_id: UUID
@@ -464,7 +474,8 @@ class CourseService(BaseService):
         if not course:
             raise CourseNotFoundError
 
-        return course
+        owner_username = await self._resolve_owner_username(course.owner_id)
+        return course.model_copy(update={"owner_username": owner_username})
 
     async def upload_cover(
         self,

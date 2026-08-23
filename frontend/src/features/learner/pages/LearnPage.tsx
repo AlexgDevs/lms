@@ -364,7 +364,6 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
                     </Button>
                   )}
                   <Button
-                    className="bg-primary hover:bg-primary-hover text-white"
                     disabled={data.isSubmittingStep || quizNeedsAnswer || codeNeedsAnswer}
                     onClick={handleCheck}
                   >
@@ -374,7 +373,6 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
                 </>
               ) : primaryLabel ? (
                 <Button
-                  className="bg-primary hover:bg-primary-hover text-white"
                   disabled={data.isSubmittingStep}
                   onClick={primaryAction}
                 >
@@ -474,7 +472,6 @@ function NotMember({ courseId }: { courseId: string }) {
       <BookOpen className="mx-auto h-10 w-10 text-muted-foreground" />
       <p className="text-sm text-foreground">Чтобы проходить уроки, сначала запишитесь на курс.</p>
       <Button
-        className="bg-primary hover:bg-primary-hover text-white"
         disabled={enroll.isPending}
         onClick={() => enroll.mutate({ path: { course_id: courseId } })}
       >
