@@ -755,6 +755,92 @@ export const CourseCreateRequestSchemaSchema = {
     description: 'Schema for incoming client request to create a course.\nDoes NOT include cover_url as it\'s handled by the server.'
 } as const;
 
+export const CourseGenerateResponseSchemaSchema = {
+    properties: {
+        task_id: {
+            type: 'string',
+            title: 'Task Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'queued'
+        },
+        topic: {
+            type: 'string',
+            title: 'Topic'
+        },
+        modules_count: {
+            type: 'integer',
+            title: 'Modules Count'
+        },
+        lessons_per_module: {
+            type: 'integer',
+            title: 'Lessons Per Module'
+        },
+        blocks_per_lesson: {
+            type: 'integer',
+            title: 'Blocks Per Lesson'
+        }
+    },
+    type: 'object',
+    required: [
+        'task_id',
+        'course_id',
+        'topic',
+        'modules_count',
+        'lessons_per_module',
+        'blocks_per_lesson'
+    ],
+    title: 'CourseGenerateResponseSchema'
+} as const;
+
+export const CourseGenerateSchemaSchema = {
+    properties: {
+        topic: {
+            type: 'string',
+            maxLength: 256,
+            minLength: 1,
+            title: 'Topic',
+            description: 'Тема курса (о чём будет курс)'
+        },
+        modules_count: {
+            type: 'integer',
+            maximum: 3,
+            minimum: 1,
+            title: 'Modules Count',
+            description: 'Количество модулей (1-3)'
+        },
+        lessons_per_module: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Lessons Per Module',
+            description: 'Количество уроков в модуле (1-5)'
+        },
+        blocks_per_lesson: {
+            type: 'integer',
+            maximum: 6,
+            minimum: 1,
+            title: 'Blocks Per Lesson',
+            description: 'Количество блоков в уроке (1-6)'
+        }
+    },
+    type: 'object',
+    required: [
+        'topic',
+        'modules_count',
+        'lessons_per_module',
+        'blocks_per_lesson'
+    ],
+    title: 'CourseGenerateSchema'
+} as const;
+
 export const CourseMemberRoleSchema = {
     type: 'string',
     enum: [

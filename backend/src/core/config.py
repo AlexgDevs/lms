@@ -262,6 +262,29 @@ class CodeExecSettings(BaseSettings):
     CODEEXEC_MAX_CODE_CHARS: int = 64_000
 
 
+class CourseGenerateSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    COURSE_GENERATE_MODULES_MIN: int = 1
+    COURSE_GENERATE_MODULES_MAX: int = 3
+    COURSE_GENERATE_LESSONS_MIN: int = 1
+    COURSE_GENERATE_LESSONS_MAX: int = 5
+    COURSE_GENERATE_BLOCKS_MIN: int = 1
+    COURSE_GENERATE_BLOCKS_MAX: int = 6
+    COURSE_GENERATE_AI_TIMEOUT_SECONDS: float = 90.0
+    COURSE_GENERATE_AI_MAX_RETRIES: int = 3
+    COURSE_GENERATE_LOCK_TTL_SECONDS: int = 600
+    COURSE_GENERATE_RATE_LIMIT_DEFAULT_RETRY_SECONDS: int = 30
+    COURSE_GENERATE_RATE_LIMIT_MAX_RETRY_COUNTDOWN: int = 300
+    COURSE_GENERATE_NETWORK_RETRY_BACKOFF: int = 10
+    COURSE_GENERATE_NETWORK_RETRY_BACKOFF_MAX: int = 45
+    COURSE_GENERATE_MAX_RETRIES: int = 5
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
     app: AppSettings = Field(default_factory=AppSettings)
@@ -272,6 +295,9 @@ class Settings(BaseSettings):
     tgp: TgpSettings = Field(default_factory=TgpSettings)
     assistant: AssistantSettings = Field(default_factory=AssistantSettings)
     course_review: CourseReviewSettings = Field(default_factory=CourseReviewSettings)
+    course_generate: CourseGenerateSettings = Field(
+        default_factory=CourseGenerateSettings
+    )
     codeexec: CodeExecSettings = Field(default_factory=CodeExecSettings)
 
 

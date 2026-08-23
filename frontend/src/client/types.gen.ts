@@ -507,6 +507,70 @@ export type CourseCreateRequestSchema = {
 };
 
 /**
+ * CourseGenerateResponseSchema
+ */
+export type CourseGenerateResponseSchema = {
+    /**
+     * Task Id
+     */
+    task_id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Status
+     */
+    status?: string;
+    /**
+     * Topic
+     */
+    topic: string;
+    /**
+     * Modules Count
+     */
+    modules_count: number;
+    /**
+     * Lessons Per Module
+     */
+    lessons_per_module: number;
+    /**
+     * Blocks Per Lesson
+     */
+    blocks_per_lesson: number;
+};
+
+/**
+ * CourseGenerateSchema
+ */
+export type CourseGenerateSchema = {
+    /**
+     * Topic
+     *
+     * Тема курса (о чём будет курс)
+     */
+    topic: string;
+    /**
+     * Modules Count
+     *
+     * Количество модулей (1-3)
+     */
+    modules_count: number;
+    /**
+     * Lessons Per Module
+     *
+     * Количество уроков в модуле (1-5)
+     */
+    lessons_per_module: number;
+    /**
+     * Blocks Per Lesson
+     *
+     * Количество блоков в уроке (1-6)
+     */
+    blocks_per_lesson: number;
+};
+
+/**
  * CourseMemberRole
  */
 export const CourseMemberRole = {
@@ -1666,6 +1730,31 @@ export type SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponses = {
 };
 
 export type SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponse = SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponses[keyof SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponses];
+
+export type GenerateCourseApiV1CoursesGeneratePostData = {
+    body: CourseGenerateSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/courses/generate';
+};
+
+export type GenerateCourseApiV1CoursesGeneratePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GenerateCourseApiV1CoursesGeneratePostError = GenerateCourseApiV1CoursesGeneratePostErrors[keyof GenerateCourseApiV1CoursesGeneratePostErrors];
+
+export type GenerateCourseApiV1CoursesGeneratePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseGenerateResponseSchema;
+};
+
+export type GenerateCourseApiV1CoursesGeneratePostResponse = GenerateCourseApiV1CoursesGeneratePostResponses[keyof GenerateCourseApiV1CoursesGeneratePostResponses];
 
 export type GetModerationQueueApiV1CoursesModerationQueueGetData = {
     body?: never;

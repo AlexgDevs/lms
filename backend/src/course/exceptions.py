@@ -45,3 +45,8 @@ class CourseIncompleteError(CourseError):
 class CourseStatusNotAllowedError(CourseError):
     detail = "Course status can only be changed via the moderation flow"
     status_code = status.HTTP_403_FORBIDDEN
+
+
+class CourseGenerateError(CourseError):
+    detail = "Course generation failed"
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT

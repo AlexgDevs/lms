@@ -1,9 +1,11 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any, Literal, Sequence
-from uuid import UUID
+from uuid import UUID, uuid4
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.ai.gemini import GeminiService
 from src.course.course_member.schemas import (
     CourseMemberCreateSchema,
     CourseMemberSchema,
@@ -21,10 +23,13 @@ from src.course.exceptions import (
     CourseNotUnderReviewError,
     CourseOwnerCannotEnrollError,
     CourseStatusNotAllowedError,
+    CourseGenerateError,
 )
 from src.course.schemas import (
     CourseCreateRequestSchema,
     CourseCreateSchema,
+    CourseGenerateSchema,
+    CourseGenerateResponseSchema,
     CourseModerationQueueSchema,
     CourseModerationRejectSchema,
     CourseSchema,
@@ -164,6 +169,58 @@ class CourseService(BaseService):
 
         review_course_task.delay(str(course_id))
         return course
+
+    async def generate_course_ai(
+        self,
+        owner_id: UUID,
+        generate_schema: CourseGenerateSchema,
+    ) -> CourseGenerateResponseSchema:
+        """
+        Create a new DRAFT course and queue Celery task for AI generation.
+
+        Returns CourseGenerateResponseSchema with task_id for client polling.
+        """
+        if not settings.ai.AI_API_KEY:
+            raise CourseGenerateError(detail="AI gateway is not configured")
+
+        topic = generate_schema.topic
+        module_count = generate_schema.modules_count
+        lessons_per_module = generate_schema.lessons_per_module
+        blocks_per_lesson = generate_schema.blocks_per_lesson
+
+        # Create a new draft course
+        course_create_data = CourseCreateSchema(
+            owner_id=owner_id,
+            title=topic,
+            description=f"Автоматически сгенерированный курс: {topic}",
+            price=0,
+            status=CourseStatus.DRAFT,
+        )
+        course = await self.uow.courses.create(course_create_data)
+        await self.uow.commit()
+
+        # Queue Celery task for async generation
+        from src.ai.generate.tasks import course_generate_task
+
+        task = course_generate_task.apply_async(
+            args=(
+                str(course.id),
+                topic,
+                module_count,
+                lessons_per_module,
+                blocks_per_lesson,
+            ),
+        )
+
+        return CourseGenerateResponseSchema(
+            task_id=task.id,
+            course_id=course.id,
+            status="queued",
+            topic=topic,
+            modules_count=module_count,
+            lessons_per_module=lessons_per_module,
+            blocks_per_lesson=blocks_per_lesson,
+        )
 
     async def approve_course(self, course_id: UUID) -> CourseSchema:
         course = await self.uow.courses.get_one(id=course_id, is_deleted=None)

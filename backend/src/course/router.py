@@ -5,6 +5,8 @@ from src.course.course_member.schemas import CourseMemberSchema
 from src.course.schemas import (
     CourseSchema,
     CourseCreateRequestSchema,
+    CourseGenerateSchema,
+    CourseGenerateResponseSchema,
     CourseModerationQueueSchema,
     CourseModerationRejectSchema,
     CourseUpdateRequestSchema,
@@ -56,6 +58,18 @@ async def submit_course_for_review(
     return await course_service.submit_for_review(
         course_id=course_id, owner_id=owner_id
     )
+
+
+@router.post("/generate", response_model=CourseGenerateResponseSchema)
+async def generate_course(
+    generate_schema: CourseGenerateSchema,
+    course_service: CourseServiceDep,
+    owner_id: UserIdDep,
+) -> CourseGenerateResponseSchema:
+    task = await course_service.generate_course_ai(
+        owner_id=owner_id, generate_schema=generate_schema
+    )
+    return task
 
 
 @router.get("/moderation/queue", response_model=list[CourseModerationQueueSchema])

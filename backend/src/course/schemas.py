@@ -111,3 +111,26 @@ class CourseModerationQueueSchema(BaseSchema):
     module_count: int
     lesson_count: int
     block_count: int
+
+
+class CourseGenerateSchema(BaseSchema):
+    topic: str = Field(
+        ..., min_length=1, max_length=256, description="Тема курса (о чём будет курс)"
+    )
+    modules_count: int = Field(..., ge=1, le=3, description="Количество модулей (1-3)")
+    lessons_per_module: int = Field(
+        ..., ge=1, le=5, description="Количество уроков в модуле (1-5)"
+    )
+    blocks_per_lesson: int = Field(
+        ..., ge=1, le=6, description="Количество блоков в уроке (1-6)"
+    )
+
+
+class CourseGenerateResponseSchema(BaseSchema):
+    task_id: str
+    course_id: UUID
+    status: str = "queued"
+    topic: str
+    modules_count: int
+    lessons_per_module: int
+    blocks_per_lesson: int
