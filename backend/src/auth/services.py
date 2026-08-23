@@ -16,6 +16,8 @@ from src.auth.schemas import (
 from src.auth.security import (
     create_access_token,
     create_refresh_token,
+    create_reset_token,
+    decode_reset_token,
     hash_password,
     hash_refresh_token,
     verify_password,
@@ -76,6 +78,25 @@ class AuthService(BaseService):
         except InvalidRefreshTokenError:
             return
         await self.uow.refresh_tokens.revoke(stored.id)
+        await self.uow.commit()
+
+    async def forgot_password(self, email: str) -> str | None:
+        user = await self.uow.users.get_one(email=email)
+        if not user:
+            return None
+        return create_reset_token(user.id)
+
+    async def reset_password(self, token: str, new_password: str) -> None:
+        user_id = decode_reset_token(token)
+        user = await self.uow.users.get_one(id=user_id)
+        if not user:
+            raise UserNotFoundError
+        from pydantic import BaseModel
+
+        class _PwdUpdate(BaseModel):
+            password_hash: str
+
+        await self.uow.users.update(user_id, _PwdUpdate(password_hash=hash_password(new_password)))
         await self.uow.commit()
 
     async def _issue_tokens(self, user_id: UUID) -> TokenPair:

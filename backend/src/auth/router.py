@@ -7,6 +7,10 @@ from src.auth.dependencies import AuthServiceDep
 from src.auth.schemas import (
     UserRegisterSchema,
     TokenPair,
+    ForgotPasswordRequestSchema,
+    ForgotPasswordResponseSchema,
+    ResetPasswordRequestSchema,
+    ChangePasswordRequestSchema,
 )
 
 from src.user.schemas import UserPublicSchema
@@ -58,3 +62,31 @@ async def logout(
     service: AuthServiceDep,
 ) -> None:
     await service.logout(refresh_token)
+
+
+@router.post(
+    "/forgot-password",
+    summary="Request password reset",
+    response_model=ForgotPasswordResponseSchema,
+)
+async def forgot_password(
+    payload: ForgotPasswordRequestSchema,
+    service: AuthServiceDep,
+) -> ForgotPasswordResponseSchema:
+    reset_token = await service.forgot_password(payload.email)
+    return ForgotPasswordResponseSchema(
+        message="If the email exists, a reset link has been sent.",
+        reset_token=reset_token,
+    )
+
+
+@router.post(
+    "/reset-password",
+    summary="Reset password with token",
+)
+async def reset_password(
+    payload: ResetPasswordRequestSchema,
+    service: AuthServiceDep,
+) -> dict[str, str]:
+    await service.reset_password(payload.token, payload.new_password)
+    return {"message": "Password has been reset successfully."}

@@ -79,12 +79,12 @@ export function LoginForm() {
                                     <Field data-invalid={fieldState.invalid}>
                                         <div className="flex items-center">
                                             <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                                            <a
-                                                href="#"
+                                            <Link
+                                                to={ROUTES.FORGOT_PASSWORD}
                                                 className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                                             >
                                                 Forgot your password?
-                                            </a>
+                                            </Link>
                                         </div>
                                         <Input
                                             {...field}

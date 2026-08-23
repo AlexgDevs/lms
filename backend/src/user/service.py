@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth.security import hash_password, verify_password
 from src.core.services import BaseService
 from src.user.exceptions import UserAlreadyExistsError, UserNotFoundError
 from src.user.schemas import UserSchema, UserUpdateRequestSchema
@@ -47,3 +48,25 @@ class UserService(BaseService):
             return updated
         except IntegrityError:
             raise UserAlreadyExistsError
+
+    async def change_password(
+        self, user_id: UUID, current_password: str, new_password: str
+    ) -> None:
+        user = await self.user_repository.get_one(id=user_id)
+        if not user:
+            raise UserNotFoundError
+        if not verify_password(current_password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect current password",
+            )
+
+        from pydantic import BaseModel
+
+        class _PwdUpdate(BaseModel):
+            password_hash: str
+
+        await self.user_repository.update(
+            user_id, _PwdUpdate(password_hash=hash_password(new_password))
+        )
+        await self.session.commit()

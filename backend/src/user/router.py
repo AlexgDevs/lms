@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from src.user.dependencies import CurrentUserDep, UserIdDep, UserServiceDep
 from src.user.schemas import UserMeSchema, UserPublicSchema, UserUpdateRequestSchema
+from src.auth.schemas import ChangePasswordRequestSchema
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -43,3 +44,18 @@ async def get_user_by_id(
 ) -> UserPublicSchema:
     user = await service.get_user(user_id)
     return UserPublicSchema.model_validate(user)
+
+
+@router.post(
+    "/me/password",
+    summary="Change password",
+)
+async def change_password(
+    user: CurrentUserDep,
+    payload: ChangePasswordRequestSchema,
+    service: UserServiceDep,
+) -> dict[str, str]:
+    await service.change_password(
+        user.id, payload.current_password, payload.new_password
+    )
+    return {"message": "Password has been changed successfully."}

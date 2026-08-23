@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { resolveMediaUrl } from "@/lib/media";
 import { useCourseDetail } from "@/features/dashboard/api/useCourseDetail";
-import { useEnrollCourse } from "@/features/dashboard/api/useCourses";
+import { useEnrollCourse, useUnenrollCourse } from "@/features/dashboard/api/useCourses";
 import useAuth, { isLoggedIn } from "@/features/auth/api/useAuth";
 import { ROUTES } from "@/routes";
 
@@ -13,6 +13,7 @@ export function CoursePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const enroll = useEnrollCourse();
+  const unenroll = useUnenrollCourse();
   const { course, modules, lessonsByModule, isLoading } =
     useCourseDetail(courseId);
 
@@ -103,9 +104,20 @@ export function CoursePage() {
 
             <div className="pt-1">
               {isMember ? (
-                <span className="inline-flex items-center text-sm font-semibold text-success bg-success/10 px-4 py-2 rounded-md">
-                  Вы записаны
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center text-sm font-semibold text-success bg-success/10 px-4 py-2 rounded-md">
+                    Вы записаны
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    disabled={unenroll.isPending}
+                    onClick={() => unenroll.mutate(course.id)}
+                  >
+                    {unenroll.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Отписаться
+                  </Button>
+                </div>
               ) : isOwner ? (
                 <span className="inline-flex items-center text-xs font-semibold text-primary bg-primary/10 px-4 py-2 rounded-md">
                   Это ваш курс

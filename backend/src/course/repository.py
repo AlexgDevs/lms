@@ -146,6 +146,14 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
         )
         await self.session.execute(statement)
 
+    async def decrement_member_count(self, course_id: UUID) -> None:
+        statement = (
+            update(Course)
+            .where(Course.id == course_id, Course.member_count > 0)
+            .values(member_count=Course.member_count - 1)
+        )
+        await self.session.execute(statement)
+
     async def get_courses_where_user_is_member(
         self, user_id: UUID
     ) -> list[CourseUserBriefSchema]:

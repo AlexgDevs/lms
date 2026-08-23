@@ -138,6 +138,17 @@ async def create_member(
     return await service.enroll(course_id=course_id, user_id=user_id)
 
 
+@router.delete(
+    "/{course_id}/members/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Unenroll from course",
+)
+async def remove_member(
+    user_id: UserIdDep, course_id: UUID, service: CourseServiceDep
+) -> None:
+    await service.unenroll(course_id=course_id, user_id=user_id)
+
+
 @router.post("/{course_id}/media", response_model=CourseSchema)
 async def upload_course_cover(
     course_id: UUID,

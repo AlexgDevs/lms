@@ -74,3 +74,40 @@ export const useCourseCatalog = (pageSize = 12, category?: string, q?: string) =
       lastPage.length === pageSize ? allPages.length * pageSize : undefined,
   })
 }
+
+export const useUnenrollCourse = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (courseId: string) => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL ?? ""}/api/v1/courses/${courseId}/members/me`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      )
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail || "Failed to unenroll")
+      }
+    },
+    onSuccess: (_, courseId) => {
+      showSuccessToast("Вы отписались от курса")
+      queryClient.invalidateQueries({
+        queryKey: getCoursesApiV1CoursesGetQueryKey(),
+      })
+      queryClient.invalidateQueries({
+        queryKey: getCourseByIdApiV1CoursesCourseIdGetQueryKey({
+          path: { course_id: courseId },
+          query: { filter: "current" },
+        }),
+      })
+    },
+    onError: (err) => {
+      showErrorToast(getErrorMessage(err) || "Ошибка при отписке от курса")
+    },
+  })
+}

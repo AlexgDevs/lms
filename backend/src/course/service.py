@@ -18,6 +18,7 @@ from src.course.exceptions import (
     CourseAlreadyPublishedError,
     CourseIncompleteError,
     CourseMemberAlredyEnrolledError,
+    CourseMemberNotFoundError,
     CourseNotFoundError,
     CourseNotPublishedError,
     CourseNotUnderReviewError,
@@ -451,6 +452,23 @@ class CourseService(BaseService):
 
         await self.uow.commit()
         return new_member
+
+    async def unenroll(self, course_id: UUID, user_id: UUID) -> None:
+        from datetime import datetime, timezone
+
+        member = await self.uow.members.get_one(
+            user_id=user_id, course_id=course_id, left_at=None
+        )
+        if not member:
+            raise CourseMemberNotFoundError
+
+        from src.course.course_member.schemas import CourseMemberUpdateSchema
+
+        await self.uow.members.update(
+            member.id, CourseMemberUpdateSchema(left_at=datetime.now(timezone.utc))
+        )
+        await self.uow.courses.decrement_member_count(course_id)
+        await self.uow.commit()
 
     async def get_course_where_user_member(
         self, course_id: UUID, user_id: UUID

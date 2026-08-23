@@ -61,3 +61,26 @@ def create_refresh_token() -> tuple[str, str]:
 
 def hash_refresh_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def create_reset_token(user_id: UUID) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    return jwt.encode(
+        payload={"sub": str(user_id), "exp": expire, "type": "reset"},
+        key=settings.app.JWT_SECRET_KEY,
+        algorithm=settings.app.JWT_ALGORITHM,
+    )
+
+
+def decode_reset_token(token: str) -> UUID:
+    try:
+        payload = jwt.decode(
+            jwt=token,
+            key=settings.app.JWT_SECRET_KEY,
+            algorithms=[settings.app.JWT_ALGORITHM],
+        )
+        if payload.get("type") != "reset":
+            raise InvalidAccessTokenError
+        return UUID(payload["sub"])
+    except jwt.InvalidTokenError as e:
+        raise InvalidAccessTokenError from e

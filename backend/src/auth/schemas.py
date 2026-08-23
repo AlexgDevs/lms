@@ -53,3 +53,22 @@ class RefreshTokenCreate(BaseSchema):
     user_id: UUID
     token_hash: str
     expires_at: datetime
+
+
+class ForgotPasswordRequestSchema(BaseSchema):
+    email: EmailStr
+
+
+class ForgotPasswordResponseSchema(BaseSchema):
+    message: str
+    reset_token: str | None = None
+
+
+class ResetPasswordRequestSchema(BaseSchema):
+    token: str
+    new_password: str
+
+
+class ChangePasswordRequestSchema(BaseSchema):
+    current_password: str
+    new_password: str

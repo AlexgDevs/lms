@@ -5,6 +5,7 @@ import { useTheme } from "@/app/providers/useTheme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoryCatalog } from "@/components/layout/CategoryCatalog";
+import { MobileNav } from "@/components/layout/MobileNav";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { ROUTES } from "@/routes";
 import { Search, Bell, Moon, Sun } from "lucide-react";
@@ -36,7 +37,8 @@ export function Header() {
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <MobileNav />
             <Link
               to="/"
               className="flex items-center gap-2 font-bold text-xl text-foreground tracking-tight hover:opacity-90 transition-opacity"
