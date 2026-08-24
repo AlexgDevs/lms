@@ -189,6 +189,12 @@ export function TeachingPage() {
 
                   <Button
                     variant="outline"
+                    onClick={() => {
+                      navigate({
+                        to: `${ROUTES.TEACHING_COURSE}/$courseId/analytics`,
+                        params: { courseId: String(mainCourse.id) },
+                      })
+                    }}
                   >
                     <BarChart2 className="w-4 h-4 text-primary" />
                     <span>Аналитика и отзывы</span>

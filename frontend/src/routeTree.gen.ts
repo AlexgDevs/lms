@@ -22,9 +22,12 @@ import { Route as LayoutAdminModerationRouteImport } from './routes/_layout/admi
 import { Route as LayoutCoursesCourseIdRouteImport } from './routes/_layout/courses.$courseId'
 import { Route as LayoutLearnCourseIdRouteImport } from './routes/_layout/learn.$courseId'
 import { Route as LayoutTeachingIndexRouteImport } from './routes/_layout/teaching.index'
+import { Route as LayoutTeachingCoursesRouteImport } from './routes/_layout/teaching.courses'
 import { Route as LayoutLearnCourseIdIndexRouteImport } from './routes/_layout/learn.$courseId.index'
 import { Route as LayoutLearnCourseIdLessonIdRouteImport } from './routes/_layout/learn.$courseId.$lessonId'
 import { Route as LayoutTeachingCoursesCourseIdRouteImport } from './routes/_layout/teaching.courses.$courseId'
+import { Route as LayoutTeachingCoursesCourseIdIndexRouteImport } from './routes/_layout/teaching.courses.$courseId.index'
+import { Route as LayoutTeachingCoursesCourseIdAnalyticsRouteImport } from './routes/_layout/teaching.courses.$courseId.analytics'
 
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
@@ -90,6 +93,11 @@ const LayoutTeachingIndexRoute = LayoutTeachingIndexRouteImport.update({
   path: '/teaching/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutTeachingCoursesRoute = LayoutTeachingCoursesRouteImport.update({
+  id: '/teaching/courses',
+  path: '/teaching/courses',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutLearnCourseIdIndexRoute =
   LayoutLearnCourseIdIndexRouteImport.update({
     id: '/',
@@ -104,9 +112,21 @@ const LayoutLearnCourseIdLessonIdRoute =
   } as any)
 const LayoutTeachingCoursesCourseIdRoute =
   LayoutTeachingCoursesCourseIdRouteImport.update({
-    id: '/teaching/courses/$courseId',
-    path: '/teaching/courses/$courseId',
-    getParentRoute: () => LayoutRoute,
+    id: '/$courseId',
+    path: '/$courseId',
+    getParentRoute: () => LayoutTeachingCoursesRoute,
+  } as any)
+const LayoutTeachingCoursesCourseIdIndexRoute =
+  LayoutTeachingCoursesCourseIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LayoutTeachingCoursesCourseIdRoute,
+  } as any)
+const LayoutTeachingCoursesCourseIdAnalyticsRoute =
+  LayoutTeachingCoursesCourseIdAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => LayoutTeachingCoursesCourseIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -121,10 +141,13 @@ export interface FileRoutesByFullPath {
   '/admin/moderation': typeof LayoutAdminModerationRoute
   '/courses/$courseId': typeof LayoutCoursesCourseIdRoute
   '/learn/$courseId': typeof LayoutLearnCourseIdRouteWithChildren
+  '/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
   '/teaching/': typeof LayoutTeachingIndexRoute
   '/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
-  '/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdRoute
+  '/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdRouteWithChildren
   '/learn/$courseId/': typeof LayoutLearnCourseIdIndexRoute
+  '/teaching/courses/$courseId/analytics': typeof LayoutTeachingCoursesCourseIdAnalyticsRoute
+  '/teaching/courses/$courseId/': typeof LayoutTeachingCoursesCourseIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
@@ -137,10 +160,12 @@ export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/admin/moderation': typeof LayoutAdminModerationRoute
   '/courses/$courseId': typeof LayoutCoursesCourseIdRoute
+  '/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
   '/teaching': typeof LayoutTeachingIndexRoute
   '/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
-  '/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdRoute
   '/learn/$courseId': typeof LayoutLearnCourseIdIndexRoute
+  '/teaching/courses/$courseId/analytics': typeof LayoutTeachingCoursesCourseIdAnalyticsRoute
+  '/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -156,10 +181,13 @@ export interface FileRoutesById {
   '/_layout/admin/moderation': typeof LayoutAdminModerationRoute
   '/_layout/courses/$courseId': typeof LayoutCoursesCourseIdRoute
   '/_layout/learn/$courseId': typeof LayoutLearnCourseIdRouteWithChildren
+  '/_layout/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
   '/_layout/teaching/': typeof LayoutTeachingIndexRoute
   '/_layout/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
-  '/_layout/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdRoute
+  '/_layout/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdRouteWithChildren
   '/_layout/learn/$courseId/': typeof LayoutLearnCourseIdIndexRoute
+  '/_layout/teaching/courses/$courseId/analytics': typeof LayoutTeachingCoursesCourseIdAnalyticsRoute
+  '/_layout/teaching/courses/$courseId/': typeof LayoutTeachingCoursesCourseIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -175,10 +203,13 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/courses/$courseId'
     | '/learn/$courseId'
+    | '/teaching/courses'
     | '/teaching/'
     | '/learn/$courseId/$lessonId'
     | '/teaching/courses/$courseId'
     | '/learn/$courseId/'
+    | '/teaching/courses/$courseId/analytics'
+    | '/teaching/courses/$courseId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/forgot-password'
@@ -191,10 +222,12 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/moderation'
     | '/courses/$courseId'
+    | '/teaching/courses'
     | '/teaching'
     | '/learn/$courseId/$lessonId'
-    | '/teaching/courses/$courseId'
     | '/learn/$courseId'
+    | '/teaching/courses/$courseId/analytics'
+    | '/teaching/courses/$courseId'
   id:
     | '__root__'
     | '/_layout'
@@ -209,10 +242,13 @@ export interface FileRouteTypes {
     | '/_layout/admin/moderation'
     | '/_layout/courses/$courseId'
     | '/_layout/learn/$courseId'
+    | '/_layout/teaching/courses'
     | '/_layout/teaching/'
     | '/_layout/learn/$courseId/$lessonId'
     | '/_layout/teaching/courses/$courseId'
     | '/_layout/learn/$courseId/'
+    | '/_layout/teaching/courses/$courseId/analytics'
+    | '/_layout/teaching/courses/$courseId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutTeachingIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/teaching/courses': {
+      id: '/_layout/teaching/courses'
+      path: '/teaching/courses'
+      fullPath: '/teaching/courses'
+      preLoaderRoute: typeof LayoutTeachingCoursesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/learn/$courseId/': {
       id: '/_layout/learn/$courseId/'
       path: '/'
@@ -332,10 +375,24 @@ declare module '@tanstack/react-router' {
     }
     '/_layout/teaching/courses/$courseId': {
       id: '/_layout/teaching/courses/$courseId'
-      path: '/teaching/courses/$courseId'
+      path: '/$courseId'
       fullPath: '/teaching/courses/$courseId'
       preLoaderRoute: typeof LayoutTeachingCoursesCourseIdRouteImport
-      parentRoute: typeof LayoutRoute
+      parentRoute: typeof LayoutTeachingCoursesRoute
+    }
+    '/_layout/teaching/courses/$courseId/': {
+      id: '/_layout/teaching/courses/$courseId/'
+      path: '/'
+      fullPath: '/teaching/courses/$courseId/'
+      preLoaderRoute: typeof LayoutTeachingCoursesCourseIdIndexRouteImport
+      parentRoute: typeof LayoutTeachingCoursesCourseIdRoute
+    }
+    '/_layout/teaching/courses/$courseId/analytics': {
+      id: '/_layout/teaching/courses/$courseId/analytics'
+      path: '/analytics'
+      fullPath: '/teaching/courses/$courseId/analytics'
+      preLoaderRoute: typeof LayoutTeachingCoursesCourseIdAnalyticsRouteImport
+      parentRoute: typeof LayoutTeachingCoursesCourseIdRoute
     }
   }
 }
@@ -353,6 +410,38 @@ const LayoutLearnCourseIdRouteChildren: LayoutLearnCourseIdRouteChildren = {
 const LayoutLearnCourseIdRouteWithChildren =
   LayoutLearnCourseIdRoute._addFileChildren(LayoutLearnCourseIdRouteChildren)
 
+interface LayoutTeachingCoursesCourseIdRouteChildren {
+  LayoutTeachingCoursesCourseIdAnalyticsRoute: typeof LayoutTeachingCoursesCourseIdAnalyticsRoute
+  LayoutTeachingCoursesCourseIdIndexRoute: typeof LayoutTeachingCoursesCourseIdIndexRoute
+}
+
+const LayoutTeachingCoursesCourseIdRouteChildren: LayoutTeachingCoursesCourseIdRouteChildren =
+  {
+    LayoutTeachingCoursesCourseIdAnalyticsRoute:
+      LayoutTeachingCoursesCourseIdAnalyticsRoute,
+    LayoutTeachingCoursesCourseIdIndexRoute:
+      LayoutTeachingCoursesCourseIdIndexRoute,
+  }
+
+const LayoutTeachingCoursesCourseIdRouteWithChildren =
+  LayoutTeachingCoursesCourseIdRoute._addFileChildren(
+    LayoutTeachingCoursesCourseIdRouteChildren,
+  )
+
+interface LayoutTeachingCoursesRouteChildren {
+  LayoutTeachingCoursesCourseIdRoute: typeof LayoutTeachingCoursesCourseIdRouteWithChildren
+}
+
+const LayoutTeachingCoursesRouteChildren: LayoutTeachingCoursesRouteChildren = {
+  LayoutTeachingCoursesCourseIdRoute:
+    LayoutTeachingCoursesCourseIdRouteWithChildren,
+}
+
+const LayoutTeachingCoursesRouteWithChildren =
+  LayoutTeachingCoursesRoute._addFileChildren(
+    LayoutTeachingCoursesRouteChildren,
+  )
+
 interface LayoutRouteChildren {
   LayoutCatalogRoute: typeof LayoutCatalogRoute
   LayoutProfileRoute: typeof LayoutProfileRoute
@@ -361,8 +450,8 @@ interface LayoutRouteChildren {
   LayoutAdminModerationRoute: typeof LayoutAdminModerationRoute
   LayoutCoursesCourseIdRoute: typeof LayoutCoursesCourseIdRoute
   LayoutLearnCourseIdRoute: typeof LayoutLearnCourseIdRouteWithChildren
+  LayoutTeachingCoursesRoute: typeof LayoutTeachingCoursesRouteWithChildren
   LayoutTeachingIndexRoute: typeof LayoutTeachingIndexRoute
-  LayoutTeachingCoursesCourseIdRoute: typeof LayoutTeachingCoursesCourseIdRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -373,8 +462,8 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminModerationRoute: LayoutAdminModerationRoute,
   LayoutCoursesCourseIdRoute: LayoutCoursesCourseIdRoute,
   LayoutLearnCourseIdRoute: LayoutLearnCourseIdRouteWithChildren,
+  LayoutTeachingCoursesRoute: LayoutTeachingCoursesRouteWithChildren,
   LayoutTeachingIndexRoute: LayoutTeachingIndexRoute,
-  LayoutTeachingCoursesCourseIdRoute: LayoutTeachingCoursesCourseIdRoute,
 }
 
 const LayoutRouteWithChildren =
