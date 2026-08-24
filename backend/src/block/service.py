@@ -1,7 +1,8 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 import nh3
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.block.enums import BlockType
@@ -9,6 +10,7 @@ from src.block.exceptions import BlockNotFoundError, BlockTypeNotMediaError
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseNotFoundError
 from src.lesson.exceptions import LessonNotFoundError
+from src.core.events.event import BlockDeleted
 from src.core.services.base_service import BaseService
 from src.core.storage import Storage
 from src.block.unit_of_work import BlockUnitOfWork
@@ -24,6 +26,9 @@ from src.block.schemas import (
     BlockUpdateSchema,
     BlockReorderSchema,
 )
+
+if TYPE_CHECKING:
+    from src.core.events.protocol import Event
 
 MEDIA_BLOCK_TYPES = frozenset(
     {BlockType.IMAGE, BlockType.VIDEO, BlockType.AUDIO, BlockType.FILE}
@@ -49,11 +54,12 @@ class BlockService(BaseService):
         block_unit_of_work: BlockUnitOfWork,
         storage: Storage,
         media_service: MediaService,
+        event_bus: "Event | None" = None,
     ):
         self.uow = block_unit_of_work
         self.storage = storage
         self.media_service = media_service
-        super().__init__(session)
+        super().__init__(session, event_bus)
 
     async def create_block(
         self,
@@ -196,6 +202,16 @@ class BlockService(BaseService):
         if not block:
             raise BlockNotFoundError
 
+        from src.course.models import CourseMember
+
+        result = await self.session.execute(
+            select(CourseMember.user_id).where(
+                CourseMember.course_id == course_id,
+                CourseMember.left_at.is_(None),
+            )
+        )
+        member_ids = [row[0] for row in result.all()]
+
         media_ids = [
             attachment.media_id
             for attachment in await self.uow.media_attachments.get_for_owner(
@@ -212,6 +228,16 @@ class BlockService(BaseService):
         if media_ids:
             await self.media_service.cleanup_unreferenced(media_ids)
             await self.uow.commit()
+
+        if self.event_bus is not None:
+            block_title = block.payload.get("title") or block.block_type.value
+            await self.event_bus.publish(
+                BlockDeleted(
+                    course_id=course_id,
+                    block_title=block_title,
+                    member_ids=member_ids,
+                )
+            )
 
     async def upload_media(
         self,

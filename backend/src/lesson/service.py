@@ -1,4 +1,6 @@
+from typing import TYPE_CHECKING
 from uuid import UUID
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from src.auth.exceptions import InvalidAccessTokenError
@@ -10,6 +12,7 @@ from src.lesson.enums import LessonProgressType
 from src.lesson.exceptions import LessonNotFoundError, LessonProgressNotFoundError
 from src.course.exceptions import CourseMemberNotFoundError, CourseNotFoundError
 from src.course.enums import CourseStatus
+from src.core.events.event import LessonDeleted
 from src.module.exceptions import ModuleNotFoundError
 from src.lesson.schemas import (
     LessonCreateRequestSchema,
@@ -22,15 +25,19 @@ from src.lesson.schemas import (
 from src.lesson.unit_of_work import LessonUnitOfWork
 from src.core.services import BaseService
 
+if TYPE_CHECKING:
+    from src.core.events.protocol import Event
+
 
 class LessonService(BaseService):
     def __init__(
         self,
         session: AsyncSession,
         lesson_unit_of_work: LessonUnitOfWork,
+        event_bus: "Event | None" = None,
     ):
         self.uow = lesson_unit_of_work
-        super().__init__(session)
+        super().__init__(session, event_bus)
 
     async def create_lesson(
         self,
@@ -116,8 +123,27 @@ class LessonService(BaseService):
         if not lesson:
             raise LessonNotFoundError
 
+        from src.course.models import CourseMember
+
+        result = await self.session.execute(
+            select(CourseMember.user_id).where(
+                CourseMember.course_id == course_id,
+                CourseMember.left_at.is_(None),
+            )
+        )
+        member_ids = [row[0] for row in result.all()]
+
         await self.uow.lessons.delete(id_=lesson_id)
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                LessonDeleted(
+                    course_id=course_id,
+                    lesson_title=lesson.title,
+                    member_ids=member_ids,
+                )
+            )
 
     async def get_or_create_lesson_progress(
         self,

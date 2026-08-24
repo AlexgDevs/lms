@@ -6,15 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoryCatalog } from "@/components/layout/CategoryCatalog";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { NotificationsBell } from "@/features/notifications/components/NotificationsBell";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { useNotificationSocket } from "@/features/notifications/api/useNotificationSocket";
 import { ROUTES } from "@/routes";
-import { Search, Bell, Moon, Sun } from "lucide-react";
+import { Search, Moon, Sun } from "lucide-react";
 
 export function Header() {
   const { header } = useLayout();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  useNotificationSocket();
 
   if (!header.visible) return null;
 
@@ -95,15 +98,7 @@ export function Header() {
           {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full text-muted-foreground hover:text-foreground transition-colors cursor-pointer relative"
-          aria-label="Уведомления"
-        >
-          <Bell size={18} />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
-        </Button>
+        <NotificationsBell />
 
         {/* Вся логика авторизации и аватара тут */}
         <UserMenu />

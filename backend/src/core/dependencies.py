@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 from src.core.config import settings
+from src.core.events.protocol import Event
 from src.core.postgres.session import get_session
 from src.core.storage import Storage
 
@@ -23,7 +24,12 @@ def get_storage(request: Request) -> Storage:
     return cast(Storage, request.app.state.storage)
 
 
+def get_event_bus(request: Request) -> Event:
+    return cast(Event, request.app.state.event_bus)
+
+
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 RedisDep = Annotated[Redis, Depends(get_redis)]
 StorageDep = Annotated[Storage, Depends(get_storage)]
 AccessTokenDep = Annotated[str, Depends(reusable_oauth2)]
+EventBusDep = Annotated[Event, Depends(get_event_bus)]

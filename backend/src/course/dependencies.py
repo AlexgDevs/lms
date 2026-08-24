@@ -2,6 +2,7 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
+from src.core.dependencies import EventBusDep
 from src.course.category.dependencies import CategoryRepositoryDep
 from src.course.category.repository import CategoryRepository
 from src.course.course_member.repository import CourseMemberRepository
@@ -58,11 +59,13 @@ def get_course_service(
     session: SessionDep,
     uow: CourseUnitOfWorkDep,
     media_service: MediaServiceDep,
+    event_bus: EventBusDep,
 ) -> CourseService:
     return CourseService(
         session=session,
         course_unit_of_work=uow,
         media_service=media_service,
+        event_bus=event_bus,
     )
 
 

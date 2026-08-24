@@ -12,6 +12,14 @@ from src.course.course_member.schemas import (
 )
 from src.auth.exceptions import InvalidAccessTokenError
 from src.core.config import settings
+from src.core.events.event import (
+    CourseApproved,
+    CourseDeleted,
+    CourseEnrolled,
+    CourseRejected,
+    CourseSubmittedForReview,
+    CourseUnenrolled,
+)
 from src.core.services.base_service import BaseService
 from src.course.enums import CourseStatus
 from src.course.exceptions import (
@@ -43,6 +51,7 @@ from src.media.service import MediaService
 
 if TYPE_CHECKING:
     from src.block.models import Block
+    from src.core.events.protocol import Event
     from src.lesson.models import Lesson
     from src.module.models import Module
     from src.user.models import User
@@ -56,10 +65,11 @@ class CourseService(BaseService):
         session: AsyncSession,
         course_unit_of_work: CourseUnitOfWork,  # TODO: add payment service in uow
         media_service: MediaService,
+        event_bus: "Event | None" = None,
     ):
         self.uow = course_unit_of_work
         self.media_service = media_service
-        super().__init__(session)
+        super().__init__(session, event_bus)
 
     async def _resolve_owner_username(self, owner_id: UUID) -> str:
         from src.user.models import User
@@ -116,12 +126,26 @@ class CourseService(BaseService):
         if not course:
             raise CourseNotFoundError
 
+        members = await self.uow.members.get_filtered(
+            limit=10000, offset=0, course_id=course_id, left_at=None
+        )
+        member_ids = [m.user_id for m in members]
+
         delete_data = CourseUpdateSchema(
             **course.model_dump(), is_deleted=datetime.now(timezone.utc)
         )
 
         await self.uow.courses.update(course_id, delete_data)
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                CourseDeleted(
+                    course_id=course_id,
+                    course_title=course.title,
+                    member_ids=member_ids,
+                )
+            )
 
     async def get_courses_where_user_member(
         self, user_id: UUID
@@ -173,6 +197,15 @@ class CourseService(BaseService):
             exclude_none=False,
         )
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                CourseSubmittedForReview(
+                    course_id=course_id,
+                    course_title=course.title,
+                    owner_id=owner_id,
+                )
+            )
 
         from src.ai.course_review.tasks import review_course_task
 
@@ -246,6 +279,16 @@ class CourseService(BaseService):
             exclude_none=False,
         )
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                CourseApproved(
+                    course_id=course_id,
+                    course_title=course.title,
+                    owner_id=course.owner_id,
+                )
+            )
+
         return course
 
     async def reject_course(
@@ -265,6 +308,17 @@ class CourseService(BaseService):
             exclude_none=False,
         )
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                CourseRejected(
+                    course_id=course_id,
+                    course_title=course.title,
+                    owner_id=course.owner_id,
+                    reason=payload.reason,
+                )
+            )
+
         return course
 
     async def get_moderation_queue(
@@ -451,6 +505,17 @@ class CourseService(BaseService):
         await self.uow.courses.increment_member_count(course_id)
 
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                CourseEnrolled(
+                    course_id=course_id,
+                    course_title=course.title,
+                    user_id=user_id,
+                    owner_id=course.owner_id,
+                )
+            )
+
         return new_member
 
     async def unenroll(self, course_id: UUID, user_id: UUID) -> None:
@@ -462,6 +527,10 @@ class CourseService(BaseService):
         if not member:
             raise CourseMemberNotFoundError
 
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+        if not course:
+            raise CourseNotFoundError
+
         from src.course.course_member.schemas import CourseMemberUpdateSchema
 
         await self.uow.members.update(
@@ -469,6 +538,16 @@ class CourseService(BaseService):
         )
         await self.uow.courses.decrement_member_count(course_id)
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                CourseUnenrolled(
+                    course_id=course_id,
+                    course_title=course.title,
+                    user_id=user_id,
+                    owner_id=course.owner_id,
+                )
+            )
 
     async def get_course_where_user_member(
         self, course_id: UUID, user_id: UUID

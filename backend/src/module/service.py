@@ -1,8 +1,10 @@
+from typing import TYPE_CHECKING
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.exceptions import InvalidAccessTokenError
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseNotFoundError
+from src.core.events.event import ModuleDeleted
 from src.core.services import BaseService
 from src.module.unit_of_work import ModuleUnitOfWork
 from src.module.exceptions import ModuleNotFoundError
@@ -15,15 +17,19 @@ from src.module.schemas import (
     ModuleReorderSchema,
 )
 
+if TYPE_CHECKING:
+    from src.core.events.protocol import Event
+
 
 class ModuleService(BaseService):
     def __init__(
         self,
         session: AsyncSession,
         module_unit_of_work: ModuleUnitOfWork,
+        event_bus: "Event | None" = None,
     ):
         self.uow = module_unit_of_work
-        super().__init__(session)
+        super().__init__(session, event_bus)
 
     async def create_module(
         self, course_id: UUID, user_id: UUID, payload: ModuleCreateRequestSchema
@@ -88,8 +94,28 @@ class ModuleService(BaseService):
         if not module:
             raise ModuleNotFoundError
 
+        from sqlalchemy import select
+        from src.course.models import CourseMember
+
+        result = await self.session.execute(
+            select(CourseMember.user_id).where(
+                CourseMember.course_id == course_id,
+                CourseMember.left_at.is_(None),
+            )
+        )
+        member_ids = [row[0] for row in result.all()]
+
         await self.uow.modules.delete(id_=module_id)
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                ModuleDeleted(
+                    course_id=course_id,
+                    module_title=module.title,
+                    member_ids=member_ids,
+                )
+            )
 
     async def get_all_by_owner_course(
         self, course_id: UUID, user_id: UUID | None, limit: int = 100, offset: int = 0

@@ -1,7 +1,7 @@
 from typing import Annotated, AsyncGenerator
 from fastapi import Depends
 
-from src.core.dependencies import SessionDep, StorageDep
+from src.core.dependencies import EventBusDep, SessionDep, StorageDep
 from src.course.dependencies import CourseRepositoryDep
 from src.lesson.dependencies import LessonRepositoryDep
 from src.block.repository import BlockRepository
@@ -48,12 +48,14 @@ def get_block_service(
     uow: BlockUnitOfWorkDep,
     storage: StorageDep,
     media_service: MediaServiceDep,
+    event_bus: EventBusDep,
 ) -> BlockService:
     return BlockService(
         session=session,
         block_unit_of_work=uow,
         storage=storage,
         media_service=media_service,
+        event_bus=event_bus,
     )
 
 

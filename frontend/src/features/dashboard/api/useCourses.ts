@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { client } from "@/client/client.gen"
 import {
   createMemberApiV1CoursesCourseIdMembersPostMutation,
   getCourseByIdApiV1CoursesCourseIdGetQueryKey,
@@ -80,19 +81,10 @@ export const useUnenrollCourse = () => {
 
   return useMutation({
     mutationFn: async (courseId: string) => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL ?? ""}/api/v1/courses/${courseId}/members/me`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        }
-      )
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.detail || "Failed to unenroll")
-      }
+      await client.delete({
+        url: `/api/v1/courses/${courseId}/members/me`,
+        throwOnError: true,
+      })
     },
     onSuccess: (_, courseId) => {
       showSuccessToast("Вы отписались от курса")
