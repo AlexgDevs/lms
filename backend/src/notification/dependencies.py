@@ -27,7 +27,9 @@ def get_notification_service(
     )
 
 
-NotificationServiceDep = Annotated[NotificationService, Depends(get_notification_service)]
+NotificationServiceDep = Annotated[
+    NotificationService, Depends(get_notification_service)
+]
 
 
 def get_ws_manager(redis: RedisDep) -> ConnectionManager:

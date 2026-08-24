@@ -41,6 +41,9 @@ class RefreshTokenSchema(BaseSchema):
     is_revoked: bool
     expires_at: datetime
     created_at: datetime
+    ip_address: str | None = None
+    user_agent: str | None = None
+    device_name: str | None = None
 
 
 class TokenPair(BaseSchema):
@@ -53,6 +56,17 @@ class RefreshTokenCreate(BaseSchema):
     user_id: UUID
     token_hash: str
     expires_at: datetime
+    ip_address: str | None = None
+    user_agent: str | None = None
+    device_name: str | None = None
+
+
+class SessionSchema(BaseSchema):
+    id: UUID
+    device_name: str | None = None
+    ip_address: str | None = None
+    created_at: datetime
+    is_current: bool = False
 
 
 class ForgotPasswordRequestSchema(BaseSchema):

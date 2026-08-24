@@ -7,8 +7,6 @@ if TYPE_CHECKING:
 
 
 class BaseService:
-    def __init__(
-        self, session: AsyncSession, event_bus: "Event | None" = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, event_bus: "Event | None" = None) -> None:
         self.session = session
         self.event_bus = event_bus

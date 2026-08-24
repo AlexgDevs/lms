@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { ApproveCourseApiV1CoursesCourseIdModerationApprovePostData, ApproveCourseApiV1CoursesCourseIdModerationApprovePostErrors, ApproveCourseApiV1CoursesCourseIdModerationApprovePostResponses, AssistantAskApiV1AiAssistantAskPostData, AssistantAskApiV1AiAssistantAskPostErrors, AssistantAskApiV1AiAssistantAskPostResponses, AssistantHintApiV1AiAssistantHintPostData, AssistantHintApiV1AiAssistantHintPostErrors, AssistantHintApiV1AiAssistantHintPostResponses, AssistantRegenerateApiV1AiAssistantRegeneratePostData, AssistantRegenerateApiV1AiAssistantRegeneratePostErrors, AssistantRegenerateApiV1AiAssistantRegeneratePostResponses, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostErrors, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostErrors, CreateCourseApiV1CoursesPostResponses, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostErrors, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostErrors, CreateLessonApiV1LessonsLessonIdProgressPostResponses, CreateMemberApiV1CoursesCourseIdMembersPostData, CreateMemberApiV1CoursesCourseIdMembersPostErrors, CreateMemberApiV1CoursesCourseIdMembersPostResponses, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostErrors, CreateModuleApiV1CoursesCourseIdModulesPostResponses, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteErrors, DeleteCourseApiV1CoursesCourseIdDeleteResponses, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses, DeleteMediaApiV1MediaMediaIdDeleteData, DeleteMediaApiV1MediaMediaIdDeleteErrors, DeleteMediaApiV1MediaMediaIdDeleteResponses, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteErrors, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponses, GenerateCourseApiV1CoursesGeneratePostData, GenerateCourseApiV1CoursesGeneratePostErrors, GenerateCourseApiV1CoursesGeneratePostResponses, GenerateTgpApiV1AiTgpCourseIdGeneratePostData, GenerateTgpApiV1AiTgpCourseIdGeneratePostErrors, GenerateTgpApiV1AiTgpCourseIdGeneratePostResponses, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetErrors, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponses, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetErrors, GetCourseByIdApiV1CoursesCourseIdGetResponses, GetCourseProgressApiV1CoursesCourseIdProgressGetData, GetCourseProgressApiV1CoursesCourseIdProgressGetErrors, GetCourseProgressApiV1CoursesCourseIdProgressGetResponses, GetCoursesApiV1CoursesGetData, GetCoursesApiV1CoursesGetErrors, GetCoursesApiV1CoursesGetResponses, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponses, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses, GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetData, GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetErrors, GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetResponses, GetMediaApiV1MediaMediaIdGetData, GetMediaApiV1MediaMediaIdGetErrors, GetMediaApiV1MediaMediaIdGetResponses, GetMediaUrlApiV1MediaMediaIdUrlGetData, GetMediaUrlApiV1MediaMediaIdUrlGetErrors, GetMediaUrlApiV1MediaMediaIdUrlGetResponses, GetModerationQueueApiV1CoursesModerationQueueGetData, GetModerationQueueApiV1CoursesModerationQueueGetErrors, GetModerationQueueApiV1CoursesModerationQueueGetResponses, GetModulesApiV1CoursesCourseIdModulesGetData, GetModulesApiV1CoursesCourseIdModulesGetErrors, GetModulesApiV1CoursesCourseIdModulesGetResponses, GetMyMediaApiV1MediaGetData, GetMyMediaApiV1MediaGetErrors, GetMyMediaApiV1MediaGetResponses, GetProfileStatsApiV1UsersMeStatsGetData, GetProfileStatsApiV1UsersMeStatsGetResponses, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetErrors, GetUserByIdApiV1UsersUserIdGetResponses, ListCategoriesApiV1CategoriesGetData, ListCategoriesApiV1CategoriesGetResponses, ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetData, ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetErrors, ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetResponses, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostErrors, LoginApiV1AuthLoginPostResponses, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostErrors, LogoutApiV1AuthLogoutPostResponses, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostErrors, RefreshApiV1AuthRefreshPostResponses, RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostData, RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostErrors, RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostResponses, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostErrors, RegisterApiV1AuthRegisterPostResponses, RejectCourseApiV1CoursesCourseIdModerationRejectPostData, RejectCourseApiV1CoursesCourseIdModerationRejectPostErrors, RejectCourseApiV1CoursesCourseIdModerationRejectPostResponses, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteErrors, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponses, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchErrors, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponses, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchErrors, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponses, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchErrors, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponses, SayHelloGetData, SayHelloGetResponses, SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostData, SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostErrors, SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostResponses, SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostData, SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostErrors, SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponses, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostErrors, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses, SubmitTgpApiV1AiTgpCourseIdSubmitPostData, SubmitTgpApiV1AiTgpCourseIdSubmitPostErrors, SubmitTgpApiV1AiTgpCourseIdSubmitPostResponses, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchErrors, UpdateCourseApiV1CoursesCourseIdPatchResponses, UpdateCurrentUserApiV1UsersMePatchData, UpdateCurrentUserApiV1UsersMePatchErrors, UpdateCurrentUserApiV1UsersMePatchResponses, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchErrors, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses, UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchData, UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchErrors, UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchResponses, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostData, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostErrors, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponses, UploadCourseCoverApiV1CoursesCourseIdMediaPostData, UploadCourseCoverApiV1CoursesCourseIdMediaPostErrors, UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses, UploadMediaApiV1MediaPostData, UploadMediaApiV1MediaPostErrors, UploadMediaApiV1MediaPostResponses } from './types.gen';
+import type { ApproveCourseApiV1CoursesCourseIdModerationApprovePostData, ApproveCourseApiV1CoursesCourseIdModerationApprovePostErrors, ApproveCourseApiV1CoursesCourseIdModerationApprovePostResponses, AssistantAskApiV1AiAssistantAskPostData, AssistantAskApiV1AiAssistantAskPostErrors, AssistantAskApiV1AiAssistantAskPostResponses, AssistantHintApiV1AiAssistantHintPostData, AssistantHintApiV1AiAssistantHintPostErrors, AssistantHintApiV1AiAssistantHintPostResponses, AssistantRegenerateApiV1AiAssistantRegeneratePostData, AssistantRegenerateApiV1AiAssistantRegeneratePostErrors, AssistantRegenerateApiV1AiAssistantRegeneratePostResponses, ChangePasswordApiV1UsersMePasswordPostData, ChangePasswordApiV1UsersMePasswordPostErrors, ChangePasswordApiV1UsersMePasswordPostResponses, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostData, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostErrors, CreateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksPostResponses, CreateCourseApiV1CoursesPostData, CreateCourseApiV1CoursesPostErrors, CreateCourseApiV1CoursesPostResponses, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostData, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostErrors, CreateLessonApiV1CoursesCourseIdModulesModuleIdLessonsPostResponses, CreateLessonApiV1LessonsLessonIdProgressPostData, CreateLessonApiV1LessonsLessonIdProgressPostErrors, CreateLessonApiV1LessonsLessonIdProgressPostResponses, CreateMemberApiV1CoursesCourseIdMembersPostData, CreateMemberApiV1CoursesCourseIdMembersPostErrors, CreateMemberApiV1CoursesCourseIdMembersPostResponses, CreateModuleApiV1CoursesCourseIdModulesPostData, CreateModuleApiV1CoursesCourseIdModulesPostErrors, CreateModuleApiV1CoursesCourseIdModulesPostResponses, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteData, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteErrors, DeleteBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdDeleteResponses, DeleteCourseApiV1CoursesCourseIdDeleteData, DeleteCourseApiV1CoursesCourseIdDeleteErrors, DeleteCourseApiV1CoursesCourseIdDeleteResponses, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteData, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteErrors, DeleteLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdDeleteResponses, DeleteMediaApiV1MediaMediaIdDeleteData, DeleteMediaApiV1MediaMediaIdDeleteErrors, DeleteMediaApiV1MediaMediaIdDeleteResponses, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteData, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteErrors, DeleteModuleApiV1CoursesCourseIdModulesModuleIdDeleteResponses, ForgotPasswordApiV1AuthForgotPasswordPostData, ForgotPasswordApiV1AuthForgotPasswordPostErrors, ForgotPasswordApiV1AuthForgotPasswordPostResponses, GenerateCourseApiV1CoursesGeneratePostData, GenerateCourseApiV1CoursesGeneratePostErrors, GenerateCourseApiV1CoursesGeneratePostResponses, GenerateTgpApiV1AiTgpCourseIdGeneratePostData, GenerateTgpApiV1AiTgpCourseIdGeneratePostErrors, GenerateTgpApiV1AiTgpCourseIdGeneratePostResponses, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetData, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetErrors, GetBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetResponses, GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetData, GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetErrors, GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetResponses, GetCourseByIdApiV1CoursesCourseIdGetData, GetCourseByIdApiV1CoursesCourseIdGetErrors, GetCourseByIdApiV1CoursesCourseIdGetResponses, GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetData, GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetErrors, GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetResponses, GetCourseProgressApiV1CoursesCourseIdProgressGetData, GetCourseProgressApiV1CoursesCourseIdProgressGetErrors, GetCourseProgressApiV1CoursesCourseIdProgressGetResponses, GetCoursesApiV1CoursesGetData, GetCoursesApiV1CoursesGetErrors, GetCoursesApiV1CoursesGetResponses, GetCurrentUserApiV1UsersMeGetData, GetCurrentUserApiV1UsersMeGetResponses, GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetData, GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetErrors, GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetResponses, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetData, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetErrors, GetLessonsApiV1CoursesCourseIdModulesModuleIdLessonsGetResponses, GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetData, GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetErrors, GetLessonSubmissionsApiV1CoursesCourseIdLessonsLessonIdSubmissionsGetResponses, GetMediaApiV1MediaMediaIdGetData, GetMediaApiV1MediaMediaIdGetErrors, GetMediaApiV1MediaMediaIdGetResponses, GetMediaUrlApiV1MediaMediaIdUrlGetData, GetMediaUrlApiV1MediaMediaIdUrlGetErrors, GetMediaUrlApiV1MediaMediaIdUrlGetResponses, GetModerationQueueApiV1CoursesModerationQueueGetData, GetModerationQueueApiV1CoursesModerationQueueGetErrors, GetModerationQueueApiV1CoursesModerationQueueGetResponses, GetModulesApiV1CoursesCourseIdModulesGetData, GetModulesApiV1CoursesCourseIdModulesGetErrors, GetModulesApiV1CoursesCourseIdModulesGetResponses, GetMyMediaApiV1MediaGetData, GetMyMediaApiV1MediaGetErrors, GetMyMediaApiV1MediaGetResponses, GetProfileStatsApiV1UsersMeStatsGetData, GetProfileStatsApiV1UsersMeStatsGetResponses, GetUnreadCountNotificationsUnreadCountGetData, GetUnreadCountNotificationsUnreadCountGetResponses, GetUserByIdApiV1UsersUserIdGetData, GetUserByIdApiV1UsersUserIdGetErrors, GetUserByIdApiV1UsersUserIdGetResponses, ListCategoriesApiV1CategoriesGetData, ListCategoriesApiV1CategoriesGetResponses, ListNotificationsNotificationsGetData, ListNotificationsNotificationsGetErrors, ListNotificationsNotificationsGetResponses, ListSessionsApiV1AuthSessionsGetData, ListSessionsApiV1AuthSessionsGetErrors, ListSessionsApiV1AuthSessionsGetResponses, ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetData, ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetErrors, ListTgpQuestionsApiV1AiTgpCourseIdQuestionsGetResponses, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostErrors, LoginApiV1AuthLoginPostResponses, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostErrors, LogoutApiV1AuthLogoutPostResponses, MarkAllNotificationsReadNotificationsReadAllPatchData, MarkAllNotificationsReadNotificationsReadAllPatchResponses, MarkNotificationReadNotificationsNotificationIdReadPatchData, MarkNotificationReadNotificationsNotificationIdReadPatchErrors, MarkNotificationReadNotificationsNotificationIdReadPatchResponses, RefreshApiV1AuthRefreshPostData, RefreshApiV1AuthRefreshPostErrors, RefreshApiV1AuthRefreshPostResponses, RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostData, RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostErrors, RegenerateTgpQuestionApiV1AiTgpQuestionsQuestionIdRegeneratePostResponses, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostErrors, RegisterApiV1AuthRegisterPostResponses, RejectCourseApiV1CoursesCourseIdModerationRejectPostData, RejectCourseApiV1CoursesCourseIdModerationRejectPostErrors, RejectCourseApiV1CoursesCourseIdModerationRejectPostResponses, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteErrors, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponses, RemoveMemberApiV1CoursesCourseIdMembersMeDeleteData, RemoveMemberApiV1CoursesCourseIdMembersMeDeleteErrors, RemoveMemberApiV1CoursesCourseIdMembersMeDeleteResponses, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchData, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchErrors, ReorderBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksReorderPatchResponses, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchData, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchErrors, ReorderLessonsApiV1CoursesCourseIdModulesModuleIdLessonsReorderPatchResponses, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchData, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchErrors, ReorderModulesApiV1CoursesCourseIdModulesReorderPatchResponses, ResetPasswordApiV1AuthResetPasswordPostData, ResetPasswordApiV1AuthResetPasswordPostErrors, ResetPasswordApiV1AuthResetPasswordPostResponses, RevokeAllSessionsApiV1AuthSessionsDeleteData, RevokeAllSessionsApiV1AuthSessionsDeleteErrors, RevokeAllSessionsApiV1AuthSessionsDeleteResponses, RevokeSessionApiV1AuthSessionsSessionIdDeleteData, RevokeSessionApiV1AuthSessionsSessionIdDeleteErrors, RevokeSessionApiV1AuthSessionsSessionIdDeleteResponses, SayHelloGetData, SayHelloGetResponses, SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostData, SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostErrors, SubmitBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdSubmissionPostResponses, SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostData, SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostErrors, SubmitCourseForReviewApiV1CoursesCourseIdSubmitPostResponses, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostData, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostErrors, SubmitLessonApiV1CoursesCourseIdLessonsLessonIdSubmissionsPostResponses, SubmitTgpApiV1AiTgpCourseIdSubmitPostData, SubmitTgpApiV1AiTgpCourseIdSubmitPostErrors, SubmitTgpApiV1AiTgpCourseIdSubmitPostResponses, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchData, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchErrors, UpdateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchResponses, UpdateCourseApiV1CoursesCourseIdPatchData, UpdateCourseApiV1CoursesCourseIdPatchErrors, UpdateCourseApiV1CoursesCourseIdPatchResponses, UpdateCurrentUserApiV1UsersMePatchData, UpdateCurrentUserApiV1UsersMePatchErrors, UpdateCurrentUserApiV1UsersMePatchResponses, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchData, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchErrors, UpdateLessonApiV1CoursesCourseIdModulesModuleIdLessonsLessonIdPatchResponses, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchData, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchErrors, UpdateModuleApiV1CoursesCourseIdModulesModuleIdPatchResponses, UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchData, UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchErrors, UpdateTgpQuestionApiV1AiTgpQuestionsQuestionIdPatchResponses, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostData, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostErrors, UploadBlockMediaApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdMediaPostResponses, UploadCourseCoverApiV1CoursesCourseIdMediaPostData, UploadCourseCoverApiV1CoursesCourseIdMediaPostErrors, UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses, UploadMediaApiV1MediaPostData, UploadMediaApiV1MediaPostErrors, UploadMediaApiV1MediaPostResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -67,7 +67,69 @@ export class AuthService {
      */
     public static logoutApiV1AuthLogoutPost<ThrowOnError extends boolean = false>(options: Options<LogoutApiV1AuthLogoutPostData, ThrowOnError>): RequestResult<LogoutApiV1AuthLogoutPostResponses, LogoutApiV1AuthLogoutPostErrors, ThrowOnError> {
         return (options.client ?? client).post<LogoutApiV1AuthLogoutPostResponses, LogoutApiV1AuthLogoutPostErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/auth/logout',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Revoke all sessions except current
+     */
+    public static revokeAllSessionsApiV1AuthSessionsDelete<ThrowOnError extends boolean = false>(options: Options<RevokeAllSessionsApiV1AuthSessionsDeleteData, ThrowOnError>): RequestResult<RevokeAllSessionsApiV1AuthSessionsDeleteResponses, RevokeAllSessionsApiV1AuthSessionsDeleteErrors, ThrowOnError> {
+        return (options.client ?? client).delete<RevokeAllSessionsApiV1AuthSessionsDeleteResponses, RevokeAllSessionsApiV1AuthSessionsDeleteErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/auth/sessions',
+            ...options
+        });
+    }
+    
+    /**
+     * List active sessions
+     */
+    public static listSessionsApiV1AuthSessionsGet<ThrowOnError extends boolean = false>(options: Options<ListSessionsApiV1AuthSessionsGetData, ThrowOnError>): RequestResult<ListSessionsApiV1AuthSessionsGetResponses, ListSessionsApiV1AuthSessionsGetErrors, ThrowOnError> {
+        return (options.client ?? client).get<ListSessionsApiV1AuthSessionsGetResponses, ListSessionsApiV1AuthSessionsGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/auth/sessions',
+            ...options
+        });
+    }
+    
+    /**
+     * Revoke a specific session
+     */
+    public static revokeSessionApiV1AuthSessionsSessionIdDelete<ThrowOnError extends boolean = false>(options: Options<RevokeSessionApiV1AuthSessionsSessionIdDeleteData, ThrowOnError>): RequestResult<RevokeSessionApiV1AuthSessionsSessionIdDeleteResponses, RevokeSessionApiV1AuthSessionsSessionIdDeleteErrors, ThrowOnError> {
+        return (options.client ?? client).delete<RevokeSessionApiV1AuthSessionsSessionIdDeleteResponses, RevokeSessionApiV1AuthSessionsSessionIdDeleteErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/auth/sessions/{session_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Request password reset
+     */
+    public static forgotPasswordApiV1AuthForgotPasswordPost<ThrowOnError extends boolean = false>(options: Options<ForgotPasswordApiV1AuthForgotPasswordPostData, ThrowOnError>): RequestResult<ForgotPasswordApiV1AuthForgotPasswordPostResponses, ForgotPasswordApiV1AuthForgotPasswordPostErrors, ThrowOnError> {
+        return (options.client ?? client).post<ForgotPasswordApiV1AuthForgotPasswordPostResponses, ForgotPasswordApiV1AuthForgotPasswordPostErrors, ThrowOnError>({
+            url: '/api/v1/auth/forgot-password',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Reset password with token
+     */
+    public static resetPasswordApiV1AuthResetPasswordPost<ThrowOnError extends boolean = false>(options: Options<ResetPasswordApiV1AuthResetPasswordPostData, ThrowOnError>): RequestResult<ResetPasswordApiV1AuthResetPasswordPostResponses, ResetPasswordApiV1AuthResetPasswordPostErrors, ThrowOnError> {
+        return (options.client ?? client).post<ResetPasswordApiV1AuthResetPasswordPostResponses, ResetPasswordApiV1AuthResetPasswordPostErrors, ThrowOnError>({
+            url: '/api/v1/auth/reset-password',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -208,6 +270,17 @@ export class CourseService {
     }
     
     /**
+     * Unenroll from course
+     */
+    public static removeMemberApiV1CoursesCourseIdMembersMeDelete<ThrowOnError extends boolean = false>(options: Options<RemoveMemberApiV1CoursesCourseIdMembersMeDeleteData, ThrowOnError>): RequestResult<RemoveMemberApiV1CoursesCourseIdMembersMeDeleteResponses, RemoveMemberApiV1CoursesCourseIdMembersMeDeleteErrors, ThrowOnError> {
+        return (options.client ?? client).delete<RemoveMemberApiV1CoursesCourseIdMembersMeDeleteResponses, RemoveMemberApiV1CoursesCourseIdMembersMeDeleteErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/courses/{course_id}/members/me',
+            ...options
+        });
+    }
+    
+    /**
      * Remove Course Cover
      */
     public static removeCourseCoverApiV1CoursesCourseIdMediaDelete<ThrowOnError extends boolean = false>(options: Options<RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData, ThrowOnError>): RequestResult<RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteResponses, RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteErrors, ThrowOnError> {
@@ -231,6 +304,41 @@ export class CourseService {
                 'Content-Type': null,
                 ...options.headers
             }
+        });
+    }
+}
+
+export class CourseAnalyticService {
+    /**
+     * Course analytics overview
+     */
+    public static getCourseOverviewApiV1CoursesCourseIdAnalyticsGet<ThrowOnError extends boolean = false>(options: Options<GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetData, ThrowOnError>): RequestResult<GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetResponses, GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetErrors, ThrowOnError> {
+        return (options.client ?? client).get<GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetResponses, GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/courses/{course_id}/analytics',
+            ...options
+        });
+    }
+    
+    /**
+     * Enrollment trend over time
+     */
+    public static getEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGet<ThrowOnError extends boolean = false>(options: Options<GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetData, ThrowOnError>): RequestResult<GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetResponses, GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetErrors, ThrowOnError> {
+        return (options.client ?? client).get<GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetResponses, GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/courses/{course_id}/analytics/enrollments',
+            ...options
+        });
+    }
+    
+    /**
+     * Content performance (lessons + blocks)
+     */
+    public static getContentPerformanceApiV1CoursesCourseIdAnalyticsContentGet<ThrowOnError extends boolean = false>(options: Options<GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetData, ThrowOnError>): RequestResult<GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetResponses, GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetErrors, ThrowOnError> {
+        return (options.client ?? client).get<GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetResponses, GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/courses/{course_id}/analytics/content',
+            ...options
         });
     }
 }
@@ -625,6 +733,21 @@ export class UserService {
             ...options
         });
     }
+    
+    /**
+     * Change password
+     */
+    public static changePasswordApiV1UsersMePasswordPost<ThrowOnError extends boolean = false>(options: Options<ChangePasswordApiV1UsersMePasswordPostData, ThrowOnError>): RequestResult<ChangePasswordApiV1UsersMePasswordPostResponses, ChangePasswordApiV1UsersMePasswordPostErrors, ThrowOnError> {
+        return (options.client ?? client).post<ChangePasswordApiV1UsersMePasswordPostResponses, ChangePasswordApiV1UsersMePasswordPostErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/me/password',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
 }
 
 export class ProfileService {
@@ -748,6 +871,52 @@ export class AiAssistantService {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
+        });
+    }
+}
+
+export class NotificationService {
+    /**
+     * List notifications
+     */
+    public static listNotificationsNotificationsGet<ThrowOnError extends boolean = false>(options?: Options<ListNotificationsNotificationsGetData, ThrowOnError>): RequestResult<ListNotificationsNotificationsGetResponses, ListNotificationsNotificationsGetErrors, ThrowOnError> {
+        return (options?.client ?? client).get<ListNotificationsNotificationsGetResponses, ListNotificationsNotificationsGetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/notifications',
+            ...options
+        });
+    }
+    
+    /**
+     * Get unread notification count
+     */
+    public static getUnreadCountNotificationsUnreadCountGet<ThrowOnError extends boolean = false>(options?: Options<GetUnreadCountNotificationsUnreadCountGetData, ThrowOnError>): RequestResult<GetUnreadCountNotificationsUnreadCountGetResponses, unknown, ThrowOnError> {
+        return (options?.client ?? client).get<GetUnreadCountNotificationsUnreadCountGetResponses, unknown, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/notifications/unread-count',
+            ...options
+        });
+    }
+    
+    /**
+     * Mark notification as read
+     */
+    public static markNotificationReadNotificationsNotificationIdReadPatch<ThrowOnError extends boolean = false>(options: Options<MarkNotificationReadNotificationsNotificationIdReadPatchData, ThrowOnError>): RequestResult<MarkNotificationReadNotificationsNotificationIdReadPatchResponses, MarkNotificationReadNotificationsNotificationIdReadPatchErrors, ThrowOnError> {
+        return (options.client ?? client).patch<MarkNotificationReadNotificationsNotificationIdReadPatchResponses, MarkNotificationReadNotificationsNotificationIdReadPatchErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/notifications/{notification_id}/read',
+            ...options
+        });
+    }
+    
+    /**
+     * Mark all notifications as read
+     */
+    public static markAllNotificationsReadNotificationsReadAllPatch<ThrowOnError extends boolean = false>(options?: Options<MarkAllNotificationsReadNotificationsReadAllPatchData, ThrowOnError>): RequestResult<MarkAllNotificationsReadNotificationsReadAllPatchResponses, unknown, ThrowOnError> {
+        return (options?.client ?? client).patch<MarkAllNotificationsReadNotificationsReadAllPatchResponses, unknown, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/notifications/read-all',
+            ...options
         });
     }
 }

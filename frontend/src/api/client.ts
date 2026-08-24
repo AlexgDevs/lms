@@ -68,33 +68,40 @@ client.interceptors.response.use(async (response, request) => {
 
   const isRefreshUrl = request.url.includes("/auth/refresh");
 
-    if (response.status === 401 && !isRefreshUrl) {
-      const isRetry = request.headers.get("X-Is-Retry") === "true";
-      const hadToken = localStorage.getItem("access_token");
+  if (response.status === 401 && !isRefreshUrl) {
+    const isRetry = request.headers.get("X-Is-Retry") === "true";
+    const hadToken = localStorage.getItem("access_token");
 
-      if (!isRetry && hadToken) {
-        if (!refreshPromise) {
-          refreshPromise = refreshAccessToken().finally(() => {
-            refreshPromise = null;
-          });
-        }
-
-        const newAccessToken = await refreshPromise;
-
-        if (newAccessToken) {
-          const retryRequest = request.clone();
-          retryRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
-          retryRequest.headers.set("X-Is-Retry", "true");
-
-          return fetch(retryRequest);
-        }
+    if (!isRetry && hadToken) {
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken().finally(() => {
+          refreshPromise = null;
+        });
       }
 
-      if (hadToken) {
-        handleLogout();
+      const newAccessToken = await refreshPromise;
+
+      if (newAccessToken) {
+        const retryRequest = request.clone();
+        retryRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
+        retryRequest.headers.set("X-Is-Retry", "true");
+
+        const retryResponse = await fetch(retryRequest);
+
+        if (!retryResponse.ok) {
+          const retryBody = await retryResponse.json().catch(() => null);
+          throw new ApiError(retryResponse.status, retryBody);
+        }
+
+        return retryResponse;
       }
-      throw new ApiError(response.status, { message: "Unauthorized" });
     }
+
+    handleLogout();
+    throw new ApiError(response.status, {
+      detail: "Сессия истекла. Войдите заново.",
+    });
+  }
 
   const body = await response.json().catch(() => null);
   throw new ApiError(response.status, body);

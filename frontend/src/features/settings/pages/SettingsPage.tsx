@@ -1,18 +1,20 @@
 import { useState } from "react"
-import { Bell, CreditCard, KeyRound, User as UserIcon } from "lucide-react"
+import { Bell, CreditCard, KeyRound, Shield, User as UserIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ProfileSettingsForm } from "@/features/settings/components/ProfileSettingsForm"
 import { PaymentDetailsPanel } from "@/features/settings/components/PaymentDetailsPanel"
 import { NotificationsPanel } from "@/features/settings/components/NotificationsPanel"
 import { PasswordChangePanel } from "@/features/settings/components/PasswordChangePanel"
+import { SessionsPanel } from "@/features/settings/components/SessionsPanel"
 
-type SettingsTab = "profile" | "payment" | "password" | "notifications"
+type SettingsTab = "profile" | "payment" | "password" | "notifications" | "sessions"
 
 const TABS = [
     { id: "profile", label: "Профиль", icon: UserIcon },
     { id: "payment", label: "Реквизиты", icon: CreditCard },
     { id: "password", label: "Пароль", icon: KeyRound },
     { id: "notifications", label: "Уведомления", icon: Bell },
+    { id: "sessions", label: "Сессии", icon: Shield },
 ] as const
 
 export function SettingsPage() {
@@ -50,6 +52,7 @@ export function SettingsPage() {
             {tab === "payment" && <PaymentDetailsPanel />}
             {tab === "password" && <PasswordChangePanel />}
             {tab === "notifications" && <NotificationsPanel />}
+            {tab === "sessions" && <SessionsPanel />}
         </div>
     )
 }

@@ -5,7 +5,7 @@ from fastapi import Depends
 from src.auth.repository import RefreshTokenRepository
 from src.auth.services import AuthService
 from src.auth.unit_of_work import AuthUnitOfWork
-from src.core.dependencies import SessionDep
+from src.core.dependencies import EventBusDep, SessionDep
 from src.user.dependencies import UserRepositoryDep
 
 
@@ -29,8 +29,9 @@ async def get_auth_unit_of_work(
 def get_auth_service(
     session: SessionDep,
     auth_unit_of_work: AuthUnitOfWorkDep,
+    event_bus: EventBusDep,
 ) -> AuthService:
-    return AuthService(session, auth_unit_of_work)
+    return AuthService(session, auth_unit_of_work, event_bus)
 
 
 RefreshTokenRepositoryDep = Annotated[

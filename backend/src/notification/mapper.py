@@ -4,5 +4,5 @@ from src.notification.schemas import NotificationSchema
 
 
 class NotificationMapper(BaseMapper[Notification, NotificationSchema]):
-    model = Notification
-    schema = NotificationSchema
+    orm_class = Notification
+    schema_class = NotificationSchema

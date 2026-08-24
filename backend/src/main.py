@@ -31,9 +31,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
     event_bus = InMemoryEvent()
     ws_manager = ConnectionManager()
-    handler = NotificationHandler(
-        session_factory=session_maker, ws_manager=ws_manager
-    )
+    handler = NotificationHandler(session_factory=session_maker, ws_manager=ws_manager)
     handler.register(event_bus)
     app.state.event_bus = event_bus
 

@@ -4,11 +4,13 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
+from src.auth.device_parser import parse_device_name
 from src.auth.exceptions import IncorrectPasswordError, InvalidRefreshTokenError
 from src.user.exceptions import UserAlreadyExistsError, UserNotFoundError
 from src.auth.schemas import (
     RefreshTokenCreate,
     RefreshTokenSchema,
+    SessionSchema,
     TokenPair,
     UserCreateSchema,
     UserRegisterSchema,
@@ -22,10 +24,17 @@ from src.auth.security import (
     hash_refresh_token,
     verify_password,
 )
+from src.core.events.event import UserLoggedIn, UserLoggedOut
 from src.user.schemas import UserSchema
 from src.auth.unit_of_work import AuthUnitOfWork
 from src.core.services.base_service import BaseService
 from src.core.config import settings
+
+if __name__ != "__main__":
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from src.core.events.protocol import Event
 
 
 class AuthService(BaseService):
@@ -34,8 +43,9 @@ class AuthService(BaseService):
         self,
         session: AsyncSession,
         auth_unit_of_work: AuthUnitOfWork,
+        event_bus: "Event | None" = None,
     ) -> None:
-        super().__init__(session)
+        super().__init__(session, event_bus)
         self.uow = auth_unit_of_work
 
     async def register(self, form_data: UserRegisterSchema) -> UserSchema:
@@ -51,14 +61,38 @@ class AuthService(BaseService):
         except IntegrityError:
             raise UserAlreadyExistsError
 
-    async def login(self, username: str, password: str) -> TokenPair:
+    async def login(
+        self,
+        username: str,
+        password: str,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+    ) -> TokenPair:
         user = await self.uow.users.get_one(username=username)
         if not user:
             raise UserNotFoundError
         if not verify_password(password, user.password_hash):
             raise IncorrectPasswordError
-        tokens = await self._issue_tokens(user.id)
+
+        device_name = parse_device_name(user_agent)
+        tokens = await self._issue_tokens(
+            user.id,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            device_name=device_name,
+        )
         await self.session.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                UserLoggedIn(
+                    user_id=user.id,
+                    ip_address=ip_address,
+                    device_name=device_name,
+                )
+            )
+
         return TokenPair(
             access_token=tokens.access_token,
             refresh_token=tokens.refresh_token,
@@ -72,13 +106,26 @@ class AuthService(BaseService):
         await self.uow.commit()
         return tokens
 
-    async def logout(self, refresh_token: str) -> None:
+    async def logout(
+        self,
+        refresh_token: str,
+        *,
+        user_id: UUID | None = None,
+    ) -> None:
         try:
             stored = await self._get_valid_refresh_token(refresh_token)
         except InvalidRefreshTokenError:
             return
         await self.uow.refresh_tokens.revoke(stored.id)
         await self.uow.commit()
+
+        if self.event_bus is not None and user_id is not None:
+            await self.event_bus.publish(
+                UserLoggedOut(
+                    user_id=user_id,
+                    session_id=stored.id,
+                )
+            )
 
     async def forgot_password(self, email: str) -> str | None:
         user = await self.uow.users.get_one(email=email)
@@ -96,10 +143,41 @@ class AuthService(BaseService):
         class _PwdUpdate(BaseModel):
             password_hash: str
 
-        await self.uow.users.update(user_id, _PwdUpdate(password_hash=hash_password(new_password)))
+        await self.uow.users.update(
+            user_id, _PwdUpdate(password_hash=hash_password(new_password))
+        )
         await self.uow.commit()
 
-    async def _issue_tokens(self, user_id: UUID) -> TokenPair:
+    async def get_sessions(
+        self, user_id: UUID, current_token_id: UUID | None
+    ) -> list[SessionSchema]:
+        sessions = await self.uow.refresh_tokens.get_active_sessions(user_id)
+        return [
+            SessionSchema(
+                id=s.id,
+                device_name=s.device_name,
+                ip_address=s.ip_address,
+                created_at=s.created_at,
+                is_current=current_token_id is not None and s.id == current_token_id,
+            )
+            for s in sessions
+        ]
+
+    async def revoke_session(self, user_id: UUID, token_id: UUID) -> bool:
+        return await self.uow.refresh_tokens.revoke_session(user_id, token_id)
+
+    async def revoke_all_sessions(self, user_id: UUID, current_token_id: UUID) -> None:
+        await self.uow.refresh_tokens.revoke_all_except(user_id, current_token_id)
+        await self.uow.commit()
+
+    async def _issue_tokens(
+        self,
+        user_id: UUID,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        device_name: str | None = None,
+    ) -> TokenPair:
         access_token = create_access_token(user_id)
         refresh_token, refresh_token_hash = create_refresh_token()
         expires_at = datetime.now(timezone.utc) + timedelta(
@@ -110,6 +188,9 @@ class AuthService(BaseService):
                 user_id=user_id,
                 token_hash=refresh_token_hash,
                 expires_at=expires_at,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                device_name=device_name,
             )
         )
         return TokenPair(access_token=access_token, refresh_token=refresh_token)

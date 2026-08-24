@@ -41,9 +41,7 @@ class NotificationRepository(BaseRepository[Notification, NotificationSchema]):
             .offset(offset)
         )
         result = await self.session.execute(items_stmt)
-        items = [
-            self.mapper.to_schema(model) for model in result.scalars().all()
-        ]
+        items = [self.mapper.to_schema(model) for model in result.scalars().all()]
 
         return items, total, unread_count
 

@@ -4,7 +4,10 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from src.core.websocket.auth import UserIdWSDep
 from src.core.websocket.manager import ConnectionManager
-from src.notification.dependencies import NotificationServiceDep, get_ws_manager_singleton
+from src.notification.dependencies import (
+    NotificationServiceDep,
+    get_ws_manager_singleton,
+)
 from src.notification.schemas import NotificationListSchema, UnreadCountSchema
 from src.user.dependencies import UserIdDep
 
@@ -23,9 +26,7 @@ async def list_notifications(
     offset: int = 0,
 ) -> NotificationListSchema:
     items, total, unread_count = await service.list_for_user(user_id, limit, offset)
-    return NotificationListSchema(
-        items=items, total=total, unread_count=unread_count
-    )
+    return NotificationListSchema(items=items, total=total, unread_count=unread_count)
 
 
 @router.get(

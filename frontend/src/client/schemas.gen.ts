@@ -243,6 +243,56 @@ export const BlockCreateRequestSchemaSchema = {
     title: 'BlockCreateRequestSchema'
 } as const;
 
+export const BlockPerformanceSchemaSchema = {
+    properties: {
+        block_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Block Id'
+        },
+        title: {
+            type: 'string',
+            title: 'Title'
+        },
+        block_type: {
+            type: 'string',
+            title: 'Block Type'
+        },
+        lesson_title: {
+            type: 'string',
+            title: 'Lesson Title'
+        },
+        accuracy: {
+            type: 'number',
+            title: 'Accuracy'
+        },
+        avg_attempts: {
+            type: 'number',
+            title: 'Avg Attempts'
+        },
+        first_try_rate: {
+            type: 'number',
+            title: 'First Try Rate'
+        },
+        total_submissions: {
+            type: 'integer',
+            title: 'Total Submissions'
+        }
+    },
+    type: 'object',
+    required: [
+        'block_id',
+        'title',
+        'block_type',
+        'lesson_title',
+        'accuracy',
+        'avg_attempts',
+        'first_try_rate',
+        'total_submissions'
+    ],
+    title: 'BlockPerformanceSchema'
+} as const;
+
 export const BlockReorderSchemaSchema = {
     properties: {
         ordered_ids: {
@@ -685,6 +735,56 @@ export const CategorySchemaSchema = {
     title: 'CategorySchema'
 } as const;
 
+export const ChangePasswordRequestSchemaSchema = {
+    properties: {
+        current_password: {
+            type: 'string',
+            title: 'Current Password'
+        },
+        new_password: {
+            type: 'string',
+            title: 'New Password'
+        }
+    },
+    type: 'object',
+    required: [
+        'current_password',
+        'new_password'
+    ],
+    title: 'ChangePasswordRequestSchema'
+} as const;
+
+export const ContentPerformanceSchemaSchema = {
+    properties: {
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        lessons: {
+            items: {
+                $ref: '#/components/schemas/LessonPerformanceSchema'
+            },
+            type: 'array',
+            title: 'Lessons'
+        },
+        blocks: {
+            items: {
+                $ref: '#/components/schemas/BlockPerformanceSchema'
+            },
+            type: 'array',
+            title: 'Blocks'
+        }
+    },
+    type: 'object',
+    required: [
+        'course_id',
+        'lessons',
+        'blocks'
+    ],
+    title: 'ContentPerformanceSchema'
+} as const;
+
 export const ContributionDaySchemaSchema = {
     properties: {
         date: {
@@ -1000,6 +1100,46 @@ export const CourseModerationRejectSchemaSchema = {
         'reason'
     ],
     title: 'CourseModerationRejectSchema'
+} as const;
+
+export const CourseOverviewSchemaSchema = {
+    properties: {
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        total_enrolled: {
+            type: 'integer',
+            title: 'Total Enrolled'
+        },
+        active: {
+            type: 'integer',
+            title: 'Active'
+        },
+        churned: {
+            type: 'integer',
+            title: 'Churned'
+        },
+        completion_rate: {
+            type: 'number',
+            title: 'Completion Rate'
+        },
+        avg_accuracy: {
+            type: 'number',
+            title: 'Avg Accuracy'
+        }
+    },
+    type: 'object',
+    required: [
+        'course_id',
+        'total_enrolled',
+        'active',
+        'churned',
+        'completion_rate',
+        'avg_accuracy'
+    ],
+    title: 'CourseOverviewSchema'
 } as const;
 
 export const CourseSchemaSchema = {
@@ -1381,6 +1521,93 @@ export const DayActivitySchemaSchema = {
     title: 'DayActivitySchema'
 } as const;
 
+export const EnrollmentTrendDaySchemaSchema = {
+    properties: {
+        date: {
+            type: 'string',
+            title: 'Date'
+        },
+        enrolled: {
+            type: 'integer',
+            title: 'Enrolled'
+        },
+        unenrolled: {
+            type: 'integer',
+            title: 'Unenrolled'
+        }
+    },
+    type: 'object',
+    required: [
+        'date',
+        'enrolled',
+        'unenrolled'
+    ],
+    title: 'EnrollmentTrendDaySchema'
+} as const;
+
+export const EnrollmentTrendSchemaSchema = {
+    properties: {
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        days: {
+            items: {
+                $ref: '#/components/schemas/EnrollmentTrendDaySchema'
+            },
+            type: 'array',
+            title: 'Days'
+        }
+    },
+    type: 'object',
+    required: [
+        'course_id',
+        'days'
+    ],
+    title: 'EnrollmentTrendSchema'
+} as const;
+
+export const ForgotPasswordRequestSchemaSchema = {
+    properties: {
+        email: {
+            type: 'string',
+            format: 'email',
+            title: 'Email'
+        }
+    },
+    type: 'object',
+    required: [
+        'email'
+    ],
+    title: 'ForgotPasswordRequestSchema'
+} as const;
+
+export const ForgotPasswordResponseSchemaSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message'
+        },
+        reset_token: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reset Token'
+        }
+    },
+    type: 'object',
+    required: [
+        'message'
+    ],
+    title: 'ForgotPasswordResponseSchema'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -1418,6 +1645,51 @@ export const LessonCreateRequestSchemaSchema = {
         'title'
     ],
     title: 'LessonCreateRequestSchema'
+} as const;
+
+export const LessonPerformanceSchemaSchema = {
+    properties: {
+        lesson_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Lesson Id'
+        },
+        title: {
+            type: 'string',
+            title: 'Title'
+        },
+        module_title: {
+            type: 'string',
+            title: 'Module Title'
+        },
+        completion_rate: {
+            type: 'number',
+            title: 'Completion Rate'
+        },
+        avg_time_seconds: {
+            type: 'number',
+            title: 'Avg Time Seconds'
+        },
+        total_started: {
+            type: 'integer',
+            title: 'Total Started'
+        },
+        total_completed: {
+            type: 'integer',
+            title: 'Total Completed'
+        }
+    },
+    type: 'object',
+    required: [
+        'lesson_id',
+        'title',
+        'module_title',
+        'completion_rate',
+        'avg_time_seconds',
+        'total_started',
+        'total_completed'
+    ],
+    title: 'LessonPerformanceSchema'
 } as const;
 
 export const LessonProgressSchemaSchema = {
@@ -1799,6 +2071,92 @@ export const ModuleUpdateRequestSchemaSchema = {
     title: 'ModuleUpdateRequestSchema'
 } as const;
 
+export const NotificationListSchemaSchema = {
+    properties: {
+        items: {
+            items: {
+                $ref: '#/components/schemas/NotificationSchema'
+            },
+            type: 'array',
+            title: 'Items'
+        },
+        total: {
+            type: 'integer',
+            title: 'Total'
+        },
+        unread_count: {
+            type: 'integer',
+            title: 'Unread Count'
+        }
+    },
+    type: 'object',
+    required: [
+        'items',
+        'total',
+        'unread_count'
+    ],
+    title: 'NotificationListSchema'
+} as const;
+
+export const NotificationSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        type: {
+            type: 'string',
+            title: 'Type'
+        },
+        title: {
+            type: 'string',
+            title: 'Title'
+        },
+        body: {
+            type: 'string',
+            title: 'Body'
+        },
+        link: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Link'
+        },
+        is_read: {
+            type: 'boolean',
+            title: 'Is Read'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'type',
+        'title',
+        'body',
+        'link',
+        'is_read',
+        'created_at'
+    ],
+    title: 'NotificationSchema'
+} as const;
+
 export const ProfileStatsSchemaSchema = {
     properties: {
         streak: {
@@ -1826,6 +2184,73 @@ export const ProfileStatsSchemaSchema = {
         'yearly'
     ],
     title: 'ProfileStatsSchema'
+} as const;
+
+export const ResetPasswordRequestSchemaSchema = {
+    properties: {
+        token: {
+            type: 'string',
+            title: 'Token'
+        },
+        new_password: {
+            type: 'string',
+            title: 'New Password'
+        }
+    },
+    type: 'object',
+    required: [
+        'token',
+        'new_password'
+    ],
+    title: 'ResetPasswordRequestSchema'
+} as const;
+
+export const SessionSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        device_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Device Name'
+        },
+        ip_address: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ip Address'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        is_current: {
+            type: 'boolean',
+            title: 'Is Current',
+            default: false
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'created_at'
+    ],
+    title: 'SessionSchema'
 } as const;
 
 export const StreakSchemaSchema = {
@@ -2112,6 +2537,20 @@ export const TokenPairSchema = {
         'refresh_token'
     ],
     title: 'TokenPair'
+} as const;
+
+export const UnreadCountSchemaSchema = {
+    properties: {
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: [
+        'count'
+    ],
+    title: 'UnreadCountSchema'
 } as const;
 
 export const UserMeSchemaSchema = {

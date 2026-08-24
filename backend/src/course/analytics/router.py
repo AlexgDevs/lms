@@ -19,9 +19,7 @@ def get_analytics_service(session: SessionDep) -> CourseAnalyticsService:
     return CourseAnalyticsService(session)
 
 
-AnalyticsServiceDep = Annotated[
-    CourseAnalyticsService, Depends(get_analytics_service)
-]
+AnalyticsServiceDep = Annotated[CourseAnalyticsService, Depends(get_analytics_service)]
 
 
 @router.get(
@@ -63,6 +61,4 @@ async def get_content_performance(
     owner_id: UserIdDep,
     service: AnalyticsServiceDep,
 ) -> ContentPerformanceSchema:
-    return await service.get_content_performance(
-        course_id=course_id, owner_id=owner_id
-    )
+    return await service.get_content_performance(course_id=course_id, owner_id=owner_id)

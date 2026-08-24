@@ -131,3 +131,19 @@ class CourseReviewFlagged(DomainEvent):
     course_id: uuid.UUID
     course_title: str
     owner_id: uuid.UUID
+
+
+# --- Auth / Session events ---
+
+
+@dataclass(frozen=True, kw_only=True)
+class UserLoggedIn(DomainEvent):
+    user_id: uuid.UUID
+    ip_address: str | None
+    device_name: str | None
+
+
+@dataclass(frozen=True, kw_only=True)
+class UserLoggedOut(DomainEvent):
+    user_id: uuid.UUID
+    session_id: uuid.UUID

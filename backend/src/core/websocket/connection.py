@@ -99,9 +99,7 @@ class Connection:
                 try:
                     await self.websocket.send_text(envelope.model_dump_json())
                 except Exception:
-                    logger.exception(
-                        "websocket.write_failed"
-                    )
+                    logger.exception("websocket.write_failed")
                     await self._on_disconnect_needed(self)
                     return
         except asyncio.CancelledError:

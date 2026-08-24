@@ -179,6 +179,44 @@ export type BlockCreateRequestSchema = {
 };
 
 /**
+ * BlockPerformanceSchema
+ */
+export type BlockPerformanceSchema = {
+    /**
+     * Block Id
+     */
+    block_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Block Type
+     */
+    block_type: string;
+    /**
+     * Lesson Title
+     */
+    lesson_title: string;
+    /**
+     * Accuracy
+     */
+    accuracy: number;
+    /**
+     * Avg Attempts
+     */
+    avg_attempts: number;
+    /**
+     * First Try Rate
+     */
+    first_try_rate: number;
+    /**
+     * Total Submissions
+     */
+    total_submissions: number;
+};
+
+/**
  * BlockReorderSchema
  */
 export type BlockReorderSchema = {
@@ -460,6 +498,38 @@ export type CategorySchema = {
 };
 
 /**
+ * ChangePasswordRequestSchema
+ */
+export type ChangePasswordRequestSchema = {
+    /**
+     * Current Password
+     */
+    current_password: string;
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
+ * ContentPerformanceSchema
+ */
+export type ContentPerformanceSchema = {
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Lessons
+     */
+    lessons: Array<LessonPerformanceSchema>;
+    /**
+     * Blocks
+     */
+    blocks: Array<BlockPerformanceSchema>;
+};
+
+/**
  * ContributionDaySchema
  */
 export type ContributionDaySchema = {
@@ -669,6 +739,36 @@ export type CourseModerationRejectSchema = {
 };
 
 /**
+ * CourseOverviewSchema
+ */
+export type CourseOverviewSchema = {
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Total Enrolled
+     */
+    total_enrolled: number;
+    /**
+     * Active
+     */
+    active: number;
+    /**
+     * Churned
+     */
+    churned: number;
+    /**
+     * Completion Rate
+     */
+    completion_rate: number;
+    /**
+     * Avg Accuracy
+     */
+    avg_accuracy: number;
+};
+
+/**
  * CourseSchema
  *
  * Full course schema returned to the client (Response model).
@@ -873,6 +973,62 @@ export type DayActivitySchema = {
 };
 
 /**
+ * EnrollmentTrendDaySchema
+ */
+export type EnrollmentTrendDaySchema = {
+    /**
+     * Date
+     */
+    date: string;
+    /**
+     * Enrolled
+     */
+    enrolled: number;
+    /**
+     * Unenrolled
+     */
+    unenrolled: number;
+};
+
+/**
+ * EnrollmentTrendSchema
+ */
+export type EnrollmentTrendSchema = {
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Days
+     */
+    days: Array<EnrollmentTrendDaySchema>;
+};
+
+/**
+ * ForgotPasswordRequestSchema
+ */
+export type ForgotPasswordRequestSchema = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
+ * ForgotPasswordResponseSchema
+ */
+export type ForgotPasswordResponseSchema = {
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Reset Token
+     */
+    reset_token?: string | null;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -894,6 +1050,40 @@ export type LessonCreateRequestSchema = {
      * Description
      */
     description?: string | null;
+};
+
+/**
+ * LessonPerformanceSchema
+ */
+export type LessonPerformanceSchema = {
+    /**
+     * Lesson Id
+     */
+    lesson_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Module Title
+     */
+    module_title: string;
+    /**
+     * Completion Rate
+     */
+    completion_rate: number;
+    /**
+     * Avg Time Seconds
+     */
+    avg_time_seconds: number;
+    /**
+     * Total Started
+     */
+    total_started: number;
+    /**
+     * Total Completed
+     */
+    total_completed: number;
 };
 
 /**
@@ -1124,6 +1314,62 @@ export type ModuleUpdateRequestSchema = {
 };
 
 /**
+ * NotificationListSchema
+ */
+export type NotificationListSchema = {
+    /**
+     * Items
+     */
+    items: Array<NotificationSchema>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Unread Count
+     */
+    unread_count: number;
+};
+
+/**
+ * NotificationSchema
+ */
+export type NotificationSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Type
+     */
+    type: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Body
+     */
+    body: string;
+    /**
+     * Link
+     */
+    link: string | null;
+    /**
+     * Is Read
+     */
+    is_read: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
  * ProfileStatsSchema
  */
 export type ProfileStatsSchema = {
@@ -1136,6 +1382,46 @@ export type ProfileStatsSchema = {
      * Yearly
      */
     yearly: Array<ContributionDaySchema>;
+};
+
+/**
+ * ResetPasswordRequestSchema
+ */
+export type ResetPasswordRequestSchema = {
+    /**
+     * Token
+     */
+    token: string;
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
+ * SessionSchema
+ */
+export type SessionSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Device Name
+     */
+    device_name?: string | null;
+    /**
+     * Ip Address
+     */
+    ip_address?: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Is Current
+     */
+    is_current?: boolean;
 };
 
 /**
@@ -1317,6 +1603,16 @@ export type TokenPair = {
      * Token Type
      */
     token_type?: string;
+};
+
+/**
+ * UnreadCountSchema
+ */
+export type UnreadCountSchema = {
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -1538,6 +1834,156 @@ export type LogoutApiV1AuthLogoutPostResponses = {
 };
 
 export type LogoutApiV1AuthLogoutPostResponse = LogoutApiV1AuthLogoutPostResponses[keyof LogoutApiV1AuthLogoutPostResponses];
+
+export type RevokeAllSessionsApiV1AuthSessionsDeleteData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Current Token
+         *
+         * Current refresh token
+         */
+        current_token: string;
+    };
+    url: '/api/v1/auth/sessions';
+};
+
+export type RevokeAllSessionsApiV1AuthSessionsDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RevokeAllSessionsApiV1AuthSessionsDeleteError = RevokeAllSessionsApiV1AuthSessionsDeleteErrors[keyof RevokeAllSessionsApiV1AuthSessionsDeleteErrors];
+
+export type RevokeAllSessionsApiV1AuthSessionsDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RevokeAllSessionsApiV1AuthSessionsDeleteResponse = RevokeAllSessionsApiV1AuthSessionsDeleteResponses[keyof RevokeAllSessionsApiV1AuthSessionsDeleteResponses];
+
+export type ListSessionsApiV1AuthSessionsGetData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Current Token
+         *
+         * Current refresh token
+         */
+        current_token: string;
+    };
+    url: '/api/v1/auth/sessions';
+};
+
+export type ListSessionsApiV1AuthSessionsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListSessionsApiV1AuthSessionsGetError = ListSessionsApiV1AuthSessionsGetErrors[keyof ListSessionsApiV1AuthSessionsGetErrors];
+
+export type ListSessionsApiV1AuthSessionsGetResponses = {
+    /**
+     * Response List Sessions Api V1 Auth Sessions Get
+     *
+     * Successful Response
+     */
+    200: Array<SessionSchema>;
+};
+
+export type ListSessionsApiV1AuthSessionsGetResponse = ListSessionsApiV1AuthSessionsGetResponses[keyof ListSessionsApiV1AuthSessionsGetResponses];
+
+export type RevokeSessionApiV1AuthSessionsSessionIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Session Id
+         */
+        session_id: string;
+    };
+    query?: never;
+    url: '/api/v1/auth/sessions/{session_id}';
+};
+
+export type RevokeSessionApiV1AuthSessionsSessionIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RevokeSessionApiV1AuthSessionsSessionIdDeleteError = RevokeSessionApiV1AuthSessionsSessionIdDeleteErrors[keyof RevokeSessionApiV1AuthSessionsSessionIdDeleteErrors];
+
+export type RevokeSessionApiV1AuthSessionsSessionIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RevokeSessionApiV1AuthSessionsSessionIdDeleteResponse = RevokeSessionApiV1AuthSessionsSessionIdDeleteResponses[keyof RevokeSessionApiV1AuthSessionsSessionIdDeleteResponses];
+
+export type ForgotPasswordApiV1AuthForgotPasswordPostData = {
+    body: ForgotPasswordRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/forgot-password';
+};
+
+export type ForgotPasswordApiV1AuthForgotPasswordPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ForgotPasswordApiV1AuthForgotPasswordPostError = ForgotPasswordApiV1AuthForgotPasswordPostErrors[keyof ForgotPasswordApiV1AuthForgotPasswordPostErrors];
+
+export type ForgotPasswordApiV1AuthForgotPasswordPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ForgotPasswordResponseSchema;
+};
+
+export type ForgotPasswordApiV1AuthForgotPasswordPostResponse = ForgotPasswordApiV1AuthForgotPasswordPostResponses[keyof ForgotPasswordApiV1AuthForgotPasswordPostResponses];
+
+export type ResetPasswordApiV1AuthResetPasswordPostData = {
+    body: ResetPasswordRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/reset-password';
+};
+
+export type ResetPasswordApiV1AuthResetPasswordPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResetPasswordApiV1AuthResetPasswordPostError = ResetPasswordApiV1AuthResetPasswordPostErrors[keyof ResetPasswordApiV1AuthResetPasswordPostErrors];
+
+export type ResetPasswordApiV1AuthResetPasswordPostResponses = {
+    /**
+     * Response Reset Password Api V1 Auth Reset Password Post
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type ResetPasswordApiV1AuthResetPasswordPostResponse = ResetPasswordApiV1AuthResetPasswordPostResponses[keyof ResetPasswordApiV1AuthResetPasswordPostResponses];
 
 export type GetCoursesApiV1CoursesGetData = {
     body?: never;
@@ -1890,6 +2336,36 @@ export type CreateMemberApiV1CoursesCourseIdMembersPostResponses = {
 
 export type CreateMemberApiV1CoursesCourseIdMembersPostResponse = CreateMemberApiV1CoursesCourseIdMembersPostResponses[keyof CreateMemberApiV1CoursesCourseIdMembersPostResponses];
 
+export type RemoveMemberApiV1CoursesCourseIdMembersMeDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/members/me';
+};
+
+export type RemoveMemberApiV1CoursesCourseIdMembersMeDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RemoveMemberApiV1CoursesCourseIdMembersMeDeleteError = RemoveMemberApiV1CoursesCourseIdMembersMeDeleteErrors[keyof RemoveMemberApiV1CoursesCourseIdMembersMeDeleteErrors];
+
+export type RemoveMemberApiV1CoursesCourseIdMembersMeDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RemoveMemberApiV1CoursesCourseIdMembersMeDeleteResponse = RemoveMemberApiV1CoursesCourseIdMembersMeDeleteResponses[keyof RemoveMemberApiV1CoursesCourseIdMembersMeDeleteResponses];
+
 export type RemoveCourseCoverApiV1CoursesCourseIdMediaDeleteData = {
     body?: never;
     path: {
@@ -1949,6 +2425,101 @@ export type UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses = {
 };
 
 export type UploadCourseCoverApiV1CoursesCourseIdMediaPostResponse = UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses[keyof UploadCourseCoverApiV1CoursesCourseIdMediaPostResponses];
+
+export type GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/analytics';
+};
+
+export type GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetError = GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetErrors[keyof GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetErrors];
+
+export type GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CourseOverviewSchema;
+};
+
+export type GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetResponse = GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetResponses[keyof GetCourseOverviewApiV1CoursesCourseIdAnalyticsGetResponses];
+
+export type GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: {
+        /**
+         * Days
+         */
+        days?: number;
+    };
+    url: '/api/v1/courses/{course_id}/analytics/enrollments';
+};
+
+export type GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetError = GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetErrors[keyof GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetErrors];
+
+export type GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EnrollmentTrendSchema;
+};
+
+export type GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetResponse = GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetResponses[keyof GetEnrollmentTrendApiV1CoursesCourseIdAnalyticsEnrollmentsGetResponses];
+
+export type GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/analytics/content';
+};
+
+export type GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetError = GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetErrors[keyof GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetErrors];
+
+export type GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ContentPerformanceSchema;
+};
+
+export type GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetResponse = GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetResponses[keyof GetContentPerformanceApiV1CoursesCourseIdAnalyticsContentGetResponses];
 
 export type ListCategoriesApiV1CategoriesGetData = {
     body?: never;
@@ -2973,6 +3544,35 @@ export type GetUserByIdApiV1UsersUserIdGetResponses = {
 
 export type GetUserByIdApiV1UsersUserIdGetResponse = GetUserByIdApiV1UsersUserIdGetResponses[keyof GetUserByIdApiV1UsersUserIdGetResponses];
 
+export type ChangePasswordApiV1UsersMePasswordPostData = {
+    body: ChangePasswordRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/password';
+};
+
+export type ChangePasswordApiV1UsersMePasswordPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ChangePasswordApiV1UsersMePasswordPostError = ChangePasswordApiV1UsersMePasswordPostErrors[keyof ChangePasswordApiV1UsersMePasswordPostErrors];
+
+export type ChangePasswordApiV1UsersMePasswordPostResponses = {
+    /**
+     * Response Change Password Api V1 Users Me Password Post
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type ChangePasswordApiV1UsersMePasswordPostResponse = ChangePasswordApiV1UsersMePasswordPostResponses[keyof ChangePasswordApiV1UsersMePasswordPostResponses];
+
 export type GetProfileStatsApiV1UsersMeStatsGetData = {
     body?: never;
     path?: never;
@@ -3213,6 +3813,102 @@ export type AssistantAskApiV1AiAssistantAskPostResponses = {
      */
     200: unknown;
 };
+
+export type ListNotificationsNotificationsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/notifications';
+};
+
+export type ListNotificationsNotificationsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListNotificationsNotificationsGetError = ListNotificationsNotificationsGetErrors[keyof ListNotificationsNotificationsGetErrors];
+
+export type ListNotificationsNotificationsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: NotificationListSchema;
+};
+
+export type ListNotificationsNotificationsGetResponse = ListNotificationsNotificationsGetResponses[keyof ListNotificationsNotificationsGetResponses];
+
+export type GetUnreadCountNotificationsUnreadCountGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifications/unread-count';
+};
+
+export type GetUnreadCountNotificationsUnreadCountGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: UnreadCountSchema;
+};
+
+export type GetUnreadCountNotificationsUnreadCountGetResponse = GetUnreadCountNotificationsUnreadCountGetResponses[keyof GetUnreadCountNotificationsUnreadCountGetResponses];
+
+export type MarkNotificationReadNotificationsNotificationIdReadPatchData = {
+    body?: never;
+    path: {
+        /**
+         * Notification Id
+         */
+        notification_id: string;
+    };
+    query?: never;
+    url: '/notifications/{notification_id}/read';
+};
+
+export type MarkNotificationReadNotificationsNotificationIdReadPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MarkNotificationReadNotificationsNotificationIdReadPatchError = MarkNotificationReadNotificationsNotificationIdReadPatchErrors[keyof MarkNotificationReadNotificationsNotificationIdReadPatchErrors];
+
+export type MarkNotificationReadNotificationsNotificationIdReadPatchResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type MarkNotificationReadNotificationsNotificationIdReadPatchResponse = MarkNotificationReadNotificationsNotificationIdReadPatchResponses[keyof MarkNotificationReadNotificationsNotificationIdReadPatchResponses];
+
+export type MarkAllNotificationsReadNotificationsReadAllPatchData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifications/read-all';
+};
+
+export type MarkAllNotificationsReadNotificationsReadAllPatchResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type MarkAllNotificationsReadNotificationsReadAllPatchResponse = MarkAllNotificationsReadNotificationsReadAllPatchResponses[keyof MarkAllNotificationsReadNotificationsReadAllPatchResponses];
 
 export type SayHelloGetData = {
     body?: never;

@@ -18,6 +18,7 @@ from src.core.events.event import (
     LessonDeleted,
     MemberRoleChanged,
     ModuleDeleted,
+    UserLoggedIn,
 )
 from src.core.realtime.envelope import Envelope, EventType
 from src.core.websocket.manager import ConnectionManager
@@ -95,6 +96,11 @@ EVENT_MAP: EventMap = {
         "AI пометил курс «{course_title}» для ручной проверки.",
         "/teaching",
     ),
+    UserLoggedIn: (
+        "Новый вход в аккаунт",
+        "Вход выполнен с устройства «{device_name}».",
+        "/settings/sessions",
+    ),
 }
 
 
@@ -136,7 +142,9 @@ def _get_user_ids_for_notification(event: DomainEvent) -> list[UUID]:
         )
         return [event.owner_id]
     if event_type in (CourseDeleted, ModuleDeleted, LessonDeleted, BlockDeleted):
-        assert isinstance(event, (CourseDeleted, ModuleDeleted, LessonDeleted, BlockDeleted))
+        assert isinstance(
+            event, (CourseDeleted, ModuleDeleted, LessonDeleted, BlockDeleted)
+        )
         return list(event.member_ids)
     if event_type == MemberRoleChanged:
         assert isinstance(event, MemberRoleChanged)
@@ -144,6 +152,9 @@ def _get_user_ids_for_notification(event: DomainEvent) -> list[UUID]:
     if event_type == LessonCompleted:
         assert isinstance(event, LessonCompleted)
         return [event.owner_id]
+    if event_type == UserLoggedIn:
+        assert isinstance(event, UserLoggedIn)
+        return [event.user_id]
     return []
 
 
@@ -173,9 +184,7 @@ class NotificationHandler:
         title_template, body_template, link_template = mapping
         title = _resolve_template(title_template, event)
         body = _resolve_template(body_template, event)
-        link = (
-            _resolve_template(link_template, event) if link_template else None
-        )
+        link = _resolve_template(link_template, event) if link_template else None
 
         user_ids = _get_user_ids_for_notification(event)
 

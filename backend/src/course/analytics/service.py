@@ -39,7 +39,9 @@ class CourseAnalyticsService(BaseService):
         await self._verify_owner(course_id, owner_id)
 
         total_result = await self.session.execute(
-            select(func.count()).select_from(CourseMember).where(
+            select(func.count())
+            .select_from(CourseMember)
+            .where(
                 CourseMember.course_id == course_id,
                 CourseMember.left_at.is_(None),
             )
@@ -47,7 +49,9 @@ class CourseAnalyticsService(BaseService):
         total_enrolled = int(total_result.scalar_one())
 
         churned_result = await self.session.execute(
-            select(func.count()).select_from(CourseMember).where(
+            select(func.count())
+            .select_from(CourseMember)
+            .where(
                 CourseMember.course_id == course_id,
                 CourseMember.left_at.is_not(None),
             )
@@ -64,7 +68,9 @@ class CourseAnalyticsService(BaseService):
 
         if lesson_ids and total_enrolled > 0:
             completed_result = await self.session.execute(
-                select(func.count()).select_from(LessonProgress).where(
+                select(func.count())
+                .select_from(LessonProgress)
+                .where(
                     LessonProgress.lesson_id.in_(lesson_ids),
                     LessonProgress.status == "completed",
                 )
@@ -81,7 +87,9 @@ class CourseAnalyticsService(BaseService):
 
         if block_ids:
             correct_result = await self.session.execute(
-                select(func.count()).select_from(BlockSubmission).where(
+                select(func.count())
+                .select_from(BlockSubmission)
+                .where(
                     BlockSubmission.block_id.in_(block_ids),
                     BlockSubmission.submission_type == "correct",
                 )
@@ -89,7 +97,9 @@ class CourseAnalyticsService(BaseService):
             total_correct = int(correct_result.scalar_one())
 
             total_sub_result = await self.session.execute(
-                select(func.count()).select_from(BlockSubmission).where(
+                select(func.count())
+                .select_from(BlockSubmission)
+                .where(
                     BlockSubmission.block_id.in_(block_ids),
                 )
             )
@@ -121,9 +131,7 @@ class CourseAnalyticsService(BaseService):
             )
             .group_by(left_day_col)
         )
-        unenrolled_by_day = {
-            str(day): count for day, count in unenrolled_result.all()
-        }
+        unenrolled_by_day = {str(day): count for day, count in unenrolled_result.all()}
 
         trend_days = []
         for day_str, count in unenrolled_by_day.items():
@@ -200,14 +208,18 @@ class CourseAnalyticsService(BaseService):
         blocks_perf = []
         for block_id, block_title, block_type, lesson_title in block_rows:
             total_sub_result = await self.session.execute(
-                select(func.count()).select_from(BlockSubmission).where(
+                select(func.count())
+                .select_from(BlockSubmission)
+                .where(
                     BlockSubmission.block_id == block_id,
                 )
             )
             total_sub = int(total_sub_result.scalar_one())
 
             correct_result = await self.session.execute(
-                select(func.count()).select_from(BlockSubmission).where(
+                select(func.count())
+                .select_from(BlockSubmission)
+                .where(
                     BlockSubmission.block_id == block_id,
                     BlockSubmission.submission_type == "correct",
                 )
@@ -222,7 +234,9 @@ class CourseAnalyticsService(BaseService):
             avg_attempts = float(avg_attempts_result.scalar_one() or 0)
 
             first_try_result = await self.session.execute(
-                select(func.count()).select_from(BlockSubmission).where(
+                select(func.count())
+                .select_from(BlockSubmission)
+                .where(
                     BlockSubmission.block_id == block_id,
                     BlockSubmission.is_first_try_correct.is_(True),
                 )
@@ -233,9 +247,7 @@ class CourseAnalyticsService(BaseService):
                 round(total_correct / total_sub * 100, 1) if total_sub > 0 else 0.0
             )
             first_try_rate = (
-                round(first_try_correct / total_sub * 100, 1)
-                if total_sub > 0
-                else 0.0
+                round(first_try_correct / total_sub * 100, 1) if total_sub > 0 else 0.0
             )
 
             blocks_perf.append(
