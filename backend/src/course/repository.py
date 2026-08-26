@@ -45,11 +45,14 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
         order_by: ColumnElement[Any] | None = None,
         category_ids: Sequence[UUID] | None = None,
         search_term: str | None = None,
+        certificate_enabled: bool | None = None,
         **filter_by: Any,
     ) -> Sequence[CourseSchema]:
         query = select(self.model).filter_by(**filter_by)
         if category_ids:
             query = query.where(self.model.category_id.in_(list(category_ids)))
+        if certificate_enabled is not None:
+            query = query.where(self.model.certificate_enabled == certificate_enabled)
         if search_term:
             escaped = _escape_like(search_term)
             query = query.where(

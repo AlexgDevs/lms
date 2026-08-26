@@ -16,6 +16,7 @@ export function CatalogPage() {
   const query = search.q;
   const activeCategory = useCategoryBySlug(categorySlug);
   const [freeOnly, setFreeOnly] = useState(false);
+  const [certificateOnly, setCertificateOnly] = useState(false);
 
   const {
     data,
@@ -23,12 +24,13 @@ export function CatalogPage() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useCourseCatalog(PAGE_SIZE, categorySlug, query);
+  } = useCourseCatalog(PAGE_SIZE, categorySlug, query, certificateOnly);
 
   const courses = (data?.pages.flat() ?? []) as CourseCardData[];
-  const visibleCourses = freeOnly
+  const visibleCourses = (freeOnly
     ? courses.filter((course) => course.price === 0)
-    : courses;
+    : courses
+  ).filter((course) => (certificateOnly ? course.certificate_enabled : true));
 
   useEffect(() => {
     const sentinel = document.getElementById("catalog-sentinel");
@@ -78,7 +80,12 @@ export function CatalogPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <CourseFilters freeOnly={freeOnly} onFreeOnlyChange={setFreeOnly} />
+          <CourseFilters
+            freeOnly={freeOnly}
+            onFreeOnlyChange={setFreeOnly}
+            certificateOnly={certificateOnly}
+            onCertificateOnlyChange={setCertificateOnly}
+          />
           {query && (
             <button
               type="button"
@@ -110,9 +117,11 @@ export function CatalogPage() {
         <div className="text-center py-20 text-muted-foreground text-sm">
           {freeOnly
             ? "Бесплатных курсов в этой категории пока нет."
-            : query
-              ? "По вашему запросу ничего не найдено."
-              : "Курсы пока не найдены."}
+            : certificateOnly
+              ? "Курсов с сертификатом в этой категории пока нет."
+              : query
+                ? "По вашему запросу ничего не найдено."
+                : "Курсы пока не найдены."}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

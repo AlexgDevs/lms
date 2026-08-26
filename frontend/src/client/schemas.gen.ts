@@ -735,6 +735,49 @@ export const CategorySchemaSchema = {
     title: 'CategorySchema'
 } as const;
 
+export const CertificateSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        certificate_number: {
+            type: 'string',
+            title: 'Certificate Number'
+        },
+        storage_key: {
+            type: 'string',
+            title: 'Storage Key'
+        },
+        issued_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Issued At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'course_id',
+        'certificate_number',
+        'storage_key',
+        'issued_at'
+    ],
+    title: 'CertificateSchema'
+} as const;
+
 export const ChangePasswordRequestSchemaSchema = {
     properties: {
         current_password: {
@@ -1251,6 +1294,11 @@ export const CourseSchemaSchema = {
             type: 'integer',
             title: 'Tgp Cooldown Hours',
             default: 24
+        },
+        certificate_enabled: {
+            type: 'boolean',
+            title: 'Certificate Enabled',
+            default: false
         }
     },
     type: 'object',
@@ -1361,6 +1409,17 @@ export const CourseUpdateRequestSchemaSchema = {
                 }
             ],
             title: 'Tgp Cooldown Hours'
+        },
+        certificate_enabled: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Certificate Enabled'
         }
     },
     type: 'object',
@@ -1477,6 +1536,11 @@ export const CourseUserBriefSchemaSchema = {
             type: 'integer',
             title: 'Tgp Cooldown Hours',
             default: 24
+        },
+        certificate_enabled: {
+            type: 'boolean',
+            title: 'Certificate Enabled',
+            default: false
         },
         role: {
             $ref: '#/components/schemas/CourseMemberRole'

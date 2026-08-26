@@ -110,6 +110,7 @@ async def get_courses(
     offset: int = 0,
     category: str | None = None,
     q: str | None = Query(None, max_length=100),
+    certificate_enabled: bool | None = None,
 ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
     return await service.list_courses(
         filter=filter,
@@ -118,6 +119,7 @@ async def get_courses(
         offset=offset,
         category=category,
         q=q,
+        certificate_enabled=certificate_enabled,
     )
 
 

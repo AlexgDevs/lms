@@ -28,6 +28,7 @@ class CourseSchema(BaseSchema):
     tgp_enabled: bool = False
     tgp_last_full_generated_at: datetime | None = None
     tgp_cooldown_hours: int = 24
+    certificate_enabled: bool = False
 
 
 class CourseCreateRequestSchema(BaseSchema):
@@ -70,6 +71,7 @@ class CourseUpdateRequestSchema(BaseSchema):
     status: CourseStatus | None = None
     tgp_enabled: bool | None = None
     tgp_cooldown_hours: int | None = Field(None, ge=0)
+    certificate_enabled: bool | None = None
 
 
 class CourseUpdateSchema(BaseSchema):
@@ -87,6 +89,7 @@ class CourseUpdateSchema(BaseSchema):
     tgp_enabled: bool | None = None
     tgp_cooldown_hours: int | None = None
     tgp_last_full_generated_at: datetime | None = None
+    certificate_enabled: bool | None = None
     is_deleted: datetime | None = None
 
 

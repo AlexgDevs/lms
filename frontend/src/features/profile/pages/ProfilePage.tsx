@@ -10,6 +10,7 @@ import { ProfileAchievements } from "@/features/profile/components/ProfileAchiev
 import { CertificatesModal } from "@/features/profile/components/CertificatesModal";
 import { useProfileStats } from "@/features/profile/api/useProfileStats";
 import { useEnrolledCourses } from "@/features/dashboard/api/useCourses";
+import { useMyCertificates } from "@/features/certificate/api/useMyCertificates";
 import { CourseCard } from "@/features/dashboard/components/CourseCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,9 +23,15 @@ export function ProfilePage() {
   const { user } = useAuth();
   const stats = useProfileStats();
   const enrolled = useEnrolledCourses(true);
+  const certificates = useMyCertificates();
   const [isCertificatesOpen, setIsCertificatesOpen] = useState(false);
 
   const enrolledCourses = enrolled.data ?? [];
+  const certificateItems = certificates.data ?? [];
+  const courseTitleById: Record<string, string> = {};
+  for (const course of enrolledCourses) {
+    courseTitleById[course.id] = course.title;
+  }
 
   const goToDashboard = () => navigate({ to: ROUTES.DASHBOARD });
 
@@ -95,6 +102,8 @@ export function ProfilePage() {
       <CertificatesModal
         open={isCertificatesOpen}
         onOpenChange={setIsCertificatesOpen}
+        certificates={certificateItems}
+        courseTitleById={courseTitleById}
       />
     </div>
   );

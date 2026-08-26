@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { ArrowUpRight, BookOpen, Users } from "lucide-react";
+import { ArrowUpRight, Award, BookOpen, Users } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { resolveMediaUrl } from "@/lib/media";
@@ -79,7 +79,17 @@ export function CourseCard({
             <h3 className="font-bold text-sm sm:text-base text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
               {course.title}
             </h3>
-            <ArrowUpRight className="w-4 h-4 shrink-0 text-primary opacity-0 group-hover:opacity-100 transition-opacity mt-0.5" />
+            <div className="flex items-center gap-1 shrink-0 mt-0.5">
+              {course.certificate_enabled && (
+                <span
+                  title="Сертификат"
+                  className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-reward/10 text-reward"
+                >
+                  <Award className="w-3.5 h-3.5" />
+                </span>
+              )}
+              <ArrowUpRight className="w-4 h-4 shrink-0 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
           </div>
           {course.description && (
             <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">

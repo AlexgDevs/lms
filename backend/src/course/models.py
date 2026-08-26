@@ -54,6 +54,11 @@ class Course(UUIDBase):
     )
     tgp_cooldown_hours: Mapped[int] = mapped_column(server_default="24", default=24)
 
+    # certificates
+    certificate_enabled: Mapped[bool] = mapped_column(
+        Boolean(), server_default="false", default=False
+    )
+
     # times
     created_at: Mapped[timestamp]
     updated_at: Mapped[timestamp]

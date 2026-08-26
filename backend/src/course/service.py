@@ -402,6 +402,7 @@ class CourseService(BaseService):
         offset: int = 0,
         category: str | None = None,
         q: str | None = None,
+        certificate_enabled: bool | None = None,
     ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
         search_term = q.strip()[:100] if q and q.strip() else None
         match filter:
@@ -430,6 +431,7 @@ class CourseService(BaseService):
                         offset=offset,
                         category_ids=category_ids,
                         search_term=search_term,
+                        certificate_enabled=certificate_enabled,
                         status=CourseStatus.PUBLISHED,
                         is_deleted=None,
                     )

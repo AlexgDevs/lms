@@ -1,14 +1,15 @@
-import { BadgeCheck, Check, Heart, Languages, Sparkles } from "lucide-react";
+import { Check, Heart, Languages, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CourseFiltersProps {
   freeOnly?: boolean;
   onFreeOnlyChange?: (value: boolean) => void;
+  certificateOnly?: boolean;
+  onCertificateOnlyChange?: (value: boolean) => void;
   className?: string;
 }
 
 const COMING_SOON_FILTERS = [
-  { label: "С сертификатом", icon: BadgeCheck },
   { label: "RU", icon: Languages },
   { label: "Сгенерировано ИИ", icon: Sparkles },
   { label: "Избранное", icon: Heart },
@@ -17,6 +18,8 @@ const COMING_SOON_FILTERS = [
 export function CourseFilters({
   freeOnly = false,
   onFreeOnlyChange,
+  certificateOnly = false,
+  onCertificateOnlyChange,
   className,
 }: CourseFiltersProps) {
   return (
@@ -34,6 +37,22 @@ export function CourseFilters({
         >
           {freeOnly && <Check className="w-3.5 h-3.5" />}
           Бесплатные
+        </button>
+      )}
+
+      {onCertificateOnlyChange && (
+        <button
+          type="button"
+          onClick={() => onCertificateOnlyChange(!certificateOnly)}
+          className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer",
+            certificateOnly
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
+        >
+          {certificateOnly && <Check className="w-3.5 h-3.5" />}
+          С сертификатом
         </button>
       )}
 

@@ -60,7 +60,12 @@ export const useEnrollCourse = () => {
   })
 }
 
-export const useCourseCatalog = (pageSize = 12, category?: string, q?: string) => {
+export const useCourseCatalog = (
+  pageSize = 12,
+  category?: string,
+  q?: string,
+  certificateOnly = false,
+) => {
   return useInfiniteQuery({
     ...getCoursesApiV1CoursesGetInfiniteOptions({
       query: {
@@ -68,6 +73,7 @@ export const useCourseCatalog = (pageSize = 12, category?: string, q?: string) =
         limit: pageSize,
         category: category || undefined,
         q: q || undefined,
+        certificate_enabled: certificateOnly || undefined,
       },
     }),
     initialPageParam: 0,

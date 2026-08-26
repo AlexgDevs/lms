@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { notFound, useNavigate, useParams } from "@tanstack/react-router"
 import {
   ArrowLeft,
+  Award,
   BookOpen,
   CheckCircle2,
   ChevronRight,
@@ -15,6 +16,7 @@ import { LearnSidebar } from "@/features/learner/components/LearnSidebar"
 import { IrbisDialogue } from "@/features/learner/components/assistant/IrbisDialogue"
 import { useLearnData } from "@/features/learner/api/useLearnData"
 import { useEnrollCourse } from "@/features/dashboard/api/useCourses"
+import { useDownloadCertificate } from "@/features/certificate/api/useDownloadCertificate"
 import type { BlockSchema, BlockSubmissionSchema } from "@/client"
 import { BlockSubmissionType, BlockType } from "@/client"
 import { ASSISTANT_ATTEMPT_THRESHOLD } from "@/lib/assistant"
@@ -98,6 +100,7 @@ interface LessonStepperProps {
 function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperProps) {
   const navigate = useNavigate()
   const { course, blocks, currentUnit, nextUnit } = data
+  const { download, downloadingId } = useDownloadCertificate()
 
   const [step, setStep] = useState(0)
   const [seededKey, setSeededKey] = useState<string | null>(null)
@@ -164,6 +167,11 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
     : undefined
   const isLessonCompleted = data.isCompleted(lessonId) || allStepsDone
   const completedFooter = isLessonCompleted && !(currentBlock && isRetrying(currentBlock.id))
+  const allLessonsCompleted =
+    data.flatUnits.length > 0 &&
+    data.progress.filter((item) => item.status === "completed").length ===
+      data.flatUnits.length
+  const canDownloadCertificate = allLessonsCompleted && course.certificate_enabled
   const quizNeedsAnswer =
     isQuiz && !isStepDone && (currentBlock ? (selected[currentBlock.id]?.length ?? 0) === 0 : false)
   const codeNeedsAnswer = isCode && !isStepDone && codeValue.trim() === ""
@@ -291,12 +299,30 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
           </h1>
         </div>
 
-        {isLessonCompleted && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-xs font-semibold text-success shrink-0">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Урок пройден
-          </span>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {canDownloadCertificate && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={downloadingId === course.id}
+              onClick={() => download(course.id)}
+              title="Курс пройден — сертификат доступен"
+            >
+              {downloadingId === course.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Award className="h-4 w-4" />
+              )}
+              Сертификат
+            </Button>
+          )}
+          {isLessonCompleted && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-xs font-semibold text-success shrink-0">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Урок пройден
+            </span>
+          )}
+        </div>
       </div>
 
       {totalSteps === 0 ? (

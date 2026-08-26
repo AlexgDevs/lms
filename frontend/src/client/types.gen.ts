@@ -498,6 +498,36 @@ export type CategorySchema = {
 };
 
 /**
+ * CertificateSchema
+ */
+export type CertificateSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Certificate Number
+     */
+    certificate_number: string;
+    /**
+     * Storage Key
+     */
+    storage_key: string;
+    /**
+     * Issued At
+     */
+    issued_at: string;
+};
+
+/**
  * ChangePasswordRequestSchema
  */
 export type ChangePasswordRequestSchema = {
@@ -835,6 +865,10 @@ export type CourseSchema = {
      * Tgp Cooldown Hours
      */
     tgp_cooldown_hours?: number;
+    /**
+     * Certificate Enabled
+     */
+    certificate_enabled?: boolean;
 };
 
 /**
@@ -884,6 +918,10 @@ export type CourseUpdateRequestSchema = {
      * Tgp Cooldown Hours
      */
     tgp_cooldown_hours?: number | null;
+    /**
+     * Certificate Enabled
+     */
+    certificate_enabled?: boolean | null;
 };
 
 /**
@@ -951,6 +989,10 @@ export type CourseUserBriefSchema = {
      * Tgp Cooldown Hours
      */
     tgp_cooldown_hours?: number;
+    /**
+     * Certificate Enabled
+     */
+    certificate_enabled?: boolean;
     role: CourseMemberRole;
     /**
      * Progress
@@ -2009,6 +2051,10 @@ export type GetCoursesApiV1CoursesGetData = {
          * Q
          */
         q?: string | null;
+        /**
+         * Certificate Enabled
+         */
+        certificate_enabled?: boolean | null;
     };
     url: '/api/v1/courses';
 };
@@ -3813,6 +3859,52 @@ export type AssistantAskApiV1AiAssistantAskPostResponses = {
      */
     200: unknown;
 };
+
+export type DownloadCertificateApiV1CoursesCourseIdCertificateGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/certificate';
+};
+
+export type DownloadCertificateApiV1CoursesCourseIdCertificateGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DownloadCertificateApiV1CoursesCourseIdCertificateGetError = DownloadCertificateApiV1CoursesCourseIdCertificateGetErrors[keyof DownloadCertificateApiV1CoursesCourseIdCertificateGetErrors];
+
+export type DownloadCertificateApiV1CoursesCourseIdCertificateGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ListMyCertificatesApiV1UsersMeCertificatesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/certificates';
+};
+
+export type ListMyCertificatesApiV1UsersMeCertificatesGetResponses = {
+    /**
+     * Response List My Certificates Api V1 Users Me Certificates Get
+     *
+     * Successful Response
+     */
+    200: Array<CertificateSchema>;
+};
+
+export type ListMyCertificatesApiV1UsersMeCertificatesGetResponse = ListMyCertificatesApiV1UsersMeCertificatesGetResponses[keyof ListMyCertificatesApiV1UsersMeCertificatesGetResponses];
 
 export type ListNotificationsNotificationsGetData = {
     body?: never;

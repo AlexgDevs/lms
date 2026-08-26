@@ -10,6 +10,7 @@ import { TGP_GENERATION_COOLDOWN_HOURS } from "@/lib/tgp"
 import { CourseHeader } from "@/features/teaching/components/builder/CourseHeader"
 import { CourseSidebar } from "@/features/teaching/components/builder/CourseSidebar"
 import { TgpPanel } from "@/features/teaching/components/builder/TgpPanel"
+import { CertificatePanel } from "@/features/teaching/components/builder/CertificatePanel"
 import { ROUTES } from "@/routes"
 import { CourseBlocks } from "@/features/teaching/components/builder/CourseBlocks"
 
@@ -76,6 +77,7 @@ export function CourseBuilderPage() {
     category_id?: string | null
     tgp_enabled?: boolean
     tgp_cooldown_hours?: number
+    certificate_enabled?: boolean
   }) => {
     await updateCourseAsync({
       path: { course_id: String(authorCourse.id) },
@@ -92,6 +94,10 @@ export function CourseBuilderPage() {
   // --- TGP handlers ---
   const handleToggleTgp = async (enabled: boolean) => {
     await handleUpdateCourse({ tgp_enabled: enabled })
+  }
+
+  const handleToggleCertificate = async (enabled: boolean) => {
+    await handleUpdateCourse({ certificate_enabled: enabled })
   }
 
   const handleGenerate = async () => {
@@ -119,6 +125,7 @@ export function CourseBuilderPage() {
   }
 
   const tgpEnabled = Boolean(authorCourse?.tgp_enabled)
+  const certificateEnabled = Boolean(authorCourse?.certificate_enabled)
 
   return (
     <div className="h-screen w-full bg-background text-foreground flex flex-col overflow-hidden">
@@ -155,6 +162,13 @@ export function CourseBuilderPage() {
             isUploadingCover={isUploadingCover || isRemovingCover}
           />
         </div>
+
+        {/* Certificate Panel */}
+        <CertificatePanel
+          certificateEnabled={certificateEnabled}
+          isUpdatingCourse={isUpdatingCourse}
+          onToggleCertificate={handleToggleCertificate}
+        />
 
         {/* TGP Panel */}
         <TgpPanel

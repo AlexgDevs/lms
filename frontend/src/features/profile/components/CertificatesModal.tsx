@@ -6,31 +6,25 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Award, Download, ExternalLink, Calendar } from "lucide-react";
-
-export interface Certificate {
-  id: string | number;
-  title: string;
-  issuedAt: string;
-  code: string;
-}
+import { Award, Download, Loader2, Calendar } from "lucide-react";
+import type { CertificateSchema } from "@/client";
+import { useDownloadCertificate } from "@/features/certificate/api/useDownloadCertificate";
 
 interface CertificatesModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  certificates?: Certificate[];
+  certificates?: CertificateSchema[];
+  courseTitleById?: Record<string, string>;
 }
-
-// Заглушка, если пока нет реальных данных
-const DEFAULT_CERTIFICATES: Certificate[] = [
-  // { id: 1, title: "Основы веб-разработки на Python", issuedAt: "12.05.2026", code: "CERT-9821" },
-];
 
 export function CertificatesModal({
   open,
   onOpenChange,
-  certificates = DEFAULT_CERTIFICATES,
+  certificates = [],
+  courseTitleById = {},
 }: CertificatesModalProps) {
+  const { download, downloadingId } = useDownloadCertificate();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl bg-card">
@@ -54,24 +48,34 @@ export function CertificatesModal({
                 >
                   <div className="space-y-1">
                     <h4 className="font-semibold text-sm text-foreground line-clamp-2">
-                      {cert.title}
+                      {courseTitleById[cert.course_id] ?? "Завершённый курс"}
                     </h4>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
                       <Calendar size={12} />
-                      <span>Выдан: {cert.issuedAt}</span>
+                      <span>
+                        Выдан:{" "}
+                        {new Date(cert.issued_at).toLocaleDateString("ru-RU")}
+                      </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-2 text-xs">
-                    <span className="font-mono text-muted-foreground/80">{cert.code}</span>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon-sm" title="Открыть">
-                        <ExternalLink size={14} />
-                      </Button>
-                      <Button variant="ghost" size="icon-sm" title="Скачать PDF">
+                    <span className="font-mono text-muted-foreground/80">
+                      № {cert.certificate_number}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      title="Скачать PDF"
+                      disabled={downloadingId === cert.course_id}
+                      onClick={() => download(cert.course_id)}
+                    >
+                      {downloadingId === cert.course_id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
                         <Download size={14} />
-                      </Button>
-                    </div>
+                      )}
+                    </Button>
                   </div>
                 </div>
               ))}

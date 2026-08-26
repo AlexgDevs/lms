@@ -17,6 +17,7 @@ from src.profile import router as profile_router
 from src.user.router import router as user_router
 from src.ai.tgp.router import router as ai_tgp_router
 from src.ai.assistant import router as ai_assistant_router
+from src.certificate import router as certificate_router, user_certificates_router
 from src.notification.router import router as notification_router
 from src.core.config import settings
 
@@ -36,6 +37,8 @@ app_v1.include_router(user_router)
 app_v1.include_router(profile_router)
 app_v1.include_router(ai_tgp_router)
 app_v1.include_router(ai_assistant_router)
+app_v1.include_router(certificate_router)
+app_v1.include_router(user_certificates_router)
 
 notifications_router = APIRouter()
 notifications_router.include_router(notification_router)
