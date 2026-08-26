@@ -241,3 +241,53 @@ body {
 .animate-confetti {
     animation: confetti-fall 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Toasts (sonner) */
+:root {
+    --toast-gap: 8px;
+}
+
+.toaster .cn-toast {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow: var(--shadow-card), 0 8px 24px rgb(0 0 0 / 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.toaster .cn-toast[data-styled="true"] {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.toaster .cn-toast[data-description="true"] .toast-description {
+    font-size: 0.8125rem;
+    opacity: 0.85;
+}
+
+/* Neutral icon tints by type (instead of richColors backgrounds) */
+.toaster .cn-toast [data-sonner-toast] svg,
+.toaster .cn-toast > svg {
+    color: var(--muted-foreground);
+}
+
+.toaster .cn-toast[data-type="success"] > [data-icon],
+.toaster .cn-toast[data-type="success"] > svg {
+    color: var(--success, #16a34a);
+}
+
+.toaster .cn-toast[data-type="error"] > [data-icon],
+.toaster .cn-toast[data-type="error"] > svg {
+    color: var(--destructive);
+}
+
+.toaster .cn-toast[data-type="warning"] > [data-icon],
+.toaster .cn-toast[data-type="warning"] > svg {
+    color: var(--warning, #f59e0b);
+}
+
+.toaster .cn-toast[data-type="info"] > [data-icon],
+.toaster .cn-toast[data-type="info"] > svg {
+    color: var(--primary);
+}

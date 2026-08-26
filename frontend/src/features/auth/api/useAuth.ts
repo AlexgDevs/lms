@@ -26,7 +26,7 @@ const useAuth = () => {
         ...registerApiV1AuthRegisterPostMutation(),
         onSuccess: () => {
             navigate({ to: ROUTES.LOGIN })
-            showSuccessToast("You have successfully registered.")
+            showSuccessToast("Вы успешно зарегистрировались.")
         },
         onError: (error) => showErrorToast(getErrorMessage(error)),
         onSettled: () => {
@@ -40,7 +40,7 @@ const useAuth = () => {
             localStorage.setItem("access_token", data.access_token)
             localStorage.setItem("refresh_token", data.refresh_token);
             navigate({ to: ROUTES.DASHBOARD })
-            showSuccessToast("You have successfully logged in.")
+            showSuccessToast("Вы успешно вошли в систему.")
         },
         onError: (error) => showErrorToast(getErrorMessage(error)),
     })

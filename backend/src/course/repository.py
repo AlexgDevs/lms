@@ -6,6 +6,7 @@ from sqlalchemy.sql import Select
 
 from src.lesson.enums import LessonProgressType
 from src.lesson.models import Lesson, LessonProgress
+from src.course.enums import CourseStatus
 from src.core.repositories.base_repository import BaseRepository
 from src.course.mapper import CourseMapper, CourseUserBriefMapper
 from src.course.models import Course, CourseMember
@@ -66,6 +67,94 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
             query = query.order_by(order_by)
         query = query.limit(limit).offset(offset)
         return await self._execute_and_map_all(query)
+
+    def _rating_subquery(self) -> Any:
+        from src.review.enums import ReviewTargetType
+        from src.review.models import Review
+
+        return (
+            select(
+                Review.target_id.label("course_id"),
+                func.round(func.avg(Review.rating), 2).label("rating"),
+                func.count(Review.id).label("rating_count"),
+            )
+            .where(
+                Review.target_type == ReviewTargetType.COURSE,
+                Review.target_id.is_not(None),
+                Review.parent_id.is_(None),
+                Review.is_deleted.is_(None),
+                Review.rating.is_not(None),
+            )
+            .group_by(Review.target_id)
+            .subquery()
+        )
+
+    async def get_published_catalog(
+        self,
+        limit: int,
+        offset: int,
+        category_ids: Sequence[UUID] | None = None,
+        search_term: str | None = None,
+        certificate_enabled: bool | None = None,
+        sort: str = "popular",
+        min_rating: int | None = None,
+        price: str = "all",
+    ) -> Sequence[CourseSchema]:
+        rating_subq = self._rating_subquery()
+
+        query = (
+            select(Course, rating_subq.c.rating, rating_subq.c.rating_count)
+            .outerjoin(rating_subq, rating_subq.c.course_id == Course.id)
+            .where(Course.status == CourseStatus.PUBLISHED, Course.is_deleted.is_(None))
+        )
+
+        if category_ids:
+            query = query.where(Course.category_id.in_(list(category_ids)))
+        if certificate_enabled is not None:
+            query = query.where(Course.certificate_enabled == certificate_enabled)
+        if min_rating is not None:
+            query = query.where(rating_subq.c.rating >= min_rating)
+        if price == "free":
+            query = query.where(Course.price == 0)
+        elif price == "paid":
+            query = query.where(Course.price > 0)
+
+        if search_term:
+            search_term = search_term[:100]
+            escaped = _escape_like(search_term)
+            query = query.where(
+                or_(
+                    Course.title.ilike(f"%{escaped}%", escape="\\"),
+                    Course.description.ilike(f"%{escaped}%", escape="\\"),
+                )
+            )
+            query = query.order_by(*_search_order(search_term))
+        else:
+            if sort == "newest":
+                query = query.order_by(Course.created_at.desc())
+            elif sort == "rating":
+                query = query.order_by(rating_subq.c.rating.desc().nullslast())
+            else:
+                query = query.order_by(Course.member_count.desc())
+
+        query = query.limit(limit).offset(offset)
+        result = await self.session.execute(query)
+        rows = result.all()
+
+        courses: list[CourseSchema] = []
+        for course_model, rating, rating_count in rows:
+            schema = self.mapper.to_schema(course_model)
+            courses.append(
+                schema.model_copy(
+                    update={
+                        "rating": float(rating) if rating is not None else None,
+                        "rating_count": (
+                            int(rating_count) if rating_count is not None else None
+                        ),
+                    }
+                )
+            )
+        return courses
 
     async def get_course_by_lesson_where_user_is_member(
         self, user_id: UUID, course_id: UUID, lesson_id: UUID

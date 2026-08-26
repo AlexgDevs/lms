@@ -1268,6 +1268,28 @@ export const CourseSchemaSchema = {
             ],
             title: 'Moderation Reason'
         },
+        rating: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating'
+        },
+        rating_count: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating Count'
+        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -1509,6 +1531,28 @@ export const CourseUserBriefSchemaSchema = {
                 }
             ],
             title: 'Moderation Reason'
+        },
+        rating: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating'
+        },
+        rating_count: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating Count'
         },
         created_at: {
             type: 'string',
@@ -2267,6 +2311,177 @@ export const ResetPasswordRequestSchemaSchema = {
         'new_password'
     ],
     title: 'ResetPasswordRequestSchema'
+} as const;
+
+export const ReviewCreateRequestSchemaSchema = {
+    properties: {
+        target_type: {
+            $ref: '#/components/schemas/ReviewTargetType'
+        },
+        target_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Target Id'
+        },
+        rating: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    maximum: 5,
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating'
+        },
+        text: {
+            type: 'string',
+            maxLength: 2000,
+            minLength: 1,
+            title: 'Text'
+        },
+        parent_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Parent Id'
+        }
+    },
+    type: 'object',
+    required: [
+        'target_type',
+        'target_id',
+        'text'
+    ],
+    title: 'ReviewCreateRequestSchema'
+} as const;
+
+export const ReviewRatingSchemaSchema = {
+    properties: {
+        average: {
+            type: 'number',
+            title: 'Average'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        },
+        distribution: {
+            additionalProperties: {
+                type: 'integer'
+            },
+            type: 'object',
+            title: 'Distribution'
+        }
+    },
+    type: 'object',
+    required: [
+        'average',
+        'count',
+        'distribution'
+    ],
+    title: 'ReviewRatingSchema'
+} as const;
+
+export const ReviewSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        user_username: {
+            type: 'string',
+            title: 'User Username',
+            default: ''
+        },
+        target_type: {
+            $ref: '#/components/schemas/ReviewTargetType'
+        },
+        target_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Target Id'
+        },
+        rating: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating'
+        },
+        text: {
+            type: 'string',
+            title: 'Text'
+        },
+        parent_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Parent Id'
+        },
+        is_edited: {
+            type: 'boolean',
+            title: 'Is Edited',
+            default: false
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        replies: {
+            items: {
+                $ref: '#/components/schemas/ReviewSchema'
+            },
+            type: 'array',
+            title: 'Replies',
+            default: []
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'target_type',
+        'target_id',
+        'text',
+        'created_at'
+    ],
+    title: 'ReviewSchema'
+} as const;
+
+export const ReviewTargetTypeSchema = {
+    type: 'string',
+    enum: [
+        'course',
+        'user',
+        'lesson'
+    ],
+    title: 'ReviewTargetType'
 } as const;
 
 export const SessionSchemaSchema = {

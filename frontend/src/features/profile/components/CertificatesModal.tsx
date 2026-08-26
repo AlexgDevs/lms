@@ -6,6 +6,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Award, Download, Loader2, Calendar } from "lucide-react";
 import type { CertificateSchema } from "@/client";
 import { useDownloadCertificate } from "@/features/certificate/api/useDownloadCertificate";
@@ -25,6 +26,8 @@ export function CertificatesModal({
 }: CertificatesModalProps) {
   const { download, downloadingId } = useDownloadCertificate();
 
+  const shortNumber = (value: string) => `№ ${value.slice(0, 8).toUpperCase()}`;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl bg-card">
@@ -40,44 +43,41 @@ export function CertificatesModal({
 
         <div className="py-2">
           {certificates.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 gap-4 max-h-[60vh] overflow-y-auto pr-1">
               {certificates.map((cert) => (
-                <div
-                  key={cert.id}
-                  className="flex flex-col justify-between p-4 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors group space-y-3"
-                >
-                  <div className="space-y-1">
-                    <h4 className="font-semibold text-sm text-foreground line-clamp-2">
-                      {courseTitleById[cert.course_id] ?? "Завершённый курс"}
-                    </h4>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
-                      <Calendar size={12} />
-                      <span>
-                        Выдан:{" "}
-                        {new Date(cert.issued_at).toLocaleDateString("ru-RU")}
-                      </span>
+                <Card key={cert.id} className="rounded-xl overflow-hidden">
+                  <CardContent className="p-4 flex items-center justify-between gap-4">
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <h4 className="font-semibold text-base text-foreground line-clamp-2">
+                        {courseTitleById[cert.course_id] ?? "Завершённый курс"}
+                      </h4>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar size={13} />
+                          {new Date(cert.issued_at).toLocaleDateString("ru-RU")}
+                        </span>
+                        <span className="font-mono text-muted-foreground/80 truncate">
+                          {shortNumber(cert.certificate_number)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between pt-2 text-xs">
-                    <span className="font-mono text-muted-foreground/80">
-                      № {cert.certificate_number}
-                    </span>
                     <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      title="Скачать PDF"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 gap-1.5"
                       disabled={downloadingId === cert.course_id}
                       onClick={() => download(cert.course_id)}
                     >
                       {downloadingId === cert.course_id ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        <Download size={14} />
+                        <Download className="w-4 h-4" />
                       )}
+                      Скачать
                     </Button>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           ) : (

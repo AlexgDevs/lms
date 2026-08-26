@@ -366,7 +366,7 @@ const syncFromProps = (qs: TgpQuestionSchema[]) => {
           )}
         </div>
 
-        <DialogFooter className="px-6 py-3 border-t bg-muted/10">
+        <DialogFooter className="mx-0 mb-0 px-6 py-3 border-t border-border/50 bg-muted/30">
           <Button
             variant="outline"
             onClick={onClose}
@@ -496,23 +496,23 @@ function QuestionCard({
         })}
       </div>
 
-      <div className="flex items-center justify-between pt-1">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className="h-6 text-[11px] gap-1"
+          className="gap-1 text-[11px]"
           onClick={() => onAddOption(question.id)}
         >
           <Plus className="h-3 w-3" /> Добавить вариант
         </Button>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <Button
             type="button"
             size="sm"
             variant="outline"
-            className="h-6 text-[11px] gap-1"
+            className="gap-1 text-[11px]"
             onClick={onRegenerate}
             disabled={!canRegenerate || isRegenerating}
             title={
@@ -538,7 +538,7 @@ function QuestionCard({
             <Button
               type="button"
               size="sm"
-              className="h-6 text-[11px] gap-1"
+              className="gap-1 text-[11px]"
               onClick={onSave}
               disabled={isSaving}
             >

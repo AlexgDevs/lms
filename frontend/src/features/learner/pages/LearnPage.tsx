@@ -17,6 +17,7 @@ import { IrbisDialogue } from "@/features/learner/components/assistant/IrbisDial
 import { useLearnData } from "@/features/learner/api/useLearnData"
 import { useEnrollCourse } from "@/features/dashboard/api/useCourses"
 import { useDownloadCertificate } from "@/features/certificate/api/useDownloadCertificate"
+import { ReviewSection } from "@/features/review/components/ReviewSection"
 import type { BlockSchema, BlockSubmissionSchema } from "@/client"
 import { BlockSubmissionType, BlockType } from "@/client"
 import { ASSISTANT_ATTEMPT_THRESHOLD } from "@/lib/assistant"
@@ -85,6 +86,17 @@ export function LearnPage() {
           lessonId={lessonId as string}
           goToLesson={goToLesson}
         />
+
+        {lessonId && data.isCourseMember && (
+          <div className="mt-6">
+            <ReviewSection
+              targetType="lesson"
+              targetId={lessonId}
+              title="Комментарии к уроку"
+              canWrite
+            />
+          </div>
+        )}
       </div>
     </div>
   )

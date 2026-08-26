@@ -6,7 +6,6 @@ import {
   Edit3,
   CheckCircle2,
   Calendar,
-  Folder,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -192,18 +191,6 @@ export function TgpPanel({
                   </Button>
                 )}
               </>
-            )}
-
-            {hasQuestions && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs gap-1.5"
-                onClick={() => setEditorOpen(true)}
-              >
-                <Folder className="w-3 h-3" />
-                Просмотр всех вопросов
-              </Button>
             )}
           </div>
 

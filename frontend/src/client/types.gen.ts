@@ -850,6 +850,14 @@ export type CourseSchema = {
      */
     moderation_reason?: string | null;
     /**
+     * Rating
+     */
+    rating?: number | null;
+    /**
+     * Rating Count
+     */
+    rating_count?: number | null;
+    /**
      * Created At
      */
     created_at: string;
@@ -973,6 +981,14 @@ export type CourseUserBriefSchema = {
      * Moderation Reason
      */
     moderation_reason?: string | null;
+    /**
+     * Rating
+     */
+    rating?: number | null;
+    /**
+     * Rating Count
+     */
+    rating_count?: number | null;
     /**
      * Created At
      */
@@ -1439,6 +1455,110 @@ export type ResetPasswordRequestSchema = {
      */
     new_password: string;
 };
+
+/**
+ * ReviewCreateRequestSchema
+ */
+export type ReviewCreateRequestSchema = {
+    target_type: ReviewTargetType;
+    /**
+     * Target Id
+     */
+    target_id: string;
+    /**
+     * Rating
+     */
+    rating?: number | null;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Parent Id
+     */
+    parent_id?: string | null;
+};
+
+/**
+ * ReviewRatingSchema
+ */
+export type ReviewRatingSchema = {
+    /**
+     * Average
+     */
+    average: number;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Distribution
+     */
+    distribution: {
+        [key: string]: number;
+    };
+};
+
+/**
+ * ReviewSchema
+ */
+export type ReviewSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * User Username
+     */
+    user_username?: string;
+    target_type: ReviewTargetType;
+    /**
+     * Target Id
+     */
+    target_id: string;
+    /**
+     * Rating
+     */
+    rating?: number | null;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Parent Id
+     */
+    parent_id?: string | null;
+    /**
+     * Is Edited
+     */
+    is_edited?: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Replies
+     */
+    replies?: Array<ReviewSchema>;
+};
+
+/**
+ * ReviewTargetType
+ */
+export const ReviewTargetType = {
+    COURSE: 'course',
+    USER: 'user',
+    LESSON: 'lesson'
+} as const;
+
+/**
+ * ReviewTargetType
+ */
+export type ReviewTargetType = typeof ReviewTargetType[keyof typeof ReviewTargetType];
 
 /**
  * SessionSchema
@@ -2055,6 +2175,18 @@ export type GetCoursesApiV1CoursesGetData = {
          * Certificate Enabled
          */
         certificate_enabled?: boolean | null;
+        /**
+         * Sort
+         */
+        sort?: 'popular' | 'newest' | 'rating';
+        /**
+         * Min Rating
+         */
+        min_rating?: number | null;
+        /**
+         * Price
+         */
+        price?: 'all' | 'free' | 'paid';
     };
     url: '/api/v1/courses';
 };
@@ -3905,6 +4037,104 @@ export type ListMyCertificatesApiV1UsersMeCertificatesGetResponses = {
 };
 
 export type ListMyCertificatesApiV1UsersMeCertificatesGetResponse = ListMyCertificatesApiV1UsersMeCertificatesGetResponses[keyof ListMyCertificatesApiV1UsersMeCertificatesGetResponses];
+
+export type CreateReviewApiV1ReviewsPostData = {
+    body: ReviewCreateRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reviews';
+};
+
+export type CreateReviewApiV1ReviewsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateReviewApiV1ReviewsPostError = CreateReviewApiV1ReviewsPostErrors[keyof CreateReviewApiV1ReviewsPostErrors];
+
+export type CreateReviewApiV1ReviewsPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: ReviewSchema;
+};
+
+export type CreateReviewApiV1ReviewsPostResponse = CreateReviewApiV1ReviewsPostResponses[keyof CreateReviewApiV1ReviewsPostResponses];
+
+export type ListReviewsApiV1ReviewsTargetTypeTargetIdGetData = {
+    body?: never;
+    path: {
+        target_type: ReviewTargetType;
+        /**
+         * Target Id
+         */
+        target_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/v1/reviews/{target_type}/{target_id}';
+};
+
+export type ListReviewsApiV1ReviewsTargetTypeTargetIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListReviewsApiV1ReviewsTargetTypeTargetIdGetError = ListReviewsApiV1ReviewsTargetTypeTargetIdGetErrors[keyof ListReviewsApiV1ReviewsTargetTypeTargetIdGetErrors];
+
+export type ListReviewsApiV1ReviewsTargetTypeTargetIdGetResponses = {
+    /**
+     * Response List Reviews Api V1 Reviews  Target Type   Target Id  Get
+     *
+     * Successful Response
+     */
+    200: Array<ReviewSchema>;
+};
+
+export type ListReviewsApiV1ReviewsTargetTypeTargetIdGetResponse = ListReviewsApiV1ReviewsTargetTypeTargetIdGetResponses[keyof ListReviewsApiV1ReviewsTargetTypeTargetIdGetResponses];
+
+export type GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetData = {
+    body?: never;
+    path: {
+        target_type: ReviewTargetType;
+        /**
+         * Target Id
+         */
+        target_id: string;
+    };
+    query?: never;
+    url: '/api/v1/reviews/{target_type}/{target_id}/rating';
+};
+
+export type GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetError = GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetErrors[keyof GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetErrors];
+
+export type GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReviewRatingSchema;
+};
+
+export type GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetResponse = GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetResponses[keyof GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetResponses];
 
 export type ListNotificationsNotificationsGetData = {
     body?: never;

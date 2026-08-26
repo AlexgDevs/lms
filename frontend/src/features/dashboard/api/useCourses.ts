@@ -65,6 +65,9 @@ export const useCourseCatalog = (
   category?: string,
   q?: string,
   certificateOnly = false,
+  sort: "popular" | "newest" | "rating" = "popular",
+  minRating?: number,
+  price: "all" | "free" | "paid" = "all",
 ) => {
   return useInfiniteQuery({
     ...getCoursesApiV1CoursesGetInfiniteOptions({
@@ -74,6 +77,9 @@ export const useCourseCatalog = (
         category: category || undefined,
         q: q || undefined,
         certificate_enabled: certificateOnly || undefined,
+        sort,
+        min_rating: minRating || undefined,
+        price,
       },
     }),
     initialPageParam: 0,

@@ -24,6 +24,8 @@ class CourseSchema(BaseSchema):
     is_member: bool = False
     status: CourseStatus
     moderation_reason: str | None = None
+    rating: float | None = None
+    rating_count: int | None = None
     created_at: datetime
     tgp_enabled: bool = False
     tgp_last_full_generated_at: datetime | None = None

@@ -50,7 +50,7 @@ export function ResetPasswordForm() {
                 }
             )
             if (!res.ok) throw new Error("Reset failed")
-            showSuccessToast("Password has been reset. You can now log in.")
+            showSuccessToast("Пароль успешно сброшен. Войдите в систему.")
             navigate({ to: ROUTES.LOGIN })
         } catch (error) {
             showErrorToast(getErrorMessage(error))
@@ -65,9 +65,9 @@ export function ResetPasswordForm() {
                 <div className="flex flex-col gap-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Set new password</CardTitle>
+                            <CardTitle>Установка нового пароля</CardTitle>
                             <CardDescription>
-                                Enter your new password below
+                                Введите новый пароль ниже
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -79,9 +79,8 @@ export function ResetPasswordForm() {
                                         render={({ field, fieldState }) => (
                                             <Field data-invalid={fieldState.invalid}>
                                                 <FieldLabel htmlFor={field.name}>
-                                                    New password
-                                                </FieldLabel>
-                                                <Input
+                                                    Новый пароль
+                                                </FieldLabel>                                                <Input
                                                     {...field}
                                                     id={field.name}
                                                     aria-invalid={fieldState.invalid}
@@ -103,7 +102,7 @@ export function ResetPasswordForm() {
                                         render={({ field, fieldState }) => (
                                             <Field data-invalid={fieldState.invalid}>
                                                 <FieldLabel htmlFor={field.name}>
-                                                    Confirm password
+                                                    Повторите пароль
                                                 </FieldLabel>
                                                 <Input
                                                     {...field}
@@ -128,9 +127,8 @@ export function ResetPasswordForm() {
                                             ) : (
                                                 <Lock className="mr-2 h-4 w-4" />
                                             )}
-                                            Reset password
-                                        </Button>
-                                    </Field>
+                                            Сбросить пароль
+                                        </Button>                                    </Field>
                                 </FieldGroup>
                             </form>
                         </CardContent>

@@ -51,7 +51,7 @@ export function ForgotPasswordForm() {
             if (!res.ok) throw new Error("Request failed")
             const result = await res.json()
             setResetToken(result.reset_token)
-            showSuccessToast("Reset token received. Use it to set a new password.")
+            showSuccessToast("Код для сброса пароля отправлен на почту.")
         } catch (error) {
             showErrorToast(getErrorMessage(error))
         } finally {
@@ -63,21 +63,21 @@ export function ForgotPasswordForm() {
         <div className="flex flex-col gap-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Reset your password</CardTitle>
+                    <CardTitle>Сброс пароля</CardTitle>
                     <CardDescription>
-                        Enter your email and we&apos;ll send you a reset token
+                        Введите email — мы отправим вам код для сброса пароля
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     {resetToken ? (
                         <div className="flex flex-col gap-4">
                             <div className="rounded-md bg-muted p-3 text-sm">
-                                <p className="font-medium mb-1">Your reset token:</p>
+                                <p className="font-medium mb-1">Ваш код сброса:</p>
                                 <code className="break-all">{resetToken}</code>
                             </div>
                             <Button asChild variant="outline">
                                 <Link to={ROUTES.RESET_PASSWORD} search={{ token: resetToken }}>
-                                    Set new password
+                                    Установить новый пароль
                                 </Link>
                             </Button>
                         </div>
@@ -112,9 +112,8 @@ export function ForgotPasswordForm() {
                                         ) : (
                                             <Mail className="mr-2 h-4 w-4" />
                                         )}
-                                        Send reset token
-                                    </Button>
-                                </Field>
+                                        Отправить код
+                                    </Button>                                </Field>
                             </FieldGroup>
                         </form>
                     )}
@@ -122,7 +121,7 @@ export function ForgotPasswordForm() {
             </Card>
             <p className="text-center text-sm text-muted-foreground">
                 <Link to={ROUTES.LOGIN} className="underline underline-offset-4">
-                    Back to login
+                    Вернуться ко входу
                 </Link>
             </p>
         </div>

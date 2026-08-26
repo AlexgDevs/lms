@@ -6,6 +6,8 @@ import { resolveMediaUrl } from "@/lib/media";
 import { useCourseDetail } from "@/features/dashboard/api/useCourseDetail";
 import { useEnrollCourse, useUnenrollCourse } from "@/features/dashboard/api/useCourses";
 import useAuth, { isLoggedIn } from "@/features/auth/api/useAuth";
+import { ReviewSection } from "@/features/review/components/ReviewSection";
+import { TinyRating } from "@/features/review/components/TinyRating";
 import { ROUTES } from "@/routes";
 
 export function CoursePage() {
@@ -82,9 +84,10 @@ export function CoursePage() {
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
               {course.owner_username && (
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5" />
                   {course.owner_username}
+                  <TinyRating targetType="user" targetId={course.owner_id} />
                 </span>
               )}
               {course.price === 0 ? (
@@ -198,6 +201,14 @@ export function CoursePage() {
           })
         )}
       </div>
+
+      <ReviewSection
+        targetType="course"
+        targetId={course.id}
+        title="Отзывы о курсе"
+        showRating
+        canWrite={loggedIn}
+      />
     </div>
   );
 }

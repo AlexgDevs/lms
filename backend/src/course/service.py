@@ -403,6 +403,9 @@ class CourseService(BaseService):
         category: str | None = None,
         q: str | None = None,
         certificate_enabled: bool | None = None,
+        sort: str = "popular",
+        min_rating: int | None = None,
+        price: str = "all",
     ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
         search_term = q.strip()[:100] if q and q.strip() else None
         match filter:
@@ -426,14 +429,15 @@ class CourseService(BaseService):
                 if category is not None and not category_ids:
                     return []
                 courses = list(
-                    await self.uow.courses.get_filtered(
+                    await self.uow.courses.get_published_catalog(
                         limit=limit,
                         offset=offset,
                         category_ids=category_ids,
                         search_term=search_term,
                         certificate_enabled=certificate_enabled,
-                        status=CourseStatus.PUBLISHED,
-                        is_deleted=None,
+                        sort=sort,
+                        min_rating=min_rating,
+                        price=price,
                     )
                 )
                 if user_id is not None:

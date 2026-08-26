@@ -111,6 +111,9 @@ async def get_courses(
     category: str | None = None,
     q: str | None = Query(None, max_length=100),
     certificate_enabled: bool | None = None,
+    sort: Literal["popular", "newest", "rating"] = "popular",
+    min_rating: int | None = Query(None, ge=1, le=5),
+    price: Literal["all", "free", "paid"] = "all",
 ) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
     return await service.list_courses(
         filter=filter,
@@ -120,6 +123,9 @@ async def get_courses(
         category=category,
         q=q,
         certificate_enabled=certificate_enabled,
+        sort=sort,
+        min_rating=min_rating,
+        price=price,
     )
 
 

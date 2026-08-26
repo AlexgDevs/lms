@@ -11,7 +11,7 @@ import {
   updateCourseApiV1CoursesCourseIdPatchMutation,
   getCourseByIdApiV1CoursesCourseIdGetQueryKey,
 } from "@/client/@tanstack/react-query.gen"
-import { showErrorToast, showSuccessToast, showInfoToast } from "@/lib/toast"
+import { showErrorToast, showSuccessToast, showInfoToast, withLoadingToast } from "@/lib/toast"
 import { getErrorMessage } from "@/lib/errors"
 import type {
   TgpQuestionSchema,
@@ -134,24 +134,26 @@ export function useTgp({ courseId }: UseTgpParams = {}) {
   const generateMutation = useMutation({
     ...generateTgpApiV1AiTgpCourseIdGeneratePostMutation(),
     onSuccess: (_data: TgpGenerateResponseSchema) => {
-      showSuccessToast(
-        "Тест TGP успешно запущен. Ожидайте завершения генерации."
-      )
       if (courseId) setOptimisticGeneratedAt(new Date().toISOString())
       invalidateCourse()
       invalidateQuestions()
       void pollQuestionsAfterGeneration()
     },
-    onError: (err) => {
-      showErrorToast(getErrorMessage(err) || "Ошибка при генерации теста TGP")
-    },
+    onError: () => {},
   })
 
   const generateAsync = async () => {
     if (!courseId) throw new Error("Не передан courseId")
-    return generateMutation.mutateAsync({
-      path: { course_id: courseId },
-    })
+    return withLoadingToast(
+      generateMutation.mutateAsync({
+        path: { course_id: courseId },
+      }),
+      {
+        loading: "Запускаем генерацию теста...",
+        success: "Тест TGP успешно запущен. Ожидайте завершения.",
+        error: "Ошибка при генерации теста TGP",
+      }
+    )
   }
 
   // Regenerate a single question (async Celery task)

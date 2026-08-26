@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { client } from "@/client/client.gen";
 import { getErrorMessage } from "@/lib/errors";
-import { showErrorToast } from "@/lib/toast";
+import { showErrorToast, withLoadingToast } from "@/lib/toast";
 
 async function triggerDownload(pdfBlob: Blob, filename: string) {
   const url = URL.createObjectURL(pdfBlob);
@@ -20,11 +20,18 @@ export const useDownloadCertificate = () => {
   const download = async (courseId: string, filename?: string) => {
     setDownloadingId(courseId);
     try {
-      const { data, response } = await client.get({
-        url: `/api/v1/courses/${courseId}/certificate`,
-        parseAs: "blob",
-        throwOnError: true,
-      });
+      const { data, response } = await withLoadingToast(
+        client.get({
+          url: `/api/v1/courses/${courseId}/certificate`,
+          parseAs: "blob",
+          throwOnError: true,
+        }),
+        {
+          loading: "Готовим сертификат...",
+          success: "Сертификат скачан",
+          error: "Не удалось загрузить сертификат",
+        }
+      );
 
       const blob = data as Blob;
       const disposition = response.headers.get("Content-Disposition") ?? "";

@@ -3,6 +3,7 @@ import { ArrowUpRight, Award, BookOpen, Users } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { resolveMediaUrl } from "@/lib/media";
+import { StarRating } from "@/features/review/components/StarRating";
 import { CourseStatus } from "@/client";
 import { ROUTES } from "@/routes";
 import type { CourseCardData } from "@/features/dashboard/types";
@@ -99,8 +100,22 @@ export function CourseCard({
         </div>
       </div>
 
-      {/* Нижняя часть: цена + участники, затем прогресс / статус / подробнее */}
+      {/* Нижняя часть: рейтинг + цена + участники, затем прогресс / статус / подробнее */}
       <div className="pt-2 mt-auto space-y-2">
+        {course.rating && course.rating > 0 && (
+          <div className="flex items-center gap-1.5">
+            <StarRating value={course.rating} readonly size={13} />
+            <span className="text-[11px] font-semibold text-foreground tabular-nums">
+              {course.rating.toFixed(1)}
+            </span>
+            {course.rating_count != null && (
+              <span className="text-[11px] text-muted-foreground">
+                ({course.rating_count})
+              </span>
+            )}
+          </div>
+        )}
+
         {!isDraft && (
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             {course.price === 0 ? (

@@ -4,10 +4,29 @@ import { CatalogPage } from "@/features/dashboard/pages/CatalogPage";
 export const Route = createFileRoute("/_layout/catalog")({
   validateSearch: (
     search: Record<string, unknown>
-  ): { category?: string; q?: string } => ({
-    category: typeof search.category === "string" ? search.category : undefined,
-    q: typeof search.q === "string" ? search.q : undefined,
-  }),
+  ): {
+    category?: string;
+    q?: string;
+    sort?: "popular" | "newest" | "rating";
+    minRating?: number;
+    price?: "all" | "free" | "paid";
+    cert?: boolean;
+  } => {
+    const num = Number(search.minRating);
+    return {
+      category: typeof search.category === "string" ? search.category : undefined,
+      q: typeof search.q === "string" ? search.q : undefined,
+      sort:
+        search.sort === "newest" || search.sort === "rating" ? search.sort : undefined,
+      minRating: Number.isFinite(num) ? num : undefined,
+      price:
+        search.price === "free" || search.price === "paid" ? search.price : undefined,
+      cert:
+        search.cert === true || search.cert === "true" || search.cert === "1"
+          ? true
+          : undefined,
+    };
+  },
   component: CatalogPage,
   head: () => ({
     meta: [
