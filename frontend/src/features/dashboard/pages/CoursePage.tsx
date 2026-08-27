@@ -6,6 +6,7 @@ import { resolveMediaUrl } from "@/lib/media";
 import { useCourseDetail } from "@/features/dashboard/api/useCourseDetail";
 import { useEnrollCourse, useUnenrollCourse } from "@/features/dashboard/api/useCourses";
 import useAuth, { isLoggedIn } from "@/features/auth/api/useAuth";
+import { useCheckout, useCoursePaymentStatus } from "@/features/payment/api/usePayments";
 import { ReviewSection } from "@/features/review/components/ReviewSection";
 import { TinyRating } from "@/features/review/components/TinyRating";
 import { ROUTES } from "@/routes";
@@ -16,8 +17,21 @@ export function CoursePage() {
   const { user } = useAuth();
   const enroll = useEnrollCourse();
   const unenroll = useUnenrollCourse();
+  const checkout = useCheckout();
   const { course, modules, lessonsByModule, isLoading } =
     useCourseDetail(courseId);
+
+  // Poll payment status after returning from checkout: while a paid course is
+  // not yet a membership, query the status until the webhook enrolls the user.
+  const loggedIn = isLoggedIn();
+  const wantsPaymentStatus =
+    Boolean(course?.price && course?.price > 0) &&
+    !course?.is_member &&
+    loggedIn;
+  const paymentStatus = useCoursePaymentStatus(
+    wantsPaymentStatus ? course?.id : undefined,
+    wantsPaymentStatus ? 4000 : undefined,
+  );
 
   if (isLoading) {
     return (
@@ -33,9 +47,10 @@ export function CoursePage() {
 
   const cover = resolveMediaUrl(course.cover_url);
   const memberCount = course.member_count ?? 0;
-  const loggedIn = isLoggedIn();
   const isOwner = Boolean(user && user.id === course.owner_id);
   const isMember = Boolean(course.is_member);
+  const paid = paymentStatus.data?.paid ?? false;
+  const waitingForAccess = paid && !isMember;
 
   const handleEnroll = () => {
     if (!loggedIn) {
@@ -44,6 +59,20 @@ export function CoursePage() {
     }
     enroll.mutate({ path: { course_id: course.id } });
   };
+
+  const handleBuy = () => {
+    if (!loggedIn) {
+      navigate({ to: ROUTES.LOGIN });
+      return;
+    }
+    checkout.mutate({ path: { course_id: course.id } });
+  };
+
+  const handleGoLearn = () => {
+    navigate({ to: "/learn/$courseId", params: { courseId: course.id } });
+  };
+
+  const isPaid = (course.price ?? 0) > 0;
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 py-2 px-4 sm:px-6">
@@ -112,6 +141,12 @@ export function CoursePage() {
                     Вы записаны
                   </span>
                   <Button
+                    size="lg"
+                    onClick={handleGoLearn}
+                  >
+                    Начать обучение
+                  </Button>
+                  <Button
                     variant="outline"
                     size="lg"
                     disabled={unenroll.isPending}
@@ -125,6 +160,22 @@ export function CoursePage() {
                 <span className="inline-flex items-center text-xs font-semibold text-primary bg-primary/10 px-4 py-2 rounded-md">
                   Это ваш курс
                 </span>
+              ) : waitingForAccess ? (
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center text-sm font-semibold text-success bg-success/10 px-4 py-2 rounded-md">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Оплата получена, открываем доступ...
+                  </span>
+                </div>
+              ) : isPaid ? (
+                <Button
+                  size="lg"
+                  disabled={checkout.isPending}
+                  onClick={handleBuy}
+                >
+                  {checkout.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {checkout.isPending ? "Переход к оплате..." : `Оплатить ${course.price} ₽`}
+                </Button>
               ) : (
                 <Button
                   size="lg"

@@ -12,6 +12,7 @@ import { useProfileStats } from "@/features/profile/api/useProfileStats";
 import { useEnrolledCourses } from "@/features/dashboard/api/useCourses";
 import { useMyCertificates } from "@/features/certificate/api/useMyCertificates";
 import { CourseCard } from "@/features/dashboard/components/CourseCard";
+import { PurchasesSection } from "@/features/payment/components/PurchasesSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/routes";
@@ -96,6 +97,7 @@ export function ProfilePage() {
           </Card>
 
           <ProfileAchievements />
+          <PurchasesSection />
         </div>
       </div>
 

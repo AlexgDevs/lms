@@ -262,6 +262,28 @@ class CodeExecSettings(BaseSettings):
     CODEEXEC_MAX_CODE_CHARS: int = 64_000
 
 
+class PaymentSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    YOOKASSA_SHOP_ID: str = Field(default="")
+    YOOKASSA_SECRET_KEY: str = Field(default="")
+    YOOKASSA_RETURN_URL: str = Field(default="http://localhost:3000")
+    PAYMENTS_SANDBOX: bool = True
+
+    # Platform: commission (%) taken from every purchase, and the payout
+    # details of the site owner where the platform share goes.
+    PAYMENT_PLATFORM_FEE_PERCENT: float = 10.0
+    PAYOUT_PLATFORM_RECIPIENT: str = Field(default="")
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.YOOKASSA_SHOP_ID and self.YOOKASSA_SECRET_KEY)
+
+
 class CourseGenerateSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=ENV_FILE_PATH,
@@ -299,6 +321,7 @@ class Settings(BaseSettings):
         default_factory=CourseGenerateSettings
     )
     codeexec: CodeExecSettings = Field(default_factory=CodeExecSettings)
+    payments: PaymentSettings = Field(default_factory=PaymentSettings)
 
 
 settings = Settings()

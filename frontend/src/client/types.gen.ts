@@ -1428,6 +1428,185 @@ export type NotificationSchema = {
 };
 
 /**
+ * PaymentCheckoutResponseSchema
+ */
+export type PaymentCheckoutResponseSchema = {
+    /**
+     * Payment Id
+     */
+    payment_id: string;
+    /**
+     * Confirmation Url
+     */
+    confirmation_url: string;
+    status: PaymentStatus;
+};
+
+/**
+ * PaymentConfigSchema
+ */
+export type PaymentConfigSchema = {
+    /**
+     * Fee Percent
+     */
+    fee_percent: number;
+    /**
+     * Platform Recipient
+     */
+    platform_recipient: string;
+};
+
+/**
+ * PaymentProvider
+ */
+export const PaymentProvider = { YOOKASSA: 'yookassa' } as const;
+
+/**
+ * PaymentProvider
+ */
+export type PaymentProvider = typeof PaymentProvider[keyof typeof PaymentProvider];
+
+/**
+ * PaymentSchema
+ */
+export type PaymentSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Amount
+     */
+    amount: number;
+    /**
+     * Currency
+     */
+    currency: string;
+    status: PaymentStatus;
+    provider: PaymentProvider;
+    /**
+     * Provider Payment Id
+     */
+    provider_payment_id: string | null;
+    /**
+     * Platform Fee
+     */
+    platform_fee?: number | null;
+    /**
+     * Author Amount
+     */
+    author_amount?: number | null;
+    /**
+     * Payout Status
+     */
+    payout_status?: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Paid At
+     */
+    paid_at: string | null;
+};
+
+/**
+ * PaymentStatus
+ */
+export const PaymentStatus = {
+    PENDING: 'pending',
+    SUCCEEDED: 'succeeded',
+    FAILED: 'failed'
+} as const;
+
+/**
+ * PaymentStatus
+ */
+export type PaymentStatus = typeof PaymentStatus[keyof typeof PaymentStatus];
+
+/**
+ * PaymentStatusResponseSchema
+ */
+export type PaymentStatusResponseSchema = {
+    /**
+     * Paid
+     */
+    paid: boolean;
+};
+
+/**
+ * PayoutAccountSchema
+ */
+export type PayoutAccountSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    method: PayoutMethod;
+    /**
+     * Recipient
+     */
+    recipient: string;
+    /**
+     * Holder Name
+     */
+    holder_name: string | null;
+    /**
+     * Bank Name
+     */
+    bank_name: string | null;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * PayoutAccountUpsertSchema
+ */
+export type PayoutAccountUpsertSchema = {
+    method: PayoutMethod;
+    /**
+     * Recipient
+     */
+    recipient: string;
+    /**
+     * Holder Name
+     */
+    holder_name?: string | null;
+    /**
+     * Bank Name
+     */
+    bank_name?: string | null;
+};
+
+/**
+ * PayoutMethod
+ */
+export const PayoutMethod = { CARD: 'card', SBP_PHONE: 'sbp_phone' } as const;
+
+/**
+ * PayoutMethod
+ */
+export type PayoutMethod = typeof PayoutMethod[keyof typeof PayoutMethod];
+
+/**
  * ProfileStatsSchema
  */
 export type ProfileStatsSchema = {
@@ -1895,6 +2074,56 @@ export type ValidationError = {
     ctx?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * YooKassaAmount
+ */
+export type YooKassaAmount = {
+    /**
+     * Value
+     */
+    value: string;
+    /**
+     * Currency
+     */
+    currency: string;
+};
+
+/**
+ * YooKassaPaymentObject
+ */
+export type YooKassaPaymentObject = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Status
+     */
+    status: string;
+    amount?: YooKassaAmount | null;
+    /**
+     * Metadata
+     */
+    metadata?: {
+        [key: string]: string;
+    } | null;
+};
+
+/**
+ * YooKassaWebhookSchema
+ */
+export type YooKassaWebhookSchema = {
+    /**
+     * Event
+     */
+    event: string;
+    /**
+     * Type
+     */
+    type?: string;
+    object: YooKassaPaymentObject;
 };
 
 export type RegisterApiV1AuthRegisterPostData = {
@@ -4135,6 +4364,188 @@ export type GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetResponses = {
 };
 
 export type GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetResponse = GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetResponses[keyof GetRatingApiV1ReviewsTargetTypeTargetIdRatingGetResponses];
+
+export type CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/payments/courses/{course_id}/checkout';
+};
+
+export type CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostError = CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostErrors[keyof CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostErrors];
+
+export type CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: PaymentCheckoutResponseSchema;
+};
+
+export type CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostResponse = CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostResponses[keyof CreateCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostResponses];
+
+export type YookassaWebhookApiV1PaymentsWebhookYookassaPostData = {
+    body: YooKassaWebhookSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/payments/webhook/yookassa';
+};
+
+export type YookassaWebhookApiV1PaymentsWebhookYookassaPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type YookassaWebhookApiV1PaymentsWebhookYookassaPostError = YookassaWebhookApiV1PaymentsWebhookYookassaPostErrors[keyof YookassaWebhookApiV1PaymentsWebhookYookassaPostErrors];
+
+export type YookassaWebhookApiV1PaymentsWebhookYookassaPostResponses = {
+    /**
+     * Response Yookassa Webhook Api V1 Payments Webhook Yookassa Post
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type YookassaWebhookApiV1PaymentsWebhookYookassaPostResponse = YookassaWebhookApiV1PaymentsWebhookYookassaPostResponses[keyof YookassaWebhookApiV1PaymentsWebhookYookassaPostResponses];
+
+export type ListMyPaymentsApiV1PaymentsMeGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/payments/me';
+};
+
+export type ListMyPaymentsApiV1PaymentsMeGetResponses = {
+    /**
+     * Response List My Payments Api V1 Payments Me Get
+     *
+     * Successful Response
+     */
+    200: Array<PaymentSchema>;
+};
+
+export type ListMyPaymentsApiV1PaymentsMeGetResponse = ListMyPaymentsApiV1PaymentsMeGetResponses[keyof ListMyPaymentsApiV1PaymentsMeGetResponses];
+
+export type GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/payments/courses/{course_id}/payment';
+};
+
+export type GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetError = GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetErrors[keyof GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetErrors];
+
+export type GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaymentStatusResponseSchema;
+};
+
+export type GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetResponse = GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetResponses[keyof GetCoursePaymentStatusApiV1PaymentsCoursesCourseIdPaymentGetResponses];
+
+export type GetPaymentConfigApiV1PaymentsConfigGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/payments/config';
+};
+
+export type GetPaymentConfigApiV1PaymentsConfigGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaymentConfigSchema;
+};
+
+export type GetPaymentConfigApiV1PaymentsConfigGetResponse = GetPaymentConfigApiV1PaymentsConfigGetResponses[keyof GetPaymentConfigApiV1PaymentsConfigGetResponses];
+
+export type DeletePayoutAccountApiV1PaymentsPayoutAccountDeleteData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/payments/payout-account';
+};
+
+export type DeletePayoutAccountApiV1PaymentsPayoutAccountDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeletePayoutAccountApiV1PaymentsPayoutAccountDeleteResponse = DeletePayoutAccountApiV1PaymentsPayoutAccountDeleteResponses[keyof DeletePayoutAccountApiV1PaymentsPayoutAccountDeleteResponses];
+
+export type GetPayoutAccountApiV1PaymentsPayoutAccountGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/payments/payout-account';
+};
+
+export type GetPayoutAccountApiV1PaymentsPayoutAccountGetResponses = {
+    /**
+     * Response Get Payout Account Api V1 Payments Payout Account Get
+     *
+     * Successful Response
+     */
+    200: PayoutAccountSchema | null;
+};
+
+export type GetPayoutAccountApiV1PaymentsPayoutAccountGetResponse = GetPayoutAccountApiV1PaymentsPayoutAccountGetResponses[keyof GetPayoutAccountApiV1PaymentsPayoutAccountGetResponses];
+
+export type UpsertPayoutAccountApiV1PaymentsPayoutAccountPutData = {
+    body: PayoutAccountUpsertSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/payments/payout-account';
+};
+
+export type UpsertPayoutAccountApiV1PaymentsPayoutAccountPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpsertPayoutAccountApiV1PaymentsPayoutAccountPutError = UpsertPayoutAccountApiV1PaymentsPayoutAccountPutErrors[keyof UpsertPayoutAccountApiV1PaymentsPayoutAccountPutErrors];
+
+export type UpsertPayoutAccountApiV1PaymentsPayoutAccountPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: PayoutAccountSchema;
+};
+
+export type UpsertPayoutAccountApiV1PaymentsPayoutAccountPutResponse = UpsertPayoutAccountApiV1PaymentsPayoutAccountPutResponses[keyof UpsertPayoutAccountApiV1PaymentsPayoutAccountPutResponses];
 
 export type ListNotificationsNotificationsGetData = {
     body?: never;

@@ -2265,6 +2265,308 @@ export const NotificationSchemaSchema = {
     title: 'NotificationSchema'
 } as const;
 
+export const PaymentCheckoutResponseSchemaSchema = {
+    properties: {
+        payment_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Payment Id'
+        },
+        confirmation_url: {
+            type: 'string',
+            title: 'Confirmation Url'
+        },
+        status: {
+            $ref: '#/components/schemas/PaymentStatus'
+        }
+    },
+    type: 'object',
+    required: [
+        'payment_id',
+        'confirmation_url',
+        'status'
+    ],
+    title: 'PaymentCheckoutResponseSchema'
+} as const;
+
+export const PaymentConfigSchemaSchema = {
+    properties: {
+        fee_percent: {
+            type: 'number',
+            title: 'Fee Percent'
+        },
+        platform_recipient: {
+            type: 'string',
+            title: 'Platform Recipient'
+        }
+    },
+    type: 'object',
+    required: [
+        'fee_percent',
+        'platform_recipient'
+    ],
+    title: 'PaymentConfigSchema'
+} as const;
+
+export const PaymentProviderSchema = {
+    type: 'string',
+    enum: [
+        'yookassa'
+    ],
+    title: 'PaymentProvider'
+} as const;
+
+export const PaymentSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        amount: {
+            type: 'integer',
+            title: 'Amount'
+        },
+        currency: {
+            type: 'string',
+            title: 'Currency'
+        },
+        status: {
+            $ref: '#/components/schemas/PaymentStatus'
+        },
+        provider: {
+            $ref: '#/components/schemas/PaymentProvider'
+        },
+        provider_payment_id: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Provider Payment Id'
+        },
+        platform_fee: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Platform Fee'
+        },
+        author_amount: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Author Amount'
+        },
+        payout_status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Payout Status'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        paid_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Paid At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'course_id',
+        'amount',
+        'currency',
+        'status',
+        'provider',
+        'provider_payment_id',
+        'created_at',
+        'paid_at'
+    ],
+    title: 'PaymentSchema'
+} as const;
+
+export const PaymentStatusSchema = {
+    type: 'string',
+    enum: [
+        'pending',
+        'succeeded',
+        'failed'
+    ],
+    title: 'PaymentStatus'
+} as const;
+
+export const PaymentStatusResponseSchemaSchema = {
+    properties: {
+        paid: {
+            type: 'boolean',
+            title: 'Paid'
+        }
+    },
+    type: 'object',
+    required: [
+        'paid'
+    ],
+    title: 'PaymentStatusResponseSchema'
+} as const;
+
+export const PayoutAccountSchemaSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        method: {
+            $ref: '#/components/schemas/PayoutMethod'
+        },
+        recipient: {
+            type: 'string',
+            title: 'Recipient'
+        },
+        holder_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Holder Name'
+        },
+        bank_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Bank Name'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'method',
+        'recipient',
+        'holder_name',
+        'bank_name',
+        'is_active',
+        'created_at'
+    ],
+    title: 'PayoutAccountSchema'
+} as const;
+
+export const PayoutAccountUpsertSchemaSchema = {
+    properties: {
+        method: {
+            $ref: '#/components/schemas/PayoutMethod'
+        },
+        recipient: {
+            type: 'string',
+            maxLength: 64,
+            minLength: 5,
+            title: 'Recipient'
+        },
+        holder_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 128
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Holder Name'
+        },
+        bank_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 128
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Bank Name'
+        }
+    },
+    type: 'object',
+    required: [
+        'method',
+        'recipient'
+    ],
+    title: 'PayoutAccountUpsertSchema'
+} as const;
+
+export const PayoutMethodSchema = {
+    type: 'string',
+    enum: [
+        'card',
+        'sbp_phone'
+    ],
+    title: 'PayoutMethod'
+} as const;
+
 export const ProfileStatsSchemaSchema = {
     properties: {
         streak: {
@@ -3028,4 +3330,89 @@ export const ValidationErrorSchema = {
         'type'
     ],
     title: 'ValidationError'
+} as const;
+
+export const YooKassaAmountSchema = {
+    properties: {
+        value: {
+            type: 'string',
+            title: 'Value'
+        },
+        currency: {
+            type: 'string',
+            title: 'Currency'
+        }
+    },
+    type: 'object',
+    required: [
+        'value',
+        'currency'
+    ],
+    title: 'YooKassaAmount'
+} as const;
+
+export const YooKassaPaymentObjectSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            title: 'Id'
+        },
+        status: {
+            type: 'string',
+            title: 'Status'
+        },
+        amount: {
+            anyOf: [
+                {
+                    $ref: '#/components/schemas/YooKassaAmount'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        metadata: {
+            anyOf: [
+                {
+                    additionalProperties: {
+                        type: 'string'
+                    },
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Metadata'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'status'
+    ],
+    title: 'YooKassaPaymentObject'
+} as const;
+
+export const YooKassaWebhookSchemaSchema = {
+    properties: {
+        event: {
+            type: 'string',
+            title: 'Event'
+        },
+        type: {
+            type: 'string',
+            title: 'Type',
+            default: 'notification'
+        },
+        object: {
+            $ref: '#/components/schemas/YooKassaPaymentObject'
+        }
+    },
+    type: 'object',
+    required: [
+        'event',
+        'object'
+    ],
+    title: 'YooKassaWebhookSchema'
 } as const;

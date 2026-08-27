@@ -50,3 +50,8 @@ class CourseStatusNotAllowedError(CourseError):
 class CourseGenerateError(CourseError):
     detail = "Course generation failed"
     status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+class CoursePaymentRequiredError(CourseError):
+    detail = "This course requires payment before enrollment"
+    status_code = status.HTTP_402_PAYMENT_REQUIRED

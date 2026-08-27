@@ -31,6 +31,7 @@ from src.course.exceptions import (
     CourseNotPublishedError,
     CourseNotUnderReviewError,
     CourseOwnerCannotEnrollError,
+    CoursePaymentRequiredError,
     CourseStatusNotAllowedError,
     CourseGenerateError,
 )
@@ -78,6 +79,21 @@ class CourseService(BaseService):
             await self.session.execute(select(User).where(User.id == owner_id))
         ).scalar_one_or_none()
         return user.username if user else ""
+
+    async def _is_paid(self, course_id: UUID, user_id: UUID) -> bool:
+        from src.payment.enums import PaymentStatus
+        from src.payment.models import Payment
+
+        result = await self.session.execute(
+            select(Payment.id)
+            .where(
+                Payment.user_id == user_id,
+                Payment.course_id == course_id,
+                Payment.status == PaymentStatus.SUCCEEDED,
+            )
+            .limit(1)
+        )
+        return result.scalars().first() is not None
 
     async def create_course(
         self,
@@ -504,7 +520,8 @@ class CourseService(BaseService):
         if member:
             raise CourseMemberAlredyEnrolledError
 
-        # TODO: creating payment and other services
+        if course.price > 0 and not await self._is_paid(course_id, user_id):
+            raise CoursePaymentRequiredError
 
         data = CourseMemberCreateSchema(course_id=course_id, user_id=user_id)
         new_member = await self.uow.members.create(data=data)
