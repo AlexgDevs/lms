@@ -46,6 +46,7 @@ export const useEnrollCourse = () => {
       })
       const courseId = variables.path?.course_id
       if (courseId) {
+        sessionStorage.removeItem(`checkout:${courseId}`)
         queryClient.invalidateQueries({
           queryKey: getCourseByIdApiV1CoursesCourseIdGetQueryKey({
             path: { course_id: courseId },
@@ -100,6 +101,7 @@ export const useUnenrollCourse = () => {
     },
     onSuccess: (_, courseId) => {
       showSuccessToast("Вы отписались от курса")
+      sessionStorage.removeItem(`checkout:${courseId}`)
       queryClient.invalidateQueries({
         queryKey: getCoursesApiV1CoursesGetQueryKey(),
       })

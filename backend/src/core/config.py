@@ -274,10 +274,27 @@ class PaymentSettings(BaseSettings):
     YOOKASSA_RETURN_URL: str = Field(default="http://localhost:3000")
     PAYMENTS_SANDBOX: bool = True
 
+    # Provider selection. "mock" lets you exercise the SBP/QR and fallback logic
+    # locally without real YooKassa credentials (see src.payment.client.MockYooKassaClient).
+    PAYMENT_PROVIDER_MODE: Literal["yookassa", "mock"] = "yookassa"
+
+    # Mock provider knobs (used only when PAYMENT_PROVIDER_MODE == "mock").
+    MOCK_SBP_AVAILABLE: bool = True
+    MOCK_CONFIRMATION_URL: str = Field(default="http://localhost:5173/mock-payment")
+    MOCK_RAISE_NETWORK: bool = False
+
+    # Dev-only escape hatch: allow webhook delivery from localhost when testing
+    # locally (real YooKassa webhooks cannot reach a local dev server).
+    PAYMENT_WEBHOOK_DEV_ACCEPT: bool = False
+
     # Platform: commission (%) taken from every purchase, and the payout
     # details of the site owner where the platform share goes.
     PAYMENT_PLATFORM_FEE_PERCENT: float = 10.0
     PAYOUT_PLATFORM_RECIPIENT: str = Field(default="")
+
+    @property
+    def mode(self) -> Literal["yookassa", "mock"]:
+        return self.PAYMENT_PROVIDER_MODE
 
     @property
     def enabled(self) -> bool:

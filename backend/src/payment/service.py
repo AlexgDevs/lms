@@ -213,7 +213,7 @@ class PaymentService(BaseService):
         await self.uow.courses.increment_member_count(course_id)
 
     def _get_client(self) -> YooKassaClient:
-        if not settings.payments.enabled:
+        if not settings.payments.enabled and settings.payments.mode != "mock":
             raise PaymentNotConfiguredError
         if self._client is not None:
             return self._client

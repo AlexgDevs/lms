@@ -110,7 +110,70 @@ class YooKassaClient:
         return text in _SBP_UNAVAILABLE_HINTS or code in _SBP_UNAVAILABLE_HINTS
 
 
+class MockYooKassaClient(YooKassaClient):
+    """Simulated YooKassa provider for local testing (no real credentials).
+
+    It keeps the real ``create_payment`` fallback logic intact: the SBP attempt
+    still runs through ``YooKassaClient.create_payment``, and when
+    ``sbp_available`` is ``False`` the SBP request raises a ``400`` that
+    ``_is_payment_method_unavailable`` recognizes, so the genuine Smart-payment
+    fallback path is exercised rather than being stubbed out.
+    """
+
+    def __init__(
+        self,
+        *,
+        sbp_available: bool = True,
+        raise_network: bool = False,
+        confirmation_url: str = "http://localhost:5173/mock-payment",
+    ) -> None:
+        super().__init__(shop_id="mock", secret_key="mock")
+        self._sbp_available = sbp_available
+        self._raise_network = raise_network
+        self._confirmation_url = confirmation_url
+
+    async def _post_payment(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if self._raise_network:
+            raise httpx.ConnectError("mock network error")
+        method = (payload.get("payment_method_data") or {}).get("type")
+        if method == "sbp" and not self._sbp_available:
+            request = httpx.Request(
+                "POST", f"{YOOKASSA_API_URL}/payments", json=payload
+            )
+            response = httpx.Response(
+                400,
+                request=request,
+                json={
+                    "code": "invalid_request",
+                    "description": "Payment method is not available",
+                },
+            )
+            raise httpx.HTTPStatusError(
+                "SBP not available for this shop", request=request, response=response
+            )
+        provider_id = f"mock_{uuid4()}"
+        meta = payload.get("metadata") or {}
+        course_id = meta.get("course_id", "")
+        return {
+            "id": provider_id,
+            "confirmation": {
+                "confirmation_url": (
+                    f"{self._confirmation_url}"
+                    f"?qr={int(method == 'sbp')}"
+                    f"&provider_id={provider_id}"
+                    f"&course_id={course_id}"
+                ),
+            },
+        }
+
+
 def build_yookassa_client() -> YooKassaClient | None:
+    if settings.payments.mode == "mock":
+        return MockYooKassaClient(
+            sbp_available=settings.payments.MOCK_SBP_AVAILABLE,
+            raise_network=settings.payments.MOCK_RAISE_NETWORK,
+            confirmation_url=settings.payments.MOCK_CONFIRMATION_URL,
+        )
     if not settings.payments.enabled:
         return None
     return YooKassaClient(

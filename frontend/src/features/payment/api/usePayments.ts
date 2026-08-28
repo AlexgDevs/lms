@@ -28,8 +28,12 @@ export const useCoursePaymentStatus = (courseId?: string, refetchInterval?: numb
 export const useCheckout = () => {
   return useMutation({
     ...createCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostMutation(),
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       if (data?.confirmation_url) {
+        const courseId = variables.path?.course_id
+        if (courseId) {
+          sessionStorage.setItem(`checkout:${courseId}`, String(Date.now()))
+        }
         window.location.href = data.confirmation_url
       }
     },

@@ -33,6 +33,14 @@ export function CoursePage() {
     wantsPaymentStatus ? 4000 : undefined,
   );
 
+  // "Недавний чекаут" — пользователь только что перешёл к оплате, вебхук ещё не
+  // записал его в курс. Маркер ставится в useCheckout, снимается при записи/отписке
+  // и умирает вместе с вкладкой (sessionStorage), поэтому дополнительный таймер не
+  // нужен: без него stale-маркер не влияет на UI (paid==false или is_member==true).
+  const recentCheckout = Boolean(
+    course?.id && sessionStorage.getItem(`checkout:${course.id}`),
+  );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -50,7 +58,11 @@ export function CoursePage() {
   const isOwner = Boolean(user && user.id === course.owner_id);
   const isMember = Boolean(course.is_member);
   const paid = paymentStatus.data?.paid ?? false;
-  const waitingForAccess = paid && !isMember;
+  // "Ожидание доступа" — только в узком окне после свежего чекаута, пока вебхук
+  // ещё не записал пользователя. Если курс оплачен давно, а пользователь отписался,
+  // доступ к нему не теряется: повторная запись бесплатна (бэкенд разрешает её).
+  const waitingForAccess = paid && !isMember && recentCheckout;
+  const ownsCourse = paid && !isMember;
 
   const handleEnroll = () => {
     if (!loggedIn) {
@@ -167,6 +179,15 @@ export function CoursePage() {
                     Оплата получена, открываем доступ...
                   </span>
                 </div>
+              ) : ownsCourse ? (
+                <Button
+                  size="lg"
+                  disabled={enroll.isPending}
+                  onClick={handleEnroll}
+                >
+                  {enroll.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {enroll.isPending ? "Запись..." : "Записаться на курс"}
+                </Button>
               ) : isPaid ? (
                 <Button
                   size="lg"
