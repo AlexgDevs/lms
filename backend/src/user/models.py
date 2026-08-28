@@ -23,6 +23,9 @@ class User(UUIDBase):
     is_staff: Mapped[bool] = mapped_column(
         sa.Boolean(), server_default="false", default=False
     )
+    ai_course_generations: Mapped[int] = mapped_column(
+        sa.Integer(), server_default="0", default=0
+    )
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         back_populates="user",

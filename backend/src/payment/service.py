@@ -10,7 +10,7 @@ from src.course.course_member.schemas import CourseMemberCreateSchema
 from src.course.exceptions import CourseNotFoundError
 from src.course.enums import CourseStatus
 from src.payment.client import YooKassaClient, build_yookassa_client
-from src.payment.enums import PaymentStatus, PayoutStatus
+from src.payment.enums import PaymentKind, PaymentStatus, PayoutStatus
 from src.payment.exceptions import (
     CourseAlreadyPaidError,
     PaymentError,
@@ -67,6 +67,7 @@ class PaymentService(BaseService):
             PaymentCreateSchema(
                 user_id=user_id,
                 course_id=course_id,
+                kind=PaymentKind.COURSE,
                 amount=course.price,
                 meta=json.dumps({"course_id": str(course_id), "user_id": str(user_id)}),
                 platform_fee=platform_fee,
@@ -142,7 +143,8 @@ class PaymentService(BaseService):
                 paid_at=datetime.now(timezone.utc),
             ),
         )
-        await self._enroll_if_needed(payment.user_id, payment.course_id)
+        if payment.course_id is not None:
+            await self._enroll_if_needed(payment.user_id, payment.course_id)
         await self.uow.commit()
         return payment
 

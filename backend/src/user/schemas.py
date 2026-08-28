@@ -14,6 +14,13 @@ class UserSchema(BaseSchema):
     avatar_url: str | None
     joined_at: datetime
     is_staff: bool = False
+    ai_course_generations: int = 0
+
+
+class AiGenerationQuotaSchema(BaseSchema):
+    used: int
+    limit: int
+    remaining: int
 
 
 class UserPublicSchema(BaseSchema):

@@ -6,7 +6,12 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.postgres.base import UUIDBase
 from src.core.postgres.types import str_128, timestamp
-from src.payment.enums import PayoutMethod, PaymentProvider, PaymentStatus
+from src.payment.enums import (
+    PaymentKind,
+    PayoutMethod,
+    PaymentProvider,
+    PaymentStatus,
+)
 
 
 class Payment(UUIDBase):
@@ -26,9 +31,14 @@ class Payment(UUIDBase):
         ForeignKey("users.id", ondelete="CASCADE"),
         index=True,
     )
-    course_id: Mapped[UUID] = mapped_column(
+    course_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("courses.id", ondelete="CASCADE"),
         index=True,
+    )
+    kind: Mapped[PaymentKind] = mapped_column(
+        String(32),
+        server_default=PaymentKind.COURSE.value,
+        default=PaymentKind.COURSE,
     )
     amount: Mapped[int]
     currency: Mapped[str] = mapped_column(String(3), default="RUB")

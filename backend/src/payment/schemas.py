@@ -4,13 +4,19 @@ from uuid import UUID
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 from src.core.schemas.base_schema import BaseSchema
-from src.payment.enums import PaymentProvider, PaymentStatus, PayoutMethod
+from src.payment.enums import (
+    PaymentKind,
+    PaymentProvider,
+    PaymentStatus,
+    PayoutMethod,
+)
 
 
 class PaymentSchema(BaseSchema):
     id: UUID
     user_id: UUID
-    course_id: UUID
+    course_id: UUID | None
+    kind: PaymentKind = PaymentKind.COURSE
     amount: int
     currency: str
     status: PaymentStatus
@@ -19,13 +25,16 @@ class PaymentSchema(BaseSchema):
     platform_fee: int | None = None
     author_amount: int | None = None
     payout_status: str | None = None
+    course_title: str = ""
+    course_cover_url: str | None = None
     created_at: datetime
     paid_at: datetime | None
 
 
 class PaymentCreateSchema(BaseSchema):
     user_id: UUID
-    course_id: UUID
+    course_id: UUID | None = None
+    kind: PaymentKind = PaymentKind.COURSE
     amount: int
     currency: str = "RUB"
     status: PaymentStatus = PaymentStatus.PENDING

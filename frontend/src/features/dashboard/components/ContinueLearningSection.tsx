@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { ArrowRight, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { resolveMediaUrl } from "@/lib/media";
@@ -21,6 +21,9 @@ interface ContinueLearningSectionProps {
   rowActionLabel?: string;
   rowActionIcon?: LucideIcon;
   showProgress?: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
 }
 
 const FEATURED_LIMIT = 2;
@@ -38,13 +41,21 @@ export function ContinueLearningSection({
   rowActionLabel = "Продолжить",
   rowActionIcon: RowActionIcon = ArrowRight,
   showProgress = true,
+  onLoadMore,
+  hasMore = false,
+  isLoadingMore = false,
 }: ContinueLearningSectionProps) {
   const [showAll, setShowAll] = useState(false);
   const navigate = useNavigate();
+  const usingLoadMore = Boolean(onLoadMore);
   const featured = courses.slice(0, FEATURED_LIMIT);
   const rest = courses.slice(FEATURED_LIMIT);
-  const visibleRest = showAll ? rest : rest.slice(0, VISIBLE_REST_LIMIT);
-  const hiddenCount = rest.length - VISIBLE_REST_LIMIT;
+  const restVisible = usingLoadMore
+    ? rest
+    : showAll
+      ? rest
+      : rest.slice(0, VISIBLE_REST_LIMIT);
+  const hiddenCount = usingLoadMore ? 0 : rest.length - VISIBLE_REST_LIMIT;
 
   const handleNavigate = (course: CourseCardData) => {
     if (onCourseClick) {
@@ -82,7 +93,7 @@ export function ContinueLearningSection({
       {rest.length > 0 && (
         <div className="space-y-2 pt-2 lg:max-w-[66.67%]">
           <div className="space-y-2">
-            {visibleRest.map((course) => (
+            {restVisible.map((course) => (
               <div
                 key={course.id}
                 role="button"
@@ -132,25 +143,50 @@ export function ContinueLearningSection({
             ))}
           </div>
 
-          {!showAll && hiddenCount > 0 && (
-            <Button
-              variant="ghost"
-              className="w-full text-xs text-muted-foreground"
-              onClick={() => setShowAll(true)}
-            >
-              <ChevronDown className="w-3.5 h-3.5 mr-1" />
-              Показать ещё {hiddenCount} курс{hiddenCount % 10 === 1 && hiddenCount % 100 !== 11 ? "" : hiddenCount % 10 >= 2 && hiddenCount % 10 <= 4 && (hiddenCount % 100 < 12 || hiddenCount % 100 > 14) ? "а" : "ов"}
-            </Button>
-          )}
-          {showAll && rest.length > VISIBLE_REST_LIMIT && (
-            <Button
-              variant="ghost"
-              className="w-full text-xs text-muted-foreground"
-              onClick={() => setShowAll(false)}
-            >
-              <ChevronUp className="w-3.5 h-3.5 mr-1" />
-              Свернуть
-            </Button>
+          {usingLoadMore ? (
+            hasMore && (
+              <Button
+                variant="ghost"
+                className="w-full text-xs text-muted-foreground"
+                onClick={() => onLoadMore?.()}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                    Загрузка...
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-3.5 h-3.5 mr-1" />
+                    Показать ещё
+                  </>
+                )}
+              </Button>
+            )
+          ) : (
+            <>
+              {!showAll && hiddenCount > 0 && (
+                <Button
+                  variant="ghost"
+                  className="w-full text-xs text-muted-foreground"
+                  onClick={() => setShowAll(true)}
+                >
+                  <ChevronDown className="w-3.5 h-3.5 mr-1" />
+                  Показать ещё {hiddenCount} курс{hiddenCount % 10 === 1 && hiddenCount % 100 !== 11 ? "" : hiddenCount % 10 >= 2 && hiddenCount % 10 <= 4 && (hiddenCount % 100 < 12 || hiddenCount % 100 > 14) ? "а" : "ов"}
+                </Button>
+              )}
+              {showAll && rest.length > VISIBLE_REST_LIMIT && (
+                <Button
+                  variant="ghost"
+                  className="w-full text-xs text-muted-foreground"
+                  onClick={() => setShowAll(false)}
+                >
+                  <ChevronUp className="w-3.5 h-3.5 mr-1" />
+                  Свернуть
+                </Button>
+              )}
+            </>
           )}
         </div>
       )}

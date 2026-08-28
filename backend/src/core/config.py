@@ -314,6 +314,8 @@ class CourseGenerateSettings(BaseSettings):
     COURSE_GENERATE_LESSONS_MAX: int = 5
     COURSE_GENERATE_BLOCKS_MIN: int = 1
     COURSE_GENERATE_BLOCKS_MAX: int = 6
+    # Free AI course generations per user before generation is blocked.
+    COURSE_GENERATE_FREE_LIMIT: int = 2
     COURSE_GENERATE_AI_TIMEOUT_SECONDS: float = 90.0
     COURSE_GENERATE_AI_MAX_RETRIES: int = 3
     COURSE_GENERATE_LOCK_TTL_SECONDS: int = 600

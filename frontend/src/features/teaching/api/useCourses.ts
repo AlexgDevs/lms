@@ -1,8 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 import { getErrorMessage } from "@/lib/errors"
 import {
   getCoursesApiV1CoursesGetOptions,
+  getCoursesApiV1CoursesGetInfiniteOptions,
+  getCoursesApiV1CoursesGetInfiniteQueryKey,
   getCoursesApiV1CoursesGetQueryKey,
   getCourseByIdApiV1CoursesCourseIdGetOptions,
   getCourseByIdApiV1CoursesCourseIdGetQueryKey,
@@ -12,6 +14,17 @@ import {
   createMemberApiV1CoursesCourseIdMembersPostMutation,
   submitCourseForReviewApiV1CoursesCourseIdSubmitPostMutation,
 } from "@/client/@tanstack/react-query.gen"
+
+export const useCreatedCoursesPage = (pageSize = 10) => {
+  return useInfiniteQuery({
+    ...getCoursesApiV1CoursesGetInfiniteOptions({
+      query: { filter: "created", limit: pageSize },
+    }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === pageSize ? allPages.length * pageSize : undefined,
+  })
+}
 
 export const useCourses = (courseId?: string) => {
   const queryClient = useQueryClient()
@@ -78,6 +91,9 @@ export const useCourses = (courseId?: string) => {
       queryClient.invalidateQueries({
         queryKey: getCoursesApiV1CoursesGetQueryKey(),
       })
+      queryClient.invalidateQueries({
+        queryKey: getCoursesApiV1CoursesGetInfiniteQueryKey(),
+      })
     },
     onError: (err) => {
       showErrorToast(getErrorMessage(err) || "Ошибка при создании курса")
@@ -115,6 +131,9 @@ export const useCourses = (courseId?: string) => {
       showSuccessToast("Курс успешно удален")
       queryClient.invalidateQueries({
         queryKey: getCoursesApiV1CoursesGetQueryKey(),
+      })
+      queryClient.invalidateQueries({
+        queryKey: getCoursesApiV1CoursesGetInfiniteQueryKey(),
       })
     },
     onError: (err) => {

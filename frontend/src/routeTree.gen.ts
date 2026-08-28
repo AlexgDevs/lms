@@ -22,6 +22,8 @@ import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutAdminModerationRouteImport } from './routes/_layout/admin.moderation'
 import { Route as LayoutCoursesCourseIdRouteImport } from './routes/_layout/courses.$courseId'
 import { Route as LayoutLearnCourseIdRouteImport } from './routes/_layout/learn.$courseId'
+import { Route as LayoutProfileIndexRouteImport } from './routes/_layout/profile/index'
+import { Route as LayoutProfilePaymentsRouteImport } from './routes/_layout/profile/payments'
 import { Route as LayoutTeachingIndexRouteImport } from './routes/_layout/teaching.index'
 import { Route as LayoutTeachingCoursesRouteImport } from './routes/_layout/teaching.courses'
 import { Route as LayoutLearnCourseIdIndexRouteImport } from './routes/_layout/learn.$courseId.index'
@@ -94,6 +96,16 @@ const LayoutLearnCourseIdRoute = LayoutLearnCourseIdRouteImport.update({
   path: '/learn/$courseId',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutProfileIndexRoute = LayoutProfileIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutProfileRoute,
+} as any)
+const LayoutProfilePaymentsRoute = LayoutProfilePaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => LayoutProfileRoute,
+} as any)
 const LayoutTeachingIndexRoute = LayoutTeachingIndexRouteImport.update({
   id: '/teaching/',
   path: '/teaching/',
@@ -143,12 +155,14 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/catalog': typeof LayoutCatalogRoute
-  '/profile': typeof LayoutProfileRoute
+  '/profile': typeof LayoutProfileRouteWithChildren
   '/settings': typeof LayoutSettingsRoute
   '/admin/moderation': typeof LayoutAdminModerationRoute
   '/courses/$courseId': typeof LayoutCoursesCourseIdRoute
   '/learn/$courseId': typeof LayoutLearnCourseIdRouteWithChildren
+  '/profile/payments': typeof LayoutProfilePaymentsRoute
   '/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
+  '/profile/': typeof LayoutProfileIndexRoute
   '/teaching/': typeof LayoutTeachingIndexRoute
   '/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
   '/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdRouteWithChildren
@@ -163,12 +177,13 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/catalog': typeof LayoutCatalogRoute
-  '/profile': typeof LayoutProfileRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/admin/moderation': typeof LayoutAdminModerationRoute
   '/courses/$courseId': typeof LayoutCoursesCourseIdRoute
+  '/profile/payments': typeof LayoutProfilePaymentsRoute
   '/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
+  '/profile': typeof LayoutProfileIndexRoute
   '/teaching': typeof LayoutTeachingIndexRoute
   '/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
   '/learn/$courseId': typeof LayoutLearnCourseIdIndexRoute
@@ -184,13 +199,15 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_layout/catalog': typeof LayoutCatalogRoute
-  '/_layout/profile': typeof LayoutProfileRoute
+  '/_layout/profile': typeof LayoutProfileRouteWithChildren
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/admin/moderation': typeof LayoutAdminModerationRoute
   '/_layout/courses/$courseId': typeof LayoutCoursesCourseIdRoute
   '/_layout/learn/$courseId': typeof LayoutLearnCourseIdRouteWithChildren
+  '/_layout/profile/payments': typeof LayoutProfilePaymentsRoute
   '/_layout/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
+  '/_layout/profile/': typeof LayoutProfileIndexRoute
   '/_layout/teaching/': typeof LayoutTeachingIndexRoute
   '/_layout/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
   '/_layout/teaching/courses/$courseId': typeof LayoutTeachingCoursesCourseIdRouteWithChildren
@@ -213,7 +230,9 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/courses/$courseId'
     | '/learn/$courseId'
+    | '/profile/payments'
     | '/teaching/courses'
+    | '/profile/'
     | '/teaching/'
     | '/learn/$courseId/$lessonId'
     | '/teaching/courses/$courseId'
@@ -228,12 +247,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/catalog'
-    | '/profile'
     | '/settings'
     | '/'
     | '/admin/moderation'
     | '/courses/$courseId'
+    | '/profile/payments'
     | '/teaching/courses'
+    | '/profile'
     | '/teaching'
     | '/learn/$courseId/$lessonId'
     | '/learn/$courseId'
@@ -254,7 +274,9 @@ export interface FileRouteTypes {
     | '/_layout/admin/moderation'
     | '/_layout/courses/$courseId'
     | '/_layout/learn/$courseId'
+    | '/_layout/profile/payments'
     | '/_layout/teaching/courses'
+    | '/_layout/profile/'
     | '/_layout/teaching/'
     | '/_layout/learn/$courseId/$lessonId'
     | '/_layout/teaching/courses/$courseId'
@@ -365,6 +387,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutLearnCourseIdRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/profile/': {
+      id: '/_layout/profile/'
+      path: '/'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof LayoutProfileIndexRouteImport
+      parentRoute: typeof LayoutProfileRoute
+    }
+    '/_layout/profile/payments': {
+      id: '/_layout/profile/payments'
+      path: '/payments'
+      fullPath: '/profile/payments'
+      preLoaderRoute: typeof LayoutProfilePaymentsRouteImport
+      parentRoute: typeof LayoutProfileRoute
+    }
     '/_layout/teaching/': {
       id: '/_layout/teaching/'
       path: '/teaching'
@@ -417,6 +453,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface LayoutProfileRouteChildren {
+  LayoutProfilePaymentsRoute: typeof LayoutProfilePaymentsRoute
+  LayoutProfileIndexRoute: typeof LayoutProfileIndexRoute
+}
+
+const LayoutProfileRouteChildren: LayoutProfileRouteChildren = {
+  LayoutProfilePaymentsRoute: LayoutProfilePaymentsRoute,
+  LayoutProfileIndexRoute: LayoutProfileIndexRoute,
+}
+
+const LayoutProfileRouteWithChildren = LayoutProfileRoute._addFileChildren(
+  LayoutProfileRouteChildren,
+)
+
 interface LayoutLearnCourseIdRouteChildren {
   LayoutLearnCourseIdLessonIdRoute: typeof LayoutLearnCourseIdLessonIdRoute
   LayoutLearnCourseIdIndexRoute: typeof LayoutLearnCourseIdIndexRoute
@@ -464,7 +514,7 @@ const LayoutTeachingCoursesRouteWithChildren =
 
 interface LayoutRouteChildren {
   LayoutCatalogRoute: typeof LayoutCatalogRoute
-  LayoutProfileRoute: typeof LayoutProfileRoute
+  LayoutProfileRoute: typeof LayoutProfileRouteWithChildren
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAdminModerationRoute: typeof LayoutAdminModerationRoute
@@ -476,7 +526,7 @@ interface LayoutRouteChildren {
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCatalogRoute: LayoutCatalogRoute,
-  LayoutProfileRoute: LayoutProfileRoute,
+  LayoutProfileRoute: LayoutProfileRouteWithChildren,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAdminModerationRoute: LayoutAdminModerationRoute,

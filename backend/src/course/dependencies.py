@@ -15,6 +15,8 @@ from src.media.dependencies import (
     MediaRepositoryDep,
     MediaServiceDep,
 )
+from src.user.dependencies import UserRepositoryDep
+from src.user.repository import UserRepository
 
 
 def get_course_repository(session: SessionDep) -> CourseRepository:
@@ -40,6 +42,7 @@ async def get_course_uow(
     media_attachment_repository: MediaAttachmentRepositoryDep,
     media_repository: MediaRepositoryDep,
     category_repository: CategoryRepositoryDep,
+    user_repository: UserRepositoryDep,
 ) -> AsyncGenerator[CourseUnitOfWork]:
     async with CourseUnitOfWork(
         session,
@@ -48,6 +51,7 @@ async def get_course_uow(
         media_attachment_repository,
         media_repository,
         category_repository,
+        user_repository,
     ) as uow:
         yield uow
 

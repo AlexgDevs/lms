@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.core.repositories.base_repository import BaseRepository
+from src.course.models import Course
 from src.payment.enums import PaymentStatus
 from src.payment.mapper import PaymentMapper, PayoutAccountMapper
 from src.payment.models import Payment, PayoutAccount
@@ -40,12 +41,24 @@ class PaymentRepository(BaseRepository[Payment, PaymentSchema]):
 
     async def list_user_payments(self, user_id: UUID) -> list[PaymentSchema]:
         query = (
-            select(self.model)
+            select(self.model, Course.title, Course.cover_url)
+            .outerjoin(Course, Course.id == self.model.course_id)
             .where(self.model.user_id == user_id)
             .order_by(self.model.created_at.desc())
         )
         result = await self.session.execute(query)
-        return [self.mapper.to_schema(model) for model in result.scalars().all()]
+        payments: list[PaymentSchema] = []
+        for model, title, cover in result.all():
+            schema = self.mapper.to_schema(model)
+            payments.append(
+                schema.model_copy(
+                    update={
+                        "course_title": title or "",
+                        "course_cover_url": cover,
+                    }
+                )
+            )
+        return payments
 
 
 class PayoutAccountRepository(BaseRepository[PayoutAccount, PayoutAccountSchema]):

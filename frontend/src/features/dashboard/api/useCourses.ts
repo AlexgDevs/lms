@@ -17,12 +17,15 @@ export const useEnrolledCourses = (enabled = true) => {
   })
 }
 
-export const useCreatedCourses = (limit = 12, enabled = true) => {
-  return useQuery({
-    ...getCoursesApiV1CoursesGetOptions({
-      query: { filter: "created", limit, offset: 0 },
+export const useCreatedCourses = (pageSize = 12, enabled = true) => {
+  return useInfiniteQuery({
+    ...getCoursesApiV1CoursesGetInfiniteOptions({
+      query: { filter: "created", limit: pageSize },
     }),
     enabled,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === pageSize ? allPages.length * pageSize : undefined,
   })
 }
 

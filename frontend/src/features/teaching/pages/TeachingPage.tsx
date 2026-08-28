@@ -6,32 +6,38 @@ import {
   Star, 
   Edit3, 
   BarChart2, 
-  Sparkles,
   Layers,
   ChevronRight,
+  ChevronDown,
   Sparkle,
   Loader2,
   BookOpen
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "@tanstack/react-router"
-import { useCourses } from "@/features/teaching/api/useCourses"
+import { useCreatedCoursesPage } from "@/features/teaching/api/useCourses"
 import { CreateCourseForm } from "@/features/teaching/components/CreateCourseForm"
+import { CourseGenerateCard } from "@/features/teaching/components/CourseGenerateCard"
+import { resolveMediaUrl } from "@/lib/media"
 import { ROUTES } from "@/routes"
 import type { CourseSchema } from "@/client"
 
 export function TeachingPage() {
   const navigate = useNavigate()
   
-  // 1. Используем созданные курсы (фильтр "created") из нашего хука
-  const { createdCourses, isLoadingCreatedCourses } = useCourses()
+  // 1. Используем созданные курсы (бесконечная пагинация, фильтр "created")
+  const {
+    data: createdPages,
+    isLoading: isLoadingCreatedCourses,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useCreatedCoursesPage()
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
 
-  // 2. Достаем список курсов (normalized: ответ может быть массивом или объектом пагинации)
-  const coursesList: CourseSchema[] = Array.isArray(createdCourses)
-    ? (createdCourses as CourseSchema[])
-    : []
+  // 2. Плоский список из всех страниц
+  const coursesList: CourseSchema[] = (createdPages?.pages ?? []).flat() as CourseSchema[]
 
   // Выбираем фокусный курс (выбранный вручную или первый в списке)
   const mainCourse = coursesList.find((c) => String(c.id) === String(activeCourseId)) || coursesList[0]
@@ -239,8 +245,16 @@ export function TeachingPage() {
                       }`}
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold text-xs font-mono">
-                          #{String(course.id).slice(0, 4)}
+                        <div className="w-10 h-10 rounded-md overflow-hidden bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          {course.cover_url ? (
+                            <img
+                              src={resolveMediaUrl(course.cover_url)}
+                              alt={course.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <BookOpen className="w-4 h-4" />
+                          )}
                         </div>
                         <div className="min-w-0">
                           <h4 className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
@@ -268,6 +282,27 @@ export function TeachingPage() {
                   )
                 })}
               </div>
+
+              {hasNextPage && (
+                <Button
+                  variant="ghost"
+                  className="w-full text-xs text-muted-foreground"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                      Загрузка...
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-3.5 h-3.5 mr-1" />
+                      Показать ещё
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
 
             {/* AI Copilot */}
@@ -277,30 +312,7 @@ export function TeachingPage() {
                 <h3 className="font-bold text-base text-foreground">AI Copilot для автора</h3>
               </div>
 
-              <div className="p-5 rounded-xl bg-card space-y-4 shadow-[var(--shadow-card)]">
-                <div className="space-y-1">
-                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
-                    Сгенерировать программу
-                  </h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Введите тему курса, и ИИ создаст структуру разделов, уроков и тестов за несколько секунд.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    placeholder="Например: Продвинутый Kubernetes..."
-                    className="w-full bg-muted/40 rounded-md px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors"
-                  />
-                  <Button
-                    className="w-full"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Создать структуру</span>
-                  </Button>
-                </div>
-              </div>
+              <CourseGenerateCard />
 
               <div className="p-4 rounded-xl bg-muted/20 text-xs text-muted-foreground space-y-2">
                 <p className="font-semibold text-foreground">💡 Совет для конверсии</p>

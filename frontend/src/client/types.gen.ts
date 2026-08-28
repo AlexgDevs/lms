@@ -5,6 +5,24 @@ export type ClientOptions = {
 };
 
 /**
+ * AiGenerationQuotaSchema
+ */
+export type AiGenerationQuotaSchema = {
+    /**
+     * Used
+     */
+    used: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Remaining
+     */
+    remaining: number;
+};
+
+/**
  * AssistantAction
  */
 export const AssistantAction = {
@@ -1457,6 +1475,20 @@ export type PaymentConfigSchema = {
 };
 
 /**
+ * PaymentKind
+ */
+export const PaymentKind = {
+    COURSE: 'course',
+    AI_ASSISTANT_SUBSCRIPTION: 'ai_assistant_subscription',
+    COURSE_GENERATION: 'course_generation'
+} as const;
+
+/**
+ * PaymentKind
+ */
+export type PaymentKind = typeof PaymentKind[keyof typeof PaymentKind];
+
+/**
  * PaymentProvider
  */
 export const PaymentProvider = { YOOKASSA: 'yookassa' } as const;
@@ -1481,7 +1513,8 @@ export type PaymentSchema = {
     /**
      * Course Id
      */
-    course_id: string;
+    course_id: string | null;
+    kind?: PaymentKind;
     /**
      * Amount
      */
@@ -1508,6 +1541,14 @@ export type PaymentSchema = {
      * Payout Status
      */
     payout_status?: string | null;
+    /**
+     * Course Title
+     */
+    course_title?: string;
+    /**
+     * Course Cover Url
+     */
+    course_cover_url?: string | null;
     /**
      * Created At
      */
@@ -3920,6 +3961,22 @@ export type UpdateCurrentUserApiV1UsersMePatchResponses = {
 };
 
 export type UpdateCurrentUserApiV1UsersMePatchResponse = UpdateCurrentUserApiV1UsersMePatchResponses[keyof UpdateCurrentUserApiV1UsersMePatchResponses];
+
+export type GetAiGenerationQuotaApiV1UsersMeAiGenerationsGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/ai-generations';
+};
+
+export type GetAiGenerationQuotaApiV1UsersMeAiGenerationsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AiGenerationQuotaSchema;
+};
+
+export type GetAiGenerationQuotaApiV1UsersMeAiGenerationsGetResponse = GetAiGenerationQuotaApiV1UsersMeAiGenerationsGetResponses[keyof GetAiGenerationQuotaApiV1UsersMeAiGenerationsGetResponses];
 
 export type GetUserByIdApiV1UsersUserIdGetData = {
     body?: never;

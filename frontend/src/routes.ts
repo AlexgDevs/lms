@@ -5,6 +5,7 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
     PROFILE: "/profile",
+    PAYMENTS: "/profile/payments",
     SETTINGS: "/settings",
     TEACHING: "/teaching",
     TEACHING_COURSE: "/teaching/courses",

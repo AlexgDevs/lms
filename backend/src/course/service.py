@@ -34,6 +34,7 @@ from src.course.exceptions import (
     CoursePaymentRequiredError,
     CourseStatusNotAllowedError,
     CourseGenerateError,
+    CourseGenerateLimitError,
 )
 from src.course.schemas import (
     CourseCreateRequestSchema,
@@ -245,6 +246,11 @@ class CourseService(BaseService):
         module_count = generate_schema.modules_count
         lessons_per_module = generate_schema.lessons_per_module
         blocks_per_lesson = generate_schema.blocks_per_lesson
+
+        if not await self.uow.users.consume_ai_course_generation(
+            owner_id, settings.course_generate.COURSE_GENERATE_FREE_LIMIT
+        ):
+            raise CourseGenerateLimitError
 
         # Create a new draft course
         course_create_data = CourseCreateSchema(

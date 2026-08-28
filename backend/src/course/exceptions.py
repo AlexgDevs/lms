@@ -52,6 +52,11 @@ class CourseGenerateError(CourseError):
     status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
+class CourseGenerateLimitError(CourseError):
+    detail = "AI course generation limit reached. Upgrade to generate more courses."
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+
+
 class CoursePaymentRequiredError(CourseError):
     detail = "This course requires payment before enrollment"
     status_code = status.HTTP_402_PAYMENT_REQUIRED

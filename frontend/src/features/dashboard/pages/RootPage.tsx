@@ -31,7 +31,7 @@ export function RootPage() {
   const recommended = useRecommendedCourses(10);
 
   const enrolledCourses = (enrolled.data ?? []) as CourseCardData[];
-  const createdCourses = (created.data ?? []) as CourseCardData[];
+  const createdCourses = ((created.data?.pages ?? []).flat() ?? []) as CourseCardData[];
   const recommendedCourses = (recommended.data ?? []) as CourseCardData[];
 
   const isLoading =
@@ -124,6 +124,9 @@ export function RootPage() {
               rowActionLabel="Редактировать"
               rowActionIcon={Edit3}
               showProgress={false}
+              onLoadMore={() => created.fetchNextPage()}
+              hasMore={created.hasNextPage}
+              isLoadingMore={created.isFetchingNextPage}
             />
           )}
           {sections.map((section) => (

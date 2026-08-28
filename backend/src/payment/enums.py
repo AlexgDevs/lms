@@ -7,6 +7,12 @@ class PaymentStatus(StrEnum):
     FAILED = "failed"
 
 
+class PaymentKind(StrEnum):
+    COURSE = "course"
+    AI_ASSISTANT_SUBSCRIPTION = "ai_assistant_subscription"
+    COURSE_GENERATION = "course_generation"
+
+
 class PaymentProvider(StrEnum):
     YOOKASSA = "yookassa"
 

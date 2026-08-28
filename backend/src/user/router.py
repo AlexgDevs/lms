@@ -2,8 +2,14 @@ from uuid import UUID
 
 from fastapi import APIRouter
 
+from src.core.config import settings
 from src.user.dependencies import CurrentUserDep, UserIdDep, UserServiceDep
-from src.user.schemas import UserMeSchema, UserPublicSchema, UserUpdateRequestSchema
+from src.user.schemas import (
+    AiGenerationQuotaSchema,
+    UserMeSchema,
+    UserPublicSchema,
+    UserUpdateRequestSchema,
+)
 from src.auth.schemas import ChangePasswordRequestSchema
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -16,6 +22,20 @@ router = APIRouter(prefix="/users", tags=["Users"])
 )
 async def get_current_user(user: CurrentUserDep) -> UserMeSchema:
     return UserMeSchema.model_validate(user)
+
+
+@router.get(
+    "/me/ai-generations",
+    summary="Get AI course generation quota",
+    response_model=AiGenerationQuotaSchema,
+)
+async def get_ai_generation_quota(user: CurrentUserDep) -> AiGenerationQuotaSchema:
+    limit = settings.course_generate.COURSE_GENERATE_FREE_LIMIT
+    return AiGenerationQuotaSchema(
+        used=user.ai_course_generations,
+        limit=limit,
+        remaining=max(0, limit - user.ai_course_generations),
+    )
 
 
 @router.patch(

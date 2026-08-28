@@ -1,17 +1,18 @@
-import { CreditCard, Loader2, CheckCircle2, Clock } from "lucide-react"
+import { ArrowRight, CreditCard, Loader2 } from "lucide-react"
+import { useNavigate } from "@tanstack/react-router"
 import { Card, CardContent } from "@/components/ui/card"
 import { useMyPayments } from "@/features/payment/api/usePayments"
-import type { PaymentSchema } from "@/client"
+import { PaymentListItem } from "@/features/payment/components/PaymentListItem"
+import { ROUTES } from "@/routes"
 
-const statusLabel: Record<string, string> = {
-  pending: "Ожидает оплаты",
-  succeeded: "Оплачено",
-  failed: "Не оплачено",
-}
+const PREVIEW_LIMIT = 5
 
 export function PurchasesSection() {
+  const navigate = useNavigate()
   const { data, isLoading } = useMyPayments()
   const payments = data ?? []
+  const preview = payments.slice(0, PREVIEW_LIMIT)
+  const hasMore = payments.length > PREVIEW_LIMIT
 
   return (
     <Card className="rounded-xl shadow-[var(--shadow-card)]">
@@ -31,39 +32,19 @@ export function PurchasesSection() {
           </p>
         ) : (
           <div className="space-y-2.5">
-            {payments.map((payment: PaymentSchema) => (
-              <div
-                key={payment.id}
-                className="flex items-center justify-between gap-3 rounded-lg bg-muted/30 px-3 py-2.5"
-              >
-                <div className="min-w-0 space-y-1">
-                  <p className="text-sm font-medium text-foreground">
-                    {payment.amount} ₽
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {new Date(payment.created_at).toLocaleDateString("ru-RU")}
-                  </p>
-                </div>
-                <span
-                  className={
-                    payment.status === "succeeded"
-                      ? "inline-flex items-center gap-1 text-xs font-medium text-success"
-                      : payment.status === "pending"
-                        ? "inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"
-                        : "inline-flex items-center gap-1 text-xs font-medium text-destructive"
-                  }
-                >
-                  {payment.status === "succeeded" ? (
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                  ) : payment.status === "pending" ? (
-                    <Clock className="h-3.5 w-3.5" />
-                  ) : (
-                    <CreditCard className="h-3.5 w-3.5" />
-                  )}
-                  {statusLabel[payment.status] ?? payment.status}
-                </span>
-              </div>
+            {preview.map((payment) => (
+              <PaymentListItem key={payment.id} payment={payment} />
             ))}
+
+            {hasMore && (
+              <button
+                type="button"
+                onClick={() => navigate({ to: ROUTES.PAYMENTS })}
+                className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer pt-1"
+              >
+                Все покупки <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </button>
+            )}
           </div>
         )}
       </CardContent>
