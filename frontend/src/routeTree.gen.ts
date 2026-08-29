@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MockPaymentRouteImport } from './routes/mock-payment'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutCatalogRouteImport } from './routes/_layout/catalog'
 import { Route as LayoutProfileRouteImport } from './routes/_layout/profile'
@@ -59,6 +60,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutIndexRoute = LayoutIndexRouteImport.update({
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/mock-payment': typeof MockPaymentRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/catalog': typeof LayoutCatalogRoute
   '/profile': typeof LayoutProfileRouteWithChildren
   '/settings': typeof LayoutSettingsRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/mock-payment': typeof MockPaymentRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/catalog': typeof LayoutCatalogRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/mock-payment': typeof MockPaymentRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/_layout/catalog': typeof LayoutCatalogRoute
   '/_layout/profile': typeof LayoutProfileRouteWithChildren
   '/_layout/settings': typeof LayoutSettingsRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/mock-payment'
     | '/reset-password'
     | '/signup'
+    | '/verify-email'
     | '/catalog'
     | '/profile'
     | '/settings'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/mock-payment'
     | '/reset-password'
     | '/signup'
+    | '/verify-email'
     | '/catalog'
     | '/settings'
     | '/'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/mock-payment'
     | '/reset-password'
     | '/signup'
+    | '/verify-email'
     | '/_layout/catalog'
     | '/_layout/profile'
     | '/_layout/settings'
@@ -292,6 +304,7 @@ export interface RootRouteChildren {
   MockPaymentRoute: typeof MockPaymentRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/': {
@@ -546,6 +566,7 @@ const rootRouteChildren: RootRouteChildren = {
   MockPaymentRoute: MockPaymentRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

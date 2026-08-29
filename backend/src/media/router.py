@@ -5,7 +5,7 @@ from fastapi import APIRouter, File, Form, UploadFile, status
 
 from src.media.dependencies import MediaServiceDep
 from src.media.schemas import MediaResponseSchema, MediaUrlResponseSchema
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import AuthenticatedUserIdDep
 
 router = APIRouter(prefix="/media", tags=["Media"])
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/media", tags=["Media"])
 )
 async def upload_media(
     service: MediaServiceDep,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     file: Annotated[UploadFile, File()],
     is_public: Annotated[bool, Form()] = True,
 ) -> MediaResponseSchema:
@@ -33,7 +33,7 @@ async def upload_media(
 @router.get("", response_model=list[MediaResponseSchema])
 async def get_my_media(
     service: MediaServiceDep,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     limit: int = 100,
     offset: int = 0,
 ) -> list[MediaResponseSchema]:
@@ -45,7 +45,7 @@ async def get_my_media(
 async def get_media(
     media_id: UUID,
     service: MediaServiceDep,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
 ) -> MediaResponseSchema:
     media = await service.get_media(media_id=media_id, user_id=user_id)
     return await service.to_response(media)
@@ -55,7 +55,7 @@ async def get_media(
 async def get_media_url(
     media_id: UUID,
     service: MediaServiceDep,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     expires_in: int = 900,
 ) -> MediaUrlResponseSchema:
     return await service.get_media_url(
@@ -67,6 +67,6 @@ async def get_media_url(
 async def delete_media(
     media_id: UUID,
     service: MediaServiceDep,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
 ) -> None:
     await service.delete_media(media_id=media_id, user_id=user_id)

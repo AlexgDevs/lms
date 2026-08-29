@@ -7,7 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.security import hash_password, verify_password
 from src.core.services import BaseService
 from src.user.exceptions import UserAlreadyExistsError, UserNotFoundError
-from src.user.schemas import UserSchema, UserUpdateRequestSchema
+from src.user.schemas import (
+    UserPasswordUpdateSchema,
+    UserSchema,
+    UserUpdateRequestSchema,
+)
 from src.user.repository import UserRepository
 
 
@@ -61,12 +65,7 @@ class UserService(BaseService):
                 detail="Incorrect current password",
             )
 
-        from pydantic import BaseModel
-
-        class _PwdUpdate(BaseModel):
-            password_hash: str
-
         await self.user_repository.update(
-            user_id, _PwdUpdate(password_hash=hash_password(new_password))
+            user_id, UserPasswordUpdateSchema(password_hash=hash_password(new_password))
         )
         await self.session.commit()

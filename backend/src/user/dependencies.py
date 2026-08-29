@@ -9,7 +9,7 @@ from src.core.dependencies import (
     SessionDep,
 )
 from src.auth.security import decode_access_token
-from src.user.exceptions import UserNotStaffError
+from src.user.exceptions import UserNotStaffError, UserNotVerifiedError
 from src.user.repository import UserRepository
 from src.user.schemas import UserSchema
 from src.user.service import UserService
@@ -25,10 +25,16 @@ def get_user_service(
     return UserService(session, user_repository)
 
 
-def get_current_user_id(access_token: AccessTokenDep) -> UUID:
+async def get_current_user_id(
+    access_token: AccessTokenDep,
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+) -> UUID:
     user_id = decode_access_token(access_token).get("sub")
     if not user_id:
         raise InvalidAccessTokenError
+    user = await user_repository.get_one(id=UUID(user_id))
+    if not user or not user.is_verified:
+        raise UserNotVerifiedError
     return UUID(user_id)
 
 
@@ -52,7 +58,10 @@ async def get_current_user(
     user_id: UserIdDep,
     user_service: UserServiceDep,
 ) -> UserSchema:
-    return await user_service.get_user(user_id)
+    user = await user_service.get_user(user_id)
+    if not user.is_verified:
+        raise UserNotVerifiedError
+    return user
 
 
 async def get_current_staff(
@@ -60,6 +69,8 @@ async def get_current_staff(
     user_service: UserServiceDep,
 ) -> UserSchema:
     user = await user_service.get_user(user_id)
+    if not user.is_verified:
+        raise UserNotVerifiedError
     if not user.is_staff:
         raise UserNotStaffError
     return user
@@ -71,3 +82,21 @@ UserIdDep = Annotated[UUID, Depends(get_current_user_id)]
 OptionalUserIdDep = Annotated[UUID | None, Depends(get_optional_current_user_id)]
 CurrentUserDep = Annotated[UserSchema, Depends(get_current_user)]
 StaffDep = Annotated[UserSchema, Depends(get_current_staff)]
+
+
+def get_authenticated_user_id(access_token: AccessTokenDep) -> UUID:
+    user_id = decode_access_token(access_token).get("sub")
+    if not user_id:
+        raise InvalidAccessTokenError
+    return UUID(user_id)
+
+
+async def get_authenticated_user(
+    user_id: Annotated[UUID, Depends(get_authenticated_user_id)],
+    user_service: UserServiceDep,
+) -> UserSchema:
+    return await user_service.get_user(user_id)
+
+
+AuthenticatedUserIdDep = Annotated[UUID, Depends(get_authenticated_user_id)]
+AuthenticatedCurrentUserDep = Annotated[UserSchema, Depends(get_authenticated_user)]

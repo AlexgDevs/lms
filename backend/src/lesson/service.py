@@ -22,6 +22,7 @@ from src.lesson.schemas import (
     LessonUpdateSchema,
     LessonReorderSchema,
 )
+from src.course.models import CourseMember
 from src.lesson.unit_of_work import LessonUnitOfWork
 from src.core.services import BaseService
 
@@ -122,8 +123,6 @@ class LessonService(BaseService):
         )
         if not lesson:
             raise LessonNotFoundError
-
-        from src.course.models import CourseMember
 
         result = await self.session.execute(
             select(CourseMember.user_id).where(

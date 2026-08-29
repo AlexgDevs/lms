@@ -22,3 +22,8 @@ class UserAlreadyExistsError(ObjectAlreadyExistsError, UserError):
 class UserNotStaffError(UserError):
     detail = "Staff privileges required"
     status_code = status.HTTP_403_FORBIDDEN
+
+
+class UserNotVerifiedError(UserError):
+    detail = "Email not verified"
+    status_code = status.HTTP_403_FORBIDDEN

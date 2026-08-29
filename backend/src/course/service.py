@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any, Literal, Sequence
 from uuid import UUID, uuid4
+
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.ai.gemini import GeminiService
 from src.course.course_member.schemas import (
     CourseMemberCreateSchema,
     CourseMemberSchema,
+    CourseMemberUpdateSchema,
 )
 from src.auth.exceptions import InvalidAccessTokenError
 from src.core.config import settings
@@ -50,13 +51,12 @@ from src.course.schemas import (
 )
 from src.course.unit_of_work import CourseUnitOfWork
 from src.media.service import MediaService
+from src.payment.enums import PaymentStatus
+from src.payment.models import Payment
+from src.user.models import User
 
 if TYPE_CHECKING:
-    from src.block.models import Block
     from src.core.events.protocol import Event
-    from src.lesson.models import Lesson
-    from src.module.models import Module
-    from src.user.models import User
 
 COVER_ROLE = "cover"
 
@@ -74,17 +74,12 @@ class CourseService(BaseService):
         super().__init__(session, event_bus)
 
     async def _resolve_owner_username(self, owner_id: UUID) -> str:
-        from src.user.models import User
-
         user = (
             await self.session.execute(select(User).where(User.id == owner_id))
         ).scalar_one_or_none()
         return user.username if user else ""
 
     async def _is_paid(self, course_id: UUID, user_id: UUID) -> bool:
-        from src.payment.enums import PaymentStatus
-        from src.payment.models import Payment
-
         result = await self.session.execute(
             select(Payment.id)
             .where(
@@ -176,6 +171,7 @@ class CourseService(BaseService):
         return int(result.scalar_one())
 
     async def submit_for_review(self, course_id: UUID, owner_id: UUID) -> CourseSchema:
+        # circular: block/lesson/module __init__ import course.dependencies
         from src.block.models import Block
         from src.lesson.models import Lesson
         from src.module.models import Module
@@ -224,6 +220,7 @@ class CourseService(BaseService):
                 )
             )
 
+        # heavy Celery module — import lazily
         from src.ai.course_review.tasks import review_course_task
 
         review_course_task.delay(str(course_id))
@@ -263,7 +260,7 @@ class CourseService(BaseService):
         course = await self.uow.courses.create(course_create_data)
         await self.uow.commit()
 
-        # Queue Celery task for async generation
+        # Queue Celery task for async generation (heavy module — import lazily)
         from src.ai.generate.tasks import course_generate_task
 
         task = course_generate_task.apply_async(
@@ -346,10 +343,10 @@ class CourseService(BaseService):
     async def get_moderation_queue(
         self, limit: int, offset: int
     ) -> list[CourseModerationQueueSchema]:
+        # circular: block/lesson/module __init__ import course.dependencies
         from src.block.models import Block
         from src.lesson.models import Lesson
         from src.module.models import Module
-        from src.user.models import User
 
         courses = list(
             await self.uow.courses.get_filtered(
@@ -548,8 +545,6 @@ class CourseService(BaseService):
         return new_member
 
     async def unenroll(self, course_id: UUID, user_id: UUID) -> None:
-        from datetime import datetime, timezone
-
         member = await self.uow.members.get_one(
             user_id=user_id, course_id=course_id, left_at=None
         )
@@ -559,8 +554,6 @@ class CourseService(BaseService):
         course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
         if not course:
             raise CourseNotFoundError
-
-        from src.course.course_member.schemas import CourseMemberUpdateSchema
 
         await self.uow.members.update(
             member.id, CourseMemberUpdateSchema(left_at=datetime.now(timezone.utc))

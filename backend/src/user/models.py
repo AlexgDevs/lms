@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
@@ -25,6 +26,12 @@ class User(UUIDBase):
     )
     ai_course_generations: Mapped[int] = mapped_column(
         sa.Integer(), server_default="0", default=0
+    )
+    is_verified: Mapped[bool] = mapped_column(
+        sa.Boolean(), server_default="false", default=False
+    )
+    email_verified_at: Mapped[datetime | None] = mapped_column(
+        sa.DateTime(timezone=True)
     )
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(

@@ -22,6 +22,7 @@ from src.core.events.event import (
 )
 from src.core.realtime.envelope import Envelope, EventType
 from src.core.websocket.manager import ConnectionManager
+from src.notification.repository import NotificationRepository
 from src.notification.schemas import NotificationCreateSchema
 from src.notification.service import NotificationService
 
@@ -189,8 +190,6 @@ class NotificationHandler:
         user_ids = _get_user_ids_for_notification(event)
 
         async with self._session_factory() as session:
-            from src.notification.repository import NotificationRepository
-
             service = NotificationService(
                 session=session,
                 notification_repository=NotificationRepository(session),

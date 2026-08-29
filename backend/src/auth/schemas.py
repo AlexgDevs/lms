@@ -75,12 +75,23 @@ class ForgotPasswordRequestSchema(BaseSchema):
 
 class ForgotPasswordResponseSchema(BaseSchema):
     message: str
-    reset_token: str | None = None
 
 
 class ResetPasswordRequestSchema(BaseSchema):
     token: str
     new_password: str
+
+
+class VerifyEmailRequestSchema(BaseSchema):
+    token: str
+
+
+class ResendVerificationRequestSchema(BaseSchema):
+    email: EmailStr
+
+
+class MessageResponseSchema(BaseSchema):
+    message: str
 
 
 class ChangePasswordRequestSchema(BaseSchema):

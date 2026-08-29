@@ -9,6 +9,7 @@ from src.block.enums import BlockType
 from src.block.exceptions import BlockNotFoundError, BlockTypeNotMediaError
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseNotFoundError
+from src.course.models import CourseMember
 from src.lesson.exceptions import LessonNotFoundError
 from src.core.events.event import BlockDeleted
 from src.core.services.base_service import BaseService
@@ -201,8 +202,6 @@ class BlockService(BaseService):
         )
         if not block:
             raise BlockNotFoundError
-
-        from src.course.models import CourseMember
 
         result = await self.session.execute(
             select(CourseMember.user_id).where(

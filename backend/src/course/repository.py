@@ -69,6 +69,7 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
         return await self._execute_and_map_all(query)
 
     def _rating_subquery(self) -> Any:
+        # circular: review/__init__ imports src.course.repository
         from src.review.enums import ReviewTargetType
         from src.review.models import Review
 

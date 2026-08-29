@@ -27,7 +27,7 @@ import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
 export function ForgotPasswordForm() {
-    const [resetToken, setResetToken] = useState<string | null>(null)
+    const [isSent, setIsSent] = useState(false)
     const [isPending, setIsPending] = useState(false)
 
     const form = useForm<ForgotPasswordFormData>({
@@ -49,9 +49,8 @@ export function ForgotPasswordForm() {
                 }
             )
             if (!res.ok) throw new Error("Request failed")
-            const result = await res.json()
-            setResetToken(result.reset_token)
-            showSuccessToast("Код для сброса пароля отправлен на почту.")
+            setIsSent(true)
+            showSuccessToast("Ссылка для сброса пароля отправлена на почту.")
         } catch (error) {
             showErrorToast(getErrorMessage(error))
         } finally {
@@ -69,17 +68,14 @@ export function ForgotPasswordForm() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {resetToken ? (
-                        <div className="flex flex-col gap-4">
-                            <div className="rounded-md bg-muted p-3 text-sm">
-                                <p className="font-medium mb-1">Ваш код сброса:</p>
-                                <code className="break-all">{resetToken}</code>
-                            </div>
-                            <Button asChild variant="outline">
-                                <Link to={ROUTES.RESET_PASSWORD} search={{ token: resetToken }}>
-                                    Установить новый пароль
-                                </Link>
-                            </Button>
+                    {isSent ? (
+                        <div className="flex flex-col gap-3 rounded-md bg-muted/40 p-4 text-sm">
+                            <p className="text-foreground font-medium">
+                                Письмо отправлено
+                            </p>
+                            <p className="text-muted-foreground">
+                                Перейдите по ссылке из письма, чтобы задать новый пароль.
+                            </p>
                         </div>
                     ) : (
                         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -89,7 +85,7 @@ export function ForgotPasswordForm() {
                                     control={form.control}
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                                            <FieldLabel htmlFor={field.name}>Электронная почта</FieldLabel>
                                             <Input
                                                 {...field}
                                                 id={field.name}

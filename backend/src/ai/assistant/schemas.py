@@ -1,31 +1,9 @@
-from enum import StrEnum
 from uuid import UUID
 
 from pydantic import Field
 
+from src.ai.assistant.enums import AssistantAction, AssistantAngle, AssistantFocus
 from src.core.schemas import BaseSchema
-
-
-class AssistantFocus(StrEnum):
-    CONFUSED = "confused"
-    THEORY = "theory"
-    CODE_ERROR = "code_error"
-    STEP_BY_STEP = "steps"
-
-
-class AssistantAngle(StrEnum):
-    SIMPLER = "simpler"
-    MORE_EXAMPLES = "more_examples"
-    DIFFERENT_EXAMPLE = "different_example"
-    ANOTHER_APPROACH = "another_approach"
-
-
-class AssistantAction(StrEnum):
-    SIMPLER_EXAMPLE = "simpler_example"
-    DIAGNOSE_CODE = "diagnose_code"
-    WHY_WRONG = "why_wrong"
-    FIRST_STEP = "first_step"
-    EXPLAIN_AGAIN = "explain_again"
 
 
 class AssistantHintRequestSchema(BaseSchema):

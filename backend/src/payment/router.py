@@ -13,7 +13,7 @@ from src.payment.schemas import (
     YooKassaWebhookSchema,
 )
 from src.payment.security import is_trusted_yookassa_ip
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import AuthenticatedUserIdDep, UserIdDep
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
@@ -56,7 +56,7 @@ async def yookassa_webhook(
 
 @router.get("/me", response_model=list[PaymentSchema])
 async def list_my_payments(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     payment_service: PaymentServiceDep,
 ) -> list[PaymentSchema]:
     """Return the current user's purchase history."""
@@ -66,7 +66,7 @@ async def list_my_payments(
 @router.get("/courses/{course_id}/payment", response_model=PaymentStatusResponseSchema)
 async def get_course_payment_status(
     course_id: UUID,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     payment_service: PaymentServiceDep,
 ) -> PaymentStatusResponseSchema:
     """Get whether the current user has already paid for a course."""
@@ -84,7 +84,7 @@ async def get_payment_config(
 
 @router.get("/payout-account", response_model=PayoutAccountSchema | None)
 async def get_payout_account(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     payment_service: PaymentServiceDep,
 ) -> PayoutAccountSchema | None:
     """Return the current user's payout details (if set)."""
@@ -94,7 +94,7 @@ async def get_payout_account(
 @router.put("/payout-account", response_model=PayoutAccountSchema)
 async def upsert_payout_account(
     payload: PayoutAccountUpsertSchema,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     payment_service: PaymentServiceDep,
 ) -> PayoutAccountSchema:
     """Create or update the current user's payout details."""
@@ -103,7 +103,7 @@ async def upsert_payout_account(
 
 @router.delete("/payout-account", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_payout_account(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     payment_service: PaymentServiceDep,
 ) -> None:
     """Delete the current user's payout details."""

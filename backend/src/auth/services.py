@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,22 +20,29 @@ from src.auth.security import (
     create_access_token,
     create_refresh_token,
     create_reset_token,
+    create_verification_token,
     decode_reset_token,
+    decode_verification_token,
     hash_password,
     hash_refresh_token,
     verify_password,
 )
 from src.core.events.event import UserLoggedIn, UserLoggedOut
-from src.user.schemas import UserSchema
+from src.core.mailer.mailer import (
+    send_password_reset_email,
+    send_verification_email,
+)
+from src.user.schemas import (
+    UserPasswordUpdateSchema,
+    UserSchema,
+    UserVerifyUpdateSchema,
+)
 from src.auth.unit_of_work import AuthUnitOfWork
 from src.core.services.base_service import BaseService
 from src.core.config import settings
 
-if __name__ != "__main__":
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from src.core.events.protocol import Event
+if TYPE_CHECKING:
+    from src.core.events.protocol import Event
 
 
 class AuthService(BaseService):
@@ -57,9 +65,35 @@ class AuthService(BaseService):
 
             new_user = await self.uow.users.create(user_data)
             await self.session.commit()
+            token = create_verification_token(new_user.id)
+            await send_verification_email(new_user.email, token)
             return new_user
         except IntegrityError:
             raise UserAlreadyExistsError
+
+    async def verify_email(self, token: str) -> UserSchema:
+        user_id = decode_verification_token(token)
+        user = await self.uow.users.get_one(id=user_id)
+        if not user:
+            raise UserNotFoundError
+        if user.is_verified:
+            return user
+
+        updated = await self.uow.users.update(
+            user_id,
+            UserVerifyUpdateSchema(
+                is_verified=True, email_verified_at=datetime.now(timezone.utc)
+            ),
+        )
+        await self.uow.commit()
+        return updated
+
+    async def resend_verification(self, email: str) -> None:
+        user = await self.uow.users.get_one(email=email)
+        if not user or user.is_verified:
+            return
+        token = create_verification_token(user.id)
+        await send_verification_email(user.email, token)
 
     async def login(
         self,
@@ -127,24 +161,21 @@ class AuthService(BaseService):
                 )
             )
 
-    async def forgot_password(self, email: str) -> str | None:
+    async def forgot_password(self, email: str) -> None:
         user = await self.uow.users.get_one(email=email)
         if not user:
-            return None
-        return create_reset_token(user.id)
+            return
+        token = create_reset_token(user.id)
+        await send_password_reset_email(user.email, token)
 
     async def reset_password(self, token: str, new_password: str) -> None:
         user_id = decode_reset_token(token)
         user = await self.uow.users.get_one(id=user_id)
         if not user:
             raise UserNotFoundError
-        from pydantic import BaseModel
-
-        class _PwdUpdate(BaseModel):
-            password_hash: str
 
         await self.uow.users.update(
-            user_id, _PwdUpdate(password_hash=hash_password(new_password))
+            user_id, UserPasswordUpdateSchema(password_hash=hash_password(new_password))
         )
         await self.uow.commit()
 

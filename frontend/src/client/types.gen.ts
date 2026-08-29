@@ -1098,10 +1098,6 @@ export type ForgotPasswordResponseSchema = {
      * Message
      */
     message: string;
-    /**
-     * Reset Token
-     */
-    reset_token?: string | null;
 };
 
 /**
@@ -1315,6 +1311,16 @@ export type MediaUrlResponseSchema = {
      * Url
      */
     url?: string | null;
+};
+
+/**
+ * MessageResponseSchema
+ */
+export type MessageResponseSchema = {
+    /**
+     * Message
+     */
+    message: string;
 };
 
 /**
@@ -1660,6 +1666,16 @@ export type ProfileStatsSchema = {
      * Yearly
      */
     yearly: Array<ContributionDaySchema>;
+};
+
+/**
+ * ResendVerificationRequestSchema
+ */
+export type ResendVerificationRequestSchema = {
+    /**
+     * Email
+     */
+    email: string;
 };
 
 /**
@@ -2010,10 +2026,6 @@ export type UserMeSchema = {
      */
     username: string;
     /**
-     * Email
-     */
-    email: string;
-    /**
      * Avatar Url
      */
     avatar_url: string | null;
@@ -2022,9 +2034,17 @@ export type UserMeSchema = {
      */
     joined_at: string;
     /**
+     * Email
+     */
+    email: string;
+    /**
      * Is Staff
      */
     is_staff?: boolean;
+    /**
+     * Is Verified
+     */
+    is_verified?: boolean;
 };
 
 /**
@@ -2039,10 +2059,6 @@ export type UserPublicSchema = {
      * Username
      */
     username: string;
-    /**
-     * Email
-     */
-    email: string;
     /**
      * Avatar Url
      */
@@ -2115,6 +2131,16 @@ export type ValidationError = {
     ctx?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * VerifyEmailRequestSchema
+ */
+export type VerifyEmailRequestSchema = {
+    /**
+     * Token
+     */
+    token: string;
 };
 
 /**
@@ -2387,6 +2413,56 @@ export type ForgotPasswordApiV1AuthForgotPasswordPostResponses = {
 };
 
 export type ForgotPasswordApiV1AuthForgotPasswordPostResponse = ForgotPasswordApiV1AuthForgotPasswordPostResponses[keyof ForgotPasswordApiV1AuthForgotPasswordPostResponses];
+
+export type VerifyEmailApiV1AuthVerifyEmailPostData = {
+    body: VerifyEmailRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/verify-email';
+};
+
+export type VerifyEmailApiV1AuthVerifyEmailPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type VerifyEmailApiV1AuthVerifyEmailPostError = VerifyEmailApiV1AuthVerifyEmailPostErrors[keyof VerifyEmailApiV1AuthVerifyEmailPostErrors];
+
+export type VerifyEmailApiV1AuthVerifyEmailPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: MessageResponseSchema;
+};
+
+export type VerifyEmailApiV1AuthVerifyEmailPostResponse = VerifyEmailApiV1AuthVerifyEmailPostResponses[keyof VerifyEmailApiV1AuthVerifyEmailPostResponses];
+
+export type ResendVerificationApiV1AuthResendVerificationPostData = {
+    body: ResendVerificationRequestSchema;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/resend-verification';
+};
+
+export type ResendVerificationApiV1AuthResendVerificationPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResendVerificationApiV1AuthResendVerificationPostError = ResendVerificationApiV1AuthResendVerificationPostErrors[keyof ResendVerificationApiV1AuthResendVerificationPostErrors];
+
+export type ResendVerificationApiV1AuthResendVerificationPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: MessageResponseSchema;
+};
+
+export type ResendVerificationApiV1AuthResendVerificationPostResponse = ResendVerificationApiV1AuthResendVerificationPostResponses[keyof ResendVerificationApiV1AuthResendVerificationPostResponses];
 
 export type ResetPasswordApiV1AuthResetPasswordPostData = {
     body: ResetPasswordRequestSchema;

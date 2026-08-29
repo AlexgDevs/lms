@@ -326,6 +326,25 @@ class CourseGenerateSettings(BaseSettings):
     COURSE_GENERATE_MAX_RETRIES: int = 5
 
 
+class MailSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    SMTP_HOST: str = "localhost"
+    SMTP_PORT: int = 1025
+    SMTP_USERNAME: str | None = None
+    SMTP_PASSWORD: str | None = None
+    SMTP_FROM: str = "noreply@lms.local"
+    SMTP_FROM_NAME: str = "LMS"
+    SMTP_USE_TLS: bool = False
+    SMTP_TIMEOUT_SECONDS: float = 10.0
+    # When False, emails are only logged (dev), never sent.
+    MAIL_ENABLED: bool = True
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
     app: AppSettings = Field(default_factory=AppSettings)
@@ -341,6 +360,7 @@ class Settings(BaseSettings):
     )
     codeexec: CodeExecSettings = Field(default_factory=CodeExecSettings)
     payments: PaymentSettings = Field(default_factory=PaymentSettings)
+    mail: MailSettings = Field(default_factory=MailSettings)
 
 
 settings = Settings()

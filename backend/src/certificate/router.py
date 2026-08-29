@@ -1,9 +1,10 @@
 from fastapi import APIRouter
 from fastapi.responses import Response
+from uuid import UUID
 
 from src.certificate.dependencies import CertificateServiceDep
 from src.certificate.schemas import CertificateSchema
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import AuthenticatedUserIdDep
 
 router = APIRouter(prefix="/courses", tags=["Certificates"])
 user_certificates_router = APIRouter(prefix="/users/me", tags=["Certificates"])
@@ -12,7 +13,7 @@ user_certificates_router = APIRouter(prefix="/users/me", tags=["Certificates"])
 @router.get("/{course_id}/certificate")
 async def download_certificate(
     course_id: str,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     certificate_service: CertificateServiceDep,
 ) -> Response:
     """Download the course completion certificate as a PDF file.
@@ -20,8 +21,6 @@ async def download_certificate(
     Returns 400 if the course is not fully completed.
     Generates the certificate on first request (lazy generation).
     """
-    from uuid import UUID
-
     pdf_bytes = await certificate_service.download_pdf(user_id, UUID(course_id))
     return Response(
         content=pdf_bytes,
@@ -34,7 +33,7 @@ async def download_certificate(
 
 @user_certificates_router.get("/certificates", response_model=list[CertificateSchema])
 async def list_my_certificates(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     certificate_service: CertificateServiceDep,
 ) -> list[CertificateSchema]:
     """List all certificates issued to the current user."""

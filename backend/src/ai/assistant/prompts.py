@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-from src.ai.assistant.schemas import AssistantAction, AssistantAngle, AssistantFocus
+from src.ai.assistant.enums import AssistantAction, AssistantAngle, AssistantFocus
 from src.block.enums import BlockType
 from src.block.schemas import BlockSchema
 from src.submissions.schemas import BlockSubmissionSchema

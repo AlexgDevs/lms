@@ -1720,17 +1720,6 @@ export const ForgotPasswordResponseSchemaSchema = {
         message: {
             type: 'string',
             title: 'Message'
-        },
-        reset_token: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Reset Token'
         }
     },
     type: 'object',
@@ -2075,6 +2064,20 @@ export const MediaUrlResponseSchemaSchema = {
     },
     type: 'object',
     title: 'MediaUrlResponseSchema'
+} as const;
+
+export const MessageResponseSchemaSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message'
+        }
+    },
+    type: 'object',
+    required: [
+        'message'
+    ],
+    title: 'MessageResponseSchema'
 } as const;
 
 export const ModuleCreateRequestSchemaSchema = {
@@ -2657,6 +2660,21 @@ export const ProfileStatsSchemaSchema = {
     title: 'ProfileStatsSchema'
 } as const;
 
+export const ResendVerificationRequestSchemaSchema = {
+    properties: {
+        email: {
+            type: 'string',
+            format: 'email',
+            title: 'Email'
+        }
+    },
+    type: 'object',
+    required: [
+        'email'
+    ],
+    title: 'ResendVerificationRequestSchema'
+} as const;
+
 export const ResetPasswordRequestSchemaSchema = {
     properties: {
         token: {
@@ -3206,10 +3224,6 @@ export const UserMeSchemaSchema = {
             type: 'string',
             title: 'Username'
         },
-        email: {
-            type: 'string',
-            title: 'Email'
-        },
         avatar_url: {
             anyOf: [
                 {
@@ -3226,9 +3240,18 @@ export const UserMeSchemaSchema = {
             format: 'date-time',
             title: 'Joined At'
         },
+        email: {
+            type: 'string',
+            title: 'Email'
+        },
         is_staff: {
             type: 'boolean',
             title: 'Is Staff',
+            default: false
+        },
+        is_verified: {
+            type: 'boolean',
+            title: 'Is Verified',
             default: false
         }
     },
@@ -3236,9 +3259,9 @@ export const UserMeSchemaSchema = {
     required: [
         'id',
         'username',
-        'email',
         'avatar_url',
-        'joined_at'
+        'joined_at',
+        'email'
     ],
     title: 'UserMeSchema'
 } as const;
@@ -3254,10 +3277,6 @@ export const UserPublicSchemaSchema = {
             type: 'string',
             title: 'Username'
         },
-        email: {
-            type: 'string',
-            title: 'Email'
-        },
         avatar_url: {
             anyOf: [
                 {
@@ -3279,7 +3298,6 @@ export const UserPublicSchemaSchema = {
     required: [
         'id',
         'username',
-        'email',
         'avatar_url',
         'joined_at'
     ],
@@ -3391,6 +3409,20 @@ export const ValidationErrorSchema = {
         'type'
     ],
     title: 'ValidationError'
+} as const;
+
+export const VerifyEmailRequestSchemaSchema = {
+    properties: {
+        token: {
+            type: 'string',
+            title: 'Token'
+        }
+    },
+    type: 'object',
+    required: [
+        'token'
+    ],
+    title: 'VerifyEmailRequestSchema'
 } as const;
 
 export const YooKassaAmountSchema = {

@@ -104,5 +104,14 @@ client.interceptors.response.use(async (response, request) => {
   }
 
   const body = await response.json().catch(() => null);
+
+  if (
+    response.status === 403 &&
+    body?.error === "UserNotVerifiedError" &&
+    window.location.pathname !== ROUTES.VERIFY_EMAIL
+  ) {
+    window.location.replace(ROUTES.VERIFY_EMAIL);
+  }
+
   throw new ApiError(response.status, body);
 });

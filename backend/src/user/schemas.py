@@ -15,6 +15,7 @@ class UserSchema(BaseSchema):
     joined_at: datetime
     is_staff: bool = False
     ai_course_generations: int = 0
+    is_verified: bool = False
 
 
 class AiGenerationQuotaSchema(BaseSchema):
@@ -26,16 +27,26 @@ class AiGenerationQuotaSchema(BaseSchema):
 class UserPublicSchema(BaseSchema):
     id: UUID
     username: str
-    email: str
     avatar_url: str | None
     joined_at: datetime
 
 
 class UserMeSchema(UserPublicSchema):
+    email: str
     is_staff: bool = False
+    is_verified: bool = False
 
 
 class UserUpdateRequestSchema(BaseSchema):
     username: str | None = None
     email: EmailStr | None = None
     avatar_url: str | None = None
+
+
+class UserVerifyUpdateSchema(BaseSchema):
+    is_verified: bool
+    email_verified_at: datetime | None
+
+
+class UserPasswordUpdateSchema(BaseSchema):
+    password_hash: str

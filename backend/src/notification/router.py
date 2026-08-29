@@ -2,14 +2,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+from src.auth.security import decode_access_token
 from src.core.websocket.auth import UserIdWSDep
+from src.core.websocket.connection import Connection
 from src.core.websocket.manager import ConnectionManager
 from src.notification.dependencies import (
     NotificationServiceDep,
     get_ws_manager_singleton,
 )
 from src.notification.schemas import NotificationListSchema, UnreadCountSchema
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import AuthenticatedUserIdDep
 
 router = APIRouter(tags=["Notifications"])
 
@@ -20,7 +22,7 @@ router = APIRouter(tags=["Notifications"])
     summary="List notifications",
 )
 async def list_notifications(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     service: NotificationServiceDep,
     limit: int = 20,
     offset: int = 0,
@@ -35,7 +37,7 @@ async def list_notifications(
     summary="Get unread notification count",
 )
 async def get_unread_count(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     service: NotificationServiceDep,
 ) -> UnreadCountSchema:
     count = await service.count_unread(user_id)
@@ -49,7 +51,7 @@ async def get_unread_count(
 )
 async def mark_notification_read(
     notification_id: UUID,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     service: NotificationServiceDep,
 ) -> None:
     await service.mark_read(notification_id, user_id)
@@ -61,7 +63,7 @@ async def mark_notification_read(
     summary="Mark all notifications as read",
 )
 async def mark_all_notifications_read(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     service: NotificationServiceDep,
 ) -> None:
     await service.mark_all_read(user_id)
@@ -69,8 +71,6 @@ async def mark_all_notifications_read(
 
 @router.websocket("/ws/notifications")
 async def notifications_ws(websocket: WebSocket) -> None:
-    from src.core.websocket.auth import get_current_user_id_ws
-
     await websocket.accept()
 
     token = websocket.query_params.get("token") or websocket.cookies.get("access_token")
@@ -79,8 +79,6 @@ async def notifications_ws(websocket: WebSocket) -> None:
         return
 
     try:
-        from src.auth.security import decode_access_token
-
         payload = decode_access_token(token)
         user_id_str = payload.get("sub")
         if not user_id_str:
@@ -92,8 +90,6 @@ async def notifications_ws(websocket: WebSocket) -> None:
         return
 
     cm = get_ws_manager_singleton()
-    from src.core.websocket.connection import Connection
-
     connection = Connection(
         websocket,
         user_id,

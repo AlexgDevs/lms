@@ -77,6 +77,17 @@ services:
     networks:
       - app_network
 
+  # Local SMTP sink for dev/testing email (verification & password reset).
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: lms_mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - app_network
+
   # One-shot: create the bucket and make it public-read (covers) on startup.
   minio-init:
     image: minio/mc:latest

@@ -3,7 +3,12 @@ from uuid import UUID
 from fastapi import APIRouter
 
 from src.core.config import settings
-from src.user.dependencies import CurrentUserDep, UserIdDep, UserServiceDep
+from src.user.dependencies import (
+    AuthenticatedCurrentUserDep,
+    AuthenticatedUserIdDep,
+    CurrentUserDep,
+    UserServiceDep,
+)
 from src.user.schemas import (
     AiGenerationQuotaSchema,
     UserMeSchema,
@@ -20,7 +25,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
     summary="Get current user",
     response_model=UserMeSchema,
 )
-async def get_current_user(user: CurrentUserDep) -> UserMeSchema:
+async def get_current_user(user: AuthenticatedCurrentUserDep) -> UserMeSchema:
     return UserMeSchema.model_validate(user)
 
 
@@ -44,7 +49,7 @@ async def get_ai_generation_quota(user: CurrentUserDep) -> AiGenerationQuotaSche
     response_model=UserMeSchema,
 )
 async def update_current_user(
-    user: CurrentUserDep,
+    user: AuthenticatedCurrentUserDep,
     payload: UserUpdateRequestSchema,
     service: UserServiceDep,
 ) -> UserMeSchema:
@@ -58,7 +63,7 @@ async def update_current_user(
     response_model=UserPublicSchema,
 )
 async def get_user_by_id(
-    _: UserIdDep,
+    _: AuthenticatedUserIdDep,
     user_id: UUID,
     service: UserServiceDep,
 ) -> UserPublicSchema:
@@ -71,7 +76,7 @@ async def get_user_by_id(
     summary="Change password",
 )
 async def change_password(
-    user: CurrentUserDep,
+    user: AuthenticatedCurrentUserDep,
     payload: ChangePasswordRequestSchema,
     service: UserServiceDep,
 ) -> dict[str, str]:

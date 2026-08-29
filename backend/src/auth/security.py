@@ -84,3 +84,26 @@ def decode_reset_token(token: str) -> UUID:
         return UUID(payload["sub"])
     except jwt.InvalidTokenError as e:
         raise InvalidAccessTokenError from e
+
+
+def create_verification_token(user_id: UUID) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(hours=24)
+    return jwt.encode(
+        payload={"sub": str(user_id), "exp": expire, "type": "verify"},
+        key=settings.app.JWT_SECRET_KEY,
+        algorithm=settings.app.JWT_ALGORITHM,
+    )
+
+
+def decode_verification_token(token: str) -> UUID:
+    try:
+        payload = jwt.decode(
+            jwt=token,
+            key=settings.app.JWT_SECRET_KEY,
+            algorithms=[settings.app.JWT_ALGORITHM],
+        )
+        if payload.get("type") != "verify":
+            raise InvalidAccessTokenError
+        return UUID(payload["sub"])
+    except jwt.InvalidTokenError as e:
+        raise InvalidAccessTokenError from e

@@ -1,9 +1,13 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.auth.exceptions import InvalidAccessTokenError
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseNotFoundError
+from src.course.models import CourseMember
 from src.core.events.event import ModuleDeleted
 from src.core.services import BaseService
 from src.module.unit_of_work import ModuleUnitOfWork
@@ -93,9 +97,6 @@ class ModuleService(BaseService):
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
             raise ModuleNotFoundError
-
-        from sqlalchemy import select
-        from src.course.models import CourseMember
 
         result = await self.session.execute(
             select(CourseMember.user_id).where(

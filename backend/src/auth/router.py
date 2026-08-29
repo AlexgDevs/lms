@@ -1,9 +1,11 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, Query, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from src.auth.dependencies import AuthServiceDep
+from src.auth.security import hash_refresh_token
 from src.auth.schemas import (
     UserRegisterSchema,
     SessionSchema,
@@ -12,8 +14,11 @@ from src.auth.schemas import (
     ForgotPasswordResponseSchema,
     ResetPasswordRequestSchema,
     ChangePasswordRequestSchema,
+    VerifyEmailRequestSchema,
+    ResendVerificationRequestSchema,
+    MessageResponseSchema,
 )
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import AuthenticatedUserIdDep
 
 from src.user.schemas import UserPublicSchema
 
@@ -65,7 +70,7 @@ async def refresh(
 async def logout(
     refresh_token: Annotated[str, Body(embed=True)],
     service: AuthServiceDep,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
 ) -> None:
     await service.logout(refresh_token, user_id=user_id)
 
@@ -76,12 +81,10 @@ async def logout(
     summary="List active sessions",
 )
 async def list_sessions(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     service: AuthServiceDep,
     current_token: Annotated[str, Query(description="Current refresh token")],
 ) -> list[SessionSchema]:
-    from src.auth.security import hash_refresh_token
-
     token_hash = hash_refresh_token(current_token)
     token = await service.uow.refresh_tokens.get_one(token_hash=token_hash)
     current_token_id = token.id if token is not None else None
@@ -95,11 +98,9 @@ async def list_sessions(
 )
 async def revoke_session(
     session_id: str,
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     service: AuthServiceDep,
 ) -> None:
-    from uuid import UUID
-
     await service.revoke_session(user_id, UUID(session_id))
 
 
@@ -109,12 +110,10 @@ async def revoke_session(
     summary="Revoke all sessions except current",
 )
 async def revoke_all_sessions(
-    user_id: UserIdDep,
+    user_id: AuthenticatedUserIdDep,
     service: AuthServiceDep,
     current_token: Annotated[str, Query(description="Current refresh token")],
 ) -> None:
-    from src.auth.security import hash_refresh_token
-
     token_hash = hash_refresh_token(current_token)
     token = await service.uow.refresh_tokens.get_one(token_hash=token_hash)
     if token:
@@ -130,10 +129,37 @@ async def forgot_password(
     payload: ForgotPasswordRequestSchema,
     service: AuthServiceDep,
 ) -> ForgotPasswordResponseSchema:
-    reset_token = await service.forgot_password(payload.email)
+    await service.forgot_password(payload.email)
     return ForgotPasswordResponseSchema(
         message="If the email exists, a reset link has been sent.",
-        reset_token=reset_token,
+    )
+
+
+@router.post(
+    "/verify-email",
+    summary="Verify email with token",
+    response_model=MessageResponseSchema,
+)
+async def verify_email(
+    payload: VerifyEmailRequestSchema,
+    service: AuthServiceDep,
+) -> MessageResponseSchema:
+    await service.verify_email(payload.token)
+    return MessageResponseSchema(message="Email verified successfully.")
+
+
+@router.post(
+    "/resend-verification",
+    summary="Resend email verification",
+    response_model=MessageResponseSchema,
+)
+async def resend_verification(
+    payload: ResendVerificationRequestSchema,
+    service: AuthServiceDep,
+) -> MessageResponseSchema:
+    await service.resend_verification(payload.email)
+    return MessageResponseSchema(
+        message="If the email exists, a verification link has been sent."
     )
 
 
