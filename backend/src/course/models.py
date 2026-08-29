@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
@@ -9,6 +10,7 @@ from sqlalchemy import (
     Text,
     UUID as sqlUUID,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.course.enums import CourseMemberRole, CourseStatus
@@ -53,6 +55,9 @@ class Course(UUIDBase):
         DateTime(timezone=True)
     )
     tgp_cooldown_hours: Mapped[int] = mapped_column(server_default="24", default=24)
+    tgp_content_snapshot: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True
+    )
 
     # certificates
     certificate_enabled: Mapped[bool] = mapped_column(

@@ -892,6 +892,10 @@ export type CourseSchema = {
      */
     tgp_cooldown_hours?: number;
     /**
+     * Tgp Outdated
+     */
+    tgp_outdated?: boolean;
+    /**
      * Certificate Enabled
      */
     certificate_enabled?: boolean;
@@ -1023,6 +1027,10 @@ export type CourseUserBriefSchema = {
      * Tgp Cooldown Hours
      */
     tgp_cooldown_hours?: number;
+    /**
+     * Tgp Outdated
+     */
+    tgp_outdated?: boolean;
     /**
      * Certificate Enabled
      */

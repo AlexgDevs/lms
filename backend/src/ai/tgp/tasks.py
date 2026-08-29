@@ -8,6 +8,7 @@ from uuid import UUID
 from loguru import logger
 from openai import APIConnectionError, APITimeoutError, InternalServerError
 from redis.asyncio import Redis, from_url
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -25,11 +26,13 @@ from src.ai.tgp.schemas import (
     TgpQuestionUpdateSchema,
 )
 from src.ai.tgp.unit_of_work import AiUnitOfWork
+from src.block.models import Block
 from src.core.celery_app import celery_app
 from src.core.config import settings
 from src.course.course_member.repository import CourseMemberRepository
 from src.course.repository import CourseRepository
 from src.course.schemas import CourseUpdateSchema
+from src.lesson.models import Lesson
 from src.module.models import Module
 from src.module.repository import ModuleRepository
 
@@ -149,6 +152,30 @@ async def _run_generate(course_id_str: str, lock_token: str | None = None) -> No
                 for module in modules
             ]
 
+            lesson_count = int(
+                (
+                    await session.execute(
+                        select(func.count())
+                        .select_from(Lesson)
+                        .where(Lesson.course_id == course_id)
+                    )
+                ).scalar_one()
+            )
+            block_count = int(
+                (
+                    await session.execute(
+                        select(func.count())
+                        .select_from(Block)
+                        .where(Block.course_id == course_id)
+                    )
+                ).scalar_one()
+            )
+            content_snapshot = {
+                "modules": len(modules),
+                "lessons": lesson_count,
+                "blocks": block_count,
+            }
+
             questions = _build_gemini().generate_questions(
                 course.title,
                 structure,
@@ -217,7 +244,10 @@ async def _run_generate(course_id_str: str, lock_token: str | None = None) -> No
 
             await uow.courses.update(
                 course_id,
-                CourseUpdateSchema(tgp_last_full_generated_at=now),
+                CourseUpdateSchema(
+                    tgp_last_full_generated_at=now,
+                    tgp_content_snapshot=content_snapshot,
+                ),
             )
             await uow.commit()
             logger.info("TGP generation completed for course {}", course_id)

@@ -8,6 +8,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   BookOpen,
   Calendar,
   Globe,
@@ -97,6 +105,7 @@ export function CourseHeader({
   const [savedField, setSavedField] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [courseSnapshot, setCourseSnapshot] = useState(course)
+  const [confirmDraftOpen, setConfirmDraftOpen] = useState(false)
 
   const status: CourseStatus = course.status ?? "draft"
   const StatusIcon = STATUS_META[status].icon
@@ -183,9 +192,7 @@ export function CourseHeader({
   }
 
   const handleTogglePublish = () => {
-    onUpdateCourse({
-      status: "draft",
-    })
+    setConfirmDraftOpen(true)
   }
 
   const descriptionChanged = description.trim() !== (course.description || "")
@@ -486,6 +493,19 @@ export function CourseHeader({
       </Popover>
       </div>
 
+      {status === "draft" && (
+        <div className="mt-2 rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-2.5 flex items-start gap-2 border">
+          <AlertTriangle size={14} className="mt-0.5 shrink-0 text-reward" />
+          <div className="text-xs leading-relaxed text-muted-foreground min-w-0">
+            <span className="font-medium text-foreground">Курс в черновике.</span>{" "}
+            Пока он не опубликован: новые пользователи не видят его в каталоге и не
+            могут записаться, а уже записанные учащиеся сохраняют доступ к урокам.
+            Правки контента активны. Чтобы вернуть курс в продажу, отправьте его на
+            модерацию.
+          </div>
+        </div>
+      )}
+
       {(status === "under_review" || status === "rejected") && (
         <div className="mt-2 rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-2.5 flex items-start gap-2 border">
           <AlertTriangle
@@ -515,6 +535,40 @@ export function CourseHeader({
           </div>
         </div>
       )}
+      <Dialog open={confirmDraftOpen} onOpenChange={setConfirmDraftOpen}>
+        <DialogContent className="sm:max-w-md rounded-xl">
+          <DialogHeader>
+            <DialogTitle>Снять курс с публикации?</DialogTitle>
+            <DialogDescription>
+              Курс будет переведён в черновик. Пока он в черновике, новые пользователи
+              не увидут его в каталоге и не смогут записаться. Уже записанные учащиеся
+              сохранят доступ к урокам. После правок отправьте курс на модерацию, чтобы
+              снова опубликовать его.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setConfirmDraftOpen(false)}
+            >
+              Отмена
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              disabled={isUpdating}
+              onClick={() => {
+                onUpdateCourse({ status: "draft" })
+                setConfirmDraftOpen(false)
+              }}
+            >
+              {isUpdating && <Loader2 size={13} className="animate-spin" />}
+              Перевести в черновик
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

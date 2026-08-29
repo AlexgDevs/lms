@@ -20,6 +20,7 @@ import { getErrorMessage } from "@/lib/errors"
 export interface UseLearnerTgpParams {
   courseId?: string
   enabled?: boolean
+  tgpOutdated?: boolean
 }
 
 export type TgpPreTestAnswer = TgpSubmitAnswerSchema
@@ -45,7 +46,11 @@ function readLastSubmittedAt(courseId: string): string | null {
   }
 }
 
-export function useLearnerTgp({ courseId, enabled = true }: UseLearnerTgpParams) {
+export function useLearnerTgp({
+  courseId,
+  enabled = true,
+  tgpOutdated = false,
+}: UseLearnerTgpParams) {
   const queryClient = useQueryClient()
   const isValid = Boolean(courseId)
 
@@ -70,7 +75,7 @@ export function useLearnerTgp({ courseId, enabled = true }: UseLearnerTgpParams)
     ? getCooldownEnd(lastSubmittedAt, TGP_SUBMIT_COOLDOWN_HOURS)
     : null
   const retakeRemainingMs = useCountdown(retakeCooldownEnd, true)
-  const canRetake = retakeRemainingMs === 0
+  const canRetake = tgpOutdated || retakeRemainingMs === 0
 
   const questionsQuery = useQuery({
     ...listTgpQuestionsApiV1AiTgpCourseIdQuestionsGetOptions({

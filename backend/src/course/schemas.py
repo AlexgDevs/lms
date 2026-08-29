@@ -30,6 +30,10 @@ class CourseSchema(BaseSchema):
     tgp_enabled: bool = False
     tgp_last_full_generated_at: datetime | None = None
     tgp_cooldown_hours: int = 24
+    tgp_outdated: bool = False
+    tgp_content_snapshot: dict[str, int] | None = Field(
+        default=None, exclude=True, description="Internal TGP generation snapshot"
+    )
     certificate_enabled: bool = False
 
 
@@ -91,6 +95,7 @@ class CourseUpdateSchema(BaseSchema):
     tgp_enabled: bool | None = None
     tgp_cooldown_hours: int | None = None
     tgp_last_full_generated_at: datetime | None = None
+    tgp_content_snapshot: dict[str, int] | None = None
     certificate_enabled: bool | None = None
     is_deleted: datetime | None = None
 

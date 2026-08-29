@@ -28,6 +28,7 @@ interface LearnSidebarProps {
   onSelectLesson: (lessonId: string) => void
   courseId?: string
   tgpEnabled?: boolean
+  tgpOutdated?: boolean
   isMember?: boolean
   flatUnits?: FlatLearningUnit[]
 }
@@ -43,6 +44,7 @@ export function LearnSidebar({
   onSelectLesson,
   courseId,
   tgpEnabled,
+  tgpOutdated,
   isMember,
   flatUnits,
 }: LearnSidebarProps) {
@@ -50,7 +52,7 @@ export function LearnSidebar({
   const navigate = useNavigate()
 
   const canTakeTgp = Boolean(courseId && tgpEnabled && isMember && isLoggedIn())
-  const tgp = useLearnerTgp({ courseId, enabled: canTakeTgp })
+  const tgp = useLearnerTgp({ courseId, enabled: canTakeTgp, tgpOutdated })
 
   const [showPreTest, setShowPreTest] = useState(false)
   const [showRoadmap, setShowRoadmap] = useState(false)
@@ -124,6 +126,12 @@ export function LearnSidebar({
 
         {canTakeTgp && (
           <div className="mt-2 space-y-2">
+            {tgp.taken && tgpOutdated && (
+              <p className="flex items-start gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600">
+                <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                Добавлен новый контент — рекомендуем пройти тест заново
+              </p>
+            )}
             {!tgp.taken ? (
               <Button
                 variant="outline"

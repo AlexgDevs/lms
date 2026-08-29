@@ -231,6 +231,25 @@ class CourseRepository(BaseRepository[Course, CourseSchema]):
         result = await self.session.execute(statement)
         return set(result.scalars().all())
 
+    async def is_member(self, course_id: UUID, user_id: UUID) -> bool:
+        """Return whether ``user_id`` is an active member (left_at is NULL) of ``course_id``.
+
+        Single source of truth for the "member can read course content even when
+        it is not published" rule. In the upcoming draft-over-live stage this is
+        the seam that will resolve membership against the course's live branch.
+        """
+        statement = (
+            select(CourseMember.id)
+            .where(
+                CourseMember.course_id == course_id,
+                CourseMember.user_id == user_id,
+                CourseMember.left_at.is_(None),
+            )
+            .limit(1)
+        )
+        result = await self.session.execute(statement)
+        return result.scalars().first() is not None
+
     async def increment_member_count(self, course_id: UUID) -> None:
         statement = (
             update(Course)

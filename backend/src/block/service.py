@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.block.enums import BlockType
 from src.block.exceptions import BlockNotFoundError, BlockTypeNotMediaError
+from src.course.access import ensure_block_removable, ensure_course_is_draft
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseNotFoundError
 from src.course.models import CourseMember
@@ -74,6 +75,7 @@ class BlockService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         lesson = await self.uow.lessons.get_one(id=lesson_id, course_id=course_id)
         if not lesson:
@@ -123,6 +125,7 @@ class BlockService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         lesson = await self.uow.lessons.get_one(id=lesson_id, course_id=course_id)
         if not lesson:
@@ -192,6 +195,7 @@ class BlockService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         lesson = await self.uow.lessons.get_one(id=lesson_id, course_id=course_id)
         if not lesson:
@@ -202,6 +206,8 @@ class BlockService(BaseService):
         )
         if not block:
             raise BlockNotFoundError
+
+        await ensure_block_removable(self.session, block.id)
 
         result = await self.session.execute(
             select(CourseMember.user_id).where(
@@ -255,6 +261,7 @@ class BlockService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         lesson = await self.uow.lessons.get_one(id=lesson_id, course_id=course_id)
         if not lesson:
@@ -362,8 +369,11 @@ class BlockService(BaseService):
         if not course:
             raise CourseNotFoundError
 
-        if course.status != CourseStatus.PUBLISHED and course.owner_id != user_id:
-            raise CourseNotFoundError
+        if course.status != CourseStatus.PUBLISHED:
+            if course.owner_id != user_id and not await self.uow.courses.is_member(
+                course_id, user_id
+            ):
+                raise CourseNotFoundError
 
         member = await self.uow.courses.get_course_where_user_is_member(
             course_id=course_id,

@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.exceptions import InvalidAccessTokenError
+from src.course.access import ensure_course_is_draft, ensure_module_removable
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseNotFoundError
 from src.course.models import CourseMember
@@ -43,6 +44,7 @@ class ModuleService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         next_order = await self.uow.modules.get_count(course.id)
 
@@ -67,6 +69,7 @@ class ModuleService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
@@ -93,10 +96,13 @@ class ModuleService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
             raise ModuleNotFoundError
+
+        await ensure_module_removable(self.session, module.id)
 
         result = await self.session.execute(
             select(CourseMember.user_id).where(
@@ -156,7 +162,10 @@ class ModuleService(BaseService):
             raise CourseNotFoundError
 
         if course.status != CourseStatus.PUBLISHED:
-            if user_id is None or course.owner_id != user_id:
+            if user_id is None or (
+                course.owner_id != user_id
+                and not await self.uow.courses.is_member(course_id, user_id)
+            ):
                 raise CourseNotFoundError
 
         return list(

@@ -74,6 +74,7 @@ export function LearnPage() {
           onSelectLesson={goToLesson}
           courseId={course?.id ?? undefined}
           tgpEnabled={course?.tgp_enabled ?? false}
+          tgpOutdated={course?.tgp_outdated ?? false}
           isMember={data.isCourseMember}
           flatUnits={data.flatUnits}
         />

@@ -27,6 +27,9 @@ from src.media import models as media_models  # noqa: F401
 from src.media.media_attachment import models as media_attachment_models  # noqa: F401
 from src.ai.tgp import models as ai_tgp_models  # noqa: F401
 from src.notification import models as notification_models  # noqa: F401
+from src.certificate import models as certificate_models  # noqa: F401
+from src.review import models as review_models  # noqa: F401
+from src.payment import models as payment_models  # noqa: F401
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool

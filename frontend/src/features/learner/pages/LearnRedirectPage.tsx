@@ -22,7 +22,11 @@ export function LearnRedirectPage() {
   const navigate = useNavigate()
   const data = useLearnData({ courseId })
   const enroll = useEnrollCourse()
-  const tgp = useLearnerTgp({ courseId, enabled: isLoggedIn() && data.isCourseMember })
+  const tgp = useLearnerTgp({
+    courseId,
+    enabled: isLoggedIn() && data.isCourseMember,
+    tgpOutdated: data.course?.tgp_outdated ?? false,
+  })
 
   const course = data.course
   const firstLessonId = data.flatUnits[0]?.lesson.id

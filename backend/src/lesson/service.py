@@ -24,6 +24,7 @@ from src.lesson.schemas import (
 )
 from src.course.models import CourseMember
 from src.lesson.unit_of_work import LessonUnitOfWork
+from src.course.access import ensure_course_is_draft, ensure_lesson_removable
 from src.core.services import BaseService
 
 if TYPE_CHECKING:
@@ -52,6 +53,7 @@ class LessonService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
@@ -82,6 +84,7 @@ class LessonService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
@@ -113,6 +116,7 @@ class LessonService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
@@ -123,6 +127,8 @@ class LessonService(BaseService):
         )
         if not lesson:
             raise LessonNotFoundError
+
+        await ensure_lesson_removable(self.session, lesson.id)
 
         result = await self.session.execute(
             select(CourseMember.user_id).where(
@@ -196,7 +202,10 @@ class LessonService(BaseService):
         if not course:
             raise CourseNotFoundError
 
-        if course.status != CourseStatus.PUBLISHED and course.owner_id != user_id:
+        if (
+            course.status != CourseStatus.PUBLISHED
+            and not await self.uow.courses.is_member(course_id, user_id)
+        ):
             raise CourseNotFoundError
 
         member = await self.uow.courses.get_course_where_user_is_member(
@@ -244,7 +253,10 @@ class LessonService(BaseService):
             raise CourseNotFoundError
 
         if course.status != CourseStatus.PUBLISHED:
-            if user_id is None or course.owner_id != user_id:
+            if user_id is None or (
+                course.owner_id != user_id
+                and not await self.uow.courses.is_member(course_id, user_id)
+            ):
                 raise CourseNotFoundError
 
         module = await self.uow.modules.get_one(

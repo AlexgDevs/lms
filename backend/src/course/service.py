@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.ai.gemini import GeminiService
+from src.course.access import course_tgp_outdated
 from src.course.course_member.schemas import (
     CourseMemberCreateSchema,
     CourseMemberSchema,
@@ -495,10 +496,21 @@ class CourseService(BaseService):
                 return await self.get_course_where_user_member(course_id, user_id)
             case "current" | _:
                 course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
-                if not course or course.status != CourseStatus.PUBLISHED:
+                if not course:
                     raise CourseNotFoundError
+                if course.status != CourseStatus.PUBLISHED:
+                    is_owner = user_id is not None and course.owner_id == user_id
+                    is_member = (
+                        user_id is not None
+                        and await self.uow.courses.is_member(course_id, user_id)
+                    )
+                    if not is_owner and not is_member:
+                        raise CourseNotFoundError
                 owner_username = await self._resolve_owner_username(course.owner_id)
-                update: dict[str, Any] = {"owner_username": owner_username}
+                update: dict[str, Any] = {
+                    "owner_username": owner_username,
+                    "tgp_outdated": await course_tgp_outdated(self.session, course),
+                }
                 if user_id is not None:
                     member_ids = await self.uow.courses.get_member_course_ids(user_id)
                     update["is_member"] = course.id in member_ids
@@ -594,7 +606,12 @@ class CourseService(BaseService):
             raise CourseNotFoundError
 
         owner_username = await self._resolve_owner_username(course.owner_id)
-        return course.model_copy(update={"owner_username": owner_username})
+        return course.model_copy(
+            update={
+                "owner_username": owner_username,
+                "tgp_outdated": await course_tgp_outdated(self.session, course),
+            }
+        )
 
     async def upload_cover(
         self,

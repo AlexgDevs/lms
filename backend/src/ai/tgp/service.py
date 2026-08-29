@@ -41,6 +41,7 @@ from src.ai.tgp.tasks import (
 from src.ai.tgp.unit_of_work import AiUnitOfWork
 from src.core.config import settings
 from src.core.services import BaseService
+from src.course.access import course_tgp_outdated
 from src.course.course_member.schemas import CourseMemberUpdateSchema
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseMemberNotFoundError, CourseNotFoundError
@@ -214,7 +215,8 @@ class AiService(BaseService):
             raise CourseMemberNotFoundError
 
         now = datetime.now(timezone.utc)
-        if member.tgp_last_submitted_at:
+        is_outdated = await course_tgp_outdated(self.session, course)
+        if member.tgp_last_submitted_at and not is_outdated:
             cooldown_end = member.tgp_last_submitted_at + timedelta(
                 hours=settings.tgp.TGP_SUBMIT_COOLDOWN_HOURS
             )

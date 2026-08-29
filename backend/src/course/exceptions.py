@@ -60,3 +60,19 @@ class CourseGenerateLimitError(CourseError):
 class CoursePaymentRequiredError(CourseError):
     detail = "This course requires payment before enrollment"
     status_code = status.HTTP_402_PAYMENT_REQUIRED
+
+
+class CourseMustBeDraftError(CourseError):
+    detail = (
+        "Редактирование контента доступно только пока курс находится в черновике. "
+        "Чтобы вернуть его в продажу, отправьте изменения на модерацию."
+    )
+    status_code = status.HTTP_409_CONFLICT
+
+
+class ContentHasStudentResultsError(CourseError):
+    detail = (
+        "Этот элемент нельзя удалить: по нему уже есть прогресс или ответы учащихся. "
+        "Можно только исправить его содержимое."
+    )
+    status_code = status.HTTP_409_CONFLICT

@@ -1341,6 +1341,11 @@ export const CourseSchemaSchema = {
             title: 'Tgp Cooldown Hours',
             default: 24
         },
+        tgp_outdated: {
+            type: 'boolean',
+            title: 'Tgp Outdated',
+            default: false
+        },
         certificate_enabled: {
             type: 'boolean',
             title: 'Certificate Enabled',
@@ -1604,6 +1609,11 @@ export const CourseUserBriefSchemaSchema = {
             type: 'integer',
             title: 'Tgp Cooldown Hours',
             default: 24
+        },
+        tgp_outdated: {
+            type: 'boolean',
+            title: 'Tgp Outdated',
+            default: false
         },
         certificate_enabled: {
             type: 'boolean',

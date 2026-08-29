@@ -274,12 +274,15 @@ class BlockSubmissionService(BaseService):
 
     async def _validate_course_access(self, course_id: UUID, user_id: UUID) -> None:
         """Ensures the course exists, is accessible, and the user is an enrolled member."""
-        course = await self.uow.courses.get_one(id=course_id)
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
         if not course:
             raise CourseNotFoundError
 
-        if course.status != CourseStatus.PUBLISHED and course.owner_id != user_id:
-            raise CourseNotFoundError
+        if course.status != CourseStatus.PUBLISHED:
+            if course.owner_id != user_id and not await self.uow.courses.is_member(
+                course_id, user_id
+            ):
+                raise CourseNotFoundError
 
         member = await self.uow.members.get_one(
             user_id=user_id, course_id=course.id, left_at=None
