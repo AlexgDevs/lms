@@ -20,3 +20,8 @@ class CodeExecTimeoutError(CodeExecError):
 class CodeExecValidationError(CodeExecError):
     detail = "Invalid code execution request"
     status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+class CodeExecRunError(CodeExecError):
+    detail = "Code execution failed at runtime"
+    status_code = status.HTTP_400_BAD_REQUEST

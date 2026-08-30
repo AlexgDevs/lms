@@ -260,6 +260,8 @@ class CodeExecSettings(BaseSettings):
     CODEEXEC_COMPILE_TIMEOUT_MS: int = 2000
     CODEEXEC_MEMORY_LIMIT_MB: int = 128
     CODEEXEC_MAX_CODE_CHARS: int = 64_000
+    # Per-user cap on CODE submissions per minute (cheap-DoS guard on Piston).
+    CODEEXEC_MAX_CALLS_PER_USER_PER_MINUTE: int = 5
 
 
 class PaymentSettings(BaseSettings):

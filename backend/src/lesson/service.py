@@ -244,6 +244,9 @@ class LessonService(BaseService):
         limit: int = 100,
         offset: int = 0,
     ) -> list[LessonSchema]:
+        # Intentional: the module/lesson structure of a PUBLISHED course is a
+        # public preview (outline). Only the content blocks are gated to members
+        # (see block.service). Non-published courses require owner/membership.
         course = await self.uow.courses.get_one(
             id=course_id,
             is_deleted=None,

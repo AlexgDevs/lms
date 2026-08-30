@@ -4,6 +4,7 @@ import httpx
 from loguru import logger
 
 from src.codeexec.exceptions import (
+    CodeExecRunError,
     CodeExecTimeoutError,
     CodeExecUnavailableError,
     CodeExecValidationError,
@@ -78,7 +79,12 @@ class CodeExecService:
             for test_case in test_cases:
                 test_input = str(test_case.get("input") or "")
                 expected = str(test_case.get("output") or "")
-                actual = await self._run_case(client, alias, solution, test_input)
+                try:
+                    actual = await self._run_case(client, alias, solution, test_input)
+                except CodeExecRunError:
+                    # A crashed program (non-zero exit) is never correct, even if
+                    # the expected output is empty. Treat it as a failed case.
+                    return False
                 if _normalize_output(actual) != _normalize_output(expected):
                     return False
         return True
@@ -132,7 +138,11 @@ class CodeExecService:
 
         run = data.get("run") or {}
         if run.get("code") != 0:
-            return ""
+            stderr = str(run.get("stderr") or "")
+            logger.warning(
+                "Code execution crashed (exit {}): {}", run.get("code"), stderr[:500]
+            )
+            raise CodeExecRunError
         return str(run.get("stdout") or "")
 
 

@@ -2,6 +2,9 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.core.config import settings
+from src.core.errors.base_errors import RateLimitExceededError
+from src.core.rate_limit import RateLimiter
 from src.course.enums import CourseStatus
 from src.course.exceptions import CourseMemberNotFoundError, CourseNotFoundError
 from src.lesson.lesson_progress.schemas import (
@@ -16,7 +19,7 @@ from src.submissions.exceptions import (
     DuplicateBlocksInSubmissionError,
     InvalidSubmissionBlocksError,
 )
-from src.block.enums import BlockSubmissionType
+from src.block.enums import BlockSubmissionType, BlockType
 from src.submissions.checker import BlockChecker
 from src.submissions.schemas import (
     BlockSubmissionCreateSchema,
@@ -34,9 +37,11 @@ class BlockSubmissionService(BaseService):
         session: AsyncSession,
         block_submission_unit_of_work: BlockSubmissionUnitOfWork,
         lesson_service: LessonService,
+        rate_limiter: RateLimiter,
     ):
         self.uow = block_submission_unit_of_work
         self.lesson_service = lesson_service
+        self._rate_limiter = rate_limiter
         super().__init__(session)
 
     async def submit_blocks(
@@ -118,6 +123,9 @@ class BlockSubmissionService(BaseService):
             if not block:
                 raise BlockNotFoundError
 
+            if block.block_type is BlockType.CODE:
+                await self._enforce_code_exec_limit(user_id)
+
             is_correct = await BlockChecker.check(block, sub_request)
             existing = existing_submissions_map.get(sub_request.block_id)
 
@@ -193,6 +201,9 @@ class BlockSubmissionService(BaseService):
 
         if submission.block_id != block_id:
             raise InvalidSubmissionBlocksError
+
+        if block.block_type is BlockType.CODE:
+            await self._enforce_code_exec_limit(user_id)
 
         is_correct = await BlockChecker.check(block, submission)
 
@@ -289,6 +300,14 @@ class BlockSubmissionService(BaseService):
         )
         if not member:
             raise CourseMemberNotFoundError
+
+    async def _enforce_code_exec_limit(self, user_id: UUID) -> None:
+        """Per-user cap on CODE submissions (cheap-DoS guard on Piston)."""
+        key = f"rl:codeexec:{user_id}"
+        hits = await self._rate_limiter.hit(key, window_seconds=60)
+        limit = settings.codeexec.CODEEXEC_MAX_CALLS_PER_USER_PER_MINUTE
+        if hits > limit:
+            raise RateLimitExceededError
 
     async def _recompute_lesson_progress(self, lesson_id: UUID, user_id: UUID) -> None:
         """Recalculates the lesson progress from the user's block submissions.

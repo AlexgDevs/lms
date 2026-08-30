@@ -48,7 +48,7 @@ class CourseMemberService(BaseService):
         self, course_member_id: UUID, left_at: datetime
     ) -> CourseMemberSchema:
         member = await self.uow.course_members.get_one(
-            user_id=course_member_id, left_at=None
+            id=course_member_id, left_at=None
         )
         if not member:
             raise CourseMemberNotFoundError
@@ -61,7 +61,7 @@ class CourseMemberService(BaseService):
     async def update_role(
         self, course_member_id: UUID, role: CourseMemberRole
     ) -> CourseMemberSchema:
-        member = await self.uow.course_members.get_one(user_id=course_member_id)
+        member = await self.uow.course_members.get_one(id=course_member_id)
         if not member:
             raise CourseMemberNotFoundError
 

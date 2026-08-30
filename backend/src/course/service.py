@@ -34,6 +34,7 @@ from src.course.exceptions import (
     CourseNotUnderReviewError,
     CourseOwnerCannotEnrollError,
     CoursePaymentRequiredError,
+    CoursePriceLockedError,
     CourseStatusNotAllowedError,
     CourseGenerateError,
     CourseGenerateLimitError,
@@ -125,6 +126,9 @@ class CourseService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+
+        if payload.price is not None and course.status == CourseStatus.PUBLISHED:
+            raise CoursePriceLockedError
 
         course = await self.uow.courses.update(
             course_id, update_data, exclude_none=False

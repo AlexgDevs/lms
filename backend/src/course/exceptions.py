@@ -76,3 +76,8 @@ class ContentHasStudentResultsError(CourseError):
         "Можно только исправить его содержимое."
     )
     status_code = status.HTTP_409_CONFLICT
+
+
+class CoursePriceLockedError(CourseError):
+    detail = "Цена опубликованного курса изменить нельзя. Верните курс в черновик."
+    status_code = status.HTTP_409_CONFLICT

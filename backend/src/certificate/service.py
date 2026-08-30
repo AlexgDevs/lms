@@ -111,7 +111,7 @@ class CertificateService(BaseService):
         if not user:
             raise CertificateUserNotFoundError
 
-        course = await self.uow.courses.get_one(id=course_id)
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
         if not course:
             raise CertificateCourseNotFoundError
 
