@@ -59,7 +59,8 @@ export function CodeBlockEditor({ payload, onChange }: CodeBlockEditorProps) {
         value={payload.code ?? ""}
         onChange={(e) => onChange({ ...payload, code: e.target.value })}
         placeholder="Напишите исходный код..."
-        className="text-xs font-mono min-h-[100px] bg-muted/30"
+        wrap="off"
+        className="code-font text-xs min-h-[100px] bg-muted/30 whitespace-pre"
       />
 
       <div className="space-y-3">
@@ -99,13 +100,13 @@ export function CodeBlockEditor({ payload, onChange }: CodeBlockEditorProps) {
                 value={test.input}
                 onChange={(e) => handleChangeTest(index, "input", e.target.value)}
                 placeholder="Входные данные (stdin)..."
-                className="text-xs font-mono min-h-[44px] bg-muted/30"
+                className="code-font text-xs min-h-[44px] bg-muted/30"
               />
               <Textarea
                 value={test.output}
                 onChange={(e) => handleChangeTest(index, "output", e.target.value)}
                 placeholder="Ожидаемый вывод (stdout)..."
-                className="text-xs font-mono min-h-[44px] bg-muted/30"
+                className="code-font text-xs min-h-[44px] bg-muted/30"
               />
             </div>
           ))}

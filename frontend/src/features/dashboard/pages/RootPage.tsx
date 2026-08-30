@@ -1,5 +1,4 @@
-import type { LucideIcon } from "lucide-react";
-import { Edit3, Loader2, PlusCircle, Sparkles } from "lucide-react";
+import { Edit3, Loader2, PlusCircle } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { isLoggedIn } from "@/features/auth/api/useAuth";
@@ -10,17 +9,9 @@ import {
 } from "@/features/dashboard/api/useCourses";
 import { ContinueLearningSection } from "@/features/dashboard/components/ContinueLearningSection";
 import { CourseFilters } from "@/features/dashboard/components/CourseFilters";
-import { CourseRowSection } from "@/features/dashboard/components/CourseRowSection";
+import { RecommendedCoursesSection } from "@/features/dashboard/components/RecommendedCoursesSection";
 import { ROUTES } from "@/routes";
 import type { CourseCardData } from "@/features/dashboard/types";
-
-interface DashboardSection {
-  title: string;
-  icon: LucideIcon;
-  accentClassName?: string;
-  count: number;
-  courses: CourseCardData[];
-}
 
 export function RootPage() {
   const navigate = useNavigate();
@@ -28,42 +19,20 @@ export function RootPage() {
 
   const enrolled = useEnrolledCourses(loggedIn);
   const created = useCreatedCourses(12, loggedIn);
-  const recommended = useRecommendedCourses(10);
+  const recommended = useRecommendedCourses(12);
 
   const enrolledCourses = (enrolled.data ?? []) as CourseCardData[];
   const createdCourses = ((created.data?.pages ?? []).flat() ?? []) as CourseCardData[];
-  const recommendedCourses = (recommended.data ?? []) as CourseCardData[];
+  const recommendedCourses = (recommended.data?.pages.flat() ?? []) as CourseCardData[];
 
-  const isLoading =
+  const initialLoading =
     recommended.isLoading || (loggedIn && (enrolled.isLoading || created.isLoading));
 
   const hasEnrolled = loggedIn && enrolledCourses.length > 0;
   const hasTeaching = loggedIn && createdCourses.length > 0;
 
-  const sections: DashboardSection[] = [];
-  const pushRecommended = () => {
-    if (recommendedCourses.length > 0 && !sections.some((s) => s.title === "Рекомендуемые")) {
-      sections.push({
-        title: "Рекомендуемые",
-        icon: Sparkles,
-        accentClassName: "text-reward",
-        count: recommendedCourses.length,
-        courses: recommendedCourses,
-      });
-    }
-  };
-
-  if (!hasEnrolled) {
-    pushRecommended();
-  }
-
-  if (hasEnrolled && !hasTeaching) {
-    pushRecommended();
-  }
-
-  if (sections.length === 0) pushRecommended();
-
-  const hasContent = hasEnrolled || hasTeaching || sections.length > 0;
+  const hasAnyCourses =
+    enrolledCourses.length > 0 || createdCourses.length > 0 || recommendedCourses.length > 0;
 
   const goToCatalog = () => navigate({ to: ROUTES.CATALOG });
 
@@ -96,11 +65,11 @@ export function RootPage() {
       </div>
 
       {/* Ряды курсов */}
-      {isLoading && !hasContent ? (
+      {initialLoading && !hasAnyCourses ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
-      ) : !hasContent ? (
+      ) : !hasAnyCourses ? (
         <div className="text-center py-20 text-muted-foreground text-sm">
           Курсы пока не найдены.
         </div>
@@ -129,18 +98,18 @@ export function RootPage() {
               isLoadingMore={created.isFetchingNextPage}
             />
           )}
-          {sections.map((section) => (
-            <CourseRowSection
-              key={section.title}
-              title={section.title}
-              icon={section.icon}
-              accentClassName={section.accentClassName}
-              count={section.count}
-              courses={section.courses}
+          {recommendedCourses.length > 0 || recommended.isLoading || recommended.hasNextPage ? (
+            <RecommendedCoursesSection
+              courses={recommendedCourses}
+              isLoading={recommended.isLoading}
+              isLoadingMore={recommended.isFetchingNextPage}
+              hasMore={recommended.hasNextPage}
+              onLoadMore={() => recommended.fetchNextPage()}
             />
-          ))}
+          ) : null}
         </>
       )}
     </div>
   );
 }
+

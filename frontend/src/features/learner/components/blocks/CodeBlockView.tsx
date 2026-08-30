@@ -1,8 +1,6 @@
 import { CheckCircle2, XCircle } from "lucide-react"
 import type { BlockSchema } from "@/client"
-import { BlockType } from "@/client"
 import type { BlockSubmissionType } from "@/client"
-import { cn } from "@/lib/utils"
 
 interface CodeBlockViewProps {
   block: BlockSchema
@@ -23,27 +21,43 @@ export function CodeBlockView({ block, value, onChange, result, locked }: CodeBl
   const isWrong = result === "wrong"
   const frozen = locked || isCorrect
 
+  const lines = value ? value.split("\n") : [""]
+
   return (
-    <div className="overflow-hidden rounded-xl bg-[color-mix(in_oklch,var(--secondary),var(--background)_40%)]">
-      {language && (
-        <div className="flex items-center justify-between bg-secondary/60 px-3 py-1.5">
-          <span className="text-xs font-medium text-muted-foreground">{language}</span>
-          {block.block_type === BlockType.CODE && (
-            <CodeCopy code={value} disabled={frozen} />
-          )}
-        </div>
-      )}
-      <textarea
-        value={value}
-        onChange={(e) => onChange(block.id, e.target.value)}
-        readOnly={frozen}
-        spellCheck={false}
-        placeholder="Введите ваш код..."
-        className={cn(
-          "w-full max-h-96 min-h-[120px] resize-y bg-transparent p-4 font-mono text-sm leading-relaxed text-foreground outline-none",
-          frozen && "cursor-default",
+    <div className="overflow-hidden rounded-xl bg-[color-mix(in_oklch,var(--secondary),var(--background)_40%)] shadow-[var(--shadow-card)] ring-1 ring-inset ring-border/30">
+      <div className="flex items-center justify-between border-b border-border/40 bg-secondary/50 px-3.5 py-1.5">
+        <span className="inline-flex items-center rounded bg-secondary/70 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          {language || "Code"}
+        </span>
+        <CodeCopy code={value} disabled={frozen} />
+      </div>
+
+      <div className="code-font text-[13px] leading-relaxed text-foreground">
+        {frozen ? (
+          <div className="max-h-96 overflow-auto px-1 py-2">
+            <div className="min-w-max">
+              {lines.map((line, index) => (
+                <div key={index} className="flex px-1">
+                  <span className="w-8 shrink-0 select-none pr-3 text-right text-[11px] leading-relaxed text-muted-foreground/50">
+                    {index + 1}
+                  </span>
+                  <pre className="whitespace-pre">{line || " "}</pre>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <textarea
+            value={value}
+            onChange={(e) => onChange(block.id, e.target.value)}
+            readOnly={frozen}
+            spellCheck={false}
+            wrap="off"
+            placeholder="Введите ваш код..."
+            className="w-full max-h-96 min-h-[132px] resize-y overflow-auto bg-transparent p-3.5 outline-none whitespace-pre"
+          />
         )}
-      />
+      </div>
 
       {testCases.length > 0 && (
         <div className="border-t border-secondary/60 px-4 py-3 space-y-2">
@@ -83,7 +97,7 @@ function TestCaseCell({ label, value }: { label: string; value: unknown }) {
   return (
     <div className="min-w-0 rounded-lg bg-background/60 px-2.5 py-1.5">
       <p className="text-[10px] font-medium text-muted-foreground uppercase">{label}</p>
-      <pre className="mt-0.5 whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-foreground">
+      <pre className="code-font mt-0.5 whitespace-pre-wrap break-words text-xs leading-relaxed text-foreground">
         {text || "—"}
       </pre>
     </div>

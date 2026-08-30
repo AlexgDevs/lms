@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/jetbrains-mono";
 
 @import "./themes/dark.css";
 @import "./themes/light.css";
@@ -70,6 +71,14 @@ body {
     line-height: 1.6;
     color: var(--text);
     word-break: break-word;
+}
+
+/* Editor-style monospace for code blocks (JetBrains Mono + ligatures) */
+.code-font {
+    font-family: var(--font-mono);
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+    tab-size: 2;
 }
 
 .rich-text p,

@@ -1,5 +1,7 @@
 import { useState } from "react"
-import { Bell, CreditCard, KeyRound, Shield, User as UserIcon } from "lucide-react"
+import type { ReactNode } from "react"
+import type { LucideIcon } from "lucide-react"
+import { Bell, CreditCard, KeyRound, Settings, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ProfileSettingsForm } from "@/features/settings/components/ProfileSettingsForm"
 import { PaymentDetailsPanel } from "@/features/settings/components/PaymentDetailsPanel"
@@ -9,19 +11,19 @@ import { SessionsPanel } from "@/features/settings/components/SessionsPanel"
 
 type SettingsTab = "profile" | "payment" | "password" | "notifications" | "sessions"
 
-const TABS = [
-    { id: "profile", label: "Профиль", icon: UserIcon },
+const TABS: { id: SettingsTab; label: string; icon: LucideIcon }[] = [
+    { id: "profile", label: "Профиль", icon: Settings },
     { id: "payment", label: "Реквизиты", icon: CreditCard },
     { id: "password", label: "Пароль", icon: KeyRound },
     { id: "notifications", label: "Уведомления", icon: Bell },
     { id: "sessions", label: "Сессии", icon: Shield },
-] as const
+]
 
 export function SettingsPage() {
     const [tab, setTab] = useState<SettingsTab>("profile")
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6 py-2">
+        <div className="max-w-6xl mx-auto space-y-6 py-2">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Настройки</h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -29,30 +31,64 @@ export function SettingsPage() {
                 </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1 p-1 bg-muted/40 rounded-full w-fit">
-                {TABS.map(({ id, label, icon: Icon }) => (
-                    <button
-                        key={id}
-                        type="button"
-                        onClick={() => setTab(id)}
-                        className={cn(
-                            "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer",
-                            tab === id
-                                ? "bg-card text-primary shadow-[var(--shadow-card)]"
-                                : "text-muted-foreground hover:text-foreground"
-                        )}
-                    >
-                        <Icon className="w-4 h-4" />
-                        {label}
-                    </button>
-                ))}
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 items-start">
+                <aside className="lg:sticky lg:top-24">
+                    <nav className="rounded-xl bg-card border border-border/60 shadow-[var(--shadow-card)] p-2 space-y-1">
+                        {TABS.map(({ id, label, icon: Icon }) => (
+                            <button
+                                key={id}
+                                type="button"
+                                onClick={() => setTab(id)}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer",
+                                    tab === id
+                                        ? "bg-primary/10 text-primary"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-muted/40",
+                                )}
+                            >
+                                <Icon className="w-4 h-4" />
+                                {label}
+                            </button>
+                        ))}
+                    </nav>
+                </aside>
 
-            {tab === "profile" && <ProfileSettingsForm />}
-            {tab === "payment" && <PaymentDetailsPanel />}
-            {tab === "password" && <PasswordChangePanel />}
-            {tab === "notifications" && <NotificationsPanel />}
-            {tab === "sessions" && <SessionsPanel />}
+                <div className="min-w-0">
+                    {tab === "profile" && (
+                        <SectionCard>
+                            <ProfileSettingsForm />
+                        </SectionCard>
+                    )}
+                    {tab === "payment" && (
+                        <SectionCard>
+                            <PaymentDetailsPanel />
+                        </SectionCard>
+                    )}
+                    {tab === "password" && (
+                        <SectionCard>
+                            <PasswordChangePanel />
+                        </SectionCard>
+                    )}
+                    {tab === "notifications" && (
+                        <SectionCard>
+                            <NotificationsPanel />
+                        </SectionCard>
+                    )}
+                    {tab === "sessions" && (
+                        <SectionCard>
+                            <SessionsPanel />
+                        </SectionCard>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function SectionCard({ children }: { children: ReactNode }) {
+    return (
+        <div className="rounded-xl bg-card border border-border/60 shadow-[var(--shadow-card)] p-5 sm:p-6">
+            {children}
         </div>
     )
 }

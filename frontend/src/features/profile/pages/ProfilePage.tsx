@@ -6,7 +6,6 @@ import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
 import { ProfileStreak } from "@/features/profile/components/ProfileStreak";
 import { WeeklyActivity } from "@/features/profile/components/WeeklyActivity";
 import { YearlyActivity } from "@/features/profile/components/YearlyActivity";
-import { ProfileAchievements } from "@/features/profile/components/ProfileAchievements";
 import { CertificatesModal } from "@/features/profile/components/CertificatesModal";
 import { useProfileStats } from "@/features/profile/api/useProfileStats";
 import { useEnrolledCourses } from "@/features/dashboard/api/useCourses";
@@ -96,7 +95,6 @@ export function ProfilePage() {
             </CardContent>
           </Card>
 
-          <ProfileAchievements />
           <PurchasesSection />
         </div>
       </div>

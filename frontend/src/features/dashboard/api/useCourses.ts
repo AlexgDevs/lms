@@ -29,11 +29,14 @@ export const useCreatedCourses = (pageSize = 12, enabled = true) => {
   })
 }
 
-export const useRecommendedCourses = (limit = 10) => {
-  return useQuery({
-    ...getCoursesApiV1CoursesGetOptions({
-      query: { filter: "all", limit, offset: 0 },
+export const useRecommendedCourses = (pageSize = 12) => {
+  return useInfiniteQuery({
+    ...getCoursesApiV1CoursesGetInfiniteOptions({
+      query: { filter: "all", limit: pageSize },
     }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === pageSize ? allPages.length * pageSize : undefined,
   })
 }
 
