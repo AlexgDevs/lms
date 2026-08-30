@@ -9,6 +9,7 @@ import {
   Layers,
   Loader2,
   Play,
+  Sparkles,
   User,
   Users,
 } from "lucide-react";
@@ -388,6 +389,12 @@ export function CoursePage() {
                     <p className="text-sm font-semibold text-foreground truncate">
                       {course.owner_username}
                     </p>
+                    {course.owner_is_founder && (
+                      <span className="inline-flex items-center gap-1 mt-1 rounded bg-reward/10 px-1.5 py-0.5 text-[10px] font-semibold text-reward">
+                        <Sparkles className="w-3 h-3" />
+                        Основатель
+                      </span>
+                    )}
                   </div>
                   <div className="ml-auto">
                     <TinyRating targetType="user" targetId={course.owner_id} />

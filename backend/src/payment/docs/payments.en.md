@@ -1,19 +1,27 @@
 # Payments (module `payment`)
 
 This module handles purchasing paid courses: checkout, payment-provider webhook
-processing, enrolling the user, purchase history, and author payout details.
+processing, enrolling the user, and purchase history.
 
 The default provider is **YooKassa (YooMoney)**, the payment method is **SBP (QR)**
 with a fallback to other methods (bank card / wallet). For local development
 without real credentials there is a **mock mode**.
 
+> **Monetization model (pre-launch).** During the beta the platform is the single
+> merchant: a YooKassa shop receives **100%** of every purchase (minus the
+> YooKassa processing fee), and the platform commission is **0%**
+> (`PAYMENT_PLATFORM_FEE_PERCENT=0`). Author payouts are **manual / deferred** —
+> see [Business model (pre-launch)](#business-model-pre-launch).
+
 ## Data model
 
 - `Payment` (`models.py`) — one row per purchase attempt. Statuses:
   `pending` → `succeeded` (on the `payment.succeeded` webhook) or `failed`.
-  Stores the amount, `platform_fee` (platform commission) and `author_amount`
-  (author share).
-- `PayoutAccount` — an author's payout details (card or phone for SBP payouts).
+  Stores the amount plus `platform_fee` / `author_amount` as **accounting only**
+  (they are computed, but the split is **not** executed — all money goes to the
+  platform shop).
+- `PayoutAccount` — an author's payout details (card or phone for SBP payouts),
+  recorded for **future** manual payouts; no automatic payout is executed.
 
 ## Purchase flow
 
@@ -81,7 +89,7 @@ Names match the `PaymentSettings` fields in `src/core/config.py` (read from
 | `MOCK_CONFIRMATION_URL` | `http://localhost:5173/mock-payment` | Mock only: URL the mock "redirects" to, opening the payment simulator page. |
 | `MOCK_RAISE_NETWORK` | `false` | Mock only: `true` — simulate a provider network error (payment is marked `failed`, `PaymentProviderError` raised). |
 | `PAYMENT_WEBHOOK_DEV_ACCEPT` | `false` | Dev only: when `true`, the webhook is accepted from `localhost/127.0.0.1/::1` (real YooKassa webhooks cannot reach a local dev server). |
-| `PAYMENT_PLATFORM_FEE_PERCENT` | `10.0` | Platform commission (% of the purchase amount). `platform_fee = round(amount * fee% / 100)`. |
+| `PAYMENT_PLATFORM_FEE_PERCENT` | `0.0` | Platform commission (% of the purchase amount). **0 during the beta** — `platform_fee = round(amount * fee% / 100)`. |
 | `PAYOUT_PLATFORM_RECIPIENT` | `""` | Payout details of the platform amount recipient (shown via `GET /api/v1/payments/config`). |
 | `YOOKASSA_TRUSTED_PROXY_IPS` | `""` | Comma-separated IPs of trusted reverse proxies / load balancers (e.g. nginx, traefik). When the socket peer is one of them, the real client IP is resolved from the `X-Forwarded-For` chain so the YooKassa IP whitelist works behind a proxy. Leave empty when the webhook reaches uvicorn directly. |
 
@@ -131,6 +139,38 @@ Scenarios:
    to the backend (requires `PAYMENT_WEBHOOK_DEV_ACCEPT=true`), the user is
    enrolled and redirected to the course page.
 
+## Business model (pre-launch)
+
+The platform runs a **"Beta Founders"** program until public release:
+
+- **0% platform commission during beta** — all sale proceeds go to the platform
+  (the single YooKassa shop) for product development. Authors are **not** paid
+  while the beta is open; manual payouts are introduced after the standard
+  monetization model launches.
+- **Lifetime Founder status** (`User.is_founder`) is granted automatically to an
+  author the moment their course is **published** while the program is open. It
+  is recorded permanently so it is unambiguous later who became a Founder.
+- **Program window** (configurable via `settings.founder`,
+  `src/core/config.py`): the program closes only when **both** the cumulative
+  SUCCEEDED revenue reaches `FOUNDER_PROGRAM_REVENUE_LIMIT` (50 000 ₽) **and**
+  `FOUNDER_PROGRAM_MAX_AUTHORS` (30 authors) have been granted. Reaching only one
+  limit does not close the program; there is no date. The money/author limits
+  keep the window from being gamed by empty courses.
+- **Founder perks (after release, deferred):** lifetime `FOUNDER_COMMISSION_PERCENT`
+  (5% vs. the standard 10%), a recommendation boost in the feed for 12 months,
+  a custom sales landing page, no payout minimum for 12 months, and priority
+  support. These are not implemented in code yet.
+
+Where it lives:
+
+- `settings.founder` (`FOUNDER_PROGRAM_ENABLED`, `FOUNDER_PROGRAM_REVENUE_LIMIT`,
+  `FOUNDER_PROGRAM_MAX_AUTHORS`, `FOUNDER_COMMISSION_PERCENT`).
+- `src/founder/service.py` — `grant_founder_if_eligible()`, called on course
+  publish (`CourseService.approve_course`) and on AI auto-publish
+  (`ai.course_review.task`).
+- `User.is_founder` / `founder_at`; `CourseSchema.owner_is_founder` (shown as the
+  «Founder» badge next to the author and in the author's profile).
+
 ## Limitations & notes
 
 - The YooKassa webhook is not HMAC-signed, so the body is never trusted alone.
@@ -141,4 +181,6 @@ Scenarios:
   `request.client.host` is the proxy and YooKassa's real IP is lost.
 - In a YooKassa test shop the "SBP unavailable" text/code may differ — then the
   fallback won't trigger (hint list is `_SBP_UNAVAILABLE_HINTS`).
+- **No author auto-payout.** `PayoutAccount` is stored, but money is never
+  transferred to authors in beta; the platform keeps the proceeds.
 - `.env` is never committed — secrets (`YOOKASSA_SECRET_KEY`) stay local only.

@@ -43,9 +43,9 @@ export function LoginForm() {
         <div className="flex flex-col gap-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Login to your account</CardTitle>
+                    <CardTitle>Вход в аккаунт</CardTitle>
                     <CardDescription>
-                        Enter your username below to login to your account
+                        Введите имя пользователя и пароль, чтобы войти в свою учётную запись.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -56,13 +56,13 @@ export function LoginForm() {
                                 control={form.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor={field.name}>Username</FieldLabel>
+                                        <FieldLabel htmlFor={field.name}>Имя пользователя</FieldLabel>
                                         <Input
                                             {...field}
                                             id={field.name}
                                             aria-invalid={fieldState.invalid}
                                             type="text"
-                                            placeholder="Enter your username"
+                                            placeholder="Введите имя пользователя"
                                         />
                                         {fieldState.invalid && (
                                             <FieldError
@@ -78,12 +78,12 @@ export function LoginForm() {
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <div className="flex items-center">
-                                            <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                                            <FieldLabel htmlFor={field.name}>Пароль</FieldLabel>
                                             <Link
                                                 to={ROUTES.FORGOT_PASSWORD}
                                                 className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                                             >
-                                                Forgot your password?
+                                                Забыли пароль?
                                             </Link>
                                         </div>
                                         <Input
@@ -104,12 +104,18 @@ export function LoginForm() {
                                 <Button type="submit" disabled={loginMutation.isPending}>
                                     {loginMutation.isPending
                                         ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        : "Login"
+                                        : "Войти"
                                     }
                                 </Button>
+                                <p className="text-center text-[11px] text-muted-foreground">
+                                    Регистрируясь, вы принимаете{" "}
+                                    <Link to={ROUTES.PRIVACY} className="underline-offset-2 hover:underline">Политику конфиденциальности</Link>{" "}
+                                    и{" "}
+                                    <Link to={ROUTES.TERMS} className="underline-offset-2 hover:underline">Условия использования</Link>.
+                                </p>
                                 <FieldDescription className="text-center">
-                                    Don&apos;t have an account?{" "}
-                                    <Link to={ROUTES.SIGNUP}>Sign up</Link>
+                                    Нет аккаунта?{" "}
+                                    <Link to={ROUTES.SIGNUP}>Зарегистрироваться</Link>
                                 </FieldDescription>
                             </Field>
                         </FieldGroup>

@@ -1,3 +1,6 @@
+import { Link } from "@tanstack/react-router"
+import { ROUTES } from "@/routes"
+
 export function Footer() {
   return (
     <footer className="w-full bg-card text-card-foreground py-6 px-6 shrink-0 transition-colors">
@@ -7,24 +10,18 @@ export function Footer() {
 
         {/* Навигационные ссылки подвала */}
         <div className="flex items-center gap-6 text-xs">
-          <a
-            href="#"
-            className="hover:text-foreground transition-colors"
-          >
-            Помощь
-          </a>
-          <a
-            href="#"
+          <Link
+            to={ROUTES.TERMS}
             className="hover:text-foreground transition-colors"
           >
             Условия использования
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to={ROUTES.PRIVACY}
             className="hover:text-foreground transition-colors"
           >
             Конфиденциальность
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

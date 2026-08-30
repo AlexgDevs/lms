@@ -1579,7 +1579,8 @@ export const createCheckoutApiV1PaymentsCoursesCourseIdCheckoutPostMutation = (o
  *
  * Handle the YooKassa webhook (payment.succeeded → enroll).
  *
- * Only accepts requests from YooKassa's official IP ranges (IP whitelist).
+ * The IP whitelist is defense-in-depth; the authoritative check is the
+ * authenticated ``GET /v3/payments/{id}`` re-verification inside the service.
  */
 export const yookassaWebhookApiV1PaymentsWebhookYookassaPostMutation = (options?: Partial<Options<YookassaWebhookApiV1PaymentsWebhookYookassaPostData>>): UseMutationOptions<YookassaWebhookApiV1PaymentsWebhookYookassaPostResponse, YookassaWebhookApiV1PaymentsWebhookYookassaPostError, Options<YookassaWebhookApiV1PaymentsWebhookYookassaPostData>> => {
     const mutationOptions: UseMutationOptions<YookassaWebhookApiV1PaymentsWebhookYookassaPostResponse, YookassaWebhookApiV1PaymentsWebhookYookassaPostError, Options<YookassaWebhookApiV1PaymentsWebhookYookassaPostData>> = {

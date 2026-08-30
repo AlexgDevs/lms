@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, Award, BookOpen, ChevronRight } from "lucide-react";
+import { ArrowRight, Award, BookOpen, ChevronRight, Sparkles } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import useAuth from "@/features/auth/api/useAuth";
 import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
@@ -38,6 +38,13 @@ export function ProfilePage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6 py-2">
       <ProfileHeader user={user} />
+
+      {user?.is_founder && (
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-reward/10 px-3 py-1.5 text-xs font-semibold text-reward">
+          <Sparkles className="w-3.5 h-3.5" />
+          Вы — Основатель платформы · пожизненная комиссия 5%
+        </div>
+      )}
 
       {enrolledCourses.length > 0 && (
         <section className="space-y-3">

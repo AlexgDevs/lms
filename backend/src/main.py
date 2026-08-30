@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from starlette.responses import Response
+from starlette.types import Scope
 
 from src.core.config import settings
 from src.core.events.protocol import InMemoryEvent
@@ -35,6 +36,17 @@ def _is_global_limit_exempt(path: str) -> bool:
     if path == "/hello" or path == "/":
         return True
     return path.startswith(f"{settings.app.API_V1_STR}/openapi.json")
+
+
+class MediaStaticFiles(StaticFiles):
+    """Serves the local media store with ``nosniff`` so a spoofed content type
+    cannot be re-interpreted by the browser (e.g. uploaded as an image but
+    rendered as HTML)."""
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        response = await super().get_response(path, scope)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        return response
 
 
 @asynccontextmanager
@@ -112,7 +124,7 @@ def init_app() -> FastAPI:
     if settings.storage.STORAGE_BACKEND == "local":
         root = settings.storage.storage_root_path
         root.mkdir(parents=True, exist_ok=True)
-        app.mount("/media", StaticFiles(directory=str(root)), name="media")
+        app.mount("/media", MediaStaticFiles(directory=str(root)), name="media")
 
     init_errors_handler(app)
     app.include_router(app_v1)

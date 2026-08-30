@@ -17,6 +17,9 @@ class UserSchema(BaseSchema):
     is_staff: bool = False
     ai_course_generations: int = 0
     is_verified: bool = False
+    is_founder: bool = False
+    founder_at: datetime | None = None
+    notifications_enabled: bool = True
 
 
 class AiGenerationQuotaSchema(BaseSchema):
@@ -36,12 +39,16 @@ class UserMeSchema(UserPublicSchema):
     email: str
     is_staff: bool = False
     is_verified: bool = False
+    is_founder: bool = False
+    founder_at: datetime | None = None
+    notifications_enabled: bool = True
 
 
 class UserUpdateRequestSchema(BaseSchema):
     username: str | None = None
     email: EmailStr | None = None
     avatar_url: str | None = None
+    notifications_enabled: bool | None = None
 
 
 class UserVerifyUpdateSchema(BaseSchema):

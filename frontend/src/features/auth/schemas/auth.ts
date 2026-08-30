@@ -3,27 +3,33 @@ import * as z from "zod"
 const loginFormSchema = z.object({
     username: z
         .string()
-        .min(1, "Username is required"),
+        .min(1, "Имя пользователя обязательно"),
     password: z
         .string()
-        .min(6, "Password is required")
+        .min(6, "Пароль обязателен")
 })
 
 const signupFormSchema = z
     .object({
-        email: z.email(),
-        username: z.string().min(1, { message: "Username is required" }),
-        name: z.string().min(1, { message: "Full Name is required" }),
+        email: z.email("Введите корректный адрес электронной почты"),
+        username: z.string().min(1, { message: "Имя пользователя обязательно" }),
+        name: z.string().min(1, { message: "Имя и фамилия обязательны" }),
         password: z
             .string()
-            .min(1, { message: "Password is required" })
-            .min(6, { message: "Password must be at least 6 characters" }),
+            .min(1, { message: "Пароль обязателен" })
+            .min(6, { message: "Пароль должен быть не короче 6 символов" }),
         confirmPassword: z
             .string()
-            .min(1, { message: "Password confirmation is required" }),
+            .min(1, { message: "Подтверждение пароля обязательно" }),
+        acceptPrivacy: z.boolean().refine((v) => v, {
+            message: "Необходимо принять Политику конфиденциальности",
+        }),
+        acceptTerms: z.boolean().refine((v) => v, {
+            message: "Необходимо принять Условия использования",
+        }),
     })
     .refine((data) => data.password === data.confirmPassword, {
-        message: "The passwords don't match",
+        message: "Пароли не совпадают",
         path: ["confirmPassword"],
     })
 

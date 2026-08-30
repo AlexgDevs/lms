@@ -1,7 +1,7 @@
 import { Controller, useForm } from "react-hook-form"
-import { useNavigate } from "@tanstack/react-router"
+import { useNavigate, Link } from "@tanstack/react-router"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2, Plus, Sparkles } from "lucide-react"
+import { ArrowRight, Loader2, Plus, Sparkles } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -84,6 +84,12 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
           <CardTitle className="text-xl font-bold">Создание курса</CardTitle>
           <CardDescription>
             Заполните основные данные. Позже их можно будет отредактировать.
+            <Link
+              to={ROUTES.TEACHING_GUIDE}
+              className="ml-1.5 inline-flex items-center gap-0.5 font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Как создавать курсы <ArrowRight className="h-3 w-3" />
+            </Link>
           </CardDescription>
         </CardHeader>
         <CardContent>

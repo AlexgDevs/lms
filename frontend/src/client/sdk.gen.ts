@@ -1001,7 +1001,8 @@ export class PaymentService {
      *
      * Handle the YooKassa webhook (payment.succeeded → enroll).
      *
-     * Only accepts requests from YooKassa's official IP ranges (IP whitelist).
+     * The IP whitelist is defense-in-depth; the authoritative check is the
+     * authenticated ``GET /v3/payments/{id}`` re-verification inside the service.
      */
     public static yookassaWebhookApiV1PaymentsWebhookYookassaPost<ThrowOnError extends boolean = false>(options: Options<YookassaWebhookApiV1PaymentsWebhookYookassaPostData, ThrowOnError>): RequestResult<YookassaWebhookApiV1PaymentsWebhookYookassaPostResponses, YookassaWebhookApiV1PaymentsWebhookYookassaPostErrors, ThrowOnError> {
         return (options.client ?? client).post<YookassaWebhookApiV1PaymentsWebhookYookassaPostResponses, YookassaWebhookApiV1PaymentsWebhookYookassaPostErrors, ThrowOnError>({

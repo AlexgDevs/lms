@@ -1226,6 +1226,11 @@ export const CourseSchemaSchema = {
             title: 'Owner Username',
             default: ''
         },
+        owner_is_founder: {
+            type: 'boolean',
+            title: 'Owner Is Founder',
+            default: false
+        },
         title: {
             type: 'string',
             title: 'Title'
@@ -1494,6 +1499,11 @@ export const CourseUserBriefSchemaSchema = {
             type: 'string',
             title: 'Owner Username',
             default: ''
+        },
+        owner_is_founder: {
+            type: 'boolean',
+            title: 'Owner Is Founder',
+            default: false
         },
         title: {
             type: 'string',
@@ -3263,6 +3273,28 @@ export const UserMeSchemaSchema = {
             type: 'boolean',
             title: 'Is Verified',
             default: false
+        },
+        is_founder: {
+            type: 'boolean',
+            title: 'Is Founder',
+            default: false
+        },
+        founder_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Founder At'
+        },
+        notifications_enabled: {
+            type: 'boolean',
+            title: 'Notifications Enabled',
+            default: true
         }
     },
     type: 'object',
@@ -3374,6 +3406,17 @@ export const UserUpdateRequestSchemaSchema = {
                 }
             ],
             title: 'Avatar Url'
+        },
+        notifications_enabled: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notifications Enabled'
         }
     },
     type: 'object',

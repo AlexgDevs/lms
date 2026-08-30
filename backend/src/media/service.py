@@ -1,3 +1,4 @@
+import mimetypes
 import os
 import uuid
 from uuid import UUID
@@ -21,6 +22,36 @@ from src.media.schemas import (
     MediaUrlResponseSchema,
 )
 from src.media.unit_of_work import MediaUnitOfWork
+
+# Server-side extension assignment per allowed content type. The client-supplied
+# filename extension is never used for the storage key, so a spoofed `.html`/
+# `.php` upload cannot be served as an executable content type.
+_MEDIA_EXTENSION_BY_TYPE: dict[str, str] = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/gif": ".gif",
+    "image/avif": ".avif",
+    "video/mp4": ".mp4",
+    "video/webm": ".webm",
+    "video/quicktime": ".mov",
+    "audio/mpeg": ".mp3",
+    "audio/ogg": ".ogg",
+    "audio/wav": ".wav",
+    "application/pdf": ".pdf",
+    "text/plain": ".txt",
+    "text/markdown": ".md",
+}
+
+# Leading-byte signatures of active content that must never be served as an
+# uploaded "media" file (defense-in-depth against spoofed content types).
+_DANGEROUS_SIGNATURES: tuple[bytes, ...] = (
+    b"<!doctype html",
+    b"<html",
+    b"<?php",
+    b"<script",
+    b"<svg",
+)
 
 
 class MediaService(BaseService):
@@ -52,9 +83,10 @@ class MediaService(BaseService):
         """
         self._validate_size(len(data))
         self._validate_content_type(content_type)
+        self._reject_dangerous_bytes(data)
 
         media_id = uuid.uuid4()
-        extension = os.path.splitext(original_name)[1].lower()
+        extension = self._safe_extension(content_type)
         storage_key = f"media/{media_id}{extension}"
 
         await self.storage.upload_bytes(storage_key, data, content_type)
@@ -183,3 +215,14 @@ class MediaService(BaseService):
         if prefix in allowed:
             return
         raise MediaTypeNotAllowedError
+
+    def _reject_dangerous_bytes(self, data: bytes) -> None:
+        head = data[:512].lstrip().lower()
+        if any(head.startswith(sig) for sig in _DANGEROUS_SIGNATURES):
+            raise MediaTypeNotAllowedError
+
+    def _safe_extension(self, content_type: str) -> str:
+        extension = _MEDIA_EXTENSION_BY_TYPE.get(content_type)
+        if extension is not None:
+            return extension
+        return mimetypes.guess_extension(content_type) or ".bin"

@@ -14,7 +14,7 @@ import {
   BookOpen
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useNavigate } from "@tanstack/react-router"
+import { useNavigate, Link } from "@tanstack/react-router"
 import { useCreatedCoursesPage } from "@/features/teaching/api/useCourses"
 import { CreateCourseForm } from "@/features/teaching/components/CreateCourseForm"
 import { CourseGenerateCard } from "@/features/teaching/components/CourseGenerateCard"
@@ -132,6 +132,12 @@ export function TeachingPage() {
             <Plus className="w-4 h-4" />
             <span>Создать первый курс</span>
           </Button>
+          <Link
+            to={ROUTES.TEACHING_GUIDE}
+            className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline transition-colors"
+          >
+            Узнать, как создавать курсы
+          </Link>
         </div>
       ) : (
         <>

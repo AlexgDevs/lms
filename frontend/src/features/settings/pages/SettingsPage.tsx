@@ -1,19 +1,17 @@
 import { useState } from "react"
 import type { ReactNode } from "react"
 import type { LucideIcon } from "lucide-react"
-import { Bell, CreditCard, KeyRound, Settings, Shield } from "lucide-react"
+import { Bell, KeyRound, Settings, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ProfileSettingsForm } from "@/features/settings/components/ProfileSettingsForm"
-import { PaymentDetailsPanel } from "@/features/settings/components/PaymentDetailsPanel"
 import { NotificationsPanel } from "@/features/settings/components/NotificationsPanel"
 import { PasswordChangePanel } from "@/features/settings/components/PasswordChangePanel"
 import { SessionsPanel } from "@/features/settings/components/SessionsPanel"
 
-type SettingsTab = "profile" | "payment" | "password" | "notifications" | "sessions"
+type SettingsTab = "profile" | "password" | "notifications" | "sessions"
 
 const TABS: { id: SettingsTab; label: string; icon: LucideIcon }[] = [
     { id: "profile", label: "Профиль", icon: Settings },
-    { id: "payment", label: "Реквизиты", icon: CreditCard },
     { id: "password", label: "Пароль", icon: KeyRound },
     { id: "notifications", label: "Уведомления", icon: Bell },
     { id: "sessions", label: "Сессии", icon: Shield },
@@ -57,11 +55,6 @@ export function SettingsPage() {
                     {tab === "profile" && (
                         <SectionCard>
                             <ProfileSettingsForm />
-                        </SectionCard>
-                    )}
-                    {tab === "payment" && (
-                        <SectionCard>
-                            <PaymentDetailsPanel />
                         </SectionCard>
                     )}
                     {tab === "password" && (

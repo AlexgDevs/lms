@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 
 from src.core.config import settings
 from src.user.dependencies import (
@@ -84,3 +84,16 @@ async def change_password(
         user.id, payload.current_password, payload.new_password
     )
     return {"message": "Password has been changed successfully."}
+
+
+@router.delete(
+    "/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete current account",
+)
+async def delete_current_user(
+    user: AuthenticatedUserIdDep,
+    service: UserServiceDep,
+) -> None:
+    """Deactivate and anonymize the current account (soft deletion)."""
+    await service.delete_me(user)

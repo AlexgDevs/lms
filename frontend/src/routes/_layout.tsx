@@ -3,7 +3,7 @@ import { isLoggedIn } from "@/features/auth/api/useAuth";
 import { ROUTES } from "@/routes.ts";
 import { Layout } from "@/components/layout/Layout";
 
-const PUBLIC_ROUTES = [ROUTES.DASHBOARD, "/about", ROUTES.CATALOG];
+const PUBLIC_ROUTES = [ROUTES.DASHBOARD, "/about", ROUTES.CATALOG, ROUTES.PRIVACY, ROUTES.TERMS];
 
 export const Route = createFileRoute("/_layout")({
   beforeLoad: ({ location }) => {

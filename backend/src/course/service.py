@@ -52,6 +52,7 @@ from src.course.schemas import (
     CourseUserBriefSchema,
 )
 from src.course.unit_of_work import CourseUnitOfWork
+from src.founder.service import grant_founder_if_eligible
 from src.media.service import MediaService
 from src.payment.enums import PaymentStatus
 from src.payment.models import Payment
@@ -75,11 +76,13 @@ class CourseService(BaseService):
         self.media_service = media_service
         super().__init__(session, event_bus)
 
-    async def _resolve_owner_username(self, owner_id: UUID) -> str:
+    async def _resolve_owner_meta(self, owner_id: UUID) -> tuple[str, bool]:
         user = (
             await self.session.execute(select(User).where(User.id == owner_id))
         ).scalar_one_or_none()
-        return user.username if user else ""
+        if not user:
+            return "", False
+        return user.username, user.is_founder
 
     async def _is_paid(self, course_id: UUID, user_id: UUID) -> bool:
         result = await self.session.execute(
@@ -313,6 +316,8 @@ class CourseService(BaseService):
                 )
             )
 
+        await grant_founder_if_eligible(self.session, course.owner_id)
+
         return course
 
     async def reject_course(
@@ -510,9 +515,12 @@ class CourseService(BaseService):
                     )
                     if not is_owner and not is_member:
                         raise CourseNotFoundError
-                owner_username = await self._resolve_owner_username(course.owner_id)
+                owner_username, owner_is_founder = await self._resolve_owner_meta(
+                    course.owner_id
+                )
                 update: dict[str, Any] = {
                     "owner_username": owner_username,
+                    "owner_is_founder": owner_is_founder,
                     "tgp_outdated": await course_tgp_outdated(self.session, course),
                 }
                 if user_id is not None:
@@ -597,8 +605,15 @@ class CourseService(BaseService):
         if not course:
             raise CourseNotFoundError
 
-        owner_username = await self._resolve_owner_username(course.owner_id)
-        return course.model_copy(update={"owner_username": owner_username})
+        owner_username, owner_is_founder = await self._resolve_owner_meta(
+            course.owner_id
+        )
+        return course.model_copy(
+            update={
+                "owner_username": owner_username,
+                "owner_is_founder": owner_is_founder,
+            }
+        )
 
     async def get_author_course_by_id(
         self, course_id: UUID, user_id: UUID
@@ -609,10 +624,13 @@ class CourseService(BaseService):
         if not course:
             raise CourseNotFoundError
 
-        owner_username = await self._resolve_owner_username(course.owner_id)
+        owner_username, owner_is_founder = await self._resolve_owner_meta(
+            course.owner_id
+        )
         return course.model_copy(
             update={
                 "owner_username": owner_username,
+                "owner_is_founder": owner_is_founder,
                 "tgp_outdated": await course_tgp_outdated(self.session, course),
             }
         )

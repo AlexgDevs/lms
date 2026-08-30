@@ -32,6 +32,7 @@ from src.core.config import settings
 from src.course.category.models import Category
 from src.course.enums import CourseStatus
 from src.course.models import Course
+from src.founder.service import grant_founder_if_eligible
 from src.lesson.models import Lesson
 from src.module.models import Module
 
@@ -266,6 +267,8 @@ async def _run_review(course_id: UUID) -> None:
                     "Course review flagged {}: {}", course_id, course.moderation_reason
                 )
             await session.commit()
+            if result.approved:
+                await grant_founder_if_eligible(session, course.owner_id)
     finally:
         await _release_lock_if_owned(redis, lock_key, lock_token)
         await redis.aclose()

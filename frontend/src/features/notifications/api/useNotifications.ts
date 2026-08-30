@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast } from "@/lib/toast"
 
@@ -40,6 +40,25 @@ export const useNotifications = (limit = 20, offset = 0) => {
       )
       if (!res.ok) throw new Error("Failed to load notifications")
       return res.json()
+    },
+  })
+}
+
+export const useNotificationsInfinite = (pageSize = 20) => {
+  return useInfiniteQuery<NotificationListResponse>({
+    queryKey: ["notifications", "infinite", pageSize],
+    queryFn: async ({ pageParam }) => {
+      const res = await fetch(
+        `${API_BASE}/notifications?limit=${pageSize}&offset=${pageParam}`,
+        { headers: authHeaders() }
+      )
+      if (!res.ok) throw new Error("Failed to load notifications")
+      return res.json()
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((n, page) => n + page.items.length, 0)
+      return loaded < lastPage.total ? loaded : undefined
     },
   })
 }

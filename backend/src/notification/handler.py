@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from loguru import logger
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
 from src.core.events.event import (
@@ -25,6 +26,7 @@ from src.core.websocket.manager import ConnectionManager
 from src.notification.repository import NotificationRepository
 from src.notification.schemas import NotificationCreateSchema
 from src.notification.service import NotificationService
+from src.user.models import User
 
 EventMap = dict[type[DomainEvent], tuple[str, str, str | None]]
 """Maps event type → (title, body_template, link_template).
@@ -188,13 +190,30 @@ class NotificationHandler:
         link = _resolve_template(link_template, event) if link_template else None
 
         user_ids = _get_user_ids_for_notification(event)
+        if not user_ids:
+            return
 
         async with self._session_factory() as session:
+            enabled_ids = set(
+                (
+                    await session.execute(
+                        select(User.id).where(
+                            User.id.in_(user_ids),
+                            User.notifications_enabled.is_(True),
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+
             service = NotificationService(
                 session=session,
                 notification_repository=NotificationRepository(session),
             )
             for user_id in user_ids:
+                if user_id not in enabled_ids:
+                    continue
                 notification = await service.create(
                     NotificationCreateSchema(
                         user_id=user_id,

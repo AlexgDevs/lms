@@ -835,6 +835,10 @@ export type CourseSchema = {
      */
     owner_username?: string;
     /**
+     * Owner Is Founder
+     */
+    owner_is_founder?: boolean;
+    /**
      * Title
      */
     title: string;
@@ -970,6 +974,10 @@ export type CourseUserBriefSchema = {
      * Owner Username
      */
     owner_username?: string;
+    /**
+     * Owner Is Founder
+     */
+    owner_is_founder?: boolean;
     /**
      * Title
      */
@@ -2053,6 +2061,18 @@ export type UserMeSchema = {
      * Is Verified
      */
     is_verified?: boolean;
+    /**
+     * Is Founder
+     */
+    is_founder?: boolean;
+    /**
+     * Founder At
+     */
+    founder_at?: string | null;
+    /**
+     * Notifications Enabled
+     */
+    notifications_enabled?: boolean;
 };
 
 /**
@@ -2111,6 +2131,10 @@ export type UserUpdateRequestSchema = {
      * Avatar Url
      */
     avatar_url?: string | null;
+    /**
+     * Notifications Enabled
+     */
+    notifications_enabled?: boolean | null;
 };
 
 /**

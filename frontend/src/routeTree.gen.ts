@@ -18,8 +18,10 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutCatalogRouteImport } from './routes/_layout/catalog'
+import { Route as LayoutPrivacyRouteImport } from './routes/_layout/privacy'
 import { Route as LayoutProfileRouteImport } from './routes/_layout/profile'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutTermsRouteImport } from './routes/_layout/terms'
 import { Route as LayoutAdminModerationRouteImport } from './routes/_layout/admin.moderation'
 import { Route as LayoutCoursesCourseIdRouteImport } from './routes/_layout/courses.$courseId'
 import { Route as LayoutLearnCourseIdRouteImport } from './routes/_layout/learn.$courseId'
@@ -27,6 +29,7 @@ import { Route as LayoutProfileIndexRouteImport } from './routes/_layout/profile
 import { Route as LayoutProfilePaymentsRouteImport } from './routes/_layout/profile/payments'
 import { Route as LayoutTeachingIndexRouteImport } from './routes/_layout/teaching.index'
 import { Route as LayoutTeachingCoursesRouteImport } from './routes/_layout/teaching.courses'
+import { Route as LayoutTeachingGuideRouteImport } from './routes/_layout/teaching.guide'
 import { Route as LayoutLearnCourseIdIndexRouteImport } from './routes/_layout/learn.$courseId.index'
 import { Route as LayoutLearnCourseIdLessonIdRouteImport } from './routes/_layout/learn.$courseId.$lessonId'
 import { Route as LayoutTeachingCoursesCourseIdRouteImport } from './routes/_layout/teaching.courses.$courseId'
@@ -77,6 +80,11 @@ const LayoutCatalogRoute = LayoutCatalogRouteImport.update({
   path: '/catalog',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutPrivacyRoute = LayoutPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutProfileRoute = LayoutProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -85,6 +93,11 @@ const LayoutProfileRoute = LayoutProfileRouteImport.update({
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutTermsRoute = LayoutTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutAdminModerationRoute = LayoutAdminModerationRouteImport.update({
@@ -120,6 +133,11 @@ const LayoutTeachingIndexRoute = LayoutTeachingIndexRouteImport.update({
 const LayoutTeachingCoursesRoute = LayoutTeachingCoursesRouteImport.update({
   id: '/teaching/courses',
   path: '/teaching/courses',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutTeachingGuideRoute = LayoutTeachingGuideRouteImport.update({
+  id: '/teaching/guide',
+  path: '/teaching/guide',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutLearnCourseIdIndexRoute =
@@ -162,13 +180,16 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/catalog': typeof LayoutCatalogRoute
+  '/privacy': typeof LayoutPrivacyRoute
   '/profile': typeof LayoutProfileRouteWithChildren
   '/settings': typeof LayoutSettingsRoute
+  '/terms': typeof LayoutTermsRoute
   '/admin/moderation': typeof LayoutAdminModerationRoute
   '/courses/$courseId': typeof LayoutCoursesCourseIdRoute
   '/learn/$courseId': typeof LayoutLearnCourseIdRouteWithChildren
   '/profile/payments': typeof LayoutProfilePaymentsRoute
   '/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
+  '/teaching/guide': typeof LayoutTeachingGuideRoute
   '/profile/': typeof LayoutProfileIndexRoute
   '/teaching/': typeof LayoutTeachingIndexRoute
   '/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
@@ -185,12 +206,15 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/catalog': typeof LayoutCatalogRoute
+  '/privacy': typeof LayoutPrivacyRoute
   '/settings': typeof LayoutSettingsRoute
+  '/terms': typeof LayoutTermsRoute
   '/': typeof LayoutIndexRoute
   '/admin/moderation': typeof LayoutAdminModerationRoute
   '/courses/$courseId': typeof LayoutCoursesCourseIdRoute
   '/profile/payments': typeof LayoutProfilePaymentsRoute
   '/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
+  '/teaching/guide': typeof LayoutTeachingGuideRoute
   '/profile': typeof LayoutProfileIndexRoute
   '/teaching': typeof LayoutTeachingIndexRoute
   '/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
@@ -208,14 +232,17 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_layout/catalog': typeof LayoutCatalogRoute
+  '/_layout/privacy': typeof LayoutPrivacyRoute
   '/_layout/profile': typeof LayoutProfileRouteWithChildren
   '/_layout/settings': typeof LayoutSettingsRoute
+  '/_layout/terms': typeof LayoutTermsRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/admin/moderation': typeof LayoutAdminModerationRoute
   '/_layout/courses/$courseId': typeof LayoutCoursesCourseIdRoute
   '/_layout/learn/$courseId': typeof LayoutLearnCourseIdRouteWithChildren
   '/_layout/profile/payments': typeof LayoutProfilePaymentsRoute
   '/_layout/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
+  '/_layout/teaching/guide': typeof LayoutTeachingGuideRoute
   '/_layout/profile/': typeof LayoutProfileIndexRoute
   '/_layout/teaching/': typeof LayoutTeachingIndexRoute
   '/_layout/learn/$courseId/$lessonId': typeof LayoutLearnCourseIdLessonIdRoute
@@ -235,13 +262,16 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/catalog'
+    | '/privacy'
     | '/profile'
     | '/settings'
+    | '/terms'
     | '/admin/moderation'
     | '/courses/$courseId'
     | '/learn/$courseId'
     | '/profile/payments'
     | '/teaching/courses'
+    | '/teaching/guide'
     | '/profile/'
     | '/teaching/'
     | '/learn/$courseId/$lessonId'
@@ -258,12 +288,15 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/catalog'
+    | '/privacy'
     | '/settings'
+    | '/terms'
     | '/'
     | '/admin/moderation'
     | '/courses/$courseId'
     | '/profile/payments'
     | '/teaching/courses'
+    | '/teaching/guide'
     | '/profile'
     | '/teaching'
     | '/learn/$courseId/$lessonId'
@@ -280,14 +313,17 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/_layout/catalog'
+    | '/_layout/privacy'
     | '/_layout/profile'
     | '/_layout/settings'
+    | '/_layout/terms'
     | '/_layout/'
     | '/_layout/admin/moderation'
     | '/_layout/courses/$courseId'
     | '/_layout/learn/$courseId'
     | '/_layout/profile/payments'
     | '/_layout/teaching/courses'
+    | '/_layout/teaching/guide'
     | '/_layout/profile/'
     | '/_layout/teaching/'
     | '/_layout/learn/$courseId/$lessonId'
@@ -372,6 +408,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCatalogRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/privacy': {
+      id: '/_layout/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof LayoutPrivacyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/profile': {
       id: '/_layout/profile'
       path: '/profile'
@@ -384,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof LayoutSettingsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/terms': {
+      id: '/_layout/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof LayoutTermsRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/admin/moderation': {
@@ -433,6 +483,13 @@ declare module '@tanstack/react-router' {
       path: '/teaching/courses'
       fullPath: '/teaching/courses'
       preLoaderRoute: typeof LayoutTeachingCoursesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/teaching/guide': {
+      id: '/_layout/teaching/guide'
+      path: '/teaching/guide'
+      fullPath: '/teaching/guide'
+      preLoaderRoute: typeof LayoutTeachingGuideRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/learn/$courseId/': {
@@ -534,25 +591,31 @@ const LayoutTeachingCoursesRouteWithChildren =
 
 interface LayoutRouteChildren {
   LayoutCatalogRoute: typeof LayoutCatalogRoute
+  LayoutPrivacyRoute: typeof LayoutPrivacyRoute
   LayoutProfileRoute: typeof LayoutProfileRouteWithChildren
   LayoutSettingsRoute: typeof LayoutSettingsRoute
+  LayoutTermsRoute: typeof LayoutTermsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAdminModerationRoute: typeof LayoutAdminModerationRoute
   LayoutCoursesCourseIdRoute: typeof LayoutCoursesCourseIdRoute
   LayoutLearnCourseIdRoute: typeof LayoutLearnCourseIdRouteWithChildren
   LayoutTeachingCoursesRoute: typeof LayoutTeachingCoursesRouteWithChildren
+  LayoutTeachingGuideRoute: typeof LayoutTeachingGuideRoute
   LayoutTeachingIndexRoute: typeof LayoutTeachingIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCatalogRoute: LayoutCatalogRoute,
+  LayoutPrivacyRoute: LayoutPrivacyRoute,
   LayoutProfileRoute: LayoutProfileRouteWithChildren,
   LayoutSettingsRoute: LayoutSettingsRoute,
+  LayoutTermsRoute: LayoutTermsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAdminModerationRoute: LayoutAdminModerationRoute,
   LayoutCoursesCourseIdRoute: LayoutCoursesCourseIdRoute,
   LayoutLearnCourseIdRoute: LayoutLearnCourseIdRouteWithChildren,
   LayoutTeachingCoursesRoute: LayoutTeachingCoursesRouteWithChildren,
+  LayoutTeachingGuideRoute: LayoutTeachingGuideRoute,
   LayoutTeachingIndexRoute: LayoutTeachingIndexRoute,
 }
 

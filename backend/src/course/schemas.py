@@ -15,6 +15,7 @@ class CourseSchema(BaseSchema):
     id: UUID
     owner_id: UUID
     owner_username: str = ""
+    owner_is_founder: bool = False
     title: str
     description: str | None
     cover_url: str | None

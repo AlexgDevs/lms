@@ -1,6 +1,7 @@
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { Link } from "@tanstack/react-router"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button"
 import {
@@ -34,23 +35,28 @@ export function SignupForm() {
             email: "",
             password: "",
             confirmPassword: "",
+            acceptPrivacy: false,
+            acceptTerms: false,
         },
     })
+
+    const acceptPrivacy = useWatch({ control: form.control, name: "acceptPrivacy" })
+    const acceptTerms = useWatch({ control: form.control, name: "acceptTerms" })
 
     const onSubmit = (data: SignupFormData) => {
         if (signUpMutation.isPending) return
 
-        // exclude confirmPassword from submission data
-        const { confirmPassword: _confirmPassword, ...submitData } = data
+        // exclude fields not sent to the backend
+        const { confirmPassword: _confirmPassword, acceptPrivacy: _acceptPrivacy, acceptTerms: _acceptTerms, ...submitData } = data
         signUpMutation.mutate({ body: submitData })
     }
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Create an account</CardTitle>
+                <CardTitle>Создание аккаунта</CardTitle>
                 <CardDescription>
-                    Enter your information below to create your account
+                    Заполните данные ниже, чтобы создать аккаунт.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -62,13 +68,13 @@ export function SignupForm() {
                                 control={form.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
+                                        <FieldLabel htmlFor={field.name}>Имя и фамилия</FieldLabel>
                                         <Input
                                             {...field}
                                             id={field.name}
                                             aria-invalid={fieldState.invalid}
                                             type="text"
-                                            placeholder="John Doe"
+                                            placeholder="Иван Иванов"
                                             required
                                         />
                                         {fieldState.invalid && (
@@ -82,13 +88,13 @@ export function SignupForm() {
                                 control={form.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor={field.name}>Username</FieldLabel>
+                                        <FieldLabel htmlFor={field.name}>Имя пользователя</FieldLabel>
                                         <Input
                                             {...field}
                                             id={field.name}
                                             aria-invalid={fieldState.invalid}
                                             type="text"
-                                            placeholder="johndoe_42"
+                                            placeholder="ivan_2026"
                                             required
                                         />
                                         {fieldState.invalid && (
@@ -103,18 +109,18 @@ export function SignupForm() {
                             control={form.control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                                    <FieldLabel htmlFor={field.name}>Электронная почта</FieldLabel>
                                     <Input
                                         {...field}
                                         id={field.name}
                                         aria-invalid={fieldState.invalid}
                                         type="email"
-                                        placeholder="m@example.com"
+                                        placeholder="you@example.com"
                                         required
                                     />
                                     <FieldDescription>
-                                        We&apos;ll use this to contact you. We will not share your
-                                        email with anyone else.
+                                        Используем для связи и уведомлений. Мы не передаём ваш email
+                                        третьим лицам.
                                     </FieldDescription>
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
@@ -127,7 +133,7 @@ export function SignupForm() {
                             control={form.control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                                    <FieldLabel htmlFor={field.name}>Пароль</FieldLabel>
                                     <Input
                                         {...field}
                                         id={field.name}
@@ -136,7 +142,7 @@ export function SignupForm() {
                                         required
                                     />
                                     <FieldDescription>
-                                        Must be at least 6 characters long.
+                                        Не менее 6 символов.
                                     </FieldDescription>
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
@@ -149,7 +155,7 @@ export function SignupForm() {
                             control={form.control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel htmlFor={field.name}>Confirm Password</FieldLabel>
+                                    <FieldLabel htmlFor={field.name}>Повторите пароль</FieldLabel>
                                     <Input
                                         {...field}
                                         id={field.name}
@@ -158,7 +164,7 @@ export function SignupForm() {
                                         required
                                     />
                                     <FieldDescription>
-                                        Please confirm your password.
+                                        Повторите пароль для подтверждения.
                                     </FieldDescription>
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
@@ -167,14 +173,67 @@ export function SignupForm() {
                             )}
                         />
                         <Field>
-                            <Button type="submit">
+                            <div className="space-y-2.5">
+                                <label className="flex items-start gap-2.5 text-xs text-muted-foreground cursor-pointer">
+                                    <Controller
+                                        name="acceptPrivacy"
+                                        control={form.control}
+                                        render={({ field }) => (
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={(v) => field.onChange(v === true)}
+                                                className="mt-0.5"
+                                            />
+                                        )}
+                                    />
+                                    <span>
+                                        Я принимаю{" "}
+                                        <Link to={ROUTES.PRIVACY} className="text-primary underline-offset-2 hover:underline">
+                                            Политику конфиденциальности
+                                        </Link>{" "}
+                                        и соглашаюсь на обработку персональных данных.
+                                    </span>
+                                </label>
+                                <label className="flex items-start gap-2.5 text-xs text-muted-foreground cursor-pointer">
+                                    <Controller
+                                        name="acceptTerms"
+                                        control={form.control}
+                                        render={({ field }) => (
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={(v) => field.onChange(v === true)}
+                                                className="mt-0.5"
+                                            />
+                                        )}
+                                    />
+                                    <span>
+                                        Я принимаю{" "}
+                                        <Link to={ROUTES.TERMS} className="text-primary underline-offset-2 hover:underline">
+                                            Условия использования
+                                        </Link>
+                                        .
+                                    </span>
+                                </label>
+                                {(form.formState.errors.acceptPrivacy || form.formState.errors.acceptTerms) && (
+                                    <p className="text-xs text-destructive">
+                                        Подтвердите согласие, чтобы продолжить.
+                                    </p>
+                                )}
+                            </div>
+                            <Button type="submit" disabled={signUpMutation.isPending || !acceptPrivacy || !acceptTerms}>
                                 {signUpMutation.isPending
                                     ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    : "Create Account"
+                                    : "Создать аккаунт"
                                 }
                             </Button>
+                            <p className="text-[11px] text-muted-foreground text-center">
+                                Регистрируясь, вы подтверждаете, что ознакомились с{" "}
+                                <Link to={ROUTES.PRIVACY} className="underline-offset-2 hover:underline">Политикой</Link>{" "}
+                                и{" "}
+                                <Link to={ROUTES.TERMS} className="underline-offset-2 hover:underline">Условиями</Link>.
+                            </p>
                             <FieldDescription className="px-6 text-center">
-                                Already have an account? <Link to={ROUTES.LOGIN}>Sign in</Link>
+                                Уже есть аккаунт? <Link to={ROUTES.LOGIN}>Войти</Link>
                             </FieldDescription>
                         </Field>
                     </FieldGroup>

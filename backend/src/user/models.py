@@ -33,6 +33,13 @@ class User(UUIDBase):
     email_verified_at: Mapped[datetime | None] = mapped_column(
         sa.DateTime(timezone=True)
     )
+    is_founder: Mapped[bool] = mapped_column(
+        sa.Boolean(), server_default="false", default=False
+    )
+    founder_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
+    notifications_enabled: Mapped[bool] = mapped_column(
+        sa.Boolean(), server_default="true", default=True
+    )
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         back_populates="user",

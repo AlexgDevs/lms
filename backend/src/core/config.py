@@ -145,7 +145,6 @@ class MediaSettings(BaseSettings):
         "image/webp",
         "image/gif",
         "image/avif",
-        "image/svg+xml",
         "video/mp4",
         "video/webm",
         "video/quicktime",
@@ -300,8 +299,10 @@ class PaymentSettings(BaseSettings):
     ] = []
 
     # Platform: commission (%) taken from every purchase, and the payout
-    # details of the site owner where the platform share goes.
-    PAYMENT_PLATFORM_FEE_PERCENT: float = 10.0
+    # details of the site owner where the platform share goes. During the beta
+    # (Founders program) the platform commission is 0% — all money goes to the
+    # platform owner for product development.
+    PAYMENT_PLATFORM_FEE_PERCENT: float = 0.0
     PAYOUT_PLATFORM_RECIPIENT: str = Field(default="")
 
     @property
@@ -385,6 +386,24 @@ class RateLimitSettings(BaseSettings):
     ] = []
 
 
+class FounderSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    # "Beta Founders" program. While it is open, any author who publishes a course
+    # is granted the lifetime Founder status. The program closes when BOTH the
+    # cumulative SUCCEEDED revenue reaches the limit AND the founder quota is filled.
+    FOUNDER_PROGRAM_ENABLED: bool = True
+    FOUNDER_PROGRAM_REVENUE_LIMIT: int = 50_000
+    FOUNDER_PROGRAM_MAX_AUTHORS: int = 30
+    # Lifetime commission for Founders after the platform leaves the beta model
+    # (not applied to payment splits while FOUNDER_PROGRAM is in beta / fee = 0).
+    FOUNDER_COMMISSION_PERCENT: float = 5.0
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
     app: AppSettings = Field(default_factory=AppSettings)
@@ -402,6 +421,7 @@ class Settings(BaseSettings):
     payments: PaymentSettings = Field(default_factory=PaymentSettings)
     mail: MailSettings = Field(default_factory=MailSettings)
     rate_limit: RateLimitSettings = Field(default_factory=RateLimitSettings)
+    founder: FounderSettings = Field(default_factory=FounderSettings)
 
 
 settings = Settings()
