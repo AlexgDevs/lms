@@ -27,3 +27,8 @@ class UserNotStaffError(UserError):
 class UserNotVerifiedError(UserError):
     detail = "Email not verified"
     status_code = status.HTTP_403_FORBIDDEN
+
+
+class UserNotActiveError(UserError):
+    detail = "Account is deactivated"
+    status_code = status.HTTP_403_FORBIDDEN

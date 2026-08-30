@@ -23,8 +23,32 @@ without real credentials there is a **mock mode**.
 4. A `confirmation_url` is returned and the user is redirected to it.
 5. After payment the provider sends a `payment.succeeded` webhook to
    `POST /api/v1/payments/webhook/yookassa`.
-6. The handler marks the payment `succeeded` and calls `_enroll_if_needed` —
+6. The handler **re-fetches the payment from YooKassa** (`GET /v3/payments/{id}`)
+   over an authenticated (Basic auth) connection, verifies `status`, `amount`,
+   `currency` and `metadata.course_id` / `metadata.user_id` against the row
+   created at checkout, then marks it `succeeded` and calls `_enroll_if_needed` —
    the user is enrolled in the course (`CourseMember`).
+
+### Webhook verification (source of truth)
+
+The webhook body is treated as a **signal**, not the source of truth. YooKassa
+does **not** HMAC-sign notifications, so the payload (`status`, `amount`,
+`metadata`) can be forged. The authoritative facts are therefore obtained from
+`YooKassaClient.get_payment()` (`service.py:_verify_payment`), which uses the
+shop's HTTP Basic credentials:
+
+- `status` must equal `"succeeded"`;
+- `amount.currency` must equal the stored `Payment.currency` (`RUB`);
+- `amount.value` (parse to kopecks) must equal the stored `Payment.amount`,
+  so a webhook for a different/forged amount is rejected even if a
+  `provider_payment_id` leaked;
+- `metadata.course_id` must equal the stored `Payment.course_id`;
+- `metadata.user_id` must equal the stored `Payment.user_id`.
+
+On any mismatch the service raises `PaymentVerificationError` (**403**, no
+enrollment). A transient provider/network error raises `PaymentProviderError`
+(**502**) so YooKassa keeps retrying delivery. Exceptions:
+`src/payment/exceptions.py`.
 
 ## SBP → other methods fallback
 
@@ -59,12 +83,29 @@ Names match the `PaymentSettings` fields in `src/core/config.py` (read from
 | `PAYMENT_WEBHOOK_DEV_ACCEPT` | `false` | Dev only: when `true`, the webhook is accepted from `localhost/127.0.0.1/::1` (real YooKassa webhooks cannot reach a local dev server). |
 | `PAYMENT_PLATFORM_FEE_PERCENT` | `10.0` | Platform commission (% of the purchase amount). `platform_fee = round(amount * fee% / 100)`. |
 | `PAYOUT_PLATFORM_RECIPIENT` | `""` | Payout details of the platform amount recipient (shown via `GET /api/v1/payments/config`). |
+| `YOOKASSA_TRUSTED_PROXY_IPS` | `""` | Comma-separated IPs of trusted reverse proxies / load balancers (e.g. nginx, traefik). When the socket peer is one of them, the real client IP is resolved from the `X-Forwarded-For` chain so the YooKassa IP whitelist works behind a proxy. Leave empty when the webhook reaches uvicorn directly. |
 
 ### Helper properties
 
 - `payments.enabled` — `true` when both `YOOKASSA_SHOP_ID` and `YOOKASSA_SECRET_KEY`
   are set.
 - `payments.mode` — returns `PAYMENT_PROVIDER_MODE`.
+
+### Webhook trust model
+
+Two stacked layers (`src/payment/security.py` + `src/payment/service.py`):
+
+1. **IP whitelist (defense-in-depth).** `is_trusted_yookassa_ip()` accepts only the
+   official YooKassa subnetworks. When the request passes a trusted proxy
+   (`YOOKASSA_TRUSTED_PROXY_IPS`), `resolve_client_ips()` adds the nearest
+   non-trusted hop of `X-Forwarded-For`; a direct request ignores the header, so a
+   spoofed `X-Forwarded-For` cannot fool the whitelist.
+2. **Authoritative re-verification via the API** (see above) — this is what
+   actually decides whether a payment is credited.
+
+`PAYMENT_WEBHOOK_DEV_ACCEPT` (localhost delivery) only takes effect when
+`PAYMENT_PROVIDER_MODE=mock`, so a leaked flag in production cannot be used to
+enroll a free course from localhost.
 
 ## Mock mode for local testing
 
@@ -92,9 +133,12 @@ Scenarios:
 
 ## Limitations & notes
 
-- The YooKassa webhook is not HMAC-signed — trust is based on the IP whitelist
-  (`src/payment/security.py`) and on the payment already existing in `pending`
-  state in our DB (`provider_payment_id`).
+- The YooKassa webhook is not HMAC-signed, so the body is never trusted alone.
+  The handler relies on the **IP whitelist** plus the **authenticated
+  `GET /v3/payments/{id}` re-verification**, and only advances a row that already
+  exists in `pending` state (`provider_payment_id`).
+- Behind a reverse proxy, set `YOOKASSA_TRUSTED_PROXY_IPS`; otherwise
+  `request.client.host` is the proxy and YooKassa's real IP is lost.
 - In a YooKassa test shop the "SBP unavailable" text/code may differ — then the
   fallback won't trigger (hint list is `_SBP_UNAVAILABLE_HINTS`).
 - `.env` is never committed — secrets (`YOOKASSA_SECRET_KEY`) stay local only.

@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +18,7 @@ from src.payment.exceptions import (
     PaymentNotFoundError,
     PaymentNotConfiguredError,
     PaymentProviderError,
+    PaymentVerificationError,
 )
 from src.payment.repository import PaymentRepository, PayoutAccountRepository
 from src.payment.schemas import (
@@ -112,7 +114,14 @@ class PaymentService(BaseService):
     async def handle_webhook(
         self, provider_payment_id: str, status: str, event: str
     ) -> PaymentSchema:
-        """Advance a payment and enroll the user on a successful webhook."""
+        """Advance a payment and enroll the user on a successful webhook.
+
+        The webhook body is a *signal*, not the source of truth: the
+        authoritative facts (status, amount, currency, metadata) are re-fetched
+        from YooKassa via ``get_payment`` over an authenticated connection, then
+        compared against the row created at checkout. Any mismatch — a forged
+        webhook, or a changed course price — is rejected (403) without enrolling.
+        """
         if event != "payment.succeeded":
             # Non-success events do not alter enrollment; still record FAILED.
             if status == "canceled":
@@ -135,6 +144,8 @@ class PaymentService(BaseService):
             raise PaymentNotFoundError
         if payment.status == PaymentStatus.SUCCEEDED:
             return payment
+
+        await self._verify_payment(payment, provider_payment_id)
 
         payment = await self.uow.payments.update(
             payment.id,
@@ -202,6 +213,45 @@ class PaymentService(BaseService):
         fee_percent = settings.payments.PAYMENT_PLATFORM_FEE_PERCENT
         platform_fee = round(amount * fee_percent / 100)
         return platform_fee, amount - platform_fee
+
+    async def _verify_payment(
+        self, payment: PaymentSchema, provider_payment_id: str
+    ) -> None:
+        """Verify the provider's authoritative payment object against our row.
+
+        Raises :class:`PaymentVerificationError` (403) on any mismatch, or
+        :class:`PaymentProviderError` (502) on a transient provider failure so
+        YooKassa keeps retrying delivery.
+        """
+        client = self._get_client()
+        try:
+            data = await client.get_payment(provider_payment_id)
+        except Exception as exc:
+            raise PaymentProviderError from exc
+
+        if data.get("status") != "succeeded":
+            raise PaymentVerificationError
+
+        amount = data.get("amount") or {}
+        if amount.get("currency", "") != payment.currency:
+            raise PaymentVerificationError
+        if self._parse_amount_to_kopecks(amount.get("value", "")) != payment.amount:
+            raise PaymentVerificationError
+
+        metadata = data.get("metadata") or {}
+        if payment.course_id is not None and metadata.get("course_id") != str(
+            payment.course_id
+        ):
+            raise PaymentVerificationError
+        if metadata.get("user_id") != str(payment.user_id):
+            raise PaymentVerificationError
+
+    @staticmethod
+    def _parse_amount_to_kopecks(value: str) -> int:
+        try:
+            return int(Decimal(value) * 100)
+        except InvalidOperation, ValueError:
+            raise PaymentVerificationError
 
     async def _enroll_if_needed(self, user_id: UUID, course_id: UUID) -> None:
         existing = await self.uow.members.get_one(

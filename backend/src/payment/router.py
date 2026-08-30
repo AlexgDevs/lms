@@ -12,7 +12,7 @@ from src.payment.schemas import (
     PaymentStatusResponseSchema,
     YooKassaWebhookSchema,
 )
-from src.payment.security import is_trusted_yookassa_ip
+from src.payment.security import is_trusted_yookassa_ip, resolve_client_ips
 from src.user.dependencies import AuthenticatedUserIdDep, UserIdDep
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
@@ -40,10 +40,13 @@ async def yookassa_webhook(
 ) -> dict[str, str]:
     """Handle the YooKassa webhook (payment.succeeded → enroll).
 
-    Only accepts requests from YooKassa's official IP ranges (IP whitelist).
+    The IP whitelist is defense-in-depth; the authoritative check is the
+    authenticated ``GET /v3/payments/{id}`` re-verification inside the service.
     """
-    client_host = request.client.host if request.client else None
-    if not is_trusted_yookassa_ip(client_host):
+    peer = request.client.host if request.client else None
+    forwarded_for = request.headers.get("x-forwarded-for")
+    client_ips = resolve_client_ips(peer, forwarded_for)
+    if not is_trusted_yookassa_ip(client_ips):
         raise HTTPException(status_code=403, detail="Untrusted webhook IP")
 
     await payment_service.handle_webhook(

@@ -9,7 +9,11 @@ from src.core.dependencies import (
     SessionDep,
 )
 from src.auth.security import decode_access_token
-from src.user.exceptions import UserNotStaffError, UserNotVerifiedError
+from src.user.exceptions import (
+    UserNotActiveError,
+    UserNotStaffError,
+    UserNotVerifiedError,
+)
 from src.user.repository import UserRepository
 from src.user.schemas import UserSchema
 from src.user.service import UserService
@@ -33,7 +37,9 @@ async def get_current_user_id(
     if not user_id:
         raise InvalidAccessTokenError
     user = await user_repository.get_one(id=UUID(user_id))
-    if not user or not user.is_verified:
+    if not user or not user.is_active:
+        raise UserNotActiveError
+    if not user.is_verified:
         raise UserNotVerifiedError
     return UUID(user_id)
 

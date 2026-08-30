@@ -284,8 +284,18 @@ class PaymentSettings(BaseSettings):
     MOCK_RAISE_NETWORK: bool = False
 
     # Dev-only escape hatch: allow webhook delivery from localhost when testing
-    # locally (real YooKassa webhooks cannot reach a local dev server).
+    # locally (real YooKassa webhooks cannot reach a local dev server). It only
+    # takes effect when PAYMENT_PROVIDER_MODE == "mock", so a leaked flag in
+    # production cannot be abused to enroll a free course from localhost.
     PAYMENT_WEBHOOK_DEV_ACCEPT: bool = False
+
+    # Trusted reverse-proxy / load-balancer IPs (comma-separated). When the
+    # immediate socket peer (request.client.host) is one of these, the real
+    # client IP is resolved from the X-Forwarded-For chain so the YooKassa IP
+    # whitelist keeps working behind nginx/traefik.
+    YOOKASSA_TRUSTED_PROXY_IPS: Annotated[
+        list[str], NoDecode, BeforeValidator(parse_comma_list)
+    ] = []
 
     # Platform: commission (%) taken from every purchase, and the payout
     # details of the site owner where the platform share goes.

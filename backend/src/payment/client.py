@@ -14,6 +14,11 @@ YOOKASSA_API_URL = "https://api.yookassa.ru/v3"
 
 _SBP_UNAVAILABLE_HINTS = ("payment method is not available", "invalid_request")
 
+# Module-level singleton: the client is stateless (each API call opens its own
+# httpx.AsyncClient), so it is safe to reuse across requests. For the mock it is
+# required — its in-memory ``_created`` store must survive checkout → webhook.
+_client_cache: YooKassaClient | None = None
+
 
 class YooKassaClient:
     """Thin async client for the YooKassa (YooMoney) v3 API.
@@ -68,6 +73,22 @@ class YooKassaClient:
                 json=payload,
                 auth=self._auth,
                 headers={"Idempotence-Key": str(uuid4())},
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data if isinstance(data, dict) else {}
+
+    async def get_payment(self, provider_payment_id: str) -> dict[str, Any]:
+        """Fetch the authoritative payment object from YooKassa.
+
+        This is the "object status" authenticity check the API recommends: the
+        response is authenticated (Basic auth), so its ``status`` / ``amount`` /
+        ``metadata`` are trustworthy even if the webhook body is forged.
+        """
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.get(
+                f"{YOOKASSA_API_URL}/payments/{provider_payment_id}",
+                auth=self._auth,
             )
             response.raise_for_status()
             data = response.json()
@@ -131,6 +152,7 @@ class MockYooKassaClient(YooKassaClient):
         self._sbp_available = sbp_available
         self._raise_network = raise_network
         self._confirmation_url = confirmation_url
+        self._created: dict[str, dict[str, Any]] = {}
 
     async def _post_payment(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self._raise_network:
@@ -152,6 +174,7 @@ class MockYooKassaClient(YooKassaClient):
                 "SBP not available for this shop", request=request, response=response
             )
         provider_id = f"mock_{uuid4()}"
+        self._created[provider_id] = payload
         meta = payload.get("metadata") or {}
         course_id = meta.get("course_id", "")
         return {
@@ -166,17 +189,40 @@ class MockYooKassaClient(YooKassaClient):
             },
         }
 
+    async def get_payment(self, provider_payment_id: str) -> dict[str, Any]:
+        """Mirror the real ``get_payment`` from the in-memory store.
+
+        The mock keeps the payment payload created at checkout, so the strict
+        amount/currency/metadata checks in the service stay on the same code path
+        as in production.
+        """
+        payload = self._created[provider_payment_id]
+        return {
+            "id": provider_payment_id,
+            "status": "succeeded",
+            "amount": payload.get("amount", {"value": "0.00", "currency": "RUB"}),
+            "metadata": payload.get("metadata") or {},
+            "test": True,
+        }
+
 
 def build_yookassa_client() -> YooKassaClient | None:
+    global _client_cache
+
+    if _client_cache is not None:
+        return _client_cache
+
     if settings.payments.mode == "mock":
-        return MockYooKassaClient(
+        _client_cache = MockYooKassaClient(
             sbp_available=settings.payments.MOCK_SBP_AVAILABLE,
             raise_network=settings.payments.MOCK_RAISE_NETWORK,
             confirmation_url=settings.payments.MOCK_CONFIRMATION_URL,
         )
+        return _client_cache
     if not settings.payments.enabled:
         return None
-    return YooKassaClient(
+    _client_cache = YooKassaClient(
         shop_id=settings.payments.YOOKASSA_SHOP_ID,
         secret_key=settings.payments.YOOKASSA_SECRET_KEY,
     )
+    return _client_cache

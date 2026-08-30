@@ -27,3 +27,8 @@ class PaymentNotConfiguredError(PaymentError):
 class PaymentProviderError(PaymentError):
     detail = "Payment provider error"
     status_code = 502
+
+
+class PaymentVerificationError(PaymentError):
+    detail = "Payment verification failed"
+    status_code = 403

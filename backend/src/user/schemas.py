@@ -13,6 +13,7 @@ class UserSchema(BaseSchema):
     password_hash: str
     avatar_url: str | None
     joined_at: datetime
+    is_active: bool = True
     is_staff: bool = False
     ai_course_generations: int = 0
     is_verified: bool = False

@@ -7,7 +7,11 @@ from sqlalchemy.exc import IntegrityError
 
 from src.auth.device_parser import parse_device_name
 from src.auth.exceptions import IncorrectPasswordError, InvalidRefreshTokenError
-from src.user.exceptions import UserAlreadyExistsError, UserNotFoundError
+from src.user.exceptions import (
+    UserAlreadyExistsError,
+    UserNotActiveError,
+    UserNotFoundError,
+)
 from src.auth.schemas import (
     RefreshTokenCreate,
     RefreshTokenSchema,
@@ -106,6 +110,8 @@ class AuthService(BaseService):
         user = await self.uow.users.get_one(username=username)
         if not user:
             raise UserNotFoundError
+        if not user.is_active:
+            raise UserNotActiveError
         if not verify_password(password, user.password_hash):
             raise IncorrectPasswordError
 
@@ -134,6 +140,12 @@ class AuthService(BaseService):
 
     async def refresh(self, refresh_token: str) -> TokenPair:
         stored = await self._get_valid_refresh_token(refresh_token)
+        user = await self.uow.users.get_one(id=stored.user_id)
+        if not user or not user.is_active:
+            # Deactivated user: force-logout all sessions, no new tokens.
+            await self.uow.refresh_tokens.revoke_all(stored.user_id)
+            await self.uow.commit()
+            raise InvalidRefreshTokenError
         # Refresh Token Rotation
         await self.uow.refresh_tokens.revoke(stored.id)
         tokens = await self._issue_tokens(stored.user_id)
@@ -177,6 +189,7 @@ class AuthService(BaseService):
         await self.uow.users.update(
             user_id, UserPasswordUpdateSchema(password_hash=hash_password(new_password))
         )
+        await self.uow.refresh_tokens.revoke_all(user_id)
         await self.uow.commit()
 
     async def get_sessions(
