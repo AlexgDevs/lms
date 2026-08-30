@@ -124,6 +124,7 @@ git tag v0.2.0 && git push origin v0.2.0
 | `ENV_PROD_B64` | base64 файла `.env.prod` |
 | `GHCR_USER`, `GHCR_TOKEN` | PAT с `packages:read` (тащит образы на сервере) |
 | `VITE_API_URL` | **origin** фронта (на сборке), например `https://lms.example.ru` |
+| `VITE_PUBLIC_URL` | публичный origin платформы (на сборке), например `https://lms.example.ru` |
 
 ## 7. Healthcheck и жизненный цикл
 

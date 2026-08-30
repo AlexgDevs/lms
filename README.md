@@ -143,8 +143,8 @@ docker run --rm --network plm_app_network -v /var/backups/media:/backups minio/m
 
 GitHub Actions secrets for the deploy job: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`,
 `ENV_PROD_B64` (base64 of `.env.prod`), `GHCR_USER`, `GHCR_TOKEN` (packages:read),
-`VITE_API_URL` (origin, no `/api/v1`). Piston needs the `codeexec` profile and a
-cgroup-v2 host.
+`VITE_API_URL` (origin, no `/api/v1`), `VITE_PUBLIC_URL` (public origin of the platform).
+Piston needs the `codeexec` profile and a cgroup-v2 host.
 
 ## 📁 Project Structure
 
