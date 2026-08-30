@@ -89,6 +89,63 @@ uv run celery -A src.core.celery_app worker --loglevel=info
 
 Open [http://localhost:5173](http://localhost:5173)
 
+### Production deployment
+
+Infra runs in the **Russian Federation** (personal-data localization per 152-ФЗ);
+services: **MinIO** (object storage) on the VPS, **PostgreSQL 18 + Redis 7.2**
+(self-hosted via Docker), **Yandex 360 / Mail.ru** SMTP, **YooKassa** payments,
+optional **Piston** (code exec, profile `codeexec`), **nginx** (SPA + reverse proxy).
+
+Files:
+
+- `Dockerfile.backend` — FastAPI image (also used for the Celery worker & migrations).
+- `Dockerfile.frontend` — Vite build (`VITE_API_URL` at build time) → nginx static.
+- `docker-compose.prod.yml` — postgres, redis, minio(+init), migrate (one-shot
+  `alembic upgrade head`), backend, worker, piston, nginx. Uses prebuilt ghcr images.
+- `.env.prod.example` — copy to `.env.prod` on the server and fill in (never commit).
+- `deploy/nginx.conf` — nginx (SPA + proxy to the backend upstream).
+- `deploy/roll.sh` — zero-downtime rolling deploy (recreate `backend-1`, then `backend`).
+- `deploy/backup.sh` — nightly PostgreSQL dump + MinIO mirror to a separate disk.
+- `.github/workflows/ci.yml` — black + mypy (backend) and lint + build (frontend) on push/PR.
+- `.github/workflows/deploy.yml` — builds & pushes ghcr images on tag `v*`, then SSH-deploys (rolling).
+
+Deploy steps on a RU VPS with Docker (cgroup v2):
+
+```bash
+# once — prepare the app dir (compose + .env.prod)
+mkdir -p ~/lms && cd ~/lms
+# copy docker-compose.prod.yml, deploy/roll.sh and .env.prod (from secrets), then:
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod pull backend backend-1 worker nginx migrate
+#   bash deploy/roll.sh   # rolling: backend-1 (new) → wait healthy → backend
+```
+
+**Zero-downtime rolling.** The app runs two replicas (`backend` + `backend-1`) behind an
+nginx `upstream`. `deploy/roll.sh` recreates `backend-1` from the new image, waits for
+its healthcheck, then recreates `backend` — so at least one instance is always serving.
+
+**Backups (separate disk on the VPS).** `deploy/backup.sh` does a nightly logical dump of
+PostgreSQL + a MinIO mirror of the `lms-media` bucket to `BACKUP_DIR` (default `/var/backups`)
+and prunes dumps older than `BACKUP_KEEP_DAYS` (14). Schedule via cron, e.g.:
+
+```bash
+0 3 * * * /opt/lms/deploy/backup.sh
+```
+
+Redis is not backed up (cache / ephemeral). Restore:
+
+```bash
+# PostgreSQL
+docker compose exec -T postgres pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean < /var/backups/lms_YYYY-MM-DD.dump
+# MinIO (reverse mirror)
+docker run --rm --network plm_app_network -v /var/backups/media:/backups minio/mc \
+  sh -c "mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD && mc mirror --overwrite /backups local/\$STORAGE_BUCKET"
+```
+
+GitHub Actions secrets for the deploy job: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`,
+`ENV_PROD_B64` (base64 of `.env.prod`), `GHCR_USER`, `GHCR_TOKEN` (packages:read),
+`VITE_API_URL` (origin, no `/api/v1`). Piston needs the `codeexec` profile and a
+cgroup-v2 host.
+
 ## 📁 Project Structure
 
 ```

@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import Sequence
 
 from loguru import logger
-from redis import Redis
+from redis.asyncio import Redis
 
 from src.core.events.event import DomainEvent
 from src.core.events.protocol import EventHandler
