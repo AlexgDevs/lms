@@ -355,6 +355,34 @@ class MailSettings(BaseSettings):
     MAIL_ENABLED: bool = True
 
 
+class RateLimitSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    # Global per-IP fixed-window guard for the whole API (DDoS / abuse layer).
+    RATE_LIMIT_GLOBAL_ENABLED: bool = True
+    RATE_LIMIT_GLOBAL_REQ_PER_MIN: int = 300
+
+    # Login brute-force guard: per IP and per username over a sliding window.
+    RATE_LIMIT_LOGIN_MAX_TRIES: int = 5
+    RATE_LIMIT_LOGIN_WINDOW_SECONDS: int = 900
+
+    # Email flood guard (forgot_password / resend_verification): per IP and per
+    # email address over a window.
+    RATE_LIMIT_EMAIL_MAX_REQUESTS: int = 3
+    RATE_LIMIT_EMAIL_WINDOW_SECONDS: int = 3600
+
+    # Trusted reverse-proxy / load-balancer IPs (comma-separated). Used by
+    # ``core.rate_limit.get_client_ip`` to resolve the real client IP from the
+    # ``X-Forwarded-For`` chain so per-IP limits work behind nginx/traefik.
+    RATE_LIMIT_TRUSTED_PROXY_IPS: Annotated[
+        list[str], NoDecode, BeforeValidator(parse_comma_list)
+    ] = []
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
     app: AppSettings = Field(default_factory=AppSettings)
@@ -371,6 +399,7 @@ class Settings(BaseSettings):
     codeexec: CodeExecSettings = Field(default_factory=CodeExecSettings)
     payments: PaymentSettings = Field(default_factory=PaymentSettings)
     mail: MailSettings = Field(default_factory=MailSettings)
+    rate_limit: RateLimitSettings = Field(default_factory=RateLimitSettings)
 
 
 settings = Settings()

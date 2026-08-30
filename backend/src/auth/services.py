@@ -6,12 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
 from src.auth.device_parser import parse_device_name
-from src.auth.exceptions import IncorrectPasswordError, InvalidRefreshTokenError
-from src.user.exceptions import (
-    UserAlreadyExistsError,
-    UserNotActiveError,
-    UserNotFoundError,
+from src.auth.exceptions import (
+    InvalidCredentialsError,
+    InvalidRefreshTokenError,
 )
+from src.user.exceptions import UserAlreadyExistsError, UserNotFoundError
 from src.auth.schemas import (
     RefreshTokenCreate,
     RefreshTokenSchema,
@@ -31,11 +30,13 @@ from src.auth.security import (
     hash_refresh_token,
     verify_password,
 )
+from src.core.errors.base_errors import RateLimitExceededError
 from src.core.events.event import UserLoggedIn, UserLoggedOut
 from src.core.mailer.mailer import (
     send_password_reset_email,
     send_verification_email,
 )
+from src.core.rate_limit import RateLimiter
 from src.user.schemas import (
     UserPasswordUpdateSchema,
     UserSchema,
@@ -48,6 +49,10 @@ from src.core.config import settings
 if TYPE_CHECKING:
     from src.core.events.protocol import Event
 
+# Used to equalize the password-check timing when a username does not exist, so
+# the login endpoint does not leak which usernames are valid (timing oracle).
+_DUMMY_PASSWORD_HASH = hash_password("invalid-password-placeholder")
+
 
 class AuthService(BaseService):
 
@@ -56,9 +61,12 @@ class AuthService(BaseService):
         session: AsyncSession,
         auth_unit_of_work: AuthUnitOfWork,
         event_bus: "Event | None" = None,
+        *,
+        rate_limiter: RateLimiter,
     ) -> None:
         super().__init__(session, event_bus)
         self.uow = auth_unit_of_work
+        self._rate_limiter = rate_limiter
 
     async def register(self, form_data: UserRegisterSchema) -> UserSchema:
         try:
@@ -92,7 +100,10 @@ class AuthService(BaseService):
         await self.uow.commit()
         return updated
 
-    async def resend_verification(self, email: str) -> None:
+    async def resend_verification(
+        self, email: str, client_ip: str | None = None
+    ) -> None:
+        await self._enforce_email_limit("resend", email, client_ip)
         user = await self.uow.users.get_one(email=email)
         if not user or user.is_verified:
             return
@@ -107,13 +118,21 @@ class AuthService(BaseService):
         ip_address: str | None = None,
         user_agent: str | None = None,
     ) -> TokenPair:
+        client_ip = ip_address or ""
+        await self._enforce_login_limit(username, client_ip)
+
         user = await self.uow.users.get_one(username=username)
         if not user:
-            raise UserNotFoundError
-        if not user.is_active:
-            raise UserNotActiveError
+            # Equalize timing so valid usernames cannot be probed, then reply
+            # with a single uniform credential error (no username enumeration).
+            verify_password(password, _DUMMY_PASSWORD_HASH)
+            raise InvalidCredentialsError
         if not verify_password(password, user.password_hash):
-            raise IncorrectPasswordError
+            raise InvalidCredentialsError
+        if not user.is_active:
+            raise InvalidCredentialsError
+
+        await self._clear_login_limit(username, client_ip)
 
         device_name = parse_device_name(user_agent)
         tokens = await self._issue_tokens(
@@ -173,7 +192,8 @@ class AuthService(BaseService):
                 )
             )
 
-    async def forgot_password(self, email: str) -> None:
+    async def forgot_password(self, email: str, client_ip: str | None = None) -> None:
+        await self._enforce_email_limit("forgot", email, client_ip)
         user = await self.uow.users.get_one(email=email)
         if not user:
             return
@@ -250,3 +270,29 @@ class AuthService(BaseService):
             await self.uow.commit()
             raise InvalidRefreshTokenError
         return stored
+
+    async def _enforce_login_limit(self, username: str, client_ip: str) -> None:
+        window = settings.rate_limit.RATE_LIMIT_LOGIN_WINDOW_SECONDS
+        limit = settings.rate_limit.RATE_LIMIT_LOGIN_MAX_TRIES
+        ip_key = f"rl:login:ip:{client_ip or 'unknown'}"
+        user_key = f"rl:login:u:{username}"
+        ip_hits = await self._rate_limiter.hit(ip_key, window)
+        user_hits = await self._rate_limiter.hit(user_key, window)
+        if ip_hits > limit or user_hits > limit:
+            raise RateLimitExceededError
+
+    async def _clear_login_limit(self, username: str, client_ip: str) -> None:
+        await self._rate_limiter.reset(f"rl:login:ip:{client_ip or 'unknown'}")
+        await self._rate_limiter.reset(f"rl:login:u:{username}")
+
+    async def _enforce_email_limit(
+        self, action: str, email: str, client_ip: str | None
+    ) -> None:
+        window = settings.rate_limit.RATE_LIMIT_EMAIL_WINDOW_SECONDS
+        limit = settings.rate_limit.RATE_LIMIT_EMAIL_MAX_REQUESTS
+        ip_key = f"rl:email:{action}:ip:{client_ip or 'unknown'}"
+        addr_key = f"rl:email:{action}:addr:{email}"
+        ip_hits = await self._rate_limiter.hit(ip_key, window)
+        addr_hits = await self._rate_limiter.hit(addr_key, window)
+        if ip_hits > limit or addr_hits > limit:
+            raise RateLimitExceededError

@@ -132,6 +132,25 @@ router → service → repository / unit_of_work → mapper → schemas → mode
   `SMTP_HOST` / `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`,
   `SMTP_USE_TLS=true` в `.env`.
 
+### Rate limiting и защита от злоупотреблений
+
+Auth-эндпоинты троттлятся Redis-счётчиком (fixed-window,
+`src/core/rate_limit.py`). Настройки — `settings.rate_limit`
+(`src/core/config.py`):
+
+| Настройка | По умолчанию | Значение |
+| --- | --- | --- |
+| `RATE_LIMIT_GLOBAL_ENABLED` | `true` | Главный переключатель глобального per-IP guard (применяется ко всем запросам `/api/v1/*` в `src/main.py`). |
+| `RATE_LIMIT_GLOBAL_REQ_PER_MIN` | `300` | Максимум запросов на IP в минуту до `429`. |
+| `RATE_LIMIT_LOGIN_MAX_TRIES` | `5` | Максимум неудачных попыток на IP *и* на username в рамках окна. |
+| `RATE_LIMIT_LOGIN_WINDOW_SECONDS` | `900` | Окно для login (секунды). Блокировка/локдаут длится столько. |
+| `RATE_LIMIT_EMAIL_MAX_REQUESTS` | `3` | Максимум `forgot-password` / `resend-verification` на IP *и* на почту в рамках окна. |
+| `RATE_LIMIT_EMAIL_WINDOW_SECONDS` | `3600` | Окно email-флуда (секунды). |
+| `RATE_LIMIT_TRUSTED_PROXY_IPS` | `[]` | IP-адреса reverse-прокси / load balancer (через запятую) для резолва реального IP клиента из `X-Forwarded-For`. |
+
+Счётчик сбрасывается при успешном входе. `429` рендерится как
+`RateLimitExceededError` с заголовком `Retry-After`.
+
 ---
 
 ## Эндпоинты
@@ -144,7 +163,7 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 | Метод | Путь | Тело | Успех | Примечания |
 | --- | --- | --- | --- | --- |
 | `POST` | `/register` | `UserRegisterSchema {username, email, password}` | `201` `UserPublicSchema` + заголовок `Location` | Создаёт пользователя (`is_verified=False`) и отправляет письмо верификации. |
-| `POST` | `/login` | OAuth2-форма: `username`, `password` | `200` `TokenPair` | Возвращает `{access_token, refresh_token, token_type}`. Также фиксирует `ip_address` + `user_agent`. |
+| `POST` | `/login` | OAuth2-форма: `username`, `password` | `200` `TokenPair` | Возвращает `{access_token, refresh_token, token_type}`. Также фиксирует `ip_address` + `user_agent`. **Rate-limit** (429) по IP и по username; при ошибке — единый `InvalidCredentialsError` (без перебора аккаунтов). |
 
 > `register` возвращает `UserPublicSchema` (без `email` и `password_hash`) —
 > публичные PII сознательно сокращены.
@@ -196,9 +215,16 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 
 ### 2. Вход → пара токенов
 
-`AuthService.login` проверяет пароль, определяет имя устройства из `User-Agent`,
-создаёт запись `RefreshToken` (store только её хеш, а также `ip_address` /
-`user_agent` / `device_name`) и возвращает `TokenPair`.
+`AuthService.login` сначала применяет **брутфорс-защиту** (по IP и по username,
+через Redis — `settings.rate_limit`), затем проверяет пароль. При любой ошибке
+(неизвестный username, неверный пароль или деактивированный аккаунт) возвращается
+единый `InvalidCredentialsError` (401) — код никогда не различает эти случаи,
+поэтому злоумышленник не может перебирать валидные username. Когда username не
+найден, сервис всё равно выполняет Argon2-проверку по dummy-хешу, чтобы выровнять
+время (нет timing-oracle). При успехе определяется имя устройства из `User-Agent`,
+создаётся запись `RefreshToken` (хранится только её хеш, а также `ip_address` /
+`user_agent` / `device_name`), сбрасываются счётчики лимита и возвращается
+`TokenPair`.
 
 ### 3. Refresh (с ротацией)
 
@@ -209,6 +235,11 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 3. **если токен уже был отозван → расценивает это как переиспользование**
    (возможная кража) и отзывает **все** refresh-токены этого пользователя;
 4. иначе отзывает предъявленный токен (ротация) и выдаёт новую пару `TokenPair`.
+
+> Деактивированный пользователь (`is_active=False`) принудительно разлогинивается
+> при первой же попытке refresh: все его сессии отзываются и возвращается
+> `401 InvalidRefreshTokenError`, так что он не может поддерживать сессию
+> ротацией токенов.
 
 ### 4. Сессии
 
@@ -222,9 +253,12 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 
 1. `POST /auth/forgot-password` → если пользователь с такой почтой существует,
    отправляет ссылку сброса (`{FRONTEND_HOST}/reset-password?token=...`). Ответ
-   одинаков в любом случае (нет перебора аккаунтов).
+   одинаков в любом случае (нет перебора аккаунтов). Эндпоинт **rate-limited**
+   (429) по IP и по почте — защита от флуда письмами.
 2. `POST /auth/reset-password` → `decode_reset_token` (нужен `type == "reset"`,
-   TTL 15 мин) → обновляет хеш пароля.
+   TTL 15 мин) → обновляет хеш пароля и **отзывает все активные refresh-токены /
+   сессии** пользователя, поэтому украденная сессия инвалидируется сменой пароля.
+   Пользователь должен войти заново.
 
 ---
 
@@ -267,8 +301,20 @@ router → service → repository / unit_of_work → mapper → schemas → mode
   все сессии.
 - **Метаданные сессии**: каждый refresh-токен хранит `ip_address`, `user_agent` и
   разобранный `device_name` для UI сессий.
-- **Нет перебора аккаунтов**: forgot-password и resend-verification всегда
-  возвращают одинаковое сообщение.
+- **Нет перебора аккаунтов**: login возвращает единый `InvalidCredentialsError`
+  для неизвестного username / неверного пароля / деактивированного аккаунта,
+  а Argon2-проверка выполняется по dummy-хешу при отсутствующем username
+  (timing-safe). `forgot-password` и `resend-verification` всегда возвращают
+  одинаковое сообщение.
+- **Защита от брутфорса и флуда письмами**: login лимитируется по IP + username,
+  forgot/resend — по IP + почта (`RateLimitExceededError`, 429); глобальный
+  per-IP guard применяется в мидлваре `src/main.py` ко всем запросам `/api/v1/*`.
+- **Деактивированные аккаунты** (`is_active=False`) не могут зайти и обновить
+  токен — сессии отзываются при первой попытке refresh (при login
+  `UserNotActiveError` не раскрывается, но аутентифицированные запросы возвращают
+  `403 UserNotActiveError`).
+- **Сброс пароля отзывает сессии**: reset-password инвалидирует все refresh-токены
+  пользователя (см. флоу 5).
 - **Куки**: `set_tokens_cookie` (utils.py) ставит http-only, `SameSite=Lax` куки;
   `secure` зависит от `settings.app.secure_cookies`. Refresh-кука ограничена путём
   `/api/v1/auth/refresh`.
@@ -283,7 +329,7 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 
 | Исключение | detail |
 | --- | --- |
-| `IncorrectPasswordError` | `"Incorrect password"` |
+| `InvalidCredentialsError` | `"Incorrect username or password"` — единая ошибка входа (неизвестный пользователь / неверный пароль / деактивированный аккаунт) |
 | `InvalidAccessTokenError` | `"Invalid access token"` |
 | `InvalidRefreshTokenError` | `"Invalid refresh token"` |
 | `NoRefreshTokenError` | `"No refresh token"` |
@@ -295,6 +341,8 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 | `UserNotFoundError` | `user` | 404 |
 | `UserAlreadyExistsError` | `user` | 409 |
 | `UserNotVerifiedError` | `user` | 403 |
+| `UserNotActiveError` | `user` | 403 |
+| `RateLimitExceededError` | `core` | 429 |
 
 ---
 
@@ -303,6 +351,8 @@ router → service → repository / unit_of_work → mapper → schemas → mode
 - `src/core/dependencies.py` — `AccessTokenDep` (oauth2 bearer), `SessionDep`,
   `EventBusDep`.
 - `src/core/mailer/mailer.py` — `send_verification_email`, `send_password_reset_email`.
+- `src/core/rate_limit.py` — Redis fixed-window `RateLimiter`, `get_client_ip`.
+- `src/core/errors/base_errors.py` — `RateLimitExceededError` (429).
 - `src/user/dependencies.py` — `UserIdDep`, `AuthenticatedUserIdDep`,
   `CurrentUserDep`, `StaffDep`, `OptionalUserIdDep`; гейт верификации.
 - `src/core/config.py` — `settings.app` (JWT/TTL/host) и `settings.mail`.

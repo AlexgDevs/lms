@@ -6,6 +6,7 @@ from src.auth.repository import RefreshTokenRepository
 from src.auth.services import AuthService
 from src.auth.unit_of_work import AuthUnitOfWork
 from src.core.dependencies import EventBusDep, SessionDep
+from src.core.rate_limit import RateLimiterDep
 from src.user.dependencies import UserRepositoryDep
 
 
@@ -30,8 +31,14 @@ def get_auth_service(
     session: SessionDep,
     auth_unit_of_work: AuthUnitOfWorkDep,
     event_bus: EventBusDep,
+    rate_limiter: RateLimiterDep,
 ) -> AuthService:
-    return AuthService(session, auth_unit_of_work, event_bus)
+    return AuthService(
+        session,
+        auth_unit_of_work,
+        event_bus,
+        rate_limiter=rate_limiter,
+    )
 
 
 RefreshTokenRepositoryDep = Annotated[

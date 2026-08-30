@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
+import { useNavigate, redirect } from "@tanstack/react-router"
 import { getErrorMessage } from "@/lib/errors";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { ROUTES } from "@/routes.ts";
@@ -11,6 +11,12 @@ import {
 
 const isLoggedIn = () => {
     return localStorage.getItem("access_token") !== null
+}
+
+export function redirectIfAuthenticated() {
+    if (isLoggedIn()) {
+        throw redirect({ to: ROUTES.PROFILE })
+    }
 }
 
 const useAuth = () => {

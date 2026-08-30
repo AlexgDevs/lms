@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage"
+import { redirectIfAuthenticated } from "@/features/auth/api/useAuth"
 import * as z from "zod"
 
 const resetPasswordSearchSchema = z.object({
@@ -8,5 +9,6 @@ const resetPasswordSearchSchema = z.object({
 
 export const Route = createFileRoute("/reset-password")({
     validateSearch: resetPasswordSearchSchema,
+    beforeLoad: redirectIfAuthenticated,
     component: () => <ResetPasswordPage />,
 })

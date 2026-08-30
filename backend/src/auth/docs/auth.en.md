@@ -131,6 +131,25 @@ Alternatives:
 - A real transactional provider (Mailtrap, Brevo, …): set `SMTP_HOST` / `SMTP_PORT`,
   `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_USE_TLS=true` in `.env`.
 
+### Rate limiting & abuse protection
+
+Auth endpoints are throttled with a Redis fixed-window counter
+(`src/core/rate_limit.py`). Settings live in `settings.rate_limit`
+(`src/core/config.py`):
+
+| Setting | Default | Meaning |
+| --- | --- | --- |
+| `RATE_LIMIT_GLOBAL_ENABLED` | `true` | Master switch of the global per-IP guard (applied to all `/api/v1/*` requests in `src/main.py`). |
+| `RATE_LIMIT_GLOBAL_REQ_PER_MIN` | `300` | Max requests per IP per minute before a `429`. |
+| `RATE_LIMIT_LOGIN_MAX_TRIES` | `5` | Max failed attempts per IP *and* per username within the window. |
+| `RATE_LIMIT_LOGIN_WINDOW_SECONDS` | `900` | Login window (seconds). A deactivated/account lockout lasts this long. |
+| `RATE_LIMIT_EMAIL_MAX_REQUESTS` | `3` | Max `forgot-password` / `resend-verification` per IP *and* per email within the window. |
+| `RATE_LIMIT_EMAIL_WINDOW_SECONDS` | `3600` | Email-flood window (seconds). |
+| `RATE_LIMIT_TRUSTED_PROXY_IPS` | `[]` | Comma-separated reverse-proxy / load-balancer IPs used to resolve the real client IP from `X-Forwarded-For`. |
+
+The counter is reset on a successful login. A `429` is rendered as
+`RateLimitExceededError` with a `Retry-After` header.
+
 ---
 
 ## Endpoints
@@ -142,7 +161,7 @@ Base path: `/api/v1/auth`. All responses use the shared error shape `{error, det
 | Method | Path | Body | Success | Notes |
 | --- | --- | --- | --- | --- |
 | `POST` | `/register` | `UserRegisterSchema {username, email, password}` | `201` `UserPublicSchema` + `Location` header | Creates the user (`is_verified=False`) and queues a verification email. |
-| `POST` | `/login` | OAuth2 form: `username`, `password` | `200` `TokenPair` | Returns `{access_token, refresh_token, token_type}`. Also captures `ip_address` + `user_agent`. |
+| `POST` | `/login` | OAuth2 form: `username`, `password` | `200` `TokenPair` | Returns `{access_token, refresh_token, token_type}`. Also captures `ip_address` + `user_agent`. **Rate-limited** (429) per IP and per username; failures return a uniform `InvalidCredentialsError` (no account enumeration). |
 
 > `register` returns `UserPublicSchema` (no `email`, no `password_hash`) — public
 > PII is reduced by design.
@@ -193,9 +212,16 @@ misconfigured mail server.
 
 ### 2. Login → token pair
 
-`AuthService.login` verifies the password, determines the device name from the
+`AuthService.login` enforces a **brute-force guard** (per IP and per username, via
+Redis — `settings.rate_limit`), then verifies the password. On any failure
+(unknown username, wrong password, or a deactivated account) it returns a single
+uniform `InvalidCredentialsError` (401) — the code never distinguishes these, so
+an attacker cannot enumerate valid usernames. When the username is not found the
+service still runs the Argon2 check against a dummy hash to equalize timing
+(no timing oracle). On success it determines the device name from the
 `User-Agent`, creates a `RefreshToken` row (only its hash is stored, plus
-`ip_address` / `user_agent` / `device_name`), and returns `TokenPair`.
+`ip_address` / `user_agent` / `device_name`), clears the rate-limit counters and
+returns `TokenPair`.
 
 ### 3. Refresh (with rotation)
 
@@ -206,6 +232,10 @@ misconfigured mail server.
 3. **if the token was already revoked → treats it as reuse** (possible token
    theft) and revokes **all** of that user's refresh tokens;
 4. otherwise revokes the presented token (rotation) and issues a fresh `TokenPair`.
+
+> A deactivated user (`is_active=False`) is force-logged-out on the first refresh
+> attempt: all their sessions are revoked and a `401 InvalidRefreshTokenError` is
+> returned, so they cannot keep their session alive by rotating tokens.
 
 ### 4. Sessions
 
@@ -218,9 +248,12 @@ revokes one; `DELETE /sessions` revokes all except the current one.
 
 1. `POST /auth/forgot-password` → if a user with that email exists, sends a
    reset link (`{FRONTEND_HOST}/reset-password?token=...`). The response is
-   identical regardless of email existence (no account enumeration).
+   identical regardless of email existence (no account enumeration). The endpoint
+   is **rate-limited** (429) per IP and per email to prevent mail flooding.
 2. `POST /auth/reset-password` → `decode_reset_token` (requires `type == "reset"`,
-   15-min TTL) → updates the stored password hash.
+   15-min TTL) → updates the stored password hash and **revokes all of the user's
+   active refresh tokens / sessions**, so a stolen session is invalidated by the
+   password change. The user must log in again.
 
 ---
 
@@ -260,8 +293,19 @@ redirecting to `/verify-email`.
   the client; rotation on every use; reuse detection revokes all sessions.
 - **Session metadata**: each refresh token records `ip_address`, `user_agent` and
   a parsed `device_name` for the sessions UI.
-- **No account enumeration**: forgot-password and resend-verification always
-  return the same message.
+- **No account enumeration**: login returns a uniform `InvalidCredentialsError`
+  for unknown username / wrong password / deactivated account, and the Argon2
+  check is run against a dummy hash when the username is missing (timing-safe).
+  `forgot-password` and `resend-verification` always return the same message.
+- **Brute-force & mail-flood protection**: login is rate-limited per IP + per
+  username, and forgot/resend per IP + per email (`RateLimitExceededError`, 429);
+  the global per-IP guard is applied in `src/main.py` middleware to every
+  `/api/v1/*` request.
+- **Deactivated accounts** (`is_active=False`) cannot log in or refresh — their
+  sessions are revoked on the first refresh attempt (`UserNotActiveError` isn't
+  revealed at login, but authenticated requests return `403 UserNotActiveError`).
+- **Password reset revokes sessions**: reset-password invalidates all refresh
+  tokens of the user (see flow 5).
 - **Cookies**: `set_tokens_cookie` (utils.py) sets http-only, `SameSite=Lax`
   cookies; `secure` follows `settings.app.secure_cookies`. The refresh cookie is
   scoped to `/api/v1/auth/refresh`.
@@ -276,7 +320,7 @@ are rendered by the global handler as `{error, detail}`:
 
 | Exception | Detail |
 | --- | --- |
-| `IncorrectPasswordError` | `"Incorrect password"` |
+| `InvalidCredentialsError` | `"Incorrect username or password"` — uniform login failure (unknown user / wrong password / deactivated account) |
 | `InvalidAccessTokenError` | `"Invalid access token"` |
 | `InvalidRefreshTokenError` | `"Invalid refresh token"` |
 | `NoRefreshTokenError` | `"No refresh token"` |
@@ -288,6 +332,8 @@ Related errors from other modules:
 | `UserNotFoundError` | `user` | 404 |
 | `UserAlreadyExistsError` | `user` | 409 |
 | `UserNotVerifiedError` | `user` | 403 |
+| `UserNotActiveError` | `user` | 403 |
+| `RateLimitExceededError` | `core` | 429 |
 
 ---
 
@@ -296,6 +342,8 @@ Related errors from other modules:
 - `src/core/dependencies.py` — `AccessTokenDep` (oauth2 bearer), `SessionDep`,
   `EventBusDep`.
 - `src/core/mailer/mailer.py` — `send_verification_email`, `send_password_reset_email`.
+- `src/core/rate_limit.py` — Redis fixed-window `RateLimiter`, `get_client_ip`.
+- `src/core/errors/base_errors.py` — `RateLimitExceededError` (429).
 - `src/user/dependencies.py` — `UserIdDep`, `AuthenticatedUserIdDep`,
   `CurrentUserDep`, `StaffDep`, `OptionalUserIdDep`; verification gate.
 - `src/core/config.py` — `settings.app` (JWT/TTL/host) and `settings.mail`.

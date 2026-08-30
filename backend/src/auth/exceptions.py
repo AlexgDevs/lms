@@ -12,6 +12,10 @@ class IncorrectPasswordError(AuthorizationError):
     detail = "Incorrect password"
 
 
+class InvalidCredentialsError(AuthorizationError):
+    detail = "Incorrect username or password"
+
+
 class InvalidAccessTokenError(AuthorizationError):
     detail = "Invalid access token"
 

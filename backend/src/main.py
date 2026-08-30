@@ -1,13 +1,16 @@
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import Awaitable, Callable, AsyncGenerator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
+from starlette.responses import Response
 
 from src.core.config import settings
 from src.core.events.protocol import InMemoryEvent
+from src.core.rate_limit import RateLimiter, get_client_ip
 from src.core.redis import init_redis, close_redis
 from src.core.logging import setup_logging
 from src.core.router import app_v1, notifications_router
@@ -18,6 +21,20 @@ from src.core.websocket.manager import ConnectionManager
 from src.notification.handler import NotificationHandler
 
 setup_logging()
+
+_GLOBAL_LIMIT_EXEMPT_PRECEDES = (
+    "/media/",
+    "/ws/",
+    "/docs",
+)
+
+
+def _is_global_limit_exempt(path: str) -> bool:
+    if path.startswith(_GLOBAL_LIMIT_EXEMPT_PRECEDES):
+        return True
+    if path == "/hello" or path == "/":
+        return True
+    return path.startswith(f"{settings.app.API_V1_STR}/openapi.json")
 
 
 @asynccontextmanager
@@ -55,6 +72,42 @@ def init_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def rate_limit_middleware(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        path = request.url.path
+        if (
+            not path.startswith(settings.app.API_V1_STR)
+            or _is_global_limit_exempt(path)
+            or request.method in ("OPTIONS", "HEAD")
+        ):
+            return await call_next(request)
+
+        redis = getattr(request.app.state, "redis", None)
+        if settings.rate_limit.RATE_LIMIT_GLOBAL_ENABLED and redis is not None:
+            client_ip = get_client_ip(request) or "unknown"
+            key = f"rl:global:{client_ip}"
+            try:
+                limiter = RateLimiter(redis)
+                hits = await limiter.hit(key, 60)
+                if hits > settings.rate_limit.RATE_LIMIT_GLOBAL_REQ_PER_MIN:
+                    ttl = await redis.ttl(key)
+                    response = JSONResponse(
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                        content={
+                            "error": "RateLimitExceededError",
+                            "detail": "Too many requests",
+                        },
+                    )
+                    response.headers["Retry-After"] = str(max(int(ttl), 1))
+                    return response
+            except Exception:
+                # Fail-open: a Redis outage must not knock out the whole API.
+                return await call_next(request)
+
+        return await call_next(request)
 
     if settings.storage.STORAGE_BACKEND == "local":
         root = settings.storage.storage_root_path

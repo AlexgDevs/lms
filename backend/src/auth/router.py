@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from src.auth.dependencies import AuthServiceDep
 from src.auth.security import hash_refresh_token
+from src.core.rate_limit import get_client_ip
 from src.auth.schemas import (
     UserRegisterSchema,
     SessionSchema,
@@ -53,7 +54,7 @@ async def login(
     return await service.login(
         username=form_data.username,
         password=form_data.password,
-        ip_address=request.client.host if request.client else None,
+        ip_address=get_client_ip(request),
         user_agent=request.headers.get("user-agent"),
     )
 
@@ -128,8 +129,9 @@ async def revoke_all_sessions(
 async def forgot_password(
     payload: ForgotPasswordRequestSchema,
     service: AuthServiceDep,
+    request: Request,
 ) -> ForgotPasswordResponseSchema:
-    await service.forgot_password(payload.email)
+    await service.forgot_password(payload.email, client_ip=get_client_ip(request))
     return ForgotPasswordResponseSchema(
         message="If the email exists, a reset link has been sent.",
     )
@@ -156,8 +158,9 @@ async def verify_email(
 async def resend_verification(
     payload: ResendVerificationRequestSchema,
     service: AuthServiceDep,
+    request: Request,
 ) -> MessageResponseSchema:
-    await service.resend_verification(payload.email)
+    await service.resend_verification(payload.email, client_ip=get_client_ip(request))
     return MessageResponseSchema(
         message="If the email exists, a verification link has been sent."
     )
