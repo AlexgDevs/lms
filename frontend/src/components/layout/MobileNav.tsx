@@ -10,16 +10,18 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { ROUTES } from "@/routes"
-
-const NAV_ITEMS = [
-    { to: ROUTES.DASHBOARD, label: "Моё обучение" },
-    { to: ROUTES.TEACHING, label: "Преподавание" },
-    { to: ROUTES.CATALOG, label: "Каталог" },
-] as const
+import useAuth from "@/features/auth/api/useAuth"
 
 export function MobileNav() {
     const [open, setOpen] = useState(false)
     const location = useLocation()
+    const { isLoggedIn } = useAuth()
+
+    const NAV_ITEMS = [
+        { to: ROUTES.DASHBOARD, label: "Моё обучение" },
+        { to: ROUTES.TEACHING, label: "Студия" },
+        { to: ROUTES.CATALOG, label: "Каталог" },
+    ].filter((item) => (item.to === ROUTES.TEACHING ? isLoggedIn : true))
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

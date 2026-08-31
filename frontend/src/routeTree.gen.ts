@@ -24,6 +24,7 @@ import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutTermsRouteImport } from './routes/_layout/terms'
 import { Route as LayoutAdminModerationRouteImport } from './routes/_layout/admin.moderation'
 import { Route as LayoutCoursesCourseIdRouteImport } from './routes/_layout/courses.$courseId'
+import { Route as LayoutJoinA8f92b3c1dRouteImport } from './routes/_layout/join/a8f92b3c1d'
 import { Route as LayoutLearnCourseIdRouteImport } from './routes/_layout/learn.$courseId'
 import { Route as LayoutProfileIndexRouteImport } from './routes/_layout/profile/index'
 import { Route as LayoutProfilePaymentsRouteImport } from './routes/_layout/profile/payments'
@@ -110,6 +111,11 @@ const LayoutCoursesCourseIdRoute = LayoutCoursesCourseIdRouteImport.update({
   path: '/courses/$courseId',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutJoinA8f92b3c1dRoute = LayoutJoinA8f92b3c1dRouteImport.update({
+  id: '/join/a8f92b3c1d',
+  path: '/join/a8f92b3c1d',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutLearnCourseIdRoute = LayoutLearnCourseIdRouteImport.update({
   id: '/learn/$courseId',
   path: '/learn/$courseId',
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof LayoutTermsRoute
   '/admin/moderation': typeof LayoutAdminModerationRoute
   '/courses/$courseId': typeof LayoutCoursesCourseIdRoute
+  '/join/a8f92b3c1d': typeof LayoutJoinA8f92b3c1dRoute
   '/learn/$courseId': typeof LayoutLearnCourseIdRouteWithChildren
   '/profile/payments': typeof LayoutProfilePaymentsRoute
   '/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/admin/moderation': typeof LayoutAdminModerationRoute
   '/courses/$courseId': typeof LayoutCoursesCourseIdRoute
+  '/join/a8f92b3c1d': typeof LayoutJoinA8f92b3c1dRoute
   '/profile/payments': typeof LayoutProfilePaymentsRoute
   '/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
   '/teaching/guide': typeof LayoutTeachingGuideRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/admin/moderation': typeof LayoutAdminModerationRoute
   '/_layout/courses/$courseId': typeof LayoutCoursesCourseIdRoute
+  '/_layout/join/a8f92b3c1d': typeof LayoutJoinA8f92b3c1dRoute
   '/_layout/learn/$courseId': typeof LayoutLearnCourseIdRouteWithChildren
   '/_layout/profile/payments': typeof LayoutProfilePaymentsRoute
   '/_layout/teaching/courses': typeof LayoutTeachingCoursesRouteWithChildren
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/moderation'
     | '/courses/$courseId'
+    | '/join/a8f92b3c1d'
     | '/learn/$courseId'
     | '/profile/payments'
     | '/teaching/courses'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/moderation'
     | '/courses/$courseId'
+    | '/join/a8f92b3c1d'
     | '/profile/payments'
     | '/teaching/courses'
     | '/teaching/guide'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/_layout/'
     | '/_layout/admin/moderation'
     | '/_layout/courses/$courseId'
+    | '/_layout/join/a8f92b3c1d'
     | '/_layout/learn/$courseId'
     | '/_layout/profile/payments'
     | '/_layout/teaching/courses'
@@ -448,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/courses/$courseId'
       fullPath: '/courses/$courseId'
       preLoaderRoute: typeof LayoutCoursesCourseIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/join/a8f92b3c1d': {
+      id: '/_layout/join/a8f92b3c1d'
+      path: '/join/a8f92b3c1d'
+      fullPath: '/join/a8f92b3c1d'
+      preLoaderRoute: typeof LayoutJoinA8f92b3c1dRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/learn/$courseId': {
@@ -598,6 +617,7 @@ interface LayoutRouteChildren {
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAdminModerationRoute: typeof LayoutAdminModerationRoute
   LayoutCoursesCourseIdRoute: typeof LayoutCoursesCourseIdRoute
+  LayoutJoinA8f92b3c1dRoute: typeof LayoutJoinA8f92b3c1dRoute
   LayoutLearnCourseIdRoute: typeof LayoutLearnCourseIdRouteWithChildren
   LayoutTeachingCoursesRoute: typeof LayoutTeachingCoursesRouteWithChildren
   LayoutTeachingGuideRoute: typeof LayoutTeachingGuideRoute
@@ -613,6 +633,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAdminModerationRoute: LayoutAdminModerationRoute,
   LayoutCoursesCourseIdRoute: LayoutCoursesCourseIdRoute,
+  LayoutJoinA8f92b3c1dRoute: LayoutJoinA8f92b3c1dRoute,
   LayoutLearnCourseIdRoute: LayoutLearnCourseIdRouteWithChildren,
   LayoutTeachingCoursesRoute: LayoutTeachingCoursesRouteWithChildren,
   LayoutTeachingGuideRoute: LayoutTeachingGuideRoute,

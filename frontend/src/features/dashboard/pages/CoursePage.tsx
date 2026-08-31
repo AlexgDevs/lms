@@ -9,7 +9,6 @@ import {
   Layers,
   Loader2,
   Play,
-  Sparkles,
   User,
   Users,
 } from "lucide-react";
@@ -154,7 +153,7 @@ export function CoursePage() {
       node: (
         <Button size="lg" className="w-full" disabled={checkout.isPending} onClick={handleBuy}>
           {checkout.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-          {checkout.isPending ? "Переход к оплате..." : `Оплатить ${course.price} ₽`}
+          {checkout.isPending ? "Переход к оплате..." : `Получить доступ · ${course.price} ₽`}
         </Button>
       ),
     },
@@ -385,16 +384,10 @@ export function CoursePage() {
                     <User className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Автор курса</p>
+                    <p className="text-xs text-muted-foreground">Преподаватель</p>
                     <p className="text-sm font-semibold text-foreground truncate">
                       {course.owner_username}
                     </p>
-                    {course.owner_is_founder && (
-                      <span className="inline-flex items-center gap-1 mt-1 rounded bg-reward/10 px-1.5 py-0.5 text-[10px] font-semibold text-reward">
-                        <Sparkles className="w-3 h-3" />
-                        Основатель
-                      </span>
-                    )}
                   </div>
                   <div className="ml-auto">
                     <TinyRating targetType="user" targetId={course.owner_id} />

@@ -133,15 +133,22 @@ export function LearnSidebar({
               </p>
             )}
             {!tgp.taken ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full py-2 text-sm"
-                onClick={() => setShowPreTest(true)}
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Пройти предварительное тестирование
-              </Button>
+              tgp.questions.length > 0 ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full py-2 text-sm"
+                  onClick={() => setShowPreTest(true)}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Пройти предварительное тестирование
+                </Button>
+              ) : (
+                <p className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                  <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  Тест ещё не готов — приступайте к урокам ниже.
+                </p>
+              )
             ) : (
               <Button
                 variant="outline"

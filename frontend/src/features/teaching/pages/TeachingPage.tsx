@@ -20,7 +20,14 @@ import { CreateCourseForm } from "@/features/teaching/components/CreateCourseFor
 import { CourseGenerateCard } from "@/features/teaching/components/CourseGenerateCard"
 import { resolveMediaUrl } from "@/lib/media"
 import { ROUTES } from "@/routes"
-import type { CourseSchema } from "@/client"
+import { CourseStatus, type CourseSchema } from "@/client"
+
+const COURSE_STATUS_LABELS: Record<string, string> = {
+  [CourseStatus.DRAFT]: "Черновик",
+  [CourseStatus.UNDER_REVIEW]: "На модерации",
+  [CourseStatus.PUBLISHED]: "Опубликован",
+  [CourseStatus.REJECTED]: "Отклонён",
+}
 
 export function TeachingPage() {
   const navigate = useNavigate()
@@ -46,7 +53,7 @@ export function TeachingPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-xs text-muted-foreground font-medium">Загрузка авторской студии...</p>
+        <p className="text-xs text-muted-foreground font-medium">Загрузка студии преподавателя...</p>
       </div>
     )
   }
@@ -59,7 +66,7 @@ export function TeachingPage() {
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold tracking-wider uppercase">
-              Авторская студия
+              Студия преподавателя
             </span>
             <span className="text-muted-foreground text-xs">• Workspace</span>
           </div>
@@ -157,9 +164,6 @@ export function TeachingPage() {
                   </div>
 
                   <div>
-                    <span className="text-xs font-bold text-primary tracking-wider uppercase font-mono">
-                      Курс ID: #{mainCourse.id}
-                    </span>
                     <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mt-1">
                       {mainCourse.title}
                     </h2>
@@ -172,14 +176,16 @@ export function TeachingPage() {
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2 max-w-md">
                     <div className="bg-background/40 backdrop-blur-md rounded-md p-3">
-                      <span className="text-[10px] text-muted-foreground block">Автор (Owner ID)</span>
-                      <span className="text-xs font-bold text-foreground font-mono truncate block">
-                        #{mainCourse.owner_id ?? "N/A"}
+                      <span className="text-[10px] text-muted-foreground block">Студентов</span>
+                      <span className="text-xs font-bold text-foreground block">
+                        {mainCourse.member_count ?? 0}
                       </span>
                     </div>
                     <div className="bg-background/40 backdrop-blur-md rounded-md p-3">
                       <span className="text-[10px] text-muted-foreground block">Статус</span>
-                      <span className="text-xs font-bold text-success">Активен</span>
+                      <span className="text-xs font-bold text-foreground block">
+                        {COURSE_STATUS_LABELS[mainCourse.status] ?? mainCourse.status}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -315,7 +321,7 @@ export function TeachingPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Sparkle className="w-4 h-4 text-reward" />
-                <h3 className="font-bold text-base text-foreground">AI Copilot для автора</h3>
+                <h3 className="font-bold text-base text-foreground">AI Copilot для преподавателя</h3>
               </div>
 
               <CourseGenerateCard />

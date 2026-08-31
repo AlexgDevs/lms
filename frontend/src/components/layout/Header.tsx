@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useLayout } from "@/app/providers/useLayout";
 import { useTheme } from "@/app/providers/useTheme";
+import useAuth from "@/features/auth/api/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoryCatalog } from "@/components/layout/CategoryCatalog";
@@ -15,9 +16,12 @@ import { Search, Moon, Sun } from "lucide-react";
 export function Header() {
   const { header } = useLayout();
   const { theme, toggleTheme } = useTheme();
+  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   useNotificationSocket();
+
+  const showTeaching = isLoggedIn;
 
   if (!header.visible) return null;
 
@@ -62,14 +66,16 @@ export function Header() {
               >
                 Моё обучение
               </Link>
-              <Link
-                to="/teaching"
-                activeProps={{ className: "text-primary font-semibold" }}
-                inactiveProps={{ className: "text-muted-foreground hover:text-foreground" }}
-                className="transition-colors"
-              >
-                Преподавание
-              </Link>
+              {showTeaching && (
+                <Link
+                  to="/teaching"
+                  activeProps={{ className: "text-primary font-semibold" }}
+                  inactiveProps={{ className: "text-muted-foreground hover:text-foreground" }}
+                  className="transition-colors"
+                >
+                  Студия
+                </Link>
+              )}
             </nav>
           </div>
 

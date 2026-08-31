@@ -10,6 +10,7 @@ export const ROUTES = {
     SETTINGS: "/settings",
     TEACHING: "/teaching",
     TEACHING_GUIDE: "/teaching/guide",
+    FOUNDERS: "/join/a8f92b3c1d",
     TEACHING_COURSE: "/teaching/courses",
     PRIVACY: "/privacy",
     TERMS: "/terms",

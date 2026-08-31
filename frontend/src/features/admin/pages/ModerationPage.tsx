@@ -174,7 +174,7 @@ export function ModerationPage() {
           <DialogHeader>
             <DialogTitle>Отклонить курс</DialogTitle>
             <DialogDescription>
-              Укажите причину отклонения — автор увидит её при отправке заново.
+              Укажите причину отклонения — преподаватель увидит её при отправке заново.
             </DialogDescription>
           </DialogHeader>
           <Textarea

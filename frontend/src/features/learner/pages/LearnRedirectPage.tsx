@@ -196,10 +196,15 @@ if (data.isLoading) {
                 </Button>
               </div>
             ) : (
-              <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                Тест ещё не сгенерирован автором курса.
-              </p>
+              <div className="space-y-2">
+                <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  Предварительный тест ещё не готов.
+                </p>
+                <Button variant="outline" className="w-full" onClick={() => goToLesson(firstLessonId)}>
+                  Начать без теста
+                </Button>
+              </div>
             )}
           </Card>
         )}
