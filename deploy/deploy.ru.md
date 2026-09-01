@@ -1,5 +1,8 @@
 # Гайд по деплою (прод)
 
+> Практическая пошаговая настройка VPS с нуля — в **[`deploy/setup.ru.md`](setup.ru.md)**.
+> Здесь — описание архитектуры и файлов.
+
 Гайд описывает, как LMS собирается, релизится и работает в продакшене
 (self-hosted на **RU VPS**, по политике «персональные данные в РФ» / 152-ФЗ).
 
@@ -141,8 +144,8 @@ git tag v0.2.0 && git push origin v0.2.0
 docker compose exec -T postgres pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" -Fc > "$BACKUP_DIR/lms_$(date +%F).dump"
 
 # Mirror бакета MinIO
-docker run --rm --network plm_app_network -v "$BACKUP_DIR/media:/backups" minio/mc \
-  sh -c "mc alias set local http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && mc mirror --overwrite local/$STORAGE_BUCKET /backups"
+docker run --rm --entrypoint sh --network plm_app_network -v "$BACKUP_DIR/media:/backups" minio/mc \
+  -c "mc alias set local http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && mc mirror --overwrite local/$STORAGE_BUCKET /backups"
 
 # удаление старых, старше BACKUP_KEEP_DAYS
 find "$BACKUP_DIR" -name 'lms_*.dump' -mtime +$BACKUP_KEEP_DAYS -delete
@@ -158,8 +161,8 @@ Redis **не** бэкапится (кеш/очередь — потеря не �
 docker compose exec -T postgres pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean < "$BACKUP_DIR/lms_YYYY-MM-DD.dump"
 
 # MinIO (обратный mirror с диска бэкапа)
-docker run --rm --network plm_app_network -v "$BACKUP_DIR/media:/backups" minio/mc \
-  sh -c "mc alias set local http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && mc mirror --overwrite /backups local/$STORAGE_BUCKET"
+docker run --rm --entrypoint sh --network plm_app_network -v "$BACKUP_DIR/media:/backups" minio/mc \
+  -c "mc alias set local http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && mc mirror --overwrite /backups local/$STORAGE_BUCKET"
 ```
 
 ## 9. Заметки и troubleshooting

@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Nightly backup to a separate disk on the VPS.
 # - PostgreSQL logical dump (pg_dump)
 # - MinIO bucket mirror (mc) to <BACKUP_DIR>/media
 # - prune dumps older than BACKUP_KEEP_DAYS
-# Schedule via cron, e.g.:  0 3 * * * /opt/lms/deploy/backup.sh
+# Schedule via cron, e.g.:  0 3 * * * /bin/bash /opt/lms/deploy/backup.sh
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -24,12 +24,12 @@ $COMPOSE exec -T postgres pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" -Fc \
   > "$BACKUP_DIR/lms_${DATE}.dump"
 
 echo "==> Miroring MinIO bucket '$STORAGE_BUCKET' -> $BACKUP_DIR/media"
-docker run --rm --network "$NETWORK" \
+docker run --rm --entrypoint sh --network "$NETWORK" \
   -v "$BACKUP_DIR/media:/backups" \
   -e MINIO_ROOT_USER="$MINIO_ROOT_USER" \
   -e MINIO_ROOT_PASSWORD="$MINIO_ROOT_PASSWORD" \
   -e STORAGE_BUCKET="$STORAGE_BUCKET" \
-  minio/mc sh -c "mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
+  minio/mc -c "mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
     && mc mirror --overwrite local/\$STORAGE_BUCKET /backups"
 
 echo "==> Pruning backups older than ${BACKUP_KEEP_DAYS:-14} days"

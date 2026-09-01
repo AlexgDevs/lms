@@ -106,6 +106,7 @@ Files:
 - `deploy/nginx.conf` — nginx (SPA + proxy to the backend upstream).
 - `deploy/roll.sh` — zero-downtime rolling deploy (recreate `backend-1`, then `backend`).
 - `deploy/backup.sh` — nightly PostgreSQL dump + MinIO mirror to a separate disk.
+- `deploy/setup.en.md` / `deploy/setup.ru.md` — **hands-on VPS setup from scratch**.
 - `.github/workflows/ci.yml` — black + mypy (backend) and lint + build (frontend) on push/PR.
 - `.github/workflows/deploy.yml` — builds & pushes ghcr images on tag `v*`, then SSH-deploys (rolling).
 
@@ -137,8 +138,8 @@ Redis is not backed up (cache / ephemeral). Restore:
 # PostgreSQL
 docker compose exec -T postgres pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean < /var/backups/lms_YYYY-MM-DD.dump
 # MinIO (reverse mirror)
-docker run --rm --network plm_app_network -v /var/backups/media:/backups minio/mc \
-  sh -c "mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD && mc mirror --overwrite /backups local/\$STORAGE_BUCKET"
+docker run --rm --entrypoint sh --network plm_app_network -v /var/backups/media:/backups minio/mc \
+  -c "mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD && mc mirror --overwrite /backups local/\$STORAGE_BUCKET"
 ```
 
 GitHub Actions secrets for the deploy job: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`,
