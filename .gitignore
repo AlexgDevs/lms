@@ -229,3 +229,6 @@ dist/
 
 # Local object storage uploads (STORAGE_ROOT_DIR)
 backend/media/
+
+# Production secrets (never commit)
+.env.prod
