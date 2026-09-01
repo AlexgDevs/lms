@@ -1,12 +1,13 @@
 from uuid import UUID
 from fastapi import APIRouter, status
 
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import OptionalUserIdDep, UserIdDep
 from src.lesson.dependencies import LessonServiceDep
 from src.lesson.schemas import (
     LessonSchema,
     LessonCreateRequestSchema,
     LessonUpdateRequestSchema,
+    LessonReorderSchema,
 )
 
 router = APIRouter(
@@ -27,6 +28,22 @@ async def create_lesson(
     user_id: UserIdDep,
 ) -> LessonSchema:
     return await service.create_lesson(
+        course_id=course_id,
+        module_id=module_id,
+        user_id=user_id,
+        payload=payload,
+    )
+
+
+@router.patch("/reorder", response_model=list[LessonSchema])
+async def reorder_lessons(
+    course_id: UUID,
+    module_id: UUID,
+    payload: LessonReorderSchema,
+    service: LessonServiceDep,
+    user_id: UserIdDep,
+) -> list[LessonSchema]:
+    return await service.reorder(
         course_id=course_id,
         module_id=module_id,
         user_id=user_id,
@@ -71,4 +88,32 @@ async def delete_lesson(
         module_id=module_id,
         course_id=course_id,
         user_id=user_id,
+    )
+
+
+@router.get("")
+async def get_lessons(
+    course_id: UUID,
+    module_id: UUID,
+    user_id: OptionalUserIdDep,
+    service: LessonServiceDep,
+    only_created: bool = False,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[LessonSchema]:
+    if only_created:
+        return await service.get_all_by_owner(
+            course_id=course_id,
+            module_id=module_id,
+            user_id=user_id,
+            limit=limit,
+            offset=offset,
+        )
+
+    return await service.get_all(
+        course_id=course_id,
+        module_id=module_id,
+        user_id=user_id,
+        limit=limit,
+        offset=offset,
     )

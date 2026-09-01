@@ -10,6 +10,7 @@ class CourseMemberSchema(BaseSchema):
     course_id: UUID
     user_id: UUID
     role: CourseMemberRole
+    tgp_last_submitted_at: datetime | None = None
 
 
 class CourseMemberCreateSchema(BaseSchema):
@@ -20,6 +21,7 @@ class CourseMemberCreateSchema(BaseSchema):
 
 class CourseMemberUpdateSchema(BaseSchema):
     left_at: datetime | None = None
+    tgp_last_submitted_at: datetime | None = None
 
 
 class CourseUpdateMemberRole(BaseSchema):

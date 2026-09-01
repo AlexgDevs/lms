@@ -2,7 +2,7 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
-from src.core.dependencies import SessionDep
+from src.core.dependencies import EventBusDep, SessionDep
 from src.course.dependencies import CourseRepositoryDep
 from src.module.repository import ModuleRepository
 from src.module.service import ModuleService
@@ -35,10 +35,12 @@ ModuleUnitOfWorkDep = Annotated[ModuleUnitOfWork, Depends(get_module_uow)]
 def get_module_service(
     session: SessionDep,
     uow: ModuleUnitOfWorkDep,
+    event_bus: EventBusDep,
 ) -> ModuleService:
     return ModuleService(
         session=session,
         module_unit_of_work=uow,
+        event_bus=event_bus,
     )
 
 

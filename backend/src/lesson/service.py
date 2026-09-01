@@ -1,13 +1,18 @@
+from typing import TYPE_CHECKING
 from uuid import UUID
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from src.auth.exceptions import InvalidAccessTokenError
 from src.lesson.lesson_progress.schemas import (
     LessonProgressCreateSchema,
     LessonProgressSchema,
 )
 from src.lesson.enums import LessonProgressType
 from src.lesson.exceptions import LessonNotFoundError, LessonProgressNotFoundError
-from src.course.exceptions import CourseNotFoundError
+from src.course.exceptions import CourseMemberNotFoundError, CourseNotFoundError
+from src.course.enums import CourseStatus
+from src.core.events.event import LessonDeleted
 from src.module.exceptions import ModuleNotFoundError
 from src.lesson.schemas import (
     LessonCreateRequestSchema,
@@ -15,9 +20,15 @@ from src.lesson.schemas import (
     LessonSchema,
     LessonUpdateRequestSchema,
     LessonUpdateSchema,
+    LessonReorderSchema,
 )
+from src.course.models import CourseMember
 from src.lesson.unit_of_work import LessonUnitOfWork
+from src.course.access import ensure_course_is_draft, ensure_lesson_removable
 from src.core.services import BaseService
+
+if TYPE_CHECKING:
+    from src.core.events.protocol import Event
 
 
 class LessonService(BaseService):
@@ -25,9 +36,10 @@ class LessonService(BaseService):
         self,
         session: AsyncSession,
         lesson_unit_of_work: LessonUnitOfWork,
+        event_bus: "Event | None" = None,
     ):
         self.uow = lesson_unit_of_work
-        super().__init__(session)
+        super().__init__(session, event_bus)
 
     async def create_lesson(
         self,
@@ -41,6 +53,7 @@ class LessonService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
@@ -71,6 +84,7 @@ class LessonService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
@@ -102,6 +116,7 @@ class LessonService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+        ensure_course_is_draft(course)
 
         module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
         if not module:
@@ -113,8 +128,27 @@ class LessonService(BaseService):
         if not lesson:
             raise LessonNotFoundError
 
+        await ensure_lesson_removable(self.session, lesson.id)
+
+        result = await self.session.execute(
+            select(CourseMember.user_id).where(
+                CourseMember.course_id == course_id,
+                CourseMember.left_at.is_(None),
+            )
+        )
+        member_ids = [row[0] for row in result.all()]
+
         await self.uow.lessons.delete(id_=lesson_id)
         await self.uow.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                LessonDeleted(
+                    course_id=course_id,
+                    lesson_title=lesson.title,
+                    member_ids=member_ids,
+                )
+            )
 
     async def get_or_create_lesson_progress(
         self,
@@ -155,3 +189,163 @@ class LessonService(BaseService):
                 raise LessonProgressNotFoundError
 
             return existing_progress
+
+    async def get_course_progress(
+        self, course_id: UUID, user_id: UUID
+    ) -> list[LessonProgressSchema]:
+        """Returns the current user's progress for every lesson of a course.
+
+        Accessible to enrolled members (and the course owner). Completion status is
+        resolved per lesson via the `LessonProgress` rows.
+        """
+        course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+        if not course:
+            raise CourseNotFoundError
+
+        if (
+            course.status != CourseStatus.PUBLISHED
+            and not await self.uow.courses.is_member(course_id, user_id)
+        ):
+            raise CourseNotFoundError
+
+        member = await self.uow.courses.get_course_where_user_is_member(
+            course_id=course_id, user_id=user_id
+        )
+        if not member:
+            raise CourseMemberNotFoundError
+
+        modules = list(
+            await self.uow.modules.get_filtered(
+                limit=1000, offset=0, course_id=course_id
+            )
+        )
+
+        lesson_ids: list[UUID] = []
+        for module in modules:
+            lessons = await self.uow.lessons.get_filtered(
+                limit=1000, offset=0, course_id=course_id, module_id=module.id
+            )
+            lesson_ids.extend(lesson.id for lesson in lessons)
+
+        if not lesson_ids:
+            return []
+
+        return list(
+            await self.uow.lessons_progress.get_by_user_and_lesson_ids(
+                user_id=user_id, lesson_ids=lesson_ids
+            )
+        )
+
+    async def get_all(
+        self,
+        course_id: UUID,
+        module_id: UUID,
+        user_id: UUID | None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[LessonSchema]:
+        # Intentional: the module/lesson structure of a PUBLISHED course is a
+        # public preview (outline). Only the content blocks are gated to members
+        # (see block.service). Non-published courses require owner/membership.
+        course = await self.uow.courses.get_one(
+            id=course_id,
+            is_deleted=None,
+        )
+
+        if not course:
+            raise CourseNotFoundError
+
+        if course.status != CourseStatus.PUBLISHED:
+            if user_id is None or (
+                course.owner_id != user_id
+                and not await self.uow.courses.is_member(course_id, user_id)
+            ):
+                raise CourseNotFoundError
+
+        module = await self.uow.modules.get_one(
+            id=module_id,
+            course_id=course_id,
+        )
+
+        if not module:
+            raise ModuleNotFoundError
+
+        return list(
+            await self.uow.lessons.get_filtered(
+                limit=limit,
+                offset=offset,
+                order_by=self.uow.lessons.model.order.asc(),
+                course_id=course.id,
+                module_id=module.id,
+            )
+        )
+
+    async def get_all_by_owner(
+        self,
+        course_id: UUID,
+        module_id: UUID,
+        user_id: UUID | None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[LessonSchema]:
+        if user_id is None:
+            raise InvalidAccessTokenError
+
+        course = await self.uow.courses.get_one(
+            id=course_id,
+            owner_id=user_id,
+            is_deleted=None,
+        )
+
+        if not course:
+            raise CourseNotFoundError
+
+        module = await self.uow.modules.get_one(
+            id=module_id,
+            course_id=course_id,
+        )
+
+        if not module:
+            raise ModuleNotFoundError
+
+        return list(
+            await self.uow.lessons.get_filtered(
+                limit=limit,
+                offset=offset,
+                order_by=self.uow.lessons.model.order.asc(),
+                course_id=course.id,
+                module_id=module.id,
+            )
+        )
+
+    async def reorder(
+        self,
+        course_id: UUID,
+        module_id: UUID,
+        user_id: UUID,
+        payload: LessonReorderSchema,
+    ) -> list[LessonSchema]:
+        course = await self.uow.courses.get_one(
+            id=course_id, owner_id=user_id, is_deleted=None
+        )
+        if not course:
+            raise CourseNotFoundError
+
+        module = await self.uow.modules.get_one(id=module_id, course_id=course_id)
+        if not module:
+            raise ModuleNotFoundError
+
+        await self.uow.lessons.set_order_bulk(
+            module_id=module_id, course_id=course_id, ordered_ids=payload.ordered_ids
+        )
+        await self.uow.commit()
+
+        return list(
+            await self.uow.lessons.get_filtered(
+                limit=1000,
+                offset=0,
+                order_by=self.uow.lessons.model.order.asc(),
+                course_id=course.id,
+                module_id=module.id,
+            )
+        )

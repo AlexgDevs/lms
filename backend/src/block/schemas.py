@@ -1,6 +1,8 @@
 from uuid import UUID
 from datetime import datetime
-from typing import Any, ClassVar, Dict, Type
+from typing import Any, ClassVar, Dict, Self, Type
+
+from pydantic import model_validator
 
 from src.core.schemas.mixin import PolymorphicPayloadMixin
 from src.core.schemas.base_schema import BaseSchema
@@ -14,12 +16,20 @@ class BlockSchema(BaseSchema):
     title: str
     block_type: BlockType
     payload: dict[str, Any]
+    order: int = 0
     created_at: datetime
     updated_at: datetime
 
 
 class TextBlockContent(BaseSchema):
-    text: str
+    text: str | None = None
+    html: str | None = None
+
+    @model_validator(mode="after")
+    def _ensure_content(self) -> Self:
+        if self.text is None and self.html is None:
+            raise ValueError("text или html должны быть заполнены")
+        return self
 
 
 class QuizOption(BaseSchema):
@@ -37,29 +47,39 @@ class QuizMultipleBlockContent(BaseSchema):
     correct_option_ids: list[int]
 
 
+class CodeTestCase(BaseSchema):
+    input: str = ""
+    output: str = ""
+
+
 class CodeBlockContent(BaseSchema):
     code: str
     language: str
+    test_cases: list[CodeTestCase] = []
 
 
 class ImageBlockContent(BaseSchema):
-    url: str
+    url: str | None = None
+    media_id: UUID | None = None
     alt_text: str | None = None
 
 
 class VideoBlockContent(BaseSchema):
-    url: str
+    url: str | None = None
+    media_id: UUID | None = None
     duration: int | None = None
 
 
 class AudioBlockContent(BaseSchema):
-    url: str
+    url: str | None = None
+    media_id: UUID | None = None
 
 
 class FileBlockContent(BaseSchema):
-    url: str
-    file_name: str
-    file_size: int
+    url: str | None = None
+    media_id: UUID | None = None
+    file_name: str | None = None
+    file_size: int | None = None
 
 
 PAYLOAD_REGISTRY: Dict[BlockType, Type[BaseSchema]] = {
@@ -85,6 +105,7 @@ class BlockCreateRequestSchema(BaseSchema, PolymorphicPayloadMixin[BlockType]):
 class BlockCreateSchema(BlockCreateRequestSchema):
     lesson_id: UUID
     course_id: UUID
+    order: int = 0
 
 
 class BlockUpdateRequestSchema(BaseSchema, PolymorphicPayloadMixin[BlockType]):
@@ -97,3 +118,7 @@ class BlockUpdateRequestSchema(BaseSchema, PolymorphicPayloadMixin[BlockType]):
 
 class BlockUpdateSchema(BlockUpdateRequestSchema):
     pass
+
+
+class BlockReorderSchema(BaseSchema):
+    ordered_ids: list[UUID]

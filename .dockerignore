@@ -1,0 +1,26 @@
+# VCS & editor
+.git
+.gitignore
+**/*.pyc
+__pycache__/
+
+# Secrets — never baked into images
+**/.env
+**/.env.*
+!.env.example
+!.env.prod.example
+
+# Python
+.venv/
+venv/
+backend/.venv/
+backend/logs/
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+
+# Test / tooling artifacts
+.alembic/

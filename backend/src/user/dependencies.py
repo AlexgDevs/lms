@@ -1,46 +1,108 @@
-from typing import Annotated
 from uuid import UUID
+from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Request
 
-from src.auth.security import decode_token
+from src.auth.exceptions import InvalidAccessTokenError
+from src.core.dependencies import (
+    AccessTokenDep,
+    SessionDep,
+)
+from src.auth.security import decode_access_token
+from src.user.exceptions import (
+    UserNotActiveError,
+    UserNotStaffError,
+    UserNotVerifiedError,
+)
+from src.user.repository import UserRepository
 from src.user.schemas import UserSchema
 from src.user.service import UserService
-from src.core.dependencies import AccessTokenDep, SessionDep
-from src.user.repository import UserRepository
 
 
-async def get_user_repository(session: SessionDep) -> UserRepository:
+def get_user_repository(session: SessionDep) -> UserRepository:
     return UserRepository(session)
 
 
-UserRepositoryDep = Annotated[UserRepository, Depends(get_user_repository)]
+def get_user_service(
+    session: SessionDep, user_repository: UserRepositoryDep
+) -> UserService:
+    return UserService(session, user_repository)
 
 
-def get_current_user_id(access_token: AccessTokenDep) -> UUID:
-    user_id = decode_token(access_token).sub
+async def get_current_user_id(
+    access_token: AccessTokenDep,
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+) -> UUID:
+    user_id = decode_access_token(access_token).get("sub")
     if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User ID not found in token",
-        )
-    return user_id
+        raise InvalidAccessTokenError
+    user = await user_repository.get_one(id=UUID(user_id))
+    if not user or not user.is_active:
+        raise UserNotActiveError
+    if not user.is_verified:
+        raise UserNotVerifiedError
+    return UUID(user_id)
+
+
+def get_optional_current_user_id(request: Request) -> UUID | None:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    access_token = auth_header.removeprefix("Bearer ").strip()
+    if not access_token:
+        return None
+    try:
+        user_id = decode_access_token(access_token).get("sub")
+    except InvalidAccessTokenError:
+        return None
+    if not user_id:
+        return None
+    return UUID(user_id)
 
 
 async def get_current_user(
     user_id: UserIdDep,
     user_service: UserServiceDep,
 ) -> UserSchema:
+    user = await user_service.get_user(user_id)
+    if not user.is_verified:
+        raise UserNotVerifiedError
+    return user
+
+
+async def get_current_staff(
+    user_id: UserIdDep,
+    user_service: UserServiceDep,
+) -> UserSchema:
+    user = await user_service.get_user(user_id)
+    if not user.is_verified:
+        raise UserNotVerifiedError
+    if not user.is_staff:
+        raise UserNotStaffError
+    return user
+
+
+UserRepositoryDep = Annotated[UserRepository, Depends(get_user_repository)]
+UserServiceDep = Annotated[UserService, Depends(get_user_service)]
+UserIdDep = Annotated[UUID, Depends(get_current_user_id)]
+OptionalUserIdDep = Annotated[UUID | None, Depends(get_optional_current_user_id)]
+CurrentUserDep = Annotated[UserSchema, Depends(get_current_user)]
+StaffDep = Annotated[UserSchema, Depends(get_current_staff)]
+
+
+def get_authenticated_user_id(access_token: AccessTokenDep) -> UUID:
+    user_id = decode_access_token(access_token).get("sub")
+    if not user_id:
+        raise InvalidAccessTokenError
+    return UUID(user_id)
+
+
+async def get_authenticated_user(
+    user_id: Annotated[UUID, Depends(get_authenticated_user_id)],
+    user_service: UserServiceDep,
+) -> UserSchema:
     return await user_service.get_user(user_id)
 
 
-def get_user_service(
-    session: SessionDep,
-    user_repository: UserRepositoryDep,
-) -> UserService:
-    return UserService(session, user_repository)
-
-
-UserServiceDep = Annotated[UserService, Depends(get_user_service)]
-UserIdDep = Annotated[UUID, Depends(get_current_user_id)]
-CurrentUserDep = Annotated[UserSchema, Depends(get_current_user)]
+AuthenticatedUserIdDep = Annotated[UUID, Depends(get_authenticated_user_id)]
+AuthenticatedCurrentUserDep = Annotated[UserSchema, Depends(get_authenticated_user)]

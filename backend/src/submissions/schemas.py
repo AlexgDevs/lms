@@ -32,8 +32,13 @@ class QuizMultipleSubmission(BaseSchema):
     selected_option_ids: list[int]
 
 
+class CodeSubmission(BaseSchema):
+    code: str
+
+
 PAYLOAD_SUBMISSION_REGISTRY: Dict[BlockType, Type[BaseSchema]] = {
     BlockType.TEXT: VoidBlockSubmission,
+    BlockType.CODE: CodeSubmission,
     BlockType.IMAGE: VoidBlockSubmission,
     BlockType.VIDEO: VoidBlockSubmission,
     BlockType.AUDIO: VoidBlockSubmission,

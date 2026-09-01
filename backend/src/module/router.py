@@ -7,9 +7,10 @@ from src.module.schemas import (
     ModuleCreateRequestSchema,
     ModuleUpdateRequestSchema,
     ModuleSchema,
+    ModuleReorderSchema,
 )
 
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import OptionalUserIdDep, UserIdDep
 
 router = APIRouter(prefix="/courses/{course_id}/modules", tags=["Modules"])
 
@@ -28,6 +29,16 @@ async def create_module(
     return await service.create_module(
         course_id=course_id, user_id=user_id, payload=payload
     )
+
+
+@router.patch("/reorder", response_model=list[ModuleSchema])
+async def reorder_modules(
+    course_id: UUID,
+    payload: ModuleReorderSchema,
+    service: ModuleServiceDep,
+    user_id: UserIdDep,
+) -> list[ModuleSchema]:
+    return await service.reorder(course_id=course_id, user_id=user_id, payload=payload)
 
 
 @router.patch(
@@ -63,4 +74,23 @@ async def delete_module(
         module_id=module_id,
         course_id=course_id,
         user_id=user_id,
+    )
+
+
+@router.get("")
+async def get_modules(
+    course_id: UUID,
+    user_id: OptionalUserIdDep,
+    service: ModuleServiceDep,
+    only_created: bool = False,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[ModuleSchema]:
+    if only_created:
+        return await service.get_all_by_owner_course(
+            course_id=course_id, user_id=user_id, limit=limit, offset=offset
+        )
+
+    return await service.get_all_by_course(
+        course_id=course_id, user_id=user_id, limit=limit, offset=offset
     )

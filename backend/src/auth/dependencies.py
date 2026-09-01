@@ -1,42 +1,48 @@
 from typing import Annotated, AsyncGenerator
+
 from fastapi import Depends
 
+from src.auth.repository import RefreshTokenRepository
 from src.auth.services import AuthService
-from src.user.dependencies import UserRepositoryDep
-from src.core.dependencies import RedisDep, SessionDep
 from src.auth.unit_of_work import AuthUnitOfWork
-from src.auth.repository import AuthRepository
+from src.core.dependencies import EventBusDep, SessionDep
+from src.core.rate_limit import RateLimiterDep
+from src.user.dependencies import UserRepositoryDep
 
 
-async def get_auth_repository(session: SessionDep) -> AuthRepository:
-    return AuthRepository(session)
+def get_refresh_token_repository(session: SessionDep) -> RefreshTokenRepository:
+    return RefreshTokenRepository(session)
 
 
 async def get_auth_unit_of_work(
     session: SessionDep,
     user_repository: UserRepositoryDep,
-    auth_repository: AuthRepositoryDep,
+    refresh_token_repository: RefreshTokenRepositoryDep,
 ) -> AsyncGenerator[AuthUnitOfWork]:
     async with AuthUnitOfWork(
         session,
         user_repository,
-        auth_repository,
-    ) as uow:
-        yield uow
+        refresh_token_repository,
+    ) as auth_unit_of_work:
+        yield auth_unit_of_work
 
 
-async def get_auth_service(
+def get_auth_service(
     session: SessionDep,
     auth_unit_of_work: AuthUnitOfWorkDep,
-    redis_client: RedisDep,
+    event_bus: EventBusDep,
+    rate_limiter: RateLimiterDep,
 ) -> AuthService:
     return AuthService(
         session,
         auth_unit_of_work,
-        redis_client,
+        event_bus,
+        rate_limiter=rate_limiter,
     )
 
 
-AuthRepositoryDep = Annotated[AuthRepository, Depends(get_auth_repository)]
+RefreshTokenRepositoryDep = Annotated[
+    RefreshTokenRepository, Depends(get_refresh_token_repository)
+]
 AuthUnitOfWorkDep = Annotated[AuthUnitOfWork, Depends(get_auth_unit_of_work)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]

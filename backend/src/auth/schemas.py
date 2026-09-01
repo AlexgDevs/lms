@@ -12,11 +12,6 @@ class AccessTokenPayload:
     sub: UUID
 
 
-class TokenPair(BaseSchema):
-    access_token: str
-    refresh_token: str
-
-
 class UserCreateSchema(BaseSchema):
     username: str
     email: str
@@ -46,3 +41,59 @@ class RefreshTokenSchema(BaseSchema):
     is_revoked: bool
     expires_at: datetime
     created_at: datetime
+    ip_address: str | None = None
+    user_agent: str | None = None
+    device_name: str | None = None
+
+
+class TokenPair(BaseSchema):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class RefreshTokenCreate(BaseSchema):
+    user_id: UUID
+    token_hash: str
+    expires_at: datetime
+    ip_address: str | None = None
+    user_agent: str | None = None
+    device_name: str | None = None
+
+
+class SessionSchema(BaseSchema):
+    id: UUID
+    device_name: str | None = None
+    ip_address: str | None = None
+    created_at: datetime
+    is_current: bool = False
+
+
+class ForgotPasswordRequestSchema(BaseSchema):
+    email: EmailStr
+
+
+class ForgotPasswordResponseSchema(BaseSchema):
+    message: str
+
+
+class ResetPasswordRequestSchema(BaseSchema):
+    token: str
+    new_password: str
+
+
+class VerifyEmailRequestSchema(BaseSchema):
+    token: str
+
+
+class ResendVerificationRequestSchema(BaseSchema):
+    email: EmailStr
+
+
+class MessageResponseSchema(BaseSchema):
+    message: str
+
+
+class ChangePasswordRequestSchema(BaseSchema):
+    current_password: str
+    new_password: str

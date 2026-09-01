@@ -1,0 +1,27 @@
+/* styles/dark.css — Инженерный Минимализм */
+[data-theme="dark"] {
+  --text: #F3F4F6;
+  --subtext1: #B3BCC9;
+  --subtext0: #9CA3AF;
+
+  --overlay2: #2A3548;
+  --overlay1: #222C3D;
+  --overlay0: #1B2332;
+
+  --surface2: #2A3548;
+  --surface1: #222C3D;
+  --surface0: #1B2332;
+
+  --base: #0B0F17;
+  --mantle: #161D2A;
+  --crust: #0D1220;
+
+  --blue: #0891B2;
+  --red: #F87171;
+  --mauve: #0E7490;
+  --teal: #0E7490;
+
+  --blue-alpha: #0891B215;
+  --red-alpha: #F8717115;
+  --mauve-alpha: #0E749015;
+}

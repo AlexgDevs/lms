@@ -6,6 +6,7 @@ from src.course.dependencies import CourseMemberRepositoryDep, CourseRepositoryD
 from src.lesson.lesson_progress.dependencies import LessonProgressRepositoryDep
 from src.block.dependencies import BlockRepositoryDep
 from src.core.dependencies import SessionDep
+from src.core.rate_limit import RateLimiterDep
 from src.lesson.dependencies import LessonRepositoryDep, LessonServiceDep
 from src.submissions.repository import BlockSubmissionRepository
 from src.submissions.service import BlockSubmissionService
@@ -51,8 +52,11 @@ def get_submission_service(
     session: SessionDep,
     block_unit_of_work: BlockSubmissionUnitOfWorkDep,
     lesson_service: LessonServiceDep,
+    rate_limiter: RateLimiterDep,
 ) -> BlockSubmissionService:
-    return BlockSubmissionService(session, block_unit_of_work, lesson_service)
+    return BlockSubmissionService(
+        session, block_unit_of_work, lesson_service, rate_limiter
+    )
 
 
 BlockSubmissionServiceDep = Annotated[

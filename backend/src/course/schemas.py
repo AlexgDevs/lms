@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from src.course.enums import CourseMemberRole
+from src.course.enums import CourseMemberRole, CourseStatus
 from src.core.schemas.base_schema import BaseSchema
 
 
@@ -14,11 +14,28 @@ class CourseSchema(BaseSchema):
 
     id: UUID
     owner_id: UUID
+    owner_username: str = ""
+    owner_is_founder: bool = False
     title: str
     description: str | None
     cover_url: str | None
     price: int
+    category_id: UUID | None = None
+    member_count: int = 0
+    is_member: bool = False
+    status: CourseStatus
+    moderation_reason: str | None = None
+    rating: float | None = None
+    rating_count: int | None = None
     created_at: datetime
+    tgp_enabled: bool = False
+    tgp_last_full_generated_at: datetime | None = None
+    tgp_cooldown_hours: int = 24
+    tgp_outdated: bool = False
+    tgp_content_snapshot: dict[str, int] | None = Field(
+        default=None, exclude=True, description="Internal TGP generation snapshot"
+    )
+    certificate_enabled: bool = False
 
 
 class CourseCreateRequestSchema(BaseSchema):
@@ -30,6 +47,7 @@ class CourseCreateRequestSchema(BaseSchema):
     title: str = Field(..., max_length=128, description="Название курса")
     description: str | None = Field(None, max_length=128, description="Описание курса")
     price: int = Field(0, ge=0, description="Цена курса (не может быть отрицательной)")
+    category_id: UUID | None = Field(None, description="ID категории курса")
 
 
 class CourseCreateSchema(BaseSchema):
@@ -43,6 +61,8 @@ class CourseCreateSchema(BaseSchema):
     description: str | None
     price: int
     cover_url: str | None = None
+    category_id: UUID | None = None
+    status: CourseStatus = CourseStatus.DRAFT
 
 
 class CourseUpdateRequestSchema(BaseSchema):
@@ -51,9 +71,14 @@ class CourseUpdateRequestSchema(BaseSchema):
     All fields are optional because the client might want to update only one field (PATCH-like).
     """
 
-    title: str = Field(..., max_length=128)
+    title: str | None = Field(None, max_length=128)
     description: str | None = Field(None, max_length=128)
     price: int | None = Field(None, ge=0)
+    category_id: UUID | None = None
+    status: CourseStatus | None = None
+    tgp_enabled: bool | None = None
+    tgp_cooldown_hours: int | None = Field(None, ge=0)
+    certificate_enabled: bool | None = None
 
 
 class CourseUpdateSchema(BaseSchema):
@@ -65,8 +90,59 @@ class CourseUpdateSchema(BaseSchema):
     description: str | None = None
     price: int | None = None
     cover_url: str | None = None
+    category_id: UUID | None = None
+    status: CourseStatus | None = None
+    moderation_reason: str | None = None
+    tgp_enabled: bool | None = None
+    tgp_cooldown_hours: int | None = None
+    tgp_last_full_generated_at: datetime | None = None
+    tgp_content_snapshot: dict[str, int] | None = None
+    certificate_enabled: bool | None = None
     is_deleted: datetime | None = None
 
 
 class CourseUserBriefSchema(CourseSchema):
     role: CourseMemberRole
+    progress: int = 0
+
+
+class CourseModerationRejectSchema(BaseSchema):
+    reason: str = Field(..., min_length=1, max_length=1000)
+
+
+class CourseModerationQueueSchema(BaseSchema):
+    id: UUID
+    title: str
+    description: str | None
+    cover_url: str | None
+    owner_id: UUID
+    owner_username: str
+    status: CourseStatus
+    moderation_reason: str | None
+    created_at: datetime
+    module_count: int
+    lesson_count: int
+    block_count: int
+
+
+class CourseGenerateSchema(BaseSchema):
+    topic: str = Field(
+        ..., min_length=1, max_length=256, description="Тема курса (о чём будет курс)"
+    )
+    modules_count: int = Field(..., ge=1, le=3, description="Количество модулей (1-3)")
+    lessons_per_module: int = Field(
+        ..., ge=1, le=5, description="Количество уроков в модуле (1-5)"
+    )
+    blocks_per_lesson: int = Field(
+        ..., ge=1, le=6, description="Количество блоков в уроке (1-6)"
+    )
+
+
+class CourseGenerateResponseSchema(BaseSchema):
+    task_id: str
+    course_id: UUID
+    status: str = "queued"
+    topic: str
+    modules_count: int
+    lessons_per_module: int
+    blocks_per_lesson: int

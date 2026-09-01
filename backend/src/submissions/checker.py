@@ -4,13 +4,16 @@ from src.block.schemas import BlockSchema
 from src.block.enums import BlockType
 from src.submissions.schemas import (
     BlockSubmissionRequestCreateSchema,
+    CodeSubmission,
     QuizMultipleSubmission,
     QuizSingleSubmission,
 )
 from src.block.schemas import (
+    CodeBlockContent,
     QuizMultipleBlockContent,
     QuizSingleBlockContent,
 )
+from src.codeexec.service import build_code_exec_service
 
 CheckerFunc = Callable[
     [BlockSchema, BlockSubmissionRequestCreateSchema], Awaitable[bool]
@@ -68,3 +71,17 @@ async def check_multiple_choice(
     correct_ids = set(block_payload.correct_option_ids)
     selected_ids = set(sub_payload.selected_option_ids)
     return correct_ids == selected_ids
+
+
+@BlockChecker.register(BlockType.CODE)
+async def check_code(
+    block: BlockSchema, submission: BlockSubmissionRequestCreateSchema
+) -> bool:
+    block_payload = CodeBlockContent.model_validate(block.payload)
+    sub_payload = CodeSubmission.model_validate(submission.payload)
+
+    return await build_code_exec_service().check(
+        language=block_payload.language,
+        test_cases=[case.model_dump() for case in block_payload.test_cases],
+        solution=sub_payload.code,
+    )

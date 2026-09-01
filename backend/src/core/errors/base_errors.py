@@ -24,3 +24,8 @@ class ObjectNotFoundError(AppException):
 class ObjectAlreadyExistsError(AppException):
     detail = "Object already exists"
     status_code = status.HTTP_409_CONFLICT
+
+
+class RateLimitExceededError(AppException):
+    detail = "Too many requests"
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS

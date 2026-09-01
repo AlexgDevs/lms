@@ -1,110 +1,298 @@
 from datetime import datetime, timedelta, timezone
+from typing import TYPE_CHECKING
 from uuid import UUID
 
-from fastapi import HTTPException, status
-from redis.asyncio import Redis
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
+from src.auth.device_parser import parse_device_name
+from src.auth.exceptions import (
+    InvalidCredentialsError,
+    InvalidRefreshTokenError,
+)
+from src.user.exceptions import UserAlreadyExistsError, UserNotFoundError
 from src.auth.schemas import (
-    AccessTokenPayload,
-    RefreshTokenCreateSchema,
+    RefreshTokenCreate,
+    RefreshTokenSchema,
+    SessionSchema,
     TokenPair,
     UserCreateSchema,
-    UserLoginSchema,
     UserRegisterSchema,
 )
 from src.auth.security import (
     create_access_token,
     create_refresh_token,
+    create_reset_token,
+    create_verification_token,
+    decode_reset_token,
+    decode_verification_token,
     hash_password,
-    hash_token,
+    hash_refresh_token,
     verify_password,
 )
-from src.user.schemas import UserSchema
+from src.core.errors.base_errors import RateLimitExceededError
+from src.core.events.event import UserLoggedIn, UserLoggedOut
+from src.core.mailer.mailer import (
+    send_password_reset_email,
+    send_verification_email,
+)
+from src.core.rate_limit import RateLimiter
+from src.user.schemas import (
+    UserPasswordUpdateSchema,
+    UserSchema,
+    UserVerifyUpdateSchema,
+)
 from src.auth.unit_of_work import AuthUnitOfWork
 from src.core.services.base_service import BaseService
 from src.core.config import settings
 
+if TYPE_CHECKING:
+    from src.core.events.protocol import Event
+
+# Used to equalize the password-check timing when a username does not exist, so
+# the login endpoint does not leak which usernames are valid (timing oracle).
+_DUMMY_PASSWORD_HASH = hash_password("invalid-password-placeholder")
+
 
 class AuthService(BaseService):
+
     def __init__(
         self,
         session: AsyncSession,
         auth_unit_of_work: AuthUnitOfWork,
-        redis_client: Redis,
-    ):
+        event_bus: "Event | None" = None,
+        *,
+        rate_limiter: RateLimiter,
+    ) -> None:
+        super().__init__(session, event_bus)
         self.uow = auth_unit_of_work
-        self.redis_client = redis_client
-        super().__init__(session)
+        self._rate_limiter = rate_limiter
 
-    async def create_user(self, user_data: UserRegisterSchema) -> UserSchema:
+    async def register(self, form_data: UserRegisterSchema) -> UserSchema:
         try:
-            user_data_to_add = UserCreateSchema(
-                **user_data.model_dump(),
-                password_hash=hash_password(user_data.password),
+            user_data = UserCreateSchema(
+                **form_data.model_dump(),
+                password_hash=hash_password(form_data.password),
             )
-            user = await self.uow.users.create(user_data_to_add)
-            await self.uow.commit()
-            return user
+
+            new_user = await self.uow.users.create(user_data)
+            await self.session.commit()
+            token = create_verification_token(new_user.id)
+            await send_verification_email(new_user.email, token)
+            return new_user
         except IntegrityError:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="User already exists"
-            )
+            raise UserAlreadyExistsError
 
-    async def authenticate_user(self, user_data: UserLoginSchema) -> TokenPair:
-        user = await self.uow.users.get_one(username=user_data.username)
+    async def verify_email(self, token: str) -> UserSchema:
+        user_id = decode_verification_token(token)
+        user = await self.uow.users.get_one(id=user_id)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-            )
+            raise UserNotFoundError
+        if user.is_verified:
+            return user
 
-        if not verify_password(user_data.password, user.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect password",
-            )
-
-        return await self._issue_tokens(user.id)
-
-    async def refresh(self, refresh_token_raw: str) -> TokenPair:
-        token_hash = hash_token(refresh_token_raw)
-        refresh_token = await self.uow.auth.get_one(
-            token_hash=token_hash,
+        updated = await self.uow.users.update(
+            user_id,
+            UserVerifyUpdateSchema(
+                is_verified=True, email_verified_at=datetime.now(timezone.utc)
+            ),
         )
-        if not refresh_token or refresh_token.expires_at < datetime.now(timezone.utc):
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token")
-
-        if refresh_token.is_revoked:
-            await self.uow.auth.revoke_all_tokens(refresh_token.user_id)
-            await self.uow.commit()
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Compromise detected")
-
-        user_id = refresh_token.user_id
-        if not user_id:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token")
-
-        await self.uow.auth.revoke_token(refresh_token.id)
         await self.uow.commit()
+        return updated
 
-        return await self._issue_tokens(user_id)
+    async def resend_verification(
+        self, email: str, client_ip: str | None = None
+    ) -> None:
+        await self._enforce_email_limit("resend", email, client_ip)
+        user = await self.uow.users.get_one(email=email)
+        if not user or user.is_verified:
+            return
+        token = create_verification_token(user.id)
+        await send_verification_email(user.email, token)
 
-    async def _issue_tokens(self, user_id: UUID) -> TokenPair:
-        payload = AccessTokenPayload(sub=user_id)
-        access_token = create_access_token(payload)
-        refresh_token, refresh_token_hash = create_refresh_token()
+    async def login(
+        self,
+        username: str,
+        password: str,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+    ) -> TokenPair:
+        client_ip = ip_address or ""
+        await self._enforce_login_limit(username, client_ip)
 
-        refresh_token_to_add = RefreshTokenCreateSchema(
-            token_hash=refresh_token_hash,
-            user_id=user_id,
-            expires_at=datetime.now(timezone.utc)
-            + timedelta(days=settings.app.REFRESH_TOKEN_EXPIRE_DAYS),
+        user = await self.uow.users.get_one(username=username)
+        if not user:
+            # Equalize timing so valid usernames cannot be probed, then reply
+            # with a single uniform credential error (no username enumeration).
+            verify_password(password, _DUMMY_PASSWORD_HASH)
+            raise InvalidCredentialsError
+        if not verify_password(password, user.password_hash):
+            raise InvalidCredentialsError
+        if not user.is_active:
+            raise InvalidCredentialsError
+
+        await self._clear_login_limit(username, client_ip)
+
+        device_name = parse_device_name(user_agent)
+        tokens = await self._issue_tokens(
+            user.id,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            device_name=device_name,
         )
-        await self.uow.auth.create(refresh_token_to_add)
-        await self.uow.commit()
+        await self.session.commit()
+
+        if self.event_bus is not None:
+            await self.event_bus.publish(
+                UserLoggedIn(
+                    user_id=user.id,
+                    ip_address=ip_address,
+                    device_name=device_name,
+                )
+            )
 
         return TokenPair(
-            access_token=access_token,
-            refresh_token=refresh_token,
+            access_token=tokens.access_token,
+            refresh_token=tokens.refresh_token,
         )
+
+    async def refresh(self, refresh_token: str) -> TokenPair:
+        stored = await self._get_valid_refresh_token(refresh_token)
+        user = await self.uow.users.get_one(id=stored.user_id)
+        if not user or not user.is_active:
+            # Deactivated user: force-logout all sessions, no new tokens.
+            await self.uow.refresh_tokens.revoke_all(stored.user_id)
+            await self.uow.commit()
+            raise InvalidRefreshTokenError
+        # Refresh Token Rotation
+        await self.uow.refresh_tokens.revoke(stored.id)
+        tokens = await self._issue_tokens(stored.user_id)
+        await self.uow.commit()
+        return tokens
+
+    async def logout(
+        self,
+        refresh_token: str,
+        *,
+        user_id: UUID | None = None,
+    ) -> None:
+        try:
+            stored = await self._get_valid_refresh_token(refresh_token)
+        except InvalidRefreshTokenError:
+            return
+        await self.uow.refresh_tokens.revoke(stored.id)
+        await self.uow.commit()
+
+        if self.event_bus is not None and user_id is not None:
+            await self.event_bus.publish(
+                UserLoggedOut(
+                    user_id=user_id,
+                    session_id=stored.id,
+                )
+            )
+
+    async def forgot_password(self, email: str, client_ip: str | None = None) -> None:
+        await self._enforce_email_limit("forgot", email, client_ip)
+        user = await self.uow.users.get_one(email=email)
+        if not user:
+            return
+        token = create_reset_token(user.id)
+        await send_password_reset_email(user.email, token)
+
+    async def reset_password(self, token: str, new_password: str) -> None:
+        user_id = decode_reset_token(token)
+        user = await self.uow.users.get_one(id=user_id)
+        if not user:
+            raise UserNotFoundError
+
+        await self.uow.users.update(
+            user_id, UserPasswordUpdateSchema(password_hash=hash_password(new_password))
+        )
+        await self.uow.refresh_tokens.revoke_all(user_id)
+        await self.uow.commit()
+
+    async def get_sessions(
+        self, user_id: UUID, current_token_id: UUID | None
+    ) -> list[SessionSchema]:
+        sessions = await self.uow.refresh_tokens.get_active_sessions(user_id)
+        return [
+            SessionSchema(
+                id=s.id,
+                device_name=s.device_name,
+                ip_address=s.ip_address,
+                created_at=s.created_at,
+                is_current=current_token_id is not None and s.id == current_token_id,
+            )
+            for s in sessions
+        ]
+
+    async def revoke_session(self, user_id: UUID, token_id: UUID) -> bool:
+        return await self.uow.refresh_tokens.revoke_session(user_id, token_id)
+
+    async def revoke_all_sessions(self, user_id: UUID, current_token_id: UUID) -> None:
+        await self.uow.refresh_tokens.revoke_all_except(user_id, current_token_id)
+        await self.uow.commit()
+
+    async def _issue_tokens(
+        self,
+        user_id: UUID,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        device_name: str | None = None,
+    ) -> TokenPair:
+        access_token = create_access_token(user_id)
+        refresh_token, refresh_token_hash = create_refresh_token()
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            days=settings.app.REFRESH_TOKEN_EXPIRE_DAYS
+        )
+        await self.uow.refresh_tokens.create(
+            RefreshTokenCreate(
+                user_id=user_id,
+                token_hash=refresh_token_hash,
+                expires_at=expires_at,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                device_name=device_name,
+            )
+        )
+        return TokenPair(access_token=access_token, refresh_token=refresh_token)
+
+    async def _get_valid_refresh_token(self, refresh_token: str) -> RefreshTokenSchema:
+        token_hash = hash_refresh_token(refresh_token)
+        stored = await self.uow.refresh_tokens.get_one(token_hash=token_hash)
+        if not stored or stored.expires_at <= datetime.now(timezone.utc):
+            raise InvalidRefreshTokenError
+        if stored.is_revoked:
+            # Reuse detected - potential token theft, revoke all user sessions
+            await self.uow.refresh_tokens.revoke_all(stored.user_id)
+            await self.uow.commit()
+            raise InvalidRefreshTokenError
+        return stored
+
+    async def _enforce_login_limit(self, username: str, client_ip: str) -> None:
+        window = settings.rate_limit.RATE_LIMIT_LOGIN_WINDOW_SECONDS
+        limit = settings.rate_limit.RATE_LIMIT_LOGIN_MAX_TRIES
+        ip_key = f"rl:login:ip:{client_ip or 'unknown'}"
+        user_key = f"rl:login:u:{username}"
+        ip_hits = await self._rate_limiter.hit(ip_key, window)
+        user_hits = await self._rate_limiter.hit(user_key, window)
+        if ip_hits > limit or user_hits > limit:
+            raise RateLimitExceededError
+
+    async def _clear_login_limit(self, username: str, client_ip: str) -> None:
+        await self._rate_limiter.reset(f"rl:login:ip:{client_ip or 'unknown'}")
+        await self._rate_limiter.reset(f"rl:login:u:{username}")
+
+    async def _enforce_email_limit(
+        self, action: str, email: str, client_ip: str | None
+    ) -> None:
+        window = settings.rate_limit.RATE_LIMIT_EMAIL_WINDOW_SECONDS
+        limit = settings.rate_limit.RATE_LIMIT_EMAIL_MAX_REQUESTS
+        ip_key = f"rl:email:{action}:ip:{client_ip or 'unknown'}"
+        addr_key = f"rl:email:{action}:addr:{email}"
+        ip_hits = await self._rate_limiter.hit(ip_key, window)
+        addr_hits = await self._rate_limiter.hit(addr_key, window)
+        if ip_hits > limit or addr_hits > limit:
+            raise RateLimitExceededError

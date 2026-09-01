@@ -2,11 +2,21 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
+from src.core.dependencies import EventBusDep
+from src.course.category.dependencies import CategoryRepositoryDep
+from src.course.category.repository import CategoryRepository
 from src.course.course_member.repository import CourseMemberRepository
 from src.core.dependencies import SessionDep
 from src.course.repository import CourseRepository
 from src.course.service import CourseService
 from src.course.unit_of_work import CourseUnitOfWork
+from src.media.dependencies import (
+    MediaAttachmentRepositoryDep,
+    MediaRepositoryDep,
+    MediaServiceDep,
+)
+from src.user.dependencies import UserRepositoryDep
+from src.user.repository import UserRepository
 
 
 def get_course_repository(session: SessionDep) -> CourseRepository:
@@ -29,9 +39,19 @@ async def get_course_uow(
     session: SessionDep,
     course_repository: CourseRepositoryDep,
     course_member_repository: CourseMemberRepositoryDep,
+    media_attachment_repository: MediaAttachmentRepositoryDep,
+    media_repository: MediaRepositoryDep,
+    category_repository: CategoryRepositoryDep,
+    user_repository: UserRepositoryDep,
 ) -> AsyncGenerator[CourseUnitOfWork]:
     async with CourseUnitOfWork(
-        session, course_repository, course_member_repository
+        session,
+        course_repository,
+        course_member_repository,
+        media_attachment_repository,
+        media_repository,
+        category_repository,
+        user_repository,
     ) as uow:
         yield uow
 
@@ -42,10 +62,14 @@ CourseUnitOfWorkDep = Annotated[CourseUnitOfWork, Depends(get_course_uow)]
 def get_course_service(
     session: SessionDep,
     uow: CourseUnitOfWorkDep,
+    media_service: MediaServiceDep,
+    event_bus: EventBusDep,
 ) -> CourseService:
     return CourseService(
         session=session,
         course_unit_of_work=uow,
+        media_service=media_service,
+        event_bus=event_bus,
     )
 
 

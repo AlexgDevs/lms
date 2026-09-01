@@ -1,7 +1,7 @@
 from typing import List, Sequence
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select, update
 
 
 from src.block.mapper import BlockMapper
@@ -24,6 +24,18 @@ class BlockRepository(BaseRepository[Block, BlockSchema]):
             )
             or 0
         )
+
+    async def set_order_bulk(self, lesson_id: UUID, ordered_ids: list[UUID]) -> None:
+        ordered_expression = case(
+            *[(self.model.id == id_, index) for index, id_ in enumerate(ordered_ids)],
+            else_=self.model.order,
+        )
+        statement = (
+            update(self.model)
+            .where(self.model.lesson_id == lesson_id)
+            .values(order=ordered_expression)
+        )
+        await self.session.execute(statement)
 
     async def get_ids_by_lesson(self, lesson_id: UUID) -> set[UUID]:
         stmt = select(self.model).where(self.model.lesson_id == lesson_id)

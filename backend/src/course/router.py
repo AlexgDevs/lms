@@ -1,15 +1,19 @@
-from typing import Sequence
+from typing import Annotated, Literal, Sequence
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, File, Form, Query, UploadFile, status
 from src.course.course_member.schemas import CourseMemberSchema
 from src.course.schemas import (
     CourseSchema,
     CourseCreateRequestSchema,
+    CourseGenerateSchema,
+    CourseGenerateResponseSchema,
+    CourseModerationQueueSchema,
+    CourseModerationRejectSchema,
     CourseUpdateRequestSchema,
     CourseUserBriefSchema,
 )
 from src.course.dependencies import CourseServiceDep
-from src.user.dependencies import UserIdDep
+from src.user.dependencies import OptionalUserIdDep, StaffDep, UserIdDep
 from uuid import UUID
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
@@ -45,29 +49,136 @@ async def delete_course(
     await course_service.delete_course(course_id=course_id, owner_id=owner_id)
 
 
-@router.get("/created")
-async def get_created_courses(
-    user_id: UserIdDep,
-    service: CourseServiceDep,
-    limit: int = 10,
-    offset: int = 0,
-) -> Sequence[CourseSchema]:
-    return await service.uow.courses.get_filtered(  # TODO: add local method they don't viled SOLID layers
-        owner_id=user_id,
-        limit=limit,
-        offset=offset,
+@router.post("/{course_id}/submit", response_model=CourseSchema)
+async def submit_course_for_review(
+    course_id: UUID,
+    course_service: CourseServiceDep,
+    owner_id: UserIdDep,
+) -> CourseSchema:
+    return await course_service.submit_for_review(
+        course_id=course_id, owner_id=owner_id
     )
 
 
-@router.get("/my")
-async def get_my_courses(
-    user_id: UserIdDep, service: CourseServiceDep
-) -> list[CourseUserBriefSchema]:
-    return await service.get_courses_where_user_member(user_id)
+@router.post("/generate", response_model=CourseGenerateResponseSchema)
+async def generate_course(
+    generate_schema: CourseGenerateSchema,
+    course_service: CourseServiceDep,
+    owner_id: UserIdDep,
+) -> CourseGenerateResponseSchema:
+    task = await course_service.generate_course_ai(
+        owner_id=owner_id, generate_schema=generate_schema
+    )
+    return task
 
 
-@router.post("/{course_id}/enroll")
+@router.get("/moderation/queue", response_model=list[CourseModerationQueueSchema])
+async def get_moderation_queue(
+    staff: StaffDep,
+    course_service: CourseServiceDep,
+    limit: int = 20,
+    offset: int = 0,
+) -> list[CourseModerationQueueSchema]:
+    return await course_service.get_moderation_queue(limit=limit, offset=offset)
+
+
+@router.post("/{course_id}/moderation/approve", response_model=CourseSchema)
+async def approve_course(
+    course_id: UUID,
+    staff: StaffDep,
+    course_service: CourseServiceDep,
+) -> CourseSchema:
+    return await course_service.approve_course(course_id=course_id)
+
+
+@router.post("/{course_id}/moderation/reject", response_model=CourseSchema)
+async def reject_course(
+    course_id: UUID,
+    payload: CourseModerationRejectSchema,
+    staff: StaffDep,
+    course_service: CourseServiceDep,
+) -> CourseSchema:
+    return await course_service.reject_course(course_id=course_id, payload=payload)
+
+
+@router.get("")
+async def get_courses(
+    user_id: OptionalUserIdDep,
+    service: CourseServiceDep,
+    filter: Literal["all", "created", "my"] = "all",
+    limit: int = 10,
+    offset: int = 0,
+    category: str | None = None,
+    q: str | None = Query(None, max_length=100),
+    certificate_enabled: bool | None = None,
+    sort: Literal["popular", "newest", "rating"] = "popular",
+    min_rating: int | None = Query(None, ge=1, le=5),
+    price: Literal["all", "free", "paid"] = "all",
+) -> Sequence[CourseSchema] | list[CourseUserBriefSchema]:
+    return await service.list_courses(
+        filter=filter,
+        user_id=user_id,
+        limit=limit,
+        offset=offset,
+        category=category,
+        q=q,
+        certificate_enabled=certificate_enabled,
+        sort=sort,
+        min_rating=min_rating,
+        price=price,
+    )
+
+
+@router.get("/{course_id}")
+async def get_course_by_id(
+    course_id: UUID,
+    user_id: OptionalUserIdDep,
+    service: CourseServiceDep,
+    filter: Literal["current", "author", "my"] = "current",
+) -> CourseSchema | CourseUserBriefSchema:
+    return await service.get_course(filter=filter, course_id=course_id, user_id=user_id)
+
+
+@router.post("/{course_id}/members")
 async def create_member(
     user_id: UserIdDep, course_id: UUID, service: CourseServiceDep
 ) -> CourseMemberSchema:
     return await service.enroll(course_id=course_id, user_id=user_id)
+
+
+@router.delete(
+    "/{course_id}/members/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Unenroll from course",
+)
+async def remove_member(
+    user_id: UserIdDep, course_id: UUID, service: CourseServiceDep
+) -> None:
+    await service.unenroll(course_id=course_id, user_id=user_id)
+
+
+@router.post("/{course_id}/media", response_model=CourseSchema)
+async def upload_course_cover(
+    course_id: UUID,
+    owner_id: UserIdDep,
+    service: CourseServiceDep,
+    file: Annotated[UploadFile, File()],
+    is_public: Annotated[bool, Form()] = True,
+) -> CourseSchema:
+    return await service.upload_cover(
+        course_id=course_id,
+        owner_id=owner_id,
+        data=await file.read(),
+        original_name=file.filename or "untitled",
+        content_type=file.content_type or "application/octet-stream",
+        is_public=is_public,
+    )
+
+
+@router.delete("/{course_id}/media", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_course_cover(
+    course_id: UUID,
+    owner_id: UserIdDep,
+    service: CourseServiceDep,
+) -> None:
+    await service.remove_cover(course_id=course_id, owner_id=owner_id)

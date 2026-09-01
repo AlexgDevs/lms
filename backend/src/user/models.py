@@ -1,5 +1,7 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.postgres.base import UUIDBase
@@ -19,6 +21,25 @@ class User(UUIDBase):
     joined_at: Mapped[timestamp]
     updated_at: Mapped[timestamp]
     is_active: Mapped[bool] = mapped_column(default=True)
+    is_staff: Mapped[bool] = mapped_column(
+        sa.Boolean(), server_default="false", default=False
+    )
+    ai_course_generations: Mapped[int] = mapped_column(
+        sa.Integer(), server_default="0", default=0
+    )
+    is_verified: Mapped[bool] = mapped_column(
+        sa.Boolean(), server_default="false", default=False
+    )
+    email_verified_at: Mapped[datetime | None] = mapped_column(
+        sa.DateTime(timezone=True)
+    )
+    is_founder: Mapped[bool] = mapped_column(
+        sa.Boolean(), server_default="false", default=False
+    )
+    founder_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
+    notifications_enabled: Mapped[bool] = mapped_column(
+        sa.Boolean(), server_default="true", default=True
+    )
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         back_populates="user",

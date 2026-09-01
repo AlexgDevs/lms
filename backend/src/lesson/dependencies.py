@@ -3,7 +3,7 @@ from fastapi import Depends
 
 from src.lesson.lesson_progress.dependencies import LessonProgressRepositoryDep
 from src.module.dependencies import ModuleRepositoryDep
-from src.core.dependencies import SessionDep
+from src.core.dependencies import EventBusDep, SessionDep
 from src.course.dependencies import CourseRepositoryDep
 
 from src.lesson.repository import LessonRepository
@@ -41,10 +41,12 @@ LessonUnitOfWorkDep = Annotated[LessonUnitOfWork, Depends(get_lesson_uow)]
 def get_lesson_service(
     session: SessionDep,
     uow: LessonUnitOfWorkDep,
+    event_bus: EventBusDep,
 ) -> LessonService:
     return LessonService(
         session=session,
         lesson_unit_of_work=uow,
+        event_bus=event_bus,
     )
 
 

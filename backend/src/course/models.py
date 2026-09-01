@@ -1,10 +1,19 @@
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, UUID as sqlUUID
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Enum as SAEnum,
+    Text,
+    UUID as sqlUUID,
+)
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.course.enums import CourseMemberRole
+from src.course.enums import CourseMemberRole, CourseStatus
 from src.core.postgres.base import UUIDBase
 from src.core.postgres.types import str_128, timestamp
 
@@ -21,7 +30,39 @@ class Course(UUIDBase):
     description: Mapped[str_128 | None]
     cover_url: Mapped[str | None]
     price: Mapped[int] = mapped_column(default=0)
+    category_id: Mapped[UUID | None] = mapped_column(
+        sqlUUID(as_uuid=True),
+        ForeignKey("categories.id", ondelete="SET NULL"),
+        index=True,
+    )
     member_count: Mapped[int] = mapped_column(server_default="0", default=0)
+    status: Mapped[CourseStatus] = mapped_column(
+        SAEnum(
+            CourseStatus,
+            native_enum=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        server_default="draft",
+        default=CourseStatus.DRAFT,
+    )
+    moderation_reason: Mapped[str | None] = mapped_column(Text)
+
+    # AI TGP (The Golden Path) pre-testing
+    tgp_enabled: Mapped[bool] = mapped_column(
+        Boolean(), server_default="false", default=False
+    )
+    tgp_last_full_generated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+    tgp_cooldown_hours: Mapped[int] = mapped_column(server_default="24", default=24)
+    tgp_content_snapshot: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True
+    )
+
+    # certificates
+    certificate_enabled: Mapped[bool] = mapped_column(
+        Boolean(), server_default="false", default=False
+    )
 
     # times
     created_at: Mapped[timestamp]
@@ -36,3 +77,8 @@ class CourseMember(UUIDBase):
 
     role: Mapped[str_128] = mapped_column(default=CourseMemberRole.MEMBER)
     left_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    # AI TGP (The Golden Path): last pre-test submission (roadmap regeneration cooldown)
+    tgp_last_submitted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )

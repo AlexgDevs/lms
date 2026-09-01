@@ -1,0 +1,27 @@
+/* styles/light.css — Инженерный Минимализм */
+[data-theme="light"] {
+  --text: #111827;
+  --subtext1: #4B5563;
+  --subtext0: #6B7280;
+
+  --overlay2: #D9DEE4;
+  --overlay1: #E4E7EC;
+  --overlay0: #EEF1F4;
+
+  --surface2: #E4E7EC;
+  --surface1: #EDF0F4;
+  --surface0: #F2F4F7;
+
+  --base: #F8F9FA;
+  --mantle: #FFFFFF;
+  --crust: #F1F3F5;
+
+  --blue: #0891B2;
+  --red: #DC2626;
+  --mauve: #0E7490;
+  --teal: #0E7490;
+
+  --blue-alpha: #0891B210;
+  --red-alpha: #DC262610;
+  --mauve-alpha: #0E749012;
+}

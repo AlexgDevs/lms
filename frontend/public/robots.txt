@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /settings
+Disallow: /admin
+
+Sitemap: https://plectix.ru/sitemap.xml
