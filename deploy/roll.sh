@@ -32,4 +32,7 @@ done
 echo "==> Recreating backend (new image)"
 $COMPOSE up -d --no-deps --force-recreate backend
 
+echo "==> Recreating worker and nginx (frontend)"
+$COMPOSE up -d --no-deps --force-recreate worker nginx
+
 echo "==> Done"
