@@ -175,12 +175,15 @@ services:
     networks: [app_network]
 
   # Code execution — heavy image; requires cgroup v2 on the Docker host.
+  # Piston the requires --privileged and a writable /piston dir (isolate sandbox).
   piston:
     image: ghcr.io/engineer-man/piston:latest
     restart: unless-stopped
     profiles: ["codeexec"]
+    privileged: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - piston_data:/piston
     environment:
       PISTON_PORT: 2000
     healthcheck:
@@ -214,6 +217,7 @@ volumes:
   postgres_data:
   redis_data:
   minio_data:
+  piston_data:
 
 networks:
   app_network:
