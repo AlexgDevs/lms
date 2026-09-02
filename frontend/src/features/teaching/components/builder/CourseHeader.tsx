@@ -201,7 +201,7 @@ export function CourseHeader({
 
   return (
     <>
-      <div className="rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-3 flex items-center gap-3">
+      <div className="rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-3 flex flex-wrap items-center gap-x-3 gap-y-2">
       {/* Миниатюра обложки — вместо большого баннера, кликабельный триггер загрузки */}
       <div className="relative shrink-0">
         <button
@@ -308,7 +308,7 @@ export function CourseHeader({
           </button>
         )}
 
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5 min-w-0">
           <Badge
             variant="secondary"
             className={`gap-1 rounded-md px-1.5 py-0 h-4.5 text-[11px] font-normal border-none ${
@@ -319,7 +319,7 @@ export function CourseHeader({
             {STATUS_META[status].label}
           </Badge>
           {course.created_at && (
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1 text-[11px] text-muted-foreground whitespace-nowrap">
               <Calendar size={10} />
               {dayjs(course.created_at).format("DD MMMM YYYY")}
             </span>
@@ -327,58 +327,60 @@ export function CourseHeader({
         </div>
       </div>
 
-      {/* Публикация / модерация */}
-      {status === "published" ? (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleTogglePublish}
-          disabled={isUpdating}
-          className="gap-1.5 text-xs font-medium h-8 shrink-0"
-        >
-          {isUpdating && <Loader2 size={13} className="animate-spin" />}
-          Снять с публикации
-        </Button>
-      ) : (
-        <Button
-          type="button"
-          variant="default"
-          size="sm"
-          onClick={onSubmitReview}
-          disabled={isSubmittingReview || status === "under_review"}
-          className="gap-1.5 text-xs font-medium h-8 shrink-0"
-          title={
-            status === "under_review"
-              ? "Курс уже отправлен на модерацию"
-              : "Отправить курс на модерацию"
-          }
-        >
-          {isSubmittingReview && <Loader2 size={13} className="animate-spin" />}
-          {status === "under_review"
-            ? "На модерации..."
-            : status === "rejected"
-              ? "Отправить заново"
-              : "Отправить на модерацию"}
-        </Button>
-      )}
-
-      {/* Настройки: описание + цена в попапе, не занимают место в шапке постоянно */}
-      <Popover open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <PopoverTrigger asChild>
+      {/* Группа действий: модерация + настройки */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Публикация / модерация */}
+        {status === "published" ? (
           <Button
             type="button"
-            size="icon"
             variant="outline"
-            className="h-8 w-8 shrink-0 rounded-md relative"
-            title="Настройки курса"
+            size="sm"
+            onClick={handleTogglePublish}
+            disabled={isUpdating}
+            className="gap-1.5 text-xs font-medium h-8"
           >
-            <Settings2 size={15} />
-            {(course.description || (course.price ?? 0) > 0) && (
-              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
-            )}
+            {isUpdating && <Loader2 size={13} className="animate-spin" />}
+            Снять с публикации
           </Button>
-        </PopoverTrigger>
+        ) : (
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={onSubmitReview}
+            disabled={isSubmittingReview || status === "under_review"}
+            className="gap-1.5 text-xs font-medium h-8"
+            title={
+              status === "under_review"
+                ? "Курс уже отправлен на модерацию"
+                : "Отправить курс на модерацию"
+            }
+          >
+            {isSubmittingReview && <Loader2 size={13} className="animate-spin" />}
+            {status === "under_review"
+              ? "На модерации..."
+              : status === "rejected"
+                ? "Отправить заново"
+                : "Отправить на модерацию"}
+          </Button>
+        )}
+
+        {/* Настройки: описание + цена в попапе, не занимают место в шапке постоянно */}
+        <Popover open={settingsOpen} onOpenChange={setSettingsOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              className="h-8 w-8 rounded-md relative"
+              title="Настройки курса"
+            >
+              <Settings2 size={15} />
+              {(course.description || (course.price ?? 0) > 0) && (
+                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
+              )}
+            </Button>
+          </PopoverTrigger>
         <PopoverContent align="end" className="w-80 rounded-xl p-4 space-y-4">
           {/* Описание */}
           <div className="space-y-1.5">
@@ -491,6 +493,7 @@ export function CourseHeader({
           )}
         </PopoverContent>
       </Popover>
+      </div>
       </div>
 
       {status === "draft" && (

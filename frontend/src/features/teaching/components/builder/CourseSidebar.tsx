@@ -1,5 +1,6 @@
 import { Layers } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 import { CourseModulesList } from "./CourseModulesList"
 
 interface CourseSidebarProps {
@@ -8,6 +9,9 @@ interface CourseSidebarProps {
   selectedLessonId: string | null
   onSelectModule: (id: string) => void
   onSelectLesson: (moduleId: string, lessonId: string) => void
+  /** Render the panel full-width (used inside a mobile Sheet) instead of a fixed-width column. */
+  fill?: boolean
+  className?: string
 }
 
 export function CourseSidebar({ 
@@ -15,10 +19,16 @@ export function CourseSidebar({
   selectedModuleId, 
   selectedLessonId, 
   onSelectModule, 
-  onSelectLesson 
+  onSelectLesson,
+  fill = false,
+  className,
 }: CourseSidebarProps) {
   return (
-    <aside className="w-max min-w-72 max-w-[20rem] shrink-0 bg-card rounded-xl flex flex-col h-full min-h-0 overflow-hidden shadow-[var(--shadow-card)]">
+    <aside className={cn(
+      "bg-card rounded-xl flex flex-col h-full min-h-0 overflow-hidden shadow-[var(--shadow-card)]",
+      fill ? "w-full" : "w-max min-w-72 max-w-[20rem] shrink-0",
+      className,
+    )}>
       {/* Шапка сайдбара */}
       <div className="p-3.5 flex items-center justify-between bg-muted/20">
         <div className="flex items-center gap-2">

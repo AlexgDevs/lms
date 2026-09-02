@@ -1,7 +1,13 @@
 import { useState } from "react"
 import { notFound, useParams, useNavigate } from "@tanstack/react-router"
-import { Loader2, ArrowLeft, Folder } from "lucide-react"
+import { Loader2, ArrowLeft, Folder, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { useCourses } from "@/features/teaching/api/useCourses"
 import { useCourseMedia } from "@/features/teaching/api/useCourseMedia"
 import { useModules } from "@/features/teaching/api/useModules"
@@ -21,6 +27,7 @@ export function CourseBuilderPage() {
   // Храним выбранный модуль и выбранный урок
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null)
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // Забираем данные из хука
   const {
@@ -128,26 +135,34 @@ export function CourseBuilderPage() {
   const certificateEnabled = Boolean(authorCourse?.certificate_enabled)
 
   return (
-    <div className="h-screen w-full bg-background text-foreground flex flex-col overflow-hidden">
+    <div className="w-full bg-background text-foreground flex flex-col min-h-0 lg:h-[calc(100vh-4rem)] lg:overflow-hidden">
        
-      {/* Верхний тулбар: кнопка назад + ID */}
-      <div className="shrink-0 bg-muted/30 px-4 py-1.5 flex items-center justify-between">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate({ to: ROUTES.TEACHING })}
-          className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={13} />
-          <span>К курсам</span>
-        </Button>
-        <span className="text-[11px] font-mono text-muted-foreground">
-          ID: {authorCourse.id}
-        </span>
+      {/* Верхний тулбар: кнопка назад + Структура (моб.) */}
+      <div className="shrink-0 bg-muted/30 px-4 py-1.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate({ to: ROUTES.TEACHING })}
+            className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft size={13} />
+            <span>К курсам</span>
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setSidebarOpen(true)}
+            className="h-8 text-xs gap-1.5 lg:hidden"
+          >
+            <Layers size={14} />
+            Редактировать структуру
+          </Button>
+        </div>
       </div>
 
       {/* Основной контент-контейнер */}
-      <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden">
+      <div className="flex-1 flex flex-col p-4 gap-4 min-h-0 lg:overflow-hidden">
         
         {/* Компактная шапка курса */}
         <div className="shrink-0">
@@ -199,25 +214,26 @@ export function CourseBuilderPage() {
         />
 
         {/* Рабочая область: Сайдбар + Центральный холст */}
-        <div className="flex-1 flex gap-4 overflow-hidden">
+        <div className="flex-1 flex flex-col gap-4 min-h-0 lg:flex-row lg:overflow-hidden">
           
-          {/* Левый Сайдбар (Модули и Уроки) */}
-          <CourseSidebar
-            courseId={courseId}
-            selectedModuleId={selectedModuleId}
-            selectedLessonId={selectedLessonId}
-            onSelectModule={(id) => {
-              setSelectedModuleId(id)
-              // Сбрасываем выбранный урок при переключении модуля, если это необходимо
-            }}
-            onSelectLesson={(moduleId, lessonId) => {
-              setSelectedModuleId(moduleId)
-              setSelectedLessonId(lessonId)
-            }}
-          />
+          {/* Левый Сайдбар (Модули и Уроки) — десктоп */}
+          <div className="hidden lg:block">
+            <CourseSidebar
+              courseId={courseId}
+              selectedModuleId={selectedModuleId}
+              selectedLessonId={selectedLessonId}
+              onSelectModule={(id) => {
+                setSelectedModuleId(id)
+              }}
+              onSelectLesson={(moduleId, lessonId) => {
+                setSelectedModuleId(moduleId)
+                setSelectedLessonId(lessonId)
+              }}
+            />
+          </div>
 
           {/* Центральный редактор контента */}
-          <main className="flex-1 min-w-0 rounded-xl bg-card overflow-hidden shadow-[var(--shadow-card)] flex flex-col">
+          <main className="flex-1 min-w-0 min-h-0 rounded-xl bg-card overflow-hidden shadow-[var(--shadow-card)] flex flex-col">
             {selectedLessonId ? (
               // СНАЧАЛА проверяем урок, так как он приоритетнее
               <CourseBlocks
@@ -253,6 +269,35 @@ export function CourseBuilderPage() {
               </div>
             )}
           </main>
+
+          {/* Структура курса — мобильная шторка */}
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetContent side="left" className="p-0 w-[85%] sm:max-w-sm">
+              <SheetHeader className="px-4 py-3.5 border-b border-border">
+                <SheetTitle className="flex items-center gap-2 text-sm">
+                  <Layers size={16} className="text-primary" />
+                  Структура курса
+                </SheetTitle>
+              </SheetHeader>
+              <div className="flex-1 min-h-0">
+                <CourseSidebar
+                  courseId={courseId}
+                  selectedModuleId={selectedModuleId}
+                  selectedLessonId={selectedLessonId}
+                  fill
+                  onSelectModule={(id) => {
+                    setSelectedModuleId(id)
+                    setSidebarOpen(false)
+                  }}
+                  onSelectLesson={(moduleId, lessonId) => {
+                    setSelectedModuleId(moduleId)
+                    setSelectedLessonId(lessonId)
+                    setSidebarOpen(false)
+                  }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
 
         </div>
 

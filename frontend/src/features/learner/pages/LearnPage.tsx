@@ -7,10 +7,17 @@ import {
   CheckCircle2,
   ChevronRight,
   Loader2,
+  Menu,
   Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { BlockView } from "@/features/learner/components/blocks/BlockView"
 import { LearnSidebar } from "@/features/learner/components/LearnSidebar"
 import { IrbisDialogue } from "@/features/learner/components/assistant/IrbisDialogue"
@@ -26,6 +33,7 @@ import { cn } from "@/lib/utils"
 export function LearnPage() {
   const { courseId, lessonId } = useParams({ strict: false })
   const navigate = useNavigate()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const data = useLearnData({ courseId, lessonId })
   const { course } = data
 
@@ -61,45 +69,87 @@ export function LearnPage() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 items-start lg:grid-cols-[300px_1fr]">
-      <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-7rem)]">
-        <LearnSidebar
-          courseTitle={course?.title ?? ""}
-          modules={data.modules}
-          lessonsByModule={data.lessonsByModule}
-          currentLessonId={lessonId}
-          totalLessons={data.flatUnits.length}
-          completedCount={data.progress.filter((item) => item.status === "completed").length}
-          isCompleted={data.isCompleted}
-          onSelectLesson={goToLesson}
-          courseId={course?.id ?? undefined}
-          tgpEnabled={course?.tgp_enabled ?? false}
-          tgpOutdated={course?.tgp_outdated ?? false}
-          isMember={data.isCourseMember}
-          flatUnits={data.flatUnits}
-        />
+    <>
+      <div className="grid grid-cols-1 gap-6 items-start lg:grid-cols-[300px_1fr]">
+        <div className="hidden lg:block lg:sticky lg:top-20 lg:max-h-[calc(100vh-7rem)]">
+          <LearnSidebar
+            courseTitle={course?.title ?? ""}
+            modules={data.modules}
+            lessonsByModule={data.lessonsByModule}
+            currentLessonId={lessonId}
+            totalLessons={data.flatUnits.length}
+            completedCount={data.progress.filter((item) => item.status === "completed").length}
+            isCompleted={data.isCompleted}
+            onSelectLesson={goToLesson}
+            courseId={course?.id ?? undefined}
+            tgpEnabled={course?.tgp_enabled ?? false}
+            tgpOutdated={course?.tgp_outdated ?? false}
+            isMember={data.isCourseMember}
+            flatUnits={data.flatUnits}
+          />
+        </div>
+
+        <div className="min-w-0">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mb-4 h-9 lg:hidden"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-4 w-4 mr-2" />
+            Оглавление курса
+          </Button>
+
+          <LessonStepper
+            data={data}
+            courseId={courseId as string}
+            lessonId={lessonId as string}
+            goToLesson={goToLesson}
+          />
+
+          {lessonId && data.isCourseMember && (
+            <div className="mt-6">
+              <ReviewSection
+                targetType="lesson"
+                targetId={lessonId}
+                title="Комментарии к уроку"
+                canWrite
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="min-w-0">
-        <LessonStepper
-          data={data}
-          courseId={courseId as string}
-          lessonId={lessonId as string}
-          goToLesson={goToLesson}
-        />
-
-        {lessonId && data.isCourseMember && (
-          <div className="mt-6">
-            <ReviewSection
-              targetType="lesson"
-              targetId={lessonId}
-              title="Комментарии к уроку"
-              canWrite
+      {/* Оглавление курса — мобильная шторка */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-[85%] sm:max-w-sm overflow-hidden">
+          <SheetHeader className="px-4 py-3.5 border-b border-border">
+            <SheetTitle className="text-sm">{course?.title ?? "Курс"}</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 min-h-0 p-3">
+            <LearnSidebar
+              fill
+              courseTitle={course?.title ?? ""}
+              modules={data.modules}
+              lessonsByModule={data.lessonsByModule}
+              currentLessonId={lessonId}
+              totalLessons={data.flatUnits.length}
+              completedCount={data.progress.filter((item) => item.status === "completed").length}
+              isCompleted={data.isCompleted}
+              onSelectLesson={(id) => {
+                setSidebarOpen(false)
+                goToLesson(id)
+              }}
+              courseId={course?.id ?? undefined}
+              tgpEnabled={course?.tgp_enabled ?? false}
+              tgpOutdated={course?.tgp_outdated ?? false}
+              isMember={data.isCourseMember}
+              flatUnits={data.flatUnits}
             />
           </div>
-        )}
-      </div>
-    </div>
+        </SheetContent>
+      </Sheet>
+    </>
   )
 }
 

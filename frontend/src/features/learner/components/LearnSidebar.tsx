@@ -31,6 +31,8 @@ interface LearnSidebarProps {
   tgpOutdated?: boolean
   isMember?: boolean
   flatUnits?: FlatLearningUnit[]
+  /** Render the panel full-height (used inside a mobile Sheet) so only the tree scrolls. */
+  fill?: boolean
 }
 
 export function LearnSidebar({
@@ -47,6 +49,7 @@ export function LearnSidebar({
   tgpOutdated,
   isMember,
   flatUnits,
+  fill = false,
 }: LearnSidebarProps) {
   const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
   const navigate = useNavigate()
@@ -108,7 +111,7 @@ export function LearnSidebar({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={cn("flex flex-col gap-4", fill && "h-full")}>
       <aside className="rounded-xl bg-card p-4 shadow-[var(--shadow-card)]">
         <h2 className="text-sm font-bold text-foreground leading-snug line-clamp-2">{courseTitle}</h2>
 
@@ -186,7 +189,10 @@ export function LearnSidebar({
         )}
       </aside>
 
-      <nav className="rounded-xl bg-card p-2 space-y-3 max-h-[calc(100vh-17rem)] overflow-y-auto shadow-[var(--shadow-card)]">
+      <nav className={cn(
+        "rounded-xl bg-card p-2 space-y-3 overflow-y-auto shadow-[var(--shadow-card)]",
+        fill ? "flex-1 min-h-0" : "max-h-[calc(100vh-17rem)]",
+      )}>
         {modules.map((module, moduleIndex) => {
           const lessons = lessonsByModule.get(module.id) ?? []
           return (
