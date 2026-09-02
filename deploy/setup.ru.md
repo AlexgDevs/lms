@@ -280,15 +280,74 @@ bash ~/lms/deploy/roll.sh
 
 ---
 
-## 12. Дальше по роад-мапу
+## 12. Домен + HTTPS (вариант A — certbot webroot)
 
-- **Домен + HTTPS** (после идентификации): `PUBLIC_URL=https://<домен>`, Let’s Encrypt (certbot, серты — в nginx 443), пересборка фронта CI по тегу `v*`.
+Шаги на сервере; конфиги уже в репо (`deploy/nginx.conf` — рабочий HTTPS, `deploy/nginx.bootstrap.conf` — для получения серта). nginx-контейнер монтирует `./deploy/nginx.conf` и каталоги `./certbot/{conf,www}` (правки конфига — без пересборки образа).
+
+### 12.1. Подготовить папки и скопировать конфиги
+```bash
+cd ~/lms
+mkdir -p certbot/conf certbot/www deploy
+# на сервере уже есть deploy/ (roll.sh и т.д.); убедись, что есть nginx.conf и nginx.bootstrap.conf:
+ls deploy/
+```
+
+### 12.2. Включить HTTP-режим (bootstrap) и получить серт
+1. Используй bootstrap-конфиг (он без 443, чтобы контейнер стартовал до появления серта):
+   ```bash
+   cp deploy/nginx.conf deploy/nginx.https.conf
+   cp deploy/nginx.bootstrap.conf deploy/nginx.conf
+   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d nginx
+   ```
+   → nginx поднимется на :80 и отдаст ACME-челлендж из `/var/www/certbot` (смонтирован).
+2. Установи certbot и выпусти серт (webroot):
+   ```bash
+   apt install -y certbot
+   certbot certonly --webroot -w /var/www/certbot \
+     -d plectix.ru -d www.plectix.ru \
+     --email asmetanin014@gmail.com --agree-tos --no-eff-email
+   ```
+   → серт появится в `certbot/conf/live/plectix.ru/` (fullchain.pem, privkey.pem).
+
+### 12.3. Переключить на HTTPS и перезапустить
+```bash
+cp deploy/nginx.https.conf deploy/nginx.conf
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d nginx
+```
+
+### 12.4. Обновить `.env.prod` на домен (https) и применить
+```bash
+nano ~/lms/.env.prod
+# PUBLIC_URL=https://plectix.ru
+# CORS_ORIGINS=https://plectix.ru
+# FRONTEND_HOST=https://plectix.ru
+# STORAGE_PUBLIC_BASE_URL=https://plectix.ru/media
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+```
+
+### 12.5. Renew (авто-обновление серта)
+```bash
+crontab -e
+# 0 5 * * * certbot renew --webroot -w /var/www/certbot --deploy-hook "docker exec plm-nginx-1 nginx -s reload"
+```
+> `nginx -s reload` перечитает новые серты без даунтайма.
+
+### 12.6. Пересобрать фронт под домен
+В GitHub Secrets задать `VITE_API_URL=https://plectix.ru`, `VITE_PUBLIC_URL=https://plectix.ru` → пуш тега `v*` → на сервере `pull` + `up`. (Политика покажет `https://plectix.ru`.)
+
+> Если после `12.3` nginx не стартует — серт ещё не создан (проверь `ls certbot/conf/live/plectix.ru/`), верни `nginx.bootstrap.conf` и повтори `certbot`.
+
+---
+
+## 13. Дальше по роад-мапу
+
+- **Домен + HTTPS** — раздел 12 (вариант A, выполнено).
 - **Реальные ключи YooKassa**: `PAYMENT_PROVIDER_MODE=yookassa` + `YOOKASSA_SHOP_ID`/`SECRET_KEY`, `PAYMENTS_SANDBOX=false` → `bash deploy/roll.sh`.
 - **Piston** — включить profile `codeexec` (нужна cgroup v2, на Ubuntu 24.04 уже есть).
 
 ---
 
-## 13. Типовые ошибки
+## 14. Типовые ошибки
 
 | Ошибка | Причина | Решение |
 | --- | --- | --- |

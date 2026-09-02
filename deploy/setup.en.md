@@ -263,15 +263,71 @@ Does: `pull` → `migrate` → recreate `backend-1` (new) → wait healthy → r
 
 ---
 
-## 12. Roadmap
+## 12. Domain + HTTPS (Option A — certbot webroot)
 
-- **Domain + HTTPS** (after ID): `PUBLIC_URL=https://<domain>`, Let’s Encrypt (certs → nginx 443), rebuild frontend via CI tag.
+Server steps; configs are in the repo (`deploy/nginx.conf` — production HTTPS, `deploy/nginx.bootstrap.conf` — for first issuance). The nginx container mounts `./deploy/nginx.conf` and `./certbot/{conf,www}` (config edits apply without an image rebuild).
+
+### 12.1. Dirs + configs
+```bash
+cd ~/lms
+mkdir -p certbot/conf certbot/www deploy
+ls deploy/
+```
+
+### 12.2. HTTP-only bootstrap & obtain the cert
+1. Use the bootstrap config (no :443, so the container starts before a cert exists):
+   ```bash
+   cp deploy/nginx.conf deploy/nginx.https.conf
+   cp deploy/nginx.bootstrap.conf deploy/nginx.conf
+   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d nginx
+   ```
+2. Issue the cert (webroot):
+   ```bash
+   apt install -y certbot
+   certbot certonly --webroot -w /var/www/certbot \
+     -d plectix.ru -d www.plectix.ru \
+     --email asmetanin014@gmail.com --agree-tos --no-eff-email
+   ```
+   → certs land in `certbot/conf/live/plectix.ru/` (`fullchain.pem`, `privkey.pem`).
+
+### 12.3. Switch to HTTPS + restart
+```bash
+cp deploy/nginx.https.conf deploy/nginx.conf
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d nginx
+```
+
+### 12.4. Update `.env.prod` to the domain (https) and apply
+```bash
+nano ~/lms/.env.prod
+# PUBLIC_URL=https://plectix.ru
+# CORS_ORIGINS=https://plectix.ru
+# FRONTEND_HOST=https://plectix.ru
+# STORAGE_PUBLIC_BASE_URL=https://plectix.ru/media
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+```
+
+### 12.5. Auto-renew
+```bash
+crontab -e
+# 0 5 * * * certbot renew --webroot -w /var/www/certbot --deploy-hook "docker exec plm-nginx-1 nginx -s reload"
+```
+
+### 12.6. Rebuild frontend for the domain
+Set GitHub Secrets `VITE_API_URL=https://plectix.ru`, `VITE_PUBLIC_URL=https://plectix.ru` → push tag `v*` → on the server `pull` + `up`.
+
+> If nginx fails to start after 12.3, the cert isn't there yet (check `ls certbot/conf/live/plectix.ru/`), restore `nginx.bootstrap.conf` and re-run `certbot`.
+
+---
+
+## 13. Roadmap
+
+- **Domain + HTTPS** — see section 12 (Option A, done).
 - **Real YooKassa keys**: `PAYMENT_PROVIDER_MODE=yookassa` + keys, `PAYMENTS_SANDBOX=false` → `bash deploy/roll.sh`.
 - **Piston**: enable `codeexec` profile (cgroup v2 is default on Ubuntu 24.04).
 
 ---
 
-## 13. Common errors
+## 14. Common errors
 
 | Error | Cause | Fix |
 | --- | --- | --- |
