@@ -70,8 +70,8 @@ export function LearnPage() {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 items-start lg:grid-cols-[300px_1fr]">
-        <div className="hidden lg:block lg:sticky lg:top-20 lg:max-h-[calc(100vh-7rem)]">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <div className="hidden lg:block lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:w-72 shrink-0">
           <LearnSidebar
             courseTitle={course?.title ?? ""}
             modules={data.modules}
@@ -86,10 +86,11 @@ export function LearnPage() {
             tgpOutdated={course?.tgp_outdated ?? false}
             isMember={data.isCourseMember}
             flatUnits={data.flatUnits}
+            widthClassName="w-72"
           />
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <Button
             variant="outline"
             size="sm"

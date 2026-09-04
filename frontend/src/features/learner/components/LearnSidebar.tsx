@@ -4,6 +4,7 @@ import type { LessonSchema, ModuleSchema } from "@/client"
 import { cn } from "@/lib/utils"
 import { formatCooldown } from "@/lib/tgp"
 import { Button } from "@/components/ui/button"
+import { AsidePanel } from "@/components/layout/AsidePanel"
 import { useNavigate } from "@tanstack/react-router"
 import {
   useLearnerTgp,
@@ -33,6 +34,8 @@ interface LearnSidebarProps {
   flatUnits?: FlatLearningUnit[]
   /** Render the panel full-height (used inside a mobile Sheet) so only the tree scrolls. */
   fill?: boolean
+  /** Width utility for the fixed-width column (defaults to "w-80"). */
+  widthClassName?: string
 }
 
 export function LearnSidebar({
@@ -50,6 +53,7 @@ export function LearnSidebar({
   isMember,
   flatUnits,
   fill = false,
+  widthClassName,
 }: LearnSidebarProps) {
   const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
   const navigate = useNavigate()
@@ -111,117 +115,125 @@ export function LearnSidebar({
   }
 
   return (
-    <div className={cn("flex flex-col gap-4", fill && "h-full")}>
-      <aside className="rounded-xl bg-card p-4 shadow-[var(--shadow-card)]">
-        <h2 className="text-sm font-bold text-foreground leading-snug line-clamp-2">{courseTitle}</h2>
+    <div className={cn("flex flex-col", fill && "h-full")}>
+      <AsidePanel
+        fill={fill}
+        widthClassName={widthClassName}
+        bodyClassName="p-2 pr-1"
+        header={
+          <div className="space-y-3">
+            <h2 className="text-sm font-bold text-foreground leading-snug line-clamp-2">
+              {courseTitle}
+            </h2>
 
-        <div className="mt-3 flex items-center gap-2">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
-            <div
-              className="h-full rounded-full bg-primary transition-[width] duration-500"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-            {completedCount}/{totalLessons}
-          </span>
-        </div>
-
-        {canTakeTgp && (
-          <div className="mt-2 space-y-2">
-            {tgp.taken && tgpOutdated && (
-              <p className="flex items-start gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600">
-                <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                Добавлен новый контент — рекомендуем пройти тест заново
-              </p>
-            )}
-            {!tgp.taken ? (
-              tgp.questions.length > 0 ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full py-2 text-sm"
-                  onClick={() => setShowPreTest(true)}
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Пройти предварительное тестирование
-                </Button>
-              ) : (
-                <p className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                  <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                  Тест ещё не готов — приступайте к урокам ниже.
-                </p>
-              )
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full py-2 text-sm"
-                onClick={() => setShowPreTest(true)}
-                disabled={!tgp.canRetake}
-                title={
-                  !tgp.canRetake
-                    ? "Тест можно пройти заново позже"
-                    : undefined
-                }
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Пройти тестирование заново
-              </Button>
-            )}
-            {!tgp.canRetake && (
-              <span className="block text-xs text-muted-foreground tabular-nums text-center">
-                Тест доступен через {formatCooldown(tgp.retakeRemainingMs)}
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
+                <div
+                  className="h-full rounded-full bg-primary transition-[width] duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                {completedCount}/{totalLessons}
               </span>
-            )}
-            {tgp.result && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full py-2 text-sm"
-                onClick={() => setShowRoadmap(true)}
-              >
-                <MapIcon className="w-4 h-4 mr-2" />
-                Просмотреть роадмап
-              </Button>
+            </div>
+
+            {canTakeTgp && (
+              <div className="space-y-2">
+                {tgp.taken && tgpOutdated && (
+                  <p className="flex items-start gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600">
+                    <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                    Добавлен новый контент — рекомендуем пройти тест заново
+                  </p>
+                )}
+                {!tgp.taken ? (
+                  tgp.questions.length > 0 ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full py-2 text-sm"
+                      onClick={() => setShowPreTest(true)}
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Пройти предварительное тестирование
+                    </Button>
+                  ) : (
+                    <p className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                      <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                      Тест ещё не готов — приступайте к урокам ниже.
+                    </p>
+                  )
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full py-2 text-sm"
+                    onClick={() => setShowPreTest(true)}
+                    disabled={!tgp.canRetake}
+                    title={
+                      !tgp.canRetake
+                        ? "Тест можно пройти заново позже"
+                        : undefined
+                    }
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Пройти тестирование заново
+                  </Button>
+                )}
+                {!tgp.canRetake && (
+                  <span className="block text-xs text-muted-foreground tabular-nums text-center">
+                    Тест доступен через {formatCooldown(tgp.retakeRemainingMs)}
+                  </span>
+                )}
+                {tgp.result && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full py-2 text-sm"
+                    onClick={() => setShowRoadmap(true)}
+                  >
+                    <MapIcon className="w-4 h-4 mr-2" />
+                    Просмотреть роадмап
+                  </Button>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </aside>
+        }
+      >
+        <nav className="space-y-3">
+          {modules.map((module, moduleIndex) => {
+            const lessons = lessonsByModule.get(module.id) ?? []
+            return (
+              <section key={module.id} className="space-y-1">
+                <h3 className="px-2 py-1 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide min-w-0">
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+                  <span className="truncate flex-1 min-w-0">
+                    {moduleIndex + 1}. {module.title}
+                  </span>
+                </h3>
 
-      <nav className={cn(
-        "rounded-xl bg-card p-2 space-y-3 overflow-y-auto shadow-[var(--shadow-card)]",
-        fill ? "flex-1 min-h-0" : "max-h-[calc(100vh-17rem)]",
-      )}>
-        {modules.map((module, moduleIndex) => {
-          const lessons = lessonsByModule.get(module.id) ?? []
-          return (
-            <section key={module.id} className="space-y-1">
-              <h3 className="px-2 py-1 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                <ChevronRight className="h-3 w-3 text-muted-foreground/60" />
-                {moduleIndex + 1}. {module.title}
-              </h3>
-
-              <ul className="space-y-0.5">
-                {lessons.map((lesson) => {
-                  const isActive = lesson.id === currentLessonId
-                  const isDone = isCompleted(lesson.id)
-                  return (
-                    <li key={lesson.id}>
-                      <LessonItem
-                        lesson={lesson}
-                        isActive={isActive}
-                        isCompleted={isDone}
-                        onClick={() => onSelectLesson(lesson.id)}
-                      />
-                    </li>
-                  )
-                })}
-              </ul>
-            </section>
-          )
-        })}
-      </nav>
+                <ul className="space-y-0.5">
+                  {lessons.map((lesson) => {
+                    const isActive = lesson.id === currentLessonId
+                    const isDone = isCompleted(lesson.id)
+                    return (
+                      <li key={lesson.id}>
+                        <LessonItem
+                          lesson={lesson}
+                          isActive={isActive}
+                          isCompleted={isDone}
+                          onClick={() => onSelectLesson(lesson.id)}
+                        />
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
+            )
+          })}
+        </nav>
+      </AsidePanel>
 
       {showPreTest && tgp.questions.length > 0 && (
         <PreTestModal
@@ -265,7 +277,7 @@ function LessonItem({ lesson, isActive, isCompleted, onClick }: LessonItemProps)
       type="button"
       onClick={onClick}
       className={cn(
-        "w-full flex items-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+        "w-full flex items-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors min-w-0",
         isActive
           ? "bg-primary/10 text-foreground font-medium"
           : isCompleted
@@ -273,7 +285,7 @@ function LessonItem({ lesson, isActive, isCompleted, onClick }: LessonItemProps)
             : "text-foreground/75 hover:bg-muted/60 hover:text-foreground",
       )}
     >
-      <span className={cn("truncate", isActive && "text-foreground")}>{lesson.title}</span>
+      <span className={cn("truncate flex-1 min-w-0", isActive && "text-foreground")}>{lesson.title}</span>
     </button>
   )
 }

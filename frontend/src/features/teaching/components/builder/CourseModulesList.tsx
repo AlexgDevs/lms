@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { useModules } from "@/features/teaching/api/useModules"
 import { CourseLessonsList } from "./CourseLessonsList"
 import { useReorderableList } from "@/lib/dnd"
@@ -60,6 +61,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
     deleteModuleAsync,
     reorderModulesAsync,
     isCreating,
+    isDeleting,
     isReordering
   } = useModules({ courseId, onlyCreated: true })
 
@@ -142,13 +144,22 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
     }
   }
 
-  const handleDeleteModule = async (moduleId: string) => {
-    if (confirm("Удалить модуль со всеми уроками?")) {
-      try {
-        await deleteModuleAsync(moduleId)
-      } catch (e) {
-        console.error("Ошибка при удалении модуля:", e)
-      }
+  // Стейт диалога подтверждения удаления модуля
+  const [confirmDeleteModuleId, setConfirmDeleteModuleId] = useState<string | null>(null)
+
+  const handleRequestDeleteModule = (moduleId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setConfirmDeleteModuleId(moduleId)
+  }
+
+  const handleDeleteModule = async () => {
+    if (!confirmDeleteModuleId) return
+    try {
+      await deleteModuleAsync(confirmDeleteModuleId)
+    } catch (e) {
+      console.error("Ошибка при удалении модуля:", e)
+    } finally {
+      setConfirmDeleteModuleId(null)
     }
   }
 
@@ -162,7 +173,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
   }
 
   return (
-    <div className="w-full space-y-3 p-2">
+    <div className="w-full space-y-3">
       {/* Шапка секции */}
       <div className="flex items-center justify-between px-2">
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -206,7 +217,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
             >
               {/* Шапка модуля */}
               <div 
-                className="flex items-center justify-between p-2.5 gap-1.5 cursor-pointer select-none group"
+                className="flex items-center justify-between p-2.5 gap-1.5 cursor-pointer select-none group min-w-0"
                 onClick={() => {
                   onSelectModule?.(module.id)
                   if (!isExpanded) {
@@ -240,7 +251,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
                   {isEditing ? (
                     <form 
                       onSubmit={(e) => handleSaveEdit(module.id, e)}
-                      className="flex items-center gap-1 flex-1"
+                      className="flex items-center gap-1 flex-1 min-w-0"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Input
@@ -272,7 +283,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
                     </form>
                   ) : (
                     <span
-                      className="text-xs font-semibold truncate flex-1"
+                      className="text-xs font-semibold truncate flex-1 min-w-0"
                       title={module.title}
                     >
                       {index + 1}. {truncateTitle(module.title)}
@@ -281,7 +292,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
                 </div>
 
                 {!isEditing && (
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-0.5 shrink-0">
                     {/* Кнопка плюсика для быстрого создания урока */}
                     <Button
                       type="button"
@@ -320,7 +331,7 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation()
-                            handleDeleteModule(module.id)
+                            handleRequestDeleteModule(module.id, e)
                           }}
                           className="gap-2 cursor-pointer text-destructive focus:text-destructive"
                         >
@@ -411,6 +422,17 @@ export const CourseModulesList: React.FC<CourseModulesListProps> = ({
           </Button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDeleteModuleId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteModuleId(null)
+        }}
+        title="Удалить модуль?"
+        description="Все уроки и их содержимое будут удалены безвозвратно."
+        isConfirming={isDeleting}
+        onConfirm={handleDeleteModule}
+      />
     </div>
   )
 }

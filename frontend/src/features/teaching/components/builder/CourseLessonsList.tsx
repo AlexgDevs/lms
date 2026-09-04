@@ -1,7 +1,17 @@
 import { useState } from "react"
-import { Plus, GripVertical, FileText, Loader2, Trash2 } from "lucide-react"
+import {
+  Plus,
+  GripVertical,
+  FileText,
+  Loader2,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { useLessons } from "@/features/teaching/api/useLessons"
 import { useReorderableList } from "@/lib/dnd"
 
@@ -32,6 +42,8 @@ export function CourseLessonsList({
     isLoadingLessons,
     createLessonAsync,
     isCreatingLesson,
+    updateLessonAsync,
+    isUpdatingLesson,
     deleteLessonAsync,
     isDeletingLesson,
     reorderLessonsAsync,
@@ -56,6 +68,13 @@ export function CourseLessonsList({
   const [isAddingLesson, setIsAddingLesson] = useState(false)
   const [newLessonTitle, setNewLessonTitle] = useState("")
   const [prevAutoAdd, setPrevAutoAdd] = useState(autoAdd)
+
+  // Стейты для переименования урока
+  const [editingLessonId, setEditingLessonId] = useState<string | null>(null)
+  const [editLessonTitle, setEditLessonTitle] = useState("")
+
+  // Стейт диалога подтверждения удаления урока
+  const [confirmDeleteLessonId, setConfirmDeleteLessonId] = useState<string | null>(null)
 
   // Реагируем на триггер "autoAdd" из родителя (при клике на + на самом модуле)
   if (autoAdd && !prevAutoAdd) {
@@ -84,20 +103,59 @@ export function CourseLessonsList({
     }
   }
 
-  // Хендлер удаления урока
-  const handleDeleteLesson = async (e: React.MouseEvent, lessonId: string) => {
+  // --- Переименование урока ---
+  const handleStartRename = (lessonId: string, currentTitle: string, e: React.MouseEvent) => {
     e.stopPropagation()
+    setEditingLessonId(lessonId)
+    setEditLessonTitle(currentTitle)
+  }
+
+  const handleSaveRename = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (!editingLessonId) return
+
+    const trimmed = editLessonTitle.trim()
+    if (!trimmed) {
+      setEditingLessonId(null)
+      return
+    }
+
+    try {
+      await updateLessonAsync({
+        path: {
+          course_id: courseId,
+          module_id: moduleId,
+          lesson_id: editingLessonId,
+        },
+        body: { title: trimmed },
+      })
+      setEditingLessonId(null)
+    } catch (err) {
+      console.error("Ошибка при переименовании урока:", err)
+    }
+  }
+
+  // --- Удаление урока ---
+  const handleRequestDeleteLesson = (lessonId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setConfirmDeleteLessonId(lessonId)
+  }
+
+  const handleDeleteLesson = async () => {
+    if (!confirmDeleteLessonId) return
 
     try {
       await deleteLessonAsync({
         path: {
           course_id: courseId,
           module_id: moduleId,
-          lesson_id: lessonId,
+          lesson_id: confirmDeleteLessonId,
         },
       })
     } catch (err) {
       console.error("Ошибка при удалении урока:", err)
+    } finally {
+      setConfirmDeleteLessonId(null)
     }
   }
 
@@ -114,13 +172,14 @@ export function CourseLessonsList({
           {/* Список уроков */}
           {(lessons as Lesson[])?.map((lesson, index) => {
             const isSelected = selectedLessonId === lesson.id
+            const isEditing = editingLessonId === lesson.id
 
             return (
               <div
                 key={lesson.id}
                 onDragOver={(e) => lessonList.dragOver(e, lesson.id)}
                 onDrop={(e) => lessonList.drop(e, lesson.id)}
-                className={`group flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
+                className={`group grid grid-cols-[auto_auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors min-w-0 ${
                   lessonList.draggingId === lesson.id
                     ? "opacity-40"
                     : lessonList.overId === lesson.id
@@ -135,27 +194,77 @@ export function CourseLessonsList({
                   draggable
                   onDragStart={(e) => lessonList.beginDrag(e, lesson.id)}
                   onDragEnd={lessonList.dragEnd}
-                  className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing shrink-0 transition-opacity select-none"
+                  className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity select-none"
                 >
                   <GripVertical size={13} className="text-muted-foreground/30" />
                 </span>
 
-                <FileText size={14} className="text-muted-foreground shrink-0" />
+                <FileText size={14} className="text-muted-foreground" />
 
-                <span className="truncate flex-1">
-                  {index + 1}. {lesson.title}
-                </span>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  disabled={isDeletingLesson}
-                  className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                  onClick={(e) => handleDeleteLesson(e, lesson.id)}
-                >
-                  <Trash2 size={12} />
-                </Button>
+                {isEditing ? (
+                  <form
+                    onSubmit={handleSaveRename}
+                    className="flex items-center gap-1 col-span-3 min-w-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Input
+                      className="h-6 text-xs bg-background min-w-0"
+                      value={editLessonTitle}
+                      onChange={(e) => setEditLessonTitle(e.target.value)}
+                      autoFocus
+                      disabled={isUpdatingLesson}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") setEditingLessonId(null)
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      size="icon-xs"
+                      variant="ghost"
+                      className="text-success hover:text-success/80 hover:bg-success/10 shrink-0"
+                      disabled={isUpdatingLesson}
+                    >
+                      <Check size={13} />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon-xs"
+                      variant="ghost"
+                      className="text-muted-foreground shrink-0"
+                      disabled={isUpdatingLesson}
+                      onClick={() => setEditingLessonId(null)}
+                    >
+                      <X size={13} />
+                    </Button>
+                  </form>
+                ) : (
+                  <>
+                    <span className="truncate min-w-0">
+                      {index + 1}. {lesson.title}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={(e) => handleStartRename(lesson.id, lesson.title, e)}
+                      title="Переименовать урок"
+                    >
+                      <Pencil size={12} />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      disabled={isDeletingLesson}
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={(e) => handleRequestDeleteLesson(lesson.id, e)}
+                      title="Удалить урок"
+                    >
+                      <Trash2 size={12} />
+                    </Button>
+                  </>
+                )}
               </div>
             )
           })}
@@ -220,6 +329,17 @@ export function CourseLessonsList({
           <span>Добавить урок</span>
         </Button>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteLessonId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteLessonId(null)
+        }}
+        title="Удалить урок?"
+        description="Все содержимое урока (блоки) будет удалено безвозвратно."
+        isConfirming={isDeletingLesson}
+        onConfirm={handleDeleteLesson}
+      />
     </div>
   )
 }
