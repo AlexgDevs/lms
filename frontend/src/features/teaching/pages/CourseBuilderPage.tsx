@@ -135,7 +135,7 @@ export function CourseBuilderPage() {
   const certificateEnabled = Boolean(authorCourse?.certificate_enabled)
 
   return (
-    <div className="w-full bg-background text-foreground flex flex-col min-h-0 lg:h-[calc(100vh-4rem)] lg:overflow-hidden">
+    <div className="w-full bg-background text-foreground flex flex-col min-h-0 lg:h-[calc(100vh-7rem)] lg:overflow-hidden">
        
       {/* Верхний тулбар: кнопка назад + Структура (моб.) */}
       <div className="shrink-0 bg-muted/30 px-4 py-1.5 flex items-center justify-between gap-2">
@@ -161,79 +161,79 @@ export function CourseBuilderPage() {
         </div>
       </div>
 
-      {/* Основной контент-контейнер */}
-      <div className="flex-1 flex flex-col p-4 gap-4 min-h-0 lg:overflow-hidden">
-        
-        {/* Компактная шапка курса */}
-        <div className="shrink-0">
-          <CourseHeader
-            course={authorCourse}
-            onUpdateCourse={handleUpdateCourse}
-            isUpdating={isUpdatingCourse}
-            onSubmitReview={handleSubmitReview}
-            isSubmittingReview={isSubmittingCourseForReview}
-            onUploadCover={uploadCourseCoverAsync}
-            onRemoveCover={removeCourseCoverAsync}
-            isUploadingCover={isUploadingCover || isRemovingCover}
+      {/* Рабочая область: Асид (модули/уроки) + Холст */}
+      <div className="flex-1 flex flex-col gap-4 p-4 min-h-0 lg:flex-row lg:overflow-hidden">
+
+        {/* Левый Асид — десктоп */}
+        <div className="hidden lg:block h-full min-h-0 shrink-0">
+          <CourseSidebar
+            courseId={courseId}
+            selectedModuleId={selectedModuleId}
+            selectedLessonId={selectedLessonId}
+            onSelectModule={(id) => {
+              setSelectedModuleId(id)
+            }}
+            onSelectLesson={(moduleId, lessonId) => {
+              setSelectedModuleId(moduleId)
+              setSelectedLessonId(lessonId)
+            }}
           />
         </div>
 
-        {/* Certificate Panel */}
-        <CertificatePanel
-          certificateEnabled={certificateEnabled}
-          isUpdatingCourse={isUpdatingCourse}
-          onToggleCertificate={handleToggleCertificate}
-        />
+        {/* Правая колонка: шапка + сворачиваемые панели + холст */}
+        <main className="flex-1 min-w-0 min-h-0 flex flex-col gap-3 lg:overflow-hidden">
 
-        {/* TGP Panel */}
-        <TgpPanel
-          courseId={String(authorCourse.id)}
-          tgpEnabled={tgpEnabled}
-          tgpLastGeneratedAt={
-            authorCourse?.tgp_last_full_generated_at ??
-            tgp.optimisticGeneratedAt ??
-            null
-          }
-          tgpCooldownHours={Math.max(
-            authorCourse?.tgp_cooldown_hours ?? TGP_GENERATION_COOLDOWN_HOURS,
-            TGP_GENERATION_COOLDOWN_HOURS,
-          )}
-          moduleCount={modules.length}
-          minModules={TGP_MIN_MODULES}
-          questions={tgp.questions ?? []}
-          isLoadingQuestions={tgp.isLoadingQuestions}
-          isGenerating={tgp.isGenerating}
-          isUpdatingCourse={tgp.isTogglingTgp || isUpdatingCourse}
-          isSavingQuestion={tgp.isUpdatingQuestion}
-          isRegenerating={tgp.isRegenerating}
-          onToggleTgp={handleToggleTgp}
-          onGenerate={handleGenerate}
-          onSaveQuestion={handleSaveQuestion}
-          onRegenerate={handleRegenerate}
-          onRefetch={handleRefetchTgp}
-        />
+          {/* Компактная шапка курса + панели (сверху, не давят на асид) */}
+          <div className="shrink-0">
+            <CourseHeader
+              course={authorCourse}
+              onUpdateCourse={handleUpdateCourse}
+              isUpdating={isUpdatingCourse}
+              onSubmitReview={handleSubmitReview}
+              isSubmittingReview={isSubmittingCourseForReview}
+              onUploadCover={uploadCourseCoverAsync}
+              onRemoveCover={removeCourseCoverAsync}
+              isUploadingCover={isUploadingCover || isRemovingCover}
+            />
+          </div>
 
-        {/* Рабочая область: Сайдбар + Центральный холст */}
-        <div className="flex-1 flex flex-col gap-4 min-h-0 lg:flex-row lg:overflow-hidden">
-          
-          {/* Левый Сайдбар (Модули и Уроки) — десктоп */}
-          <div className="hidden lg:block">
-            <CourseSidebar
-              courseId={courseId}
-              selectedModuleId={selectedModuleId}
-              selectedLessonId={selectedLessonId}
-              onSelectModule={(id) => {
-                setSelectedModuleId(id)
-              }}
-              onSelectLesson={(moduleId, lessonId) => {
-                setSelectedModuleId(moduleId)
-                setSelectedLessonId(lessonId)
-              }}
+          <div className="shrink-0 space-y-3">
+            <CertificatePanel
+              certificateEnabled={certificateEnabled}
+              isUpdatingCourse={isUpdatingCourse}
+              onToggleCertificate={handleToggleCertificate}
+            />
+
+            <TgpPanel
+              courseId={String(authorCourse.id)}
+              tgpEnabled={tgpEnabled}
+              tgpLastGeneratedAt={
+                authorCourse?.tgp_last_full_generated_at ??
+                tgp.optimisticGeneratedAt ??
+                null
+              }
+              tgpCooldownHours={Math.max(
+                authorCourse?.tgp_cooldown_hours ?? TGP_GENERATION_COOLDOWN_HOURS,
+                TGP_GENERATION_COOLDOWN_HOURS,
+              )}
+              moduleCount={modules.length}
+              minModules={TGP_MIN_MODULES}
+              questions={tgp.questions ?? []}
+              isLoadingQuestions={tgp.isLoadingQuestions}
+              isGenerating={tgp.isGenerating}
+              isUpdatingCourse={tgp.isTogglingTgp || isUpdatingCourse}
+              isSavingQuestion={tgp.isUpdatingQuestion}
+              isRegenerating={tgp.isRegenerating}
+              onToggleTgp={handleToggleTgp}
+              onGenerate={handleGenerate}
+              onSaveQuestion={handleSaveQuestion}
+              onRegenerate={handleRegenerate}
+              onRefetch={handleRefetchTgp}
             />
           </div>
 
           {/* Центральный редактор контента */}
-          <main className="flex-1 min-w-0 min-h-0 rounded-xl bg-card overflow-hidden shadow-[var(--shadow-card)] flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col">
             {selectedLessonId ? (
               // СНАЧАЛА проверяем урок, так как он приоритетнее
               <CourseBlocks
@@ -242,7 +242,7 @@ export function CourseBuilderPage() {
               />
             ) : selectedModuleId ? (
               // ПОТОМ проверяем модуль, если урок не выбран
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-card rounded-xl shadow-[var(--shadow-card)]">
                 <div className="space-y-3">
                   <div className="w-10 h-10 rounded-md bg-reward/10 text-reward flex items-center justify-center mx-auto">
                     <Folder size={20} />
@@ -257,7 +257,7 @@ export function CourseBuilderPage() {
               </div>
             ) : (
               // Ничего не выбрано
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-card rounded-xl shadow-[var(--shadow-card)]">
                 <div className="max-w-sm space-y-1.5">
                   <p className="text-sm font-semibold text-foreground">
                     Выберите модуль или урок слева
@@ -268,40 +268,38 @@ export function CourseBuilderPage() {
                 </div>
               </div>
             )}
-          </main>
-
-          {/* Структура курса — мобильная шторка */}
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetContent side="left" className="p-0 w-[85%] sm:max-w-sm">
-              <SheetHeader className="px-4 py-3.5 border-b border-border">
-                <SheetTitle className="flex items-center gap-2 text-sm">
-                  <Layers size={16} className="text-primary" />
-                  Структура курса
-                </SheetTitle>
-              </SheetHeader>
-              <div className="flex-1 min-h-0">
-                <CourseSidebar
-                  courseId={courseId}
-                  selectedModuleId={selectedModuleId}
-                  selectedLessonId={selectedLessonId}
-                  fill
-                  onSelectModule={(id) => {
-                    setSelectedModuleId(id)
-                    setSidebarOpen(false)
-                  }}
-                  onSelectLesson={(moduleId, lessonId) => {
-                    setSelectedModuleId(moduleId)
-                    setSelectedLessonId(lessonId)
-                    setSidebarOpen(false)
-                  }}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
-
-        </div>
-
+          </div>
+        </main>
       </div>
+
+      {/* Структура курса — мобильная шторка */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="p-0 gap-0 w-[85%] sm:max-w-sm overflow-hidden">
+          <SheetHeader className="px-4 py-3.5 border-b border-border shrink-0">
+            <SheetTitle className="flex items-center gap-2 text-sm">
+              <Layers size={16} className="text-primary" />
+              Структура курса
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <CourseSidebar
+              courseId={courseId}
+              selectedModuleId={selectedModuleId}
+              selectedLessonId={selectedLessonId}
+              fill
+              onSelectModule={(id) => {
+                setSelectedModuleId(id)
+                setSidebarOpen(false)
+              }}
+              onSelectLesson={(moduleId, lessonId) => {
+                setSelectedModuleId(moduleId)
+                setSelectedLessonId(lessonId)
+                setSidebarOpen(false)
+              }}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
 
     </div>
   )
