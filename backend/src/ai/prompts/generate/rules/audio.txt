@@ -1,0 +1,5 @@
+RULES FOR AN AUDIO PLACEHOLDER:
+- Put the description of the audio in the block "title".
+- Do NOT provide a url — the author uploads the audio later.
+- Description MUST be in Russian.
+Payload schema: {}

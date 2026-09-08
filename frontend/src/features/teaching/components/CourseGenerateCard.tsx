@@ -4,6 +4,17 @@ import { useQueryClient } from "@tanstack/react-query"
 import { AlertTriangle, CheckCircle2, Loader2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
   useAiGenerationQuota,
   useGenerateCourse,
 } from "@/features/teaching/api/useCourseGenerate"
@@ -18,8 +29,15 @@ const STRUCTURE_DEFAULTS = {
   blocks_per_lesson: 6,
 }
 
+const COUNTS_MIN = 3
+const COUNTS_MAX = 10
+
 const POLL_INTERVAL_MS = 3000
-const GENERATION_TIMEOUT_MS = 4 * 60 * 1000
+const GENERATION_TIMEOUT_MS = 10 * 60 * 1000
+
+function clampCount(value: number): number {
+  return Math.min(COUNTS_MAX, Math.max(COUNTS_MIN, Math.round(value) || COUNTS_MIN))
+}
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -35,6 +53,14 @@ export function CourseGenerateCard() {
   const generate = useGenerateCourse()
 
   const [topic, setTopic] = useState("")
+  const [open, setOpen] = useState(false)
+  const [modulesCount, setModulesCount] = useState(STRUCTURE_DEFAULTS.modules_count)
+  const [lessonsPerModule, setLessonsPerModule] = useState(
+    STRUCTURE_DEFAULTS.lessons_per_module
+  )
+  const [blocksPerLesson, setBlocksPerLesson] = useState(
+    STRUCTURE_DEFAULTS.blocks_per_lesson
+  )
   const [phase, setPhase] = useState<"idle" | "generating">("idle")
   const [generationCourseId, setGenerationCourseId] = useState<string>()
   const [elapsed, setElapsed] = useState(0)
@@ -104,8 +130,14 @@ export function CourseGenerateCard() {
     if (!topic.trim()) return
     try {
       const res = await generate.mutateAsync({
-        body: { topic: topic.trim(), ...STRUCTURE_DEFAULTS },
+        body: {
+          topic: topic.trim(),
+          modules_count: modulesCount,
+          lessons_per_module: lessonsPerModule,
+          blocks_per_lesson: blocksPerLesson,
+        },
       })
+      setOpen(false)
       setGenerationCourseId(res.course_id)
       setElapsed(0)
       setPhase("generating")
@@ -154,7 +186,7 @@ export function CourseGenerateCard() {
               ИИ генерирует структуру курса
             </p>
             <p className="text-[11px] text-muted-foreground font-mono">
-              {formatElapsed(elapsed)} • обычно до 2 минут
+              {formatElapsed(elapsed)} • может занять несколько минут
             </p>
           </div>
         </div>
@@ -165,19 +197,90 @@ export function CourseGenerateCard() {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && canGenerate && topic.trim()) handleGenerate()
+              if (e.key === "Enter" && canGenerate && topic.trim()) setOpen(true)
             }}
             placeholder="Например: Продвинутый Kubernetes..."
             className="w-full bg-muted/40 rounded-md px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors"
           />
-          <Button
-            className="w-full"
-            disabled={!canGenerate || !topic.trim()}
-            onClick={handleGenerate}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Создать структуру</span>
-          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="w-full"
+                disabled={!canGenerate || !topic.trim()}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Создать структуру</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Настройки генерации</DialogTitle>
+                <DialogDescription>
+                  Укажите размер курса. Каждый параметр — от {COUNTS_MIN} до{" "}
+                  {COUNTS_MAX}.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-1">
+                <div className="space-y-1.5">
+                  <Label htmlFor="gen-modules" className="text-xs">
+                    Модули
+                  </Label>
+                  <Input
+                    id="gen-modules"
+                    type="number"
+                    min={COUNTS_MIN}
+                    max={COUNTS_MAX}
+                    value={modulesCount}
+                    onChange={(e) => setModulesCount(clampCount(Number(e.target.value)))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="gen-lessons" className="text-xs">
+                    Уроков в модуле
+                  </Label>
+                  <Input
+                    id="gen-lessons"
+                    type="number"
+                    min={COUNTS_MIN}
+                    max={COUNTS_MAX}
+                    value={lessonsPerModule}
+                    onChange={(e) =>
+                      setLessonsPerModule(clampCount(Number(e.target.value)))
+                    }
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="gen-blocks" className="text-xs">
+                    Блоков в уроке
+                  </Label>
+                  <Input
+                    id="gen-blocks"
+                    type="number"
+                    min={COUNTS_MIN}
+                    max={COUNTS_MAX}
+                    value={blocksPerLesson}
+                    onChange={(e) =>
+                      setBlocksPerLesson(clampCount(Number(e.target.value)))
+                    }
+                  />
+                </div>
+
+                <p className="text-xs text-muted-foreground flex items-start gap-1.5 leading-relaxed">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  Генерация может занять продолжительное время (до нескольких
+                  минут) — чем больше курс, тем дольше.
+                </p>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setOpen(false)}>
+                  Отмена
+                </Button>
+                <Button onClick={handleGenerate}>Начать генерацию</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
     </div>

@@ -1,3 +1,5 @@
+# TODO: move the inline prompts in this module to src/ai/prompts/ and keep
+# prompts in English (course content stays in Russian).
 import json
 from collections.abc import AsyncIterator
 from dataclasses import dataclass

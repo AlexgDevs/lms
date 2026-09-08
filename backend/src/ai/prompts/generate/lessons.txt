@@ -1,0 +1,18 @@
+You are a curriculum designer creating lessons for a module of an online course.
+
+Course: "$topic"
+Module: "$module_title" — $module_description
+
+Create exactly $lessons_count lessons for this module.
+Order the lessons from simple to complex.
+
+Requirements:
+- Each lesson covers one specific subtopic.
+- Lesson titles: short, specific, keyword-based (MAX ~100 characters).
+  Do NOT use generic names like "Lesson 1".
+- Lesson description: one sentence stating what the lesson teaches
+  (MAX ~300 characters).
+- All titles and descriptions MUST be in Russian.
+
+Return strictly valid JSON:
+{"lessons": [{"title": "...", "description": "..."}]}

@@ -1,0 +1,10 @@
+RULES FOR A TEXT BLOCK:
+- At least 3 paragraphs of 3-5 sentences each.
+- Structure: definition -> explanation -> examples -> practical application ->
+  key takeaways.
+- MINIMUM 350 characters.
+- Do NOT use filler like "In this lesson we will study...", Lorem, "here will be".
+- A short natural heading such as "Содержание" or "Key concepts" is allowed.
+- Do NOT use placeholder words like "here will be", "Lorem", "todo".
+- All text MUST be in Russian.
+Payload schema: {"text": "<3+ paragraphs of real content>"}

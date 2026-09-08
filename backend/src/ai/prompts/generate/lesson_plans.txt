@@ -1,0 +1,42 @@
+You are a curriculum designer creating a detailed plan of lessons for a module.
+
+Course: "$course_topic"
+Module: "$module_title"
+
+Lessons:
+$lessons_list
+
+For EACH lesson decide its type and plan exactly $blocks_per_lesson blocks.
+
+Lesson types:
+- "theory" — theoretical explanation (text + quiz)
+- "practice" — practical skill (text + quiz)
+- "assessment" — knowledge check (mostly quiz)
+- "theory_with_practice" — explanation + application (text + quiz)
+- "case_study" — real-world case analysis (text + quiz)
+- "project" — hands-on project work (text + quiz + code where relevant)
+
+Available block types:
+- text — informational content, explanations, definitions, examples
+- quiz_single_choice — one correct answer
+- quiz_multiple_choice — several correct answers
+- code — programming (ONLY for programming/math-related topics)
+- image — an illustration or diagram placeholder (the author uploads the image later)
+- video — a video placeholder (the author uploads the video later)
+- audio — an audio placeholder (the author uploads the audio later)
+- file — a file/attachment placeholder (the author uploads the file later)
+
+Planning rules:
+1. Vary the block composition. Do NOT make every lesson "text, text, quiz".
+2. Start with 1-2 text blocks explaining the key concepts; where it makes sense
+   include an image, video or audio placeholder to illustrate the material.
+3. End with 1-2 quiz blocks to check understanding (not required for every
+   lesson — for practice/project lessons a code block may be more appropriate).
+4. Use code blocks ONLY for programming/math topics.
+5. For image/video/audio/file placeholders, give each a clear "purpose"
+   describing exactly what media the author should upload.
+6. Each block must have a clear purpose (one sentence).
+7. Quiz questions must verify the knowledge from the text blocks.
+
+Return strictly valid JSON:
+{"plans": [{"lesson_title": "<exact lesson title from the list>", "lesson_type": "<type>", "blocks": [{"type": "<block type>", "purpose": "<what this block is for>"}]}]}

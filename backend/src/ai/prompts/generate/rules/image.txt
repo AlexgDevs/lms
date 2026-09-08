@@ -1,0 +1,5 @@
+RULES FOR AN IMAGE PLACEHOLDER:
+- Provide a detailed "alt_text" describing the image/diagram to be created.
+- Do NOT provide a url — the author uploads the image later.
+- Alt text MUST be in Russian.
+Payload schema: {"alt_text": "<detailed description>"}

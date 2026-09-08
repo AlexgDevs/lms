@@ -4,6 +4,8 @@ Auto-publishes courses the AI (or heuristic fallback) approves; courses with
 flags stay in ``under_review`` so a human moderator can decide.
 """
 
+# TODO: the AI review prompt lives in src/ai/gemini.review_course — move it to
+# src/ai/prompts/; the heuristic flags below are user-facing moderation reasons.
 import asyncio
 import random
 import re

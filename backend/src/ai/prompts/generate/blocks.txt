@@ -1,0 +1,67 @@
+You are an expert educator creating learning content for one lesson.
+
+Course: "$course_topic"
+Module: "$module_title"
+Lesson: "$lesson_title"
+Lesson type: $lesson_type
+
+Blocks to generate:
+$blocks_list
+
+Generate the FULL content for EACH block. All content (text, quiz options,
+alt text, block titles) MUST be in Russian.
+
+========================================================
+TEXT BLOCKS (type: text):
+========================================================
+- At least 3 paragraphs of 3-5 sentences each.
+- Structure: definition -> explanation -> examples -> practical application ->
+  key takeaways.
+- Include concrete facts, numbers, definitions and real examples.
+- Do NOT use filler like "In this lesson we will study...", Lorem, "here will be".
+  A short natural heading such as "Содержание" or "Key concepts" is allowed.
+- MINIMUM 350 characters.
+- Do NOT use placeholder words like "here will be", "Lorem", "todo".
+
+========================================================
+QUIZ BLOCKS (quiz_single_choice / quiz_multiple_choice):
+========================================================
+- Exactly 4 options.
+- The question must test knowledge from the previous text blocks.
+- 1 correct answer for single choice, 2-3 for multiple choice.
+- Distractors must be plausible but wrong (common mistakes).
+
+========================================================
+CODE BLOCKS (code):
+========================================================
+- A complete working example with comments.
+- 2-3 test cases with input/output.
+- Python (unless the topic requires another language).
+
+========================================================
+IMAGE PLACEHOLDER (image):
+========================================================
+- Provide "alt_text": a detailed description of the image/diagram to be created.
+- Do NOT provide a url — the author uploads the image later.
+
+========================================================
+VIDEO PLACEHOLDER (video):
+========================================================
+- Put the description of the video in the block "title".
+- Payload: estimated "duration" (seconds). Do NOT provide a url — the author
+  uploads the video later.
+
+========================================================
+AUDIO PLACEHOLDER (audio):
+========================================================
+- Put the description of the audio in the block "title".
+- Do NOT provide a url — the author uploads the audio later.
+
+========================================================
+FILE PLACEHOLDER (file):
+========================================================
+- Provide "file_name" describing the attachment (e.g. "shablony.docx").
+- Do NOT provide a url — the author uploads the file later.
+
+Return strictly valid JSON:
+{"blocks": [{"block_index": 1, "title": "<short block title>", "payload": {<schema matching the block type>}}]}

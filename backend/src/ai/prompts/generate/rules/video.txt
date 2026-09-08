@@ -1,0 +1,6 @@
+RULES FOR A VIDEO PLACEHOLDER:
+- Put the description of the video in the block "title".
+- Payload: estimated "duration" (seconds). Do NOT provide a url — the author
+  uploads the video later.
+- Description MUST be in Russian.
+Payload schema: {"duration": <int seconds>}

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.postgres.base import UUIDBase
@@ -14,7 +14,7 @@ class Module(UUIDBase):
         ForeignKey("courses.id", ondelete="CASCADE")
     )
     title: Mapped[str_128]
-    description: Mapped[str_128 | None]
+    description: Mapped[str | None] = mapped_column(Text)
     order: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[timestamp]
     updated_at: Mapped[timestamp]

@@ -1,3 +1,4 @@
+# TODO: move these prompts to src/ai/prompts/ (e.g. prompts/assistant/).
 import json
 from typing import Any
 

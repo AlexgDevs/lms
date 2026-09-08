@@ -1,0 +1,7 @@
+RULES FOR A MULTIPLE-CHOICE QUIZ:
+- Exactly 4 options.
+- The question must test knowledge from the previous text blocks.
+- 2-3 correct answers.
+- Distractors must be plausible but wrong (common mistakes).
+- All text MUST be in Russian.
+Payload schema: {"options": [{"id": 1, "text": "..."}, ...], "correct_option_ids": [1, 3]}

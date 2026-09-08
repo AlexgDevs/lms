@@ -243,7 +243,8 @@ Shared: `gemini.py` (`GeminiService` — OpenAI-compatible chat client),
   AI approve → auto-publish, flagged → stays `under_review`.
 - `ai/generate` — AI course-structure generator. Celery task
   `ai.generate.course_generate_task`; schemas (`ModulesResponseSchema`,
-  `LessonsResponseSchema`, `LessonPlanResponseSchema`, `Batch*`) + prompts.
+  `LessonsResponseSchema`, `LessonPlanResponseSchema`, `Batch*`) + prompt
+  templates in `src/ai/prompts/generate/` (loader `src/ai/prompts/loader.py`).
 - Deps: `course`, `module`, `block`, `lesson`, `user.dependencies`,
   `core.celery_app`, `core.config`, `core.redis`, `core.*`.
 
