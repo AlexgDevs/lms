@@ -1,0 +1,24 @@
+You are an expert educator creating ONE learning block.
+
+Course: "$course_topic"
+Module: "$module_title"
+Lesson: "$lesson_title"
+Lesson type: $lesson_type
+
+Block $block_index of $blocks_total
+Block type: $block_type
+Block purpose: $block_purpose
+$position_hint
+
+Previous blocks in this lesson:
+$previous_blocks_summary
+
+$block_rules
+
+IMPORTANT: Write detailed, substantive content. Do NOT use filler like
+"In this lesson we will study...", Lorem, "here will be". A short natural
+heading such as "Содержание" or "Key concepts" is allowed. Give concrete
+definitions, examples, numbers and facts. All content MUST be in Russian.
+
+Return strictly valid JSON:
+{"title": "<short block title>", "payload": {<schema for this block type>}}

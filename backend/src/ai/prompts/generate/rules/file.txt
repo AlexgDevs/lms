@@ -1,0 +1,4 @@
+RULES FOR A FILE PLACEHOLDER:
+- Provide "file_name" describing the attachment (e.g. "shablony.docx").
+- Do NOT provide a url — the author uploads the file later.
+Payload schema: {"file_name": "<descriptive file name>"}

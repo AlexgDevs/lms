@@ -17,7 +17,7 @@ from uuid import UUID, uuid4
 from loguru import logger
 from openai import APIConnectionError, APITimeoutError, InternalServerError
 from redis.asyncio import Redis, from_url
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -26,13 +26,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import NullPool
 
-from src.ai.generate.prompts import (
-    batch_blocks_content_prompt,
-    batch_lesson_plans_prompt,
-    lessons_prompt,
-    modules_prompt,
-    single_block_content_prompt,
-)
+from src.ai.prompts import loader
 from src.ai.generate.schemas import (
     BatchBlocksResponseSchema,
     BatchLessonPlanItemSchema,
@@ -133,14 +127,139 @@ def _ai_call_delay() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Prompt builders (delegate to the template loader in src/ai/prompts)
+# ---------------------------------------------------------------------------
+
+
+def _course_meta_prompt(topic: str) -> str:
+    return loader.render("course_meta", topic=topic)
+
+
+def _modules_prompt(topic: str, modules_count: int) -> str:
+    return loader.render("modules", topic=topic, modules_count=modules_count)
+
+
+def _lessons_prompt(
+    topic: str,
+    module_title: str,
+    module_description: str,
+    lessons_count: int,
+) -> str:
+    return loader.render(
+        "lessons",
+        topic=topic,
+        module_title=module_title,
+        module_description=module_description,
+        lessons_count=lessons_count,
+    )
+
+
+def _lesson_plans_prompt(
+    course_topic: str,
+    module_title: str,
+    lessons: list[dict[str, str]],
+    blocks_per_lesson: int,
+) -> str:
+    lessons_list = "\n".join(
+        f'  {i + 1}. "{les["title"]}" — {les.get("description", "")}'
+        for i, les in enumerate(lessons)
+    )
+    return loader.render(
+        "lesson_plans",
+        course_topic=course_topic,
+        module_title=module_title,
+        lessons_list=lessons_list,
+        blocks_per_lesson=blocks_per_lesson,
+    )
+
+
+def _blocks_prompt(
+    course_topic: str,
+    module_title: str,
+    lesson_title: str,
+    lesson_type: str,
+    blocks: list[dict[str, str]],
+) -> str:
+    blocks_list = "\n".join(
+        f'  {i + 1}. Type: {b["type"]}, Purpose: {b["purpose"]}'
+        for i, b in enumerate(blocks)
+    )
+    return loader.render(
+        "blocks",
+        course_topic=course_topic,
+        module_title=module_title,
+        lesson_title=lesson_title,
+        lesson_type=lesson_type,
+        blocks_list=blocks_list,
+    )
+
+
+def _get_block_rules(block_type: str) -> str:
+    return loader.render_rules(block_type)
+
+
+def _single_block_prompt(
+    course_topic: str,
+    module_title: str,
+    lesson_title: str,
+    lesson_type: str,
+    block_type: str,
+    block_purpose: str,
+    block_index: int,
+    blocks_total: int,
+    previous_blocks_summary: str,
+) -> str:
+    position_hint = ""
+    if block_index == 0:
+        position_hint = "This is the FIRST block — introduce the topic clearly."
+    elif block_index == blocks_total - 1:
+        position_hint = "This is the LAST block — summarize the lesson."
+    else:
+        position_hint = (
+            f"This is block {block_index + 1} of {blocks_total} — "
+            "continue developing the previous content."
+        )
+    return loader.render(
+        "single_block",
+        course_topic=course_topic,
+        module_title=module_title,
+        lesson_title=lesson_title,
+        lesson_type=lesson_type,
+        block_index=block_index + 1,
+        blocks_total=blocks_total,
+        block_type=block_type,
+        block_purpose=block_purpose,
+        position_hint=position_hint,
+        previous_blocks_summary=previous_blocks_summary,
+        block_rules=_get_block_rules(block_type),
+    )
+
+
+# ---------------------------------------------------------------------------
 # AI generation helpers
 # ---------------------------------------------------------------------------
+
+
+def _generate_course_meta(gemini: GeminiService, topic: str) -> tuple[str, str]:
+    """Generate a concise, keyword-based course title and description."""
+    try:
+        data = gemini._generate_json(_course_meta_prompt(topic))
+        title = str(data.get("title", "")).strip() or topic
+        description = str(data.get("description", "")).strip()
+        if not description:
+            description = f"Автоматически сгенерированный курс: {topic}"
+        return _truncate(title, 120), _truncate(description, 300)
+    except Exception as exc:
+        logger.warning("Course meta generation failed, using topic as title: {}", exc)
+        return _truncate(topic, 120), _truncate(
+            f"Автоматически сгенерированный курс: {topic}", 300
+        )
 
 
 def _generate_modules(
     gemini: GeminiService, topic: str, modules_count: int
 ) -> list[ModulePlanSchema]:
-    prompt = modules_prompt(topic, modules_count)
+    prompt = _modules_prompt(topic, modules_count)
     data = gemini._generate_json(prompt)
     resp = ModulesResponseSchema(**data)
     modules = resp.modules[:modules_count]
@@ -159,7 +278,7 @@ def _generate_lessons(
     module_description: str,
     lessons_count: int,
 ) -> list[LessonPlanSchema]:
-    prompt = lessons_prompt(topic, module_title, module_description, lessons_count)
+    prompt = _lessons_prompt(topic, module_title, module_description, lessons_count)
     data = gemini._generate_json(prompt)
     resp = LessonsResponseSchema(**data)
     lessons = resp.lessons[:lessons_count]
@@ -177,7 +296,7 @@ def _generate_lesson_plans_batch(
     blocks_per_lesson: int,
 ) -> list[BatchLessonPlanItemSchema]:
     """Generate lesson plans for ALL lessons in a module in a single AI call."""
-    prompt = batch_lesson_plans_prompt(
+    prompt = _lesson_plans_prompt(
         course_topic, module_title, lessons, blocks_per_lesson
     )
     try:
@@ -222,7 +341,7 @@ def _generate_blocks_batch(
     blocks: list[dict[str, str]],
 ) -> list[BlockContentSchema]:
     """Generate content for ALL blocks in a lesson in a single AI call."""
-    prompt = batch_blocks_content_prompt(
+    prompt = _blocks_prompt(
         course_topic, module_title, lesson_title, lesson_type, blocks
     )
     try:
@@ -271,7 +390,7 @@ def _generate_single_block_content(
     """Fallback: generate a single block when batch fails."""
     previous_summary = _build_previous_blocks_summary(generated_blocks, lesson_title)
 
-    prompt = single_block_content_prompt(
+    prompt = _single_block_prompt(
         course_topic=course_topic,
         module_title=module_title,
         lesson_title=lesson_title,
@@ -366,7 +485,16 @@ def _fallback_payload(block_type: str, purpose: str) -> dict[str, Any]:
             "test_cases": [{"input": "", "output": "Привет, мир!"}],
         }
     if block_type == "image":
-        return {"alt_text": purpose if purpose else "Иллюстрация"}
+        return {
+            "url": None,
+            "alt_text": purpose if purpose else "Иллюстрация",
+        }
+    if block_type == "video":
+        return {"url": None, "duration": 120}
+    if block_type == "audio":
+        return {"url": None}
+    if block_type == "file":
+        return {"url": None, "file_name": purpose if purpose else "Файл"}
     return {"text": purpose if purpose else "Содержание блока"}
 
 
@@ -452,6 +580,15 @@ def _normalize_payload(block_type: str, payload: dict[str, Any]) -> dict[str, An
     elif block_type == "image":
         if "alt_text" not in payload:
             payload["alt_text"] = "Иллюстрация"
+        payload.setdefault("url", None)
+    elif block_type == "video":
+        payload.setdefault("url", None)
+        payload.setdefault("duration", 120)
+    elif block_type == "audio":
+        payload.setdefault("url", None)
+    elif block_type == "file":
+        payload.setdefault("url", None)
+        payload.setdefault("file_name", "Файл")
     return payload
 
 
@@ -476,47 +613,19 @@ def _get_block_title(block_type: str, payload: dict[str, Any], index: int) -> st
     elif block_type == "image":
         alt = str(payload.get("alt_text", "Изображение"))
         return alt[:100]
+    elif block_type == "video":
+        return "Видео"
+    elif block_type == "audio":
+        return "Аудио"
+    elif block_type == "file":
+        name = str(payload.get("file_name", "Файл"))
+        return name[:100]
     return f"Блок {index + 1}"
 
 
 # ---------------------------------------------------------------------------
 # DB helpers
 # ---------------------------------------------------------------------------
-
-
-async def _delete_course_cascade(session: AsyncSession, course_id: UUID) -> None:
-    blocks_stmt = (
-        delete(Block)
-        .where(
-            Block.lesson_id.in_(select(Lesson.id).where(Lesson.course_id == course_id))
-        )
-        .execution_options(synchronize_session=False)
-    )
-    await session.execute(blocks_stmt)
-
-    lessons_stmt = (
-        delete(Lesson)
-        .where(Lesson.course_id == course_id)
-        .execution_options(synchronize_session=False)
-    )
-    await session.execute(lessons_stmt)
-
-    modules_stmt = (
-        delete(Module)
-        .where(Module.course_id == course_id)
-        .execution_options(synchronize_session=False)
-    )
-    await session.execute(modules_stmt)
-
-    course_stmt = (
-        delete(Course)
-        .where(Course.id == course_id)
-        .execution_options(synchronize_session=False)
-    )
-    await session.execute(course_stmt)
-
-    await session.commit()
-    logger.info("Rollback: deleted course {} and all related records", course_id)
 
 
 # ---------------------------------------------------------------------------
@@ -575,7 +684,11 @@ async def _run_generate_course(
 
                 gemini = _build_gemini()
 
-                # ---- Phase 0: Generate structure (modules + lessons) ----
+                # ---- Phase 0: Generate course meta + structure (modules + lessons) ----
+
+                course_title, course_description = _generate_course_meta(gemini, topic)
+                logger.info("Phase 0: course meta generated: {}", course_title)
+                _ai_call_delay()
 
                 modules_list = _generate_modules(gemini, topic, modules_count)
                 logger.info("Phase 0: generated {} modules", len(modules_list))
@@ -722,10 +835,8 @@ async def _run_generate_course(
 
                 # ---- Phase 3: Create DB records (single transaction) ----
 
-                course.title = _truncate(topic)
-                course.description = _truncate(
-                    f"Автоматически сгенерированный курс: {topic}"
-                )
+                course.title = _truncate(course_title, 128)
+                course.description = _truncate(course_description, 300)
                 session.add(course)
 
                 # Index blocks by lesson_title
@@ -739,8 +850,8 @@ async def _run_generate_course(
                 for mod_idx, mod in enumerate(modules_list):
                     module_row = Module(
                         course_id=course_id,
-                        title=_truncate(mod.title),
-                        description=_truncate(mod.description),
+                        title=_truncate(mod.title, 128),
+                        description=_truncate(mod.description, 300),
                         order=mod_idx,
                     )
                     session.add(module_row)
@@ -757,8 +868,10 @@ async def _run_generate_course(
                         lesson_row = Lesson(
                             course_id=course_id,
                             module_id=module_row.id,
-                            title=_truncate(lesson_info["lesson_title"]),
-                            description=_truncate(lesson_info["lesson_description"]),
+                            title=_truncate(lesson_info["lesson_title"], 128),
+                            description=_truncate(
+                                lesson_info["lesson_description"], 300
+                            ),
                             order=current_order,
                         )
                         session.add(lesson_row)
@@ -796,12 +909,11 @@ async def _run_generate_course(
                 logger.info("Course generation completed: {}", course_id)
 
     except Exception as exc:
-        logger.error("Course generation failed for {}: {}", course_id, exc)
-        try:
-            async with session_factory() as rollback_session:
-                await _delete_course_cascade(rollback_session, course_id)
-        except Exception as rollback_exc:
-            logger.exception("Rollback failed for {}: {}", course_id, rollback_exc)
+        logger.error(
+            "Course generation failed for {}; keeping course in DRAFT: {}",
+            course_id,
+            exc,
+        )
         raise
     finally:
         await _release_lock_if_owned(redis, lock_key, lock_token)

@@ -45,7 +45,7 @@ class CourseCreateRequestSchema(BaseSchema):
     """
 
     title: str = Field(..., max_length=128, description="Название курса")
-    description: str | None = Field(None, max_length=128, description="Описание курса")
+    description: str | None = Field(None, max_length=300, description="Описание курса")
     price: int = Field(0, ge=0, description="Цена курса (не может быть отрицательной)")
     category_id: UUID | None = Field(None, description="ID категории курса")
 
@@ -72,7 +72,7 @@ class CourseUpdateRequestSchema(BaseSchema):
     """
 
     title: str | None = Field(None, max_length=128)
-    description: str | None = Field(None, max_length=128)
+    description: str | None = Field(None, max_length=300)
     price: int | None = Field(None, ge=0)
     category_id: UUID | None = None
     status: CourseStatus | None = None
@@ -127,14 +127,16 @@ class CourseModerationQueueSchema(BaseSchema):
 
 class CourseGenerateSchema(BaseSchema):
     topic: str = Field(
-        ..., min_length=1, max_length=256, description="Тема курса (о чём будет курс)"
+        ..., min_length=1, max_length=120, description="Тема курса (о чём будет курс)"
     )
-    modules_count: int = Field(..., ge=1, le=3, description="Количество модулей (1-3)")
+    modules_count: int = Field(
+        ..., ge=3, le=10, description="Количество модулей (3-10)"
+    )
     lessons_per_module: int = Field(
-        ..., ge=1, le=5, description="Количество уроков в модуле (1-5)"
+        ..., ge=3, le=10, description="Количество уроков в модуле (3-10)"
     )
     blocks_per_lesson: int = Field(
-        ..., ge=1, le=6, description="Количество блоков в уроке (1-6)"
+        ..., ge=3, le=10, description="Количество блоков в уроке (3-10)"
     )
 
 

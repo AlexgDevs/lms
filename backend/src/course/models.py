@@ -27,7 +27,7 @@ class Course(UUIDBase):
         ForeignKey("users.id", ondelete="CASCADE"),
         index=True,
     )
-    description: Mapped[str_128 | None]
+    description: Mapped[str | None] = mapped_column(Text)
     cover_url: Mapped[str | None]
     price: Mapped[int] = mapped_column(default=0)
     category_id: Mapped[UUID | None] = mapped_column(

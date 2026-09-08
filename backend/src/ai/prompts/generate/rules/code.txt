@@ -1,0 +1,5 @@
+RULES FOR A CODE BLOCK:
+- A complete working example with comments.
+- 2-3 test cases with input/output.
+- Python (unless the topic requires another language).
+Payload schema: {"code": "...", "language": "python", "test_cases": [{"input": "...", "output": "..."}]}
