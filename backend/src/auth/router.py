@@ -63,8 +63,13 @@ async def login(
 async def refresh(
     refresh_token: Annotated[str, Body(embed=True)],
     service: AuthServiceDep,
+    request: Request,
 ) -> TokenPair:
-    return await service.refresh(refresh_token)
+    return await service.refresh(
+        refresh_token,
+        ip_address=get_client_ip(request),
+        user_agent=request.headers.get("user-agent"),
+    )
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

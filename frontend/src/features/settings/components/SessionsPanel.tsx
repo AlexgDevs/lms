@@ -1,11 +1,12 @@
 import { Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getErrorMessage } from "@/lib/errors"
 import { useSessions, useRevokeSession, useRevokeAllSessions } from "../api/useSessions"
 import { SessionCard } from "./SessionCard"
 
 export function SessionsPanel() {
-  const { data: sessions, isLoading } = useSessions()
+  const { data: sessions, isLoading, isError, error } = useSessions()
   const revokeSession = useRevokeSession()
   const revokeAll = useRevokeAllSessions()
 
@@ -25,6 +26,10 @@ export function SessionsPanel() {
       <CardContent className="space-y-4">
         {isLoading ? (
           <div className="text-sm text-muted-foreground">Загрузка...</div>
+        ) : isError ? (
+          <p className="text-sm text-destructive">
+            {getErrorMessage(error) || "Не удалось загрузить сессии."}
+          </p>
         ) : sessions && sessions.length > 0 ? (
           <>
             <div className="space-y-2">
