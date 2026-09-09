@@ -157,7 +157,13 @@ class AuthService(BaseService):
             refresh_token=tokens.refresh_token,
         )
 
-    async def refresh(self, refresh_token: str) -> TokenPair:
+    async def refresh(
+        self,
+        refresh_token: str,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+    ) -> TokenPair:
         stored = await self._get_valid_refresh_token(refresh_token)
         user = await self.uow.users.get_one(id=stored.user_id)
         if not user or not user.is_active:
@@ -165,9 +171,15 @@ class AuthService(BaseService):
             await self.uow.refresh_tokens.revoke_all(stored.user_id)
             await self.uow.commit()
             raise InvalidRefreshTokenError
-        # Refresh Token Rotation
+        # Refresh Token Rotation — preserve device metadata
         await self.uow.refresh_tokens.revoke(stored.id)
-        tokens = await self._issue_tokens(stored.user_id)
+        device_name = parse_device_name(user_agent)
+        tokens = await self._issue_tokens(
+            stored.user_id,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            device_name=device_name,
+        )
         await self.uow.commit()
         return tokens
 
@@ -228,7 +240,9 @@ class AuthService(BaseService):
         ]
 
     async def revoke_session(self, user_id: UUID, token_id: UUID) -> bool:
-        return await self.uow.refresh_tokens.revoke_session(user_id, token_id)
+        result = await self.uow.refresh_tokens.revoke_session(user_id, token_id)
+        await self.uow.commit()
+        return result
 
     async def revoke_all_sessions(self, user_id: UUID, current_token_id: UUID) -> None:
         await self.uow.refresh_tokens.revoke_all_except(user_id, current_token_id)
