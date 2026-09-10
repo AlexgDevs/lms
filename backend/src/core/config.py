@@ -369,14 +369,18 @@ class RateLimitSettings(BaseSettings):
     RATE_LIMIT_GLOBAL_ENABLED: bool = True
     RATE_LIMIT_GLOBAL_REQ_PER_MIN: int = 300
 
-    # Login brute-force guard: per IP and per username over a sliding window.
+    # Login brute-force guard: per username over a sliding window.
     RATE_LIMIT_LOGIN_MAX_TRIES: int = 5
     RATE_LIMIT_LOGIN_WINDOW_SECONDS: int = 900
+    # IP-level login guard (DDoS / shared-IP safety): 10× the per-user limit.
+    RATE_LIMIT_LOGIN_IP_MAX_TRIES: int = 50
 
-    # Email flood guard (forgot_password / resend_verification): per IP and per
-    # email address over a window.
+    # Email flood guard (forgot_password / resend_verification): per email
+    # address over a window.
     RATE_LIMIT_EMAIL_MAX_REQUESTS: int = 3
     RATE_LIMIT_EMAIL_WINDOW_SECONDS: int = 3600
+    # IP-level email guard: 10× the per-email limit.
+    RATE_LIMIT_EMAIL_IP_MAX_REQUESTS: int = 30
 
     # Trusted reverse-proxy / load-balancer IPs (comma-separated). Used by
     # ``core.rate_limit.get_client_ip`` to resolve the real client IP from the

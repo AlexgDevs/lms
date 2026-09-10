@@ -287,12 +287,13 @@ class AuthService(BaseService):
 
     async def _enforce_login_limit(self, username: str, client_ip: str) -> None:
         window = settings.rate_limit.RATE_LIMIT_LOGIN_WINDOW_SECONDS
-        limit = settings.rate_limit.RATE_LIMIT_LOGIN_MAX_TRIES
-        ip_key = f"rl:login:ip:{client_ip or 'unknown'}"
+        user_limit = settings.rate_limit.RATE_LIMIT_LOGIN_MAX_TRIES
+        ip_limit = settings.rate_limit.RATE_LIMIT_LOGIN_IP_MAX_TRIES
         user_key = f"rl:login:u:{username}"
-        ip_hits = await self._rate_limiter.hit(ip_key, window)
+        ip_key = f"rl:login:ip:{client_ip or 'unknown'}"
         user_hits = await self._rate_limiter.hit(user_key, window)
-        if ip_hits > limit or user_hits > limit:
+        ip_hits = await self._rate_limiter.hit(ip_key, window)
+        if user_hits > user_limit or ip_hits > ip_limit:
             raise RateLimitExceededError
 
     async def _clear_login_limit(self, username: str, client_ip: str) -> None:
@@ -303,10 +304,11 @@ class AuthService(BaseService):
         self, action: str, email: str, client_ip: str | None
     ) -> None:
         window = settings.rate_limit.RATE_LIMIT_EMAIL_WINDOW_SECONDS
-        limit = settings.rate_limit.RATE_LIMIT_EMAIL_MAX_REQUESTS
-        ip_key = f"rl:email:{action}:ip:{client_ip or 'unknown'}"
+        addr_limit = settings.rate_limit.RATE_LIMIT_EMAIL_MAX_REQUESTS
+        ip_limit = settings.rate_limit.RATE_LIMIT_EMAIL_IP_MAX_REQUESTS
         addr_key = f"rl:email:{action}:addr:{email}"
-        ip_hits = await self._rate_limiter.hit(ip_key, window)
+        ip_key = f"rl:email:{action}:ip:{client_ip or 'unknown'}"
         addr_hits = await self._rate_limiter.hit(addr_key, window)
-        if ip_hits > limit or addr_hits > limit:
+        ip_hits = await self._rate_limiter.hit(ip_key, window)
+        if addr_hits > addr_limit or ip_hits > ip_limit:
             raise RateLimitExceededError
