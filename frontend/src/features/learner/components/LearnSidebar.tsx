@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ChevronRight, Map as MapIcon, Sparkles } from "lucide-react"
+import { CheckCircle2, FileText, Folder, Map as MapIcon, Sparkles } from "lucide-react"
 import type { LessonSchema, ModuleSchema } from "@/client"
 import { cn } from "@/lib/utils"
 import { formatCooldown } from "@/lib/tgp"
@@ -115,7 +115,7 @@ export function LearnSidebar({
   }
 
   return (
-    <div className={cn("flex flex-col", fill && "h-full")}>
+    <div className={cn("flex flex-col h-full min-h-0 overflow-hidden", fill && "h-full")}>
       <AsidePanel
         fill={fill}
         widthClassName={widthClassName}
@@ -201,19 +201,36 @@ export function LearnSidebar({
           </div>
         }
       >
-        <nav className="space-y-3">
+        <nav className="space-y-4 min-w-0 overflow-hidden">
           {modules.map((module, moduleIndex) => {
             const lessons = lessonsByModule.get(module.id) ?? []
+            const completedInModule = lessons.filter((l) => isCompleted(l.id)).length
+            const moduleProgress = lessons.length > 0 ? Math.round((completedInModule / lessons.length) * 100) : 0
+            const moduleTitle = `${moduleIndex + 1}. ${module.title}`
             return (
-              <section key={module.id} className="space-y-1">
-                <h3 className="px-2 py-1 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide min-w-0">
-                  <ChevronRight className="h-3 w-3 text-muted-foreground/60 shrink-0" />
-                  <span className="truncate flex-1 min-w-0">
-                    {moduleIndex + 1}. {module.title}
-                  </span>
-                </h3>
+              <section key={module.id} className="space-y-1 min-w-0 overflow-hidden">
+                <div className="rounded-lg bg-muted/20 px-2 py-1.5 min-w-0 overflow-hidden">
+                  <h3
+                    className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide min-w-0 overflow-hidden w-full"
+                    title={moduleTitle}
+                  >
+                    <Folder className="h-3.5 w-3.5 text-reward shrink-0" />
+                    <span className="truncate flex-1 min-w-0 block">{moduleTitle}</span>
+                    <span className="text-[10px] font-medium tabular-nums text-muted-foreground/70 shrink-0">
+                      {completedInModule}/{lessons.length}
+                    </span>
+                  </h3>
+                  {lessons.length > 0 && (
+                    <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full rounded-full bg-primary transition-[width] duration-500"
+                        style={{ width: `${moduleProgress}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
 
-                <ul className="space-y-0.5">
+                <ul className="space-y-0.5 ml-1 border-l border-border/40 pl-3 bg-muted/10 rounded-md py-1 min-w-0 overflow-hidden">
                   {lessons.map((lesson) => {
                     const isActive = lesson.id === currentLessonId
                     const isDone = isCompleted(lesson.id)
@@ -228,6 +245,9 @@ export function LearnSidebar({
                       </li>
                     )
                   })}
+                  {lessons.length === 0 && (
+                    <li className="px-2 py-1 text-xs text-muted-foreground">Нет уроков</li>
+                  )}
                 </ul>
               </section>
             )
@@ -276,8 +296,9 @@ function LessonItem({ lesson, isActive, isCompleted, onClick }: LessonItemProps)
     <button
       type="button"
       onClick={onClick}
+      title={lesson.title}
       className={cn(
-        "w-full flex items-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors min-w-0",
+        "w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors min-w-0 overflow-hidden max-w-full",
         isActive
           ? "bg-primary/10 text-foreground font-medium"
           : isCompleted
@@ -285,7 +306,9 @@ function LessonItem({ lesson, isActive, isCompleted, onClick }: LessonItemProps)
             : "text-foreground/75 hover:bg-muted/60 hover:text-foreground",
       )}
     >
-      <span className={cn("truncate flex-1 min-w-0", isActive && "text-foreground")}>{lesson.title}</span>
+      <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+      <span className={cn("truncate flex-1 min-w-0 block", isActive && "text-foreground")}>{lesson.title}</span>
+      {isCompleted && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success" />}
     </button>
   )
 }
