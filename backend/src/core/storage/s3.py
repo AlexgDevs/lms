@@ -125,6 +125,20 @@ class S3Storage:
                 Params={"Bucket": self.bucket, "Key": key},
                 ExpiresIn=expires_in,
             )
+        # Variant B — keep content private (only course members get the URL via
+        # block API) but make the URL browser-reachable. MinIO generates
+        # ``http://minio:9000/<bucket>/<key>?X-Amz-...`` which is not resolvable
+        # from the browser. When ``STORAGE_PUBLIC_BASE_URL`` (e.g.
+        # ``https://plectix.ru/media``) is set, rewrite the origin + bucket
+        # prefix to ``<public_base>/<key>?query`` so the browser hits
+        # ``/media/<key>`` → nginx ``rewrite /media → /<bucket>`` → MinIO.
+        # The signature stays valid because nginx rewrites the path back to
+        # ``/<bucket>/<key>`` and forwards with the original Host.
+        if self.public_base_url and url:
+            qmark = url.find("?")
+            query = url[qmark:] if qmark != -1 else ""
+            base = self.public_base_url.rstrip("/")
+            return f"{base}/{key}{query}"
         return url
 
     def get_public_url(self, key: str) -> str:

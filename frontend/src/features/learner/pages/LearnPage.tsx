@@ -71,7 +71,7 @@ export function LearnPage() {
   return (
     <>
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <div className="hidden lg:block lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:w-72 shrink-0">
+        <div className="hidden lg:block lg:sticky lg:top-20 lg:h-[calc(100vh-7rem)] lg:w-72 shrink-0 overflow-hidden min-h-0 flex flex-col">
           <LearnSidebar
             courseTitle={course?.title ?? ""}
             modules={data.modules}
@@ -123,11 +123,11 @@ export function LearnPage() {
 
       {/* Оглавление курса — мобильная шторка */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="p-0 w-[85%] sm:max-w-sm overflow-hidden">
-          <SheetHeader className="px-4 py-3.5 border-b border-border">
+        <SheetContent side="left" className="p-0 gap-0 w-[85%] sm:max-w-sm overflow-hidden">
+          <SheetHeader className="px-4 py-3.5 border-b border-border shrink-0">
             <SheetTitle className="text-sm">{course?.title ?? "Курс"}</SheetTitle>
           </SheetHeader>
-          <div className="flex-1 min-h-0 p-3">
+          <div className="flex-1 min-h-0 overflow-hidden p-3 flex flex-col">
             <LearnSidebar
               fill
               courseTitle={course?.title ?? ""}
