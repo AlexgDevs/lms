@@ -884,7 +884,7 @@ export const CourseCreateRequestSchemaSchema = {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 128
+                    maxLength: 300
                 },
                 {
                     type: 'null'
@@ -971,31 +971,31 @@ export const CourseGenerateSchemaSchema = {
     properties: {
         topic: {
             type: 'string',
-            maxLength: 256,
+            maxLength: 120,
             minLength: 1,
             title: 'Topic',
             description: 'Тема курса (о чём будет курс)'
         },
         modules_count: {
             type: 'integer',
-            maximum: 3,
-            minimum: 1,
+            maximum: 10,
+            minimum: 3,
             title: 'Modules Count',
-            description: 'Количество модулей (1-3)'
+            description: 'Количество модулей (3-10)'
         },
         lessons_per_module: {
             type: 'integer',
-            maximum: 5,
-            minimum: 1,
+            maximum: 10,
+            minimum: 3,
             title: 'Lessons Per Module',
-            description: 'Количество уроков в модуле (1-5)'
+            description: 'Количество уроков в модуле (3-10)'
         },
         blocks_per_lesson: {
             type: 'integer',
-            maximum: 6,
-            minimum: 1,
+            maximum: 10,
+            minimum: 3,
             title: 'Blocks Per Lesson',
-            description: 'Количество блоков в уроке (1-6)'
+            description: 'Количество блоков в уроке (3-10)'
         }
     },
     type: 'object',
@@ -1401,7 +1401,7 @@ export const CourseUpdateRequestSchemaSchema = {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 128
+                    maxLength: 300
                 },
                 {
                     type: 'null'
@@ -2809,6 +2809,27 @@ export const ReviewSchemaSchema = {
             title: 'User Username',
             default: ''
         },
+        user_avatar_url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'User Avatar Url'
+        },
+        user_is_staff: {
+            type: 'boolean',
+            title: 'User Is Staff',
+            default: false
+        },
+        user_is_founder: {
+            type: 'boolean',
+            title: 'User Is Founder',
+            default: false
+        },
         target_type: {
             $ref: '#/components/schemas/ReviewTargetType'
         },
@@ -3260,23 +3281,23 @@ export const UserMeSchemaSchema = {
             format: 'date-time',
             title: 'Joined At'
         },
-        email: {
-            type: 'string',
-            title: 'Email'
-        },
         is_staff: {
             type: 'boolean',
             title: 'Is Staff',
             default: false
         },
-        is_verified: {
-            type: 'boolean',
-            title: 'Is Verified',
-            default: false
-        },
         is_founder: {
             type: 'boolean',
             title: 'Is Founder',
+            default: false
+        },
+        email: {
+            type: 'string',
+            title: 'Email'
+        },
+        is_verified: {
+            type: 'boolean',
+            title: 'Is Verified',
             default: false
         },
         founder_at: {
@@ -3334,6 +3355,16 @@ export const UserPublicSchemaSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Joined At'
+        },
+        is_staff: {
+            type: 'boolean',
+            title: 'Is Staff',
+            default: false
+        },
+        is_founder: {
+            type: 'boolean',
+            title: 'Is Founder',
+            default: false
         }
     },
     type: 'object',

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
+import TiptapLink from "@tiptap/extension-link"
+import TiptapUnderline from "@tiptap/extension-underline"
 import {
   Bold,
   Code,
@@ -40,17 +42,28 @@ function plainTextToHtml(text: string): string {
 
 export function TextBlockEditor({ payload, onChange }: TextBlockEditorProps) {
   const [initialContent] = useState(() => payload.html ?? plainTextToHtml(payload.text ?? ""))
+  const lastEmittedRef = useRef<string>(initialContent)
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
-        link: { openOnClick: false, autolink: true, defaultProtocol: "https" },
+        // disable built-in link/underline to use dedicated extensions
+        link: false,
+        underline: false,
+      }),
+      TiptapUnderline,
+      TiptapLink.configure({
+        openOnClick: false,
+        autolink: true,
+        defaultProtocol: "https",
       }),
     ],
     content: initialContent,
     onUpdate: ({ editor }) => {
-      onChange({ text: editor.getText(), html: editor.getHTML() })
+      const html = editor.getHTML()
+      lastEmittedRef.current = html
+      onChange({ text: editor.getText(), html })
     },
     editorProps: {
       attributes: {
@@ -59,12 +72,11 @@ export function TextBlockEditor({ payload, onChange }: TextBlockEditorProps) {
     },
   })
 
-  const lastEmittedRef = useRef<string>(initialContent)
-
   useEffect(() => {
     if (!editor) return
     const next = payload.html ?? plainTextToHtml(payload.text ?? "")
-    if (next !== lastEmittedRef.current) {
+    // avoid overwriting while user is typing — prevents cursor jump to end
+    if (next !== lastEmittedRef.current && !editor.isFocused) {
       lastEmittedRef.current = next
       editor.commands.setContent(next, { emitUpdate: false })
     }

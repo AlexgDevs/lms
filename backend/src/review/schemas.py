@@ -28,6 +28,9 @@ class ReviewSchema(BaseSchema):
     id: UUID
     user_id: UUID
     user_username: str = ""
+    user_avatar_url: str | None = None
+    user_is_staff: bool = False
+    user_is_founder: bool = False
     target_type: ReviewTargetType
     target_id: UUID
     rating: int | None = None

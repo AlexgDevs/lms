@@ -671,19 +671,19 @@ export type CourseGenerateSchema = {
     /**
      * Modules Count
      *
-     * Количество модулей (1-3)
+     * Количество модулей (3-10)
      */
     modules_count: number;
     /**
      * Lessons Per Module
      *
-     * Количество уроков в модуле (1-5)
+     * Количество уроков в модуле (3-10)
      */
     lessons_per_module: number;
     /**
      * Blocks Per Lesson
      *
-     * Количество блоков в уроке (1-6)
+     * Количество блоков в уроке (3-10)
      */
     blocks_per_lesson: number;
 };
@@ -1767,6 +1767,18 @@ export type ReviewSchema = {
      * User Username
      */
     user_username?: string;
+    /**
+     * User Avatar Url
+     */
+    user_avatar_url?: string | null;
+    /**
+     * User Is Staff
+     */
+    user_is_staff?: boolean;
+    /**
+     * User Is Founder
+     */
+    user_is_founder?: boolean;
     target_type: ReviewTargetType;
     /**
      * Target Id
@@ -2050,21 +2062,21 @@ export type UserMeSchema = {
      */
     joined_at: string;
     /**
-     * Email
-     */
-    email: string;
-    /**
      * Is Staff
      */
     is_staff?: boolean;
     /**
-     * Is Verified
-     */
-    is_verified?: boolean;
-    /**
      * Is Founder
      */
     is_founder?: boolean;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Is Verified
+     */
+    is_verified?: boolean;
     /**
      * Founder At
      */
@@ -2095,6 +2107,14 @@ export type UserPublicSchema = {
      * Joined At
      */
     joined_at: string;
+    /**
+     * Is Staff
+     */
+    is_staff?: boolean;
+    /**
+     * Is Founder
+     */
+    is_founder?: boolean;
 };
 
 /**
@@ -4028,6 +4048,22 @@ export type GetCourseProgressApiV1CoursesCourseIdProgressGetResponses = {
 };
 
 export type GetCourseProgressApiV1CoursesCourseIdProgressGetResponse = GetCourseProgressApiV1CoursesCourseIdProgressGetResponses[keyof GetCourseProgressApiV1CoursesCourseIdProgressGetResponses];
+
+export type DeleteCurrentUserApiV1UsersMeDeleteData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me';
+};
+
+export type DeleteCurrentUserApiV1UsersMeDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteCurrentUserApiV1UsersMeDeleteResponse = DeleteCurrentUserApiV1UsersMeDeleteResponses[keyof DeleteCurrentUserApiV1UsersMeDeleteResponses];
 
 export type GetCurrentUserApiV1UsersMeGetData = {
     body?: never;
