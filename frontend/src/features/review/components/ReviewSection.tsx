@@ -92,17 +92,23 @@ export function ReviewSection({
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-6">
+        <div className="flex justify-center py-10">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       ) : items.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">
-          {showRating
-            ? "Отзывов пока нет. Будьте первым!"
-            : "Комментариев пока нет. Начните обсуждение!"}
-        </p>
+        <div className="py-10 text-center">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <MessageSquare className="h-5 w-5" />
+          </div>
+          <p className="mt-3 text-sm font-medium text-foreground">
+            {showRating ? "Отзывов пока нет" : "Комментариев пока нет"}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {showRating ? "Будьте первым — поделитесь мнением о курсе" : "Начните обсуждение — задайте вопрос или поделитесь мыслью"}
+          </p>
+        </div>
       ) : (
-        <div className={cn("space-y-3")}>
+        <div className={cn("space-y-4 sm:space-y-5")}>
           {items.map((review) => (
             <ReviewItem
               key={review.id}

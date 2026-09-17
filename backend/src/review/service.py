@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +12,7 @@ from src.review.exceptions import (
     ReviewReplyNotAllowedError,
     ReviewTargetNotFoundError,
 )
+from src.review.mapper import ReviewMapper
 from src.review.schemas import (
     ReviewCreateRequestSchema,
     ReviewCreateSchema,
@@ -20,7 +20,7 @@ from src.review.schemas import (
     ReviewSchema,
 )
 from src.review.unit_of_work import ReviewUnitOfWork
-from src.user.models import User
+from src.user.schemas import UserSchema
 
 
 class ReviewService(BaseService):
@@ -91,13 +91,13 @@ class ReviewService(BaseService):
                 replies_by_parent.setdefault(reply.parent_id, []).append(reply)
 
         author_ids = {review.user_id for review in [*roots, *replies]}
-        usernames = await self._resolve_usernames(author_ids)
+        user_map = await self._resolve_users(author_ids)
 
         enriched_root: list[ReviewSchema] = []
         for root in roots:
-            root = self._with_username(root, usernames)
+            root = self._with_user(root, user_map)
             nested = [
-                self._with_username(reply, usernames)
+                self._with_user(reply, user_map)
                 for reply in replies_by_parent.get(root.id, [])
             ]
             enriched_root.append(root.model_copy(update={"replies": nested}))
@@ -137,7 +137,9 @@ class ReviewService(BaseService):
         except IntegrityError:
             await self.uow.rollback()
             raise ReviewAlreadyExistsError
-        return review
+        # enrich via mapper-backed UserSchema
+        user_map = await self._resolve_users({user_id})
+        return self._with_user(review, user_map)
 
     async def _create_reply(
         self, user_id: UUID, payload: ReviewCreateRequestSchema
@@ -164,7 +166,8 @@ class ReviewService(BaseService):
         )
         review = await self.uow.reviews.create(create_data)
         await self.uow.commit()
-        return review
+        user_map = await self._resolve_users({user_id})
+        return self._with_user(review, user_map)
 
     async def _validate_target_exists(
         self,
@@ -194,18 +197,19 @@ class ReviewService(BaseService):
         else:
             raise ReviewTargetNotFoundError
 
-    async def _resolve_usernames(self, user_ids: set[UUID]) -> dict[UUID, str]:
+    async def _resolve_users(self, user_ids: set[UUID]) -> dict[UUID, UserSchema]:
+        """Fetch users via repository + mapper — all responses go through Pydantic schemas."""
         if not user_ids:
             return {}
-        result = await self.session.execute(
-            select(User.id, User.username).where(User.id.in_(list(user_ids)))
-        )
-        return {user_id: username for user_id, username in result.all()}
+        users = await self.uow.users.get_by_ids(list(user_ids))
+        return {u.id: u for u in users}
 
-    @staticmethod
-    def _with_username(
-        review: ReviewSchema, usernames: dict[UUID, str]
+    def _with_user(
+        self, review: ReviewSchema, user_map: dict[UUID, UserSchema]
     ) -> ReviewSchema:
-        return review.model_copy(
-            update={"user_username": usernames.get(review.user_id, "")}
-        )
+        """Enrich ReviewSchema with user data via mapper-backed schemas."""
+        user = user_map.get(review.user_id)
+        if user is None:
+            return review
+        # Use mapper-style enrichment — data comes from UserSchema, not raw dict
+        return ReviewMapper.enrich_with_user(review, user)

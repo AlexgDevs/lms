@@ -6,6 +6,7 @@ export const ROUTES = {
     RESET_PASSWORD: "/reset-password",
     VERIFY_EMAIL: "/verify-email",
     PROFILE: "/profile",
+    USER_PROFILE: "/users/$userId",
     PAYMENTS: "/profile/payments",
     SETTINGS: "/settings",
     TEACHING: "/teaching",

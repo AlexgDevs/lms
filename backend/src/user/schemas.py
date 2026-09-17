@@ -33,6 +33,8 @@ class UserPublicSchema(BaseSchema):
     username: str
     avatar_url: str | None
     joined_at: datetime
+    is_staff: bool = False
+    is_founder: bool = False
 
 
 class UserMeSchema(UserPublicSchema):

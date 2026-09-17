@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import update
+from sqlalchemy import select, update
 
 from src.core.repositories import BaseRepository
 from src.user.models import User
@@ -12,6 +12,13 @@ class UserRepository(BaseRepository[User, UserSchema]):
     model = User
     schema = UserSchema
     mapper = UserMapper
+
+    async def get_by_ids(self, ids: list[UUID]) -> list[UserSchema]:
+        if not ids:
+            return []
+        query = select(self.model).where(self.model.id.in_(ids))
+        result = await self.session.execute(query)
+        return [self.mapper.to_schema(m) for m in result.scalars().all()]
 
     async def consume_ai_course_generation(self, user_id: UUID, limit: int) -> bool:
         """Atomically reserve one free AI course generation.
