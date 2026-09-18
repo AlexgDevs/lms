@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
 import { PaymentKind, type PaymentSchema } from "@/client"
+import { formatPrice } from "@/lib/price"
 
 const statusLabel: Record<string, string> = {
   pending: "Ожидает оплаты",
@@ -99,7 +100,7 @@ export function PaymentListItem({ payment }: { payment: PaymentSchema }) {
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-1">
-        <p className="text-sm font-semibold text-foreground">{payment.amount} ₽</p>
+        <p className="text-sm font-semibold text-foreground">{formatPrice(payment.amount)} ₽</p>
         <StatusBadge status={payment.status} />
       </div>
     </>

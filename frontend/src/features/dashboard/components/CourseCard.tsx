@@ -3,6 +3,7 @@ import { ArrowUpRight, Award, BookOpen, Users } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { resolveMediaUrl } from "@/lib/media";
+import { formatPrice } from "@/lib/price";
 import { StarRating } from "@/features/review/components/StarRating";
 import { CourseStatus } from "@/client";
 import { ROUTES } from "@/routes";
@@ -119,13 +120,9 @@ export function CourseCard({
         {!isDraft && (
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             {course.price === 0 ? (
-              <span className="font-bold text-success">
-                Бесплатно
-              </span>
+              <span className="font-bold text-success">Бесплатно</span>
             ) : (
-              <span className="font-bold text-destructive">
-                {course.price.toLocaleString()} ₽
-              </span>
+              <span className="font-bold text-destructive">{formatPrice(course.price)} ₽</span>
             )}
             <span className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />

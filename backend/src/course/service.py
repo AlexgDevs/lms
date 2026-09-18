@@ -547,8 +547,11 @@ class CourseService(BaseService):
         if member:
             raise CourseMemberAlredyEnrolledError
 
-        if course.price > 0 and not await self._is_paid(course_id, user_id):
-            raise CoursePaymentRequiredError
+        if course.price > 0:
+            is_paid = await self._is_paid(course_id, user_id)
+            has_history = await self.uow.members.has_ever_enrolled(user_id, course_id)
+            if not is_paid and not has_history:
+                raise CoursePaymentRequiredError
 
         data = CourseMemberCreateSchema(course_id=course_id, user_id=user_id)
         new_member = await self.uow.members.create(data=data)

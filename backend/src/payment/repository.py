@@ -26,6 +26,23 @@ class PaymentRepository(BaseRepository[Payment, PaymentSchema]):
         model = result.scalars().one_or_none()
         return self.mapper.to_schema(model) if model else None
 
+    async def get_pending_by_user_course(
+        self, user_id: UUID, course_id: UUID
+    ) -> PaymentSchema | None:
+        query = (
+            select(self.model)
+            .where(
+                self.model.user_id == user_id,
+                self.model.course_id == course_id,
+                self.model.status == PaymentStatus.PENDING,
+            )
+            .order_by(self.model.created_at.desc())
+            .limit(1)
+        )
+        result = await self.session.execute(query)
+        model = result.scalars().one_or_none()
+        return self.mapper.to_schema(model) if model else None
+
     async def has_successful_payment(self, user_id: UUID, course_id: UUID) -> bool:
         query = (
             select(self.model.id)
