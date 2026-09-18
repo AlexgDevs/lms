@@ -31,6 +31,7 @@ import {
 import { createCourseSchema, type CreateCourseFormData } from "@/features/teaching/schemas/course"
 import { useCourses } from "@/features/teaching/api/useCourses"
 import { useCategoryTree } from "@/features/dashboard/api/useCategories"
+import { rubToKopeks } from "@/lib/price"
 import { ROUTES } from "@/routes"
 
 interface CreateCourseFormProps {
@@ -58,8 +59,12 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
     if (isCreatingCourse) return
 
     try {
+      const payload = {
+        ...data,
+        price: rubToKopeks(data.price ?? 0),
+      }
       // Вызываем асинхронную мутацию
-      const newCourse = await createCourseAsync({ body: data })
+      const newCourse = await createCourseAsync({ body: payload })
 
       // Мгновенный редирект в конструктор курса по полученному id
       if (newCourse?.id) {

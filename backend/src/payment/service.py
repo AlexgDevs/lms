@@ -85,6 +85,7 @@ class PaymentService(BaseService):
                 course_id=course_id,
                 user_id=user_id,
                 return_url=f"{settings.app.FRONTEND_HOST.rstrip('/')}/courses/{course_id}",
+                idempotence_key=str(payment.id),
             )
         except Exception as exc:  # network / provider error
             await self.uow.payments.update(
@@ -141,17 +142,42 @@ class PaymentService(BaseService):
             "yookassa", provider_payment_id
         )
         if not payment:
+            # Fallback for race: checkout hasn't committed provider_payment_id yet.
+            # Use authoritative payment metadata to find pending row.
+            try:
+                fallback_client = self._get_client()
+                data = await fallback_client.get_payment(provider_payment_id)
+                meta = data.get("metadata") or {}
+                uid = meta.get("user_id")
+                cid = meta.get("course_id")
+                if uid and cid:
+                    pending = await self.uow.payments.get_pending_by_user_course(
+                        UUID(uid), UUID(cid)
+                    )
+                    if pending:
+                        payment = await self.uow.payments.update(
+                            pending.id,
+                            PaymentUpdateSchema(
+                                provider_payment_id=provider_payment_id
+                            ),
+                        )
+                        await self.uow.commit()
+            except Exception:
+                pass
+        if not payment:
             raise PaymentNotFoundError
         if payment.status == PaymentStatus.SUCCEEDED:
             return payment
 
         await self._verify_payment(payment, provider_payment_id)
 
+        # include provider_payment_id in case it was attached via fallback
         payment = await self.uow.payments.update(
             payment.id,
             PaymentUpdateSchema(
                 status=PaymentStatus.SUCCEEDED,
                 paid_at=datetime.now(timezone.utc),
+                provider_payment_id=provider_payment_id,
             ),
         )
         if payment.course_id is not None:

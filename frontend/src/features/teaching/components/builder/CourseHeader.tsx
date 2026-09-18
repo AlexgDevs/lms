@@ -32,6 +32,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import { resolveMediaUrl } from "@/lib/media"
+import { kopeksToRub, rubToKopeks } from "@/lib/price"
 import { CategoryPicker } from "@/features/teaching/components/CategoryPicker"
 
 type CourseStatus = "draft" | "under_review" | "published" | "rejected"
@@ -97,7 +98,7 @@ export function CourseHeader({
 }: CourseHeaderProps) {
   const [title, setTitle] = useState(course.title)
   const [description, setDescription] = useState(course.description || "")
-  const [price, setPrice] = useState<number | "">(course.price ?? 0)
+  const [price, setPrice] = useState<number | "">(kopeksToRub(course.price ?? 0))
   const [isFree, setIsFree] = useState((course.price ?? 0) === 0)
   const [categoryId, setCategoryId] = useState<string | null>(course.category_id ?? null)
 
@@ -117,7 +118,7 @@ export function CourseHeader({
     setCourseSnapshot(course)
     setTitle(course.title)
     setDescription(course.description || "")
-    setPrice(course.price ?? 0)
+    setPrice(kopeksToRub(course.price ?? 0))
     setIsFree((course.price ?? 0) === 0)
     setCategoryId(course.category_id ?? null)
   }
@@ -165,15 +166,15 @@ export function CourseHeader({
 
   // --- Цена ---
   const handleSavePrice = () => {
-    const numericPrice = isFree ? 0 : Number(price)
-    if (numericPrice !== (course.price ?? 0)) {
-      onUpdateCourse({ price: numericPrice })
+    const numericPriceKopeks = isFree ? 0 : rubToKopeks(Number(price))
+    if (numericPriceKopeks !== (course.price ?? 0)) {
+      onUpdateCourse({ price: numericPriceKopeks })
       triggerSavedAnimation("price")
     }
   }
 
   const handleCancelPrice = () => {
-    setPrice(course.price ?? 0)
+    setPrice(kopeksToRub(course.price ?? 0))
     setIsFree((course.price ?? 0) === 0)
   }
 
@@ -196,7 +197,7 @@ export function CourseHeader({
   }
 
   const descriptionChanged = description.trim() !== (course.description || "")
-  const priceChanged = (isFree ? 0 : Number(price)) !== (course.price ?? 0)
+  const priceChanged = (isFree ? 0 : rubToKopeks(Number(price))) !== (course.price ?? 0)
   const settingsDirty = descriptionChanged || priceChanged
 
   return (

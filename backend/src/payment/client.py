@@ -49,12 +49,13 @@ class YooKassaClient:
         course_id: UUID,
         user_id: UUID,
         return_url: str,
+        idempotence_key: str | None = None,
     ) -> dict[str, Any]:
         base = self._build_payload(amount, course_id, user_id, return_url)
         sbp_payload = {**base, "payment_method_data": {"type": "sbp"}}
 
         try:
-            return await self._post_payment(sbp_payload)
+            return await self._post_payment(sbp_payload, idempotence_key)
         except httpx.HTTPStatusError as exc:
             if not self._is_payment_method_unavailable(exc):
                 raise
@@ -64,15 +65,17 @@ class YooKassaClient:
                 course_id,
                 exc.response.status_code,
             )
-            return await self._post_payment(base)
+            return await self._post_payment(base, idempotence_key)
 
-    async def _post_payment(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def _post_payment(
+        self, payload: dict[str, Any], idempotence_key: str | None = None
+    ) -> dict[str, Any]:
         async with httpx.AsyncClient(timeout=20.0) as client:
             response = await client.post(
                 f"{YOOKASSA_API_URL}/payments",
                 json=payload,
                 auth=self._auth,
-                headers={"Idempotence-Key": str(uuid4())},
+                headers={"Idempotence-Key": idempotence_key or str(uuid4())},
             )
             response.raise_for_status()
             data = response.json()
@@ -154,7 +157,10 @@ class MockYooKassaClient(YooKassaClient):
         self._confirmation_url = confirmation_url
         self._created: dict[str, dict[str, Any]] = {}
 
-    async def _post_payment(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def _post_payment(
+        self, payload: dict[str, Any], idempotence_key: str | None = None
+    ) -> dict[str, Any]:
+        _ = idempotence_key
         if self._raise_network:
             raise httpx.ConnectError("mock network error")
         method = (payload.get("payment_method_data") or {}).get("type")

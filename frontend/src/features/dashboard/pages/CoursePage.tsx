@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { resolveMediaUrl } from "@/lib/media";
+import { formatPrice } from "@/lib/price";
 import { useCourseDetail } from "@/features/dashboard/api/useCourseDetail";
 import { useEnrollCourse, useUnenrollCourse } from "@/features/dashboard/api/useCourses";
 import useAuth, { isLoggedIn } from "@/features/auth/api/useAuth";
@@ -153,7 +154,7 @@ export function CoursePage() {
       node: (
         <Button size="lg" className="w-full" disabled={checkout.isPending} onClick={handleBuy}>
           {checkout.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-          {checkout.isPending ? "Переход к оплате..." : `Получить доступ · ${course.price} ₽`}
+          {checkout.isPending ? "Переход к оплате..." : `Получить доступ · ${formatPrice(course.price)} ₽`}
         </Button>
       ),
     },
@@ -227,7 +228,7 @@ export function CoursePage() {
                 <span
                   className={`ml-auto text-base font-bold ${course.price === 0 ? "text-success" : "text-destructive"}`}
                 >
-                  {course.price === 0 ? "Бесплатно" : `${course.price.toLocaleString()} ₽`}
+                  {course.price === 0 ? "Бесплатно" : `${formatPrice(course.price)} ₽`}
                 </span>
               </div>
             </div>
@@ -351,7 +352,7 @@ export function CoursePage() {
                 <span
                   className={`text-2xl font-bold ${course.price === 0 ? "text-success" : "text-foreground"}`}
                 >
-                  {course.price === 0 ? "Бесплатно" : `${course.price.toLocaleString()} ₽`}
+                  {course.price === 0 ? "Бесплатно" : `${formatPrice(course.price)} ₽`}
                 </span>
                 {course.rating != null && (
                   <span className="text-xs text-muted-foreground">
