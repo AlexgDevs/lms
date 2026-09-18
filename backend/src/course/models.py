@@ -6,6 +6,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Index,
     Enum as SAEnum,
     Text,
     UUID as sqlUUID,
@@ -81,4 +82,14 @@ class CourseMember(UUIDBase):
     # AI TGP (The Golden Path): last pre-test submission (roadmap regeneration cooldown)
     tgp_last_submitted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True)
+    )
+
+    __table_args__ = (
+        Index(
+            "uq_active_course_member",
+            "user_id",
+            "course_id",
+            unique=True,
+            postgresql_where="left_at IS NULL",
+        ),
     )

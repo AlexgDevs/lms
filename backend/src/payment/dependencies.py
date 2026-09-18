@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.core.dependencies import SessionDep
+from src.core.dependencies import EventBusDep, SessionDep
 from src.course.course_member.repository import CourseMemberRepository
 from src.course.repository import CourseRepository
 from src.payment.repository import PaymentRepository, PayoutAccountRepository
@@ -47,11 +47,13 @@ PaymentUnitOfWorkDep = Annotated[PaymentUnitOfWork, Depends(get_payment_unit_of_
 def get_payment_service(
     session: SessionDep,
     payment_unit_of_work: PaymentUnitOfWorkDep,
+    event_bus: EventBusDep,
 ) -> PaymentService:
     return PaymentService(
         session=session,
         payment_unit_of_work=payment_unit_of_work,
         yookassa_client=build_yookassa_client(),
+        event_bus=event_bus,
     )
 
 

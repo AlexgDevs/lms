@@ -1,5 +1,6 @@
 import { notFound, useNavigate, useParams } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import {
   ArrowLeft,
   Award,
@@ -23,6 +24,8 @@ import { useCheckout, useCoursePaymentStatus } from "@/features/payment/api/useP
 import { ReviewSection } from "@/features/review/components/ReviewSection";
 import { TinyRating } from "@/features/review/components/TinyRating";
 import { ROUTES } from "@/routes";
+import { useQueryClient } from "@tanstack/react-query";
+import { getCourseByIdApiV1CoursesCourseIdGetQueryKey } from "@/client/@tanstack/react-query.gen";
 
 export function CoursePage() {
   const { courseId } = useParams({ strict: false });
@@ -31,6 +34,7 @@ export function CoursePage() {
   const enroll = useEnrollCourse();
   const unenroll = useUnenrollCourse();
   const checkout = useCheckout();
+  const queryClient = useQueryClient();
   const { course, modules, lessonsByModule, isLoading } =
     useCourseDetail(courseId);
 
@@ -45,6 +49,21 @@ export function CoursePage() {
     wantsPaymentStatus ? course?.id : undefined,
     wantsPaymentStatus ? 4000 : undefined,
   );
+
+  // When payment status first becomes paid, refetch the course data to pick up
+  // the membership created by the webhook. Without this the is_member flag stays
+  // stale in the React Query cache and the user sees a confusing "Записаться"
+  // button instead of "Начать обучение".
+  useEffect(() => {
+    if (paymentStatus.data?.paid && course?.id) {
+      queryClient.invalidateQueries({
+        queryKey: getCourseByIdApiV1CoursesCourseIdGetQueryKey({
+          path: { course_id: course.id },
+          query: { filter: "current" },
+        }),
+      });
+    }
+  }, [paymentStatus.data?.paid, course?.id, queryClient]);
 
   // "Недавний чекаут" — пользователь только что перешёл к оплате, вебхук ещё не
   // записал его в курс. Маркер ставится в useCheckout, снимается при записи/отписке
