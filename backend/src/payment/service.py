@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +11,10 @@ from src.core.services.base_service import BaseService
 from src.course.course_member.schemas import CourseMemberCreateSchema
 from src.course.exceptions import CourseNotFoundError
 from src.course.enums import CourseStatus
+
+if TYPE_CHECKING:
+    from src.core.events.event import CourseEnrolled
+    from src.core.events.protocol import Event
 from src.payment.client import YooKassaClient, build_yookassa_client
 from src.payment.enums import PaymentKind, PaymentStatus, PayoutStatus
 from src.payment.exceptions import (
@@ -40,10 +45,11 @@ class PaymentService(BaseService):
         session: AsyncSession,
         payment_unit_of_work: PaymentUnitOfWork,
         yookassa_client: YooKassaClient | None = None,
+        event_bus: "Event | None" = None,
     ) -> None:
         self.uow = payment_unit_of_work
         self._client = yookassa_client
-        super().__init__(session)
+        super().__init__(session, event_bus)
 
     async def create_checkout(
         self, user_id: UUID, course_id: UUID
@@ -289,6 +295,20 @@ class PaymentService(BaseService):
         data = CourseMemberCreateSchema(course_id=course_id, user_id=user_id)
         await self.uow.members.create(data)
         await self.uow.courses.increment_member_count(course_id)
+
+        if self.event_bus is not None:
+            from src.core.events.event import CourseEnrolled
+
+            course = await self.uow.courses.get_one(id=course_id, is_deleted=None)
+            if course:
+                await self.event_bus.publish(
+                    CourseEnrolled(
+                        course_id=course_id,
+                        course_title=course.title,
+                        user_id=user_id,
+                        owner_id=course.owner_id,
+                    )
+                )
 
     def _get_client(self) -> YooKassaClient:
         if not settings.payments.enabled and settings.payments.mode != "mock":
