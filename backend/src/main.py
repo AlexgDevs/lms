@@ -63,6 +63,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     handler = NotificationHandler(session_factory=session_maker, ws_manager=ws_manager)
     handler.register(event_bus)
     app.state.event_bus = event_bus
+    app.state.ws_manager = ws_manager
 
     yield
     await close_storage(app.state.storage)

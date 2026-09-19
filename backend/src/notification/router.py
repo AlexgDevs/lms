@@ -3,12 +3,10 @@ from uuid import UUID
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from src.auth.security import decode_access_token
-from src.core.websocket.auth import UserIdWSDep
 from src.core.websocket.connection import Connection
 from src.core.websocket.manager import ConnectionManager
 from src.notification.dependencies import (
     NotificationServiceDep,
-    get_ws_manager_singleton,
 )
 from src.notification.schemas import NotificationListSchema, UnreadCountSchema
 from src.user.dependencies import AuthenticatedUserIdDep
@@ -89,7 +87,7 @@ async def notifications_ws(websocket: WebSocket) -> None:
         await websocket.close(code=4401, reason="Invalid token")
         return
 
-    cm = get_ws_manager_singleton()
+    cm: ConnectionManager = websocket.app.state.ws_manager
     connection = Connection(
         websocket,
         user_id,
