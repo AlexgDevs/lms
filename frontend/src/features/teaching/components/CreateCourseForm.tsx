@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { createCourseSchema, type CreateCourseFormData } from "@/features/teaching/schemas/course"
+import { createCourseSchema, type CreateCourseFormData, COURSE_DESCRIPTION_MAX, COURSE_PRICE_MAX_RUB } from "@/features/teaching/schemas/course"
 import { useCourses } from "@/features/teaching/api/useCourses"
 import { useCategoryTree } from "@/features/dashboard/api/useCategories"
 import { rubToKopeks } from "@/lib/price"
@@ -139,6 +139,7 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
                       id={field.name}
                       aria-invalid={fieldState.invalid}
                       rows={3}
+                      maxLength={COURSE_DESCRIPTION_MAX}
                       placeholder="Кратко опишите, чему научит ваш курс..."
                     />
                     {fieldState.invalid && (
@@ -163,7 +164,8 @@ export function CreateCourseForm({ onCancel }: CreateCourseFormProps) {
                       aria-invalid={fieldState.invalid}
                       type="number"
                       min={0}
-                      placeholder="0 для бесплатного курса"
+                      max={COURSE_PRICE_MAX_RUB}
+                      placeholder="0 — бесплатно, иначе 50–100000"
                       onChange={(e) => {
                         const val = e.target.valueAsNumber
                         field.onChange(Number.isNaN(val) ? 0 : val)
