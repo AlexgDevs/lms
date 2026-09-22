@@ -20,6 +20,7 @@ from src.media.exceptions import MediaForbiddenError, MediaNotFoundError
 from src.media.media_attachment.enums import MediaOwnerType
 from src.media.schemas import MediaSchema
 from src.media.service import MediaService
+from src.core.schemas.limits import TEXT_SAFE_MAX
 from src.block.schemas import (
     BlockCreateRequestSchema,
     BlockCreateSchema,
@@ -36,7 +37,7 @@ MEDIA_BLOCK_TYPES = frozenset(
     {BlockType.IMAGE, BlockType.VIDEO, BlockType.AUDIO, BlockType.FILE}
 )
 
-MAX_RICH_TEXT_LENGTH = 100_000
+MAX_RICH_TEXT_LENGTH = TEXT_SAFE_MAX
 
 
 def _sanitize_text_payload(payload: dict[str, Any]) -> None:
