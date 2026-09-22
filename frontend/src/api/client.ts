@@ -72,7 +72,12 @@ client.interceptors.response.use(async (response, request) => {
     const isRetry = request.headers.get("X-Is-Retry") === "true";
     const hadToken = localStorage.getItem("access_token");
 
-    if (!isRetry && hadToken) {
+    if (!hadToken) {
+      const body = await response.json().catch(() => null);
+      throw new ApiError(response.status, body);
+    }
+
+    if (!isRetry) {
       if (!refreshPromise) {
         refreshPromise = refreshAccessToken().finally(() => {
           refreshPromise = null;

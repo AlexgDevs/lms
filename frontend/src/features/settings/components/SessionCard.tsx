@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { Session } from "../api/useSessions"
 
-function getDeviceIcon(deviceName: string | null) {
+function getDeviceIcon(deviceName: string | null | undefined) {
   if (!deviceName) return <Monitor className="w-5 h-5" />
   const lower = deviceName.toLowerCase()
   if (lower.includes("android") || lower.includes("iphone") || lower.includes("ios"))

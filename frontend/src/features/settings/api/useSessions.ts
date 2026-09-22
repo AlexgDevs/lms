@@ -1,52 +1,41 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query"
+import {
+  listSessionsApiV1AuthSessionsGetOptions,
+  revokeAllSessionsApiV1AuthSessionsDeleteMutation,
+  revokeSessionApiV1AuthSessionsSessionIdDeleteMutation,
+} from "@/client/@tanstack/react-query.gen"
 import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
+import type { SessionSchema } from "@/client/types.gen"
 
-const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`
+export type Session = SessionSchema
 
-function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem("access_token")
-  return token ? { Authorization: `Bearer ${token}` } : {}
+export function getCurrentRefreshToken(): string {
+  return localStorage.getItem("refresh_token") || ""
 }
 
-export interface Session {
-  id: string
-  device_name: string | null
-  ip_address: string | null
-  created_at: string
-  is_current: boolean
-}
-
-async function fetchSessions(currentToken: string): Promise<Session[]> {
-  const res = await fetch(
-    `${API_BASE}/auth/sessions?current_token=${encodeURIComponent(currentToken)}`,
-    { headers: authHeaders() },
-  )
-  if (!res.ok) throw new Error(await res.text())
-  return res.json()
-}
-
-async function revokeSession(sessionId: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/auth/sessions/${sessionId}`, {
-    method: "DELETE",
-    headers: authHeaders(),
+function invalidateSessions(queryClient: QueryClient) {
+  queryClient.invalidateQueries({
+    predicate: (query) =>
+      Array.isArray(query.queryKey) &&
+      typeof query.queryKey[0] === "object" &&
+      query.queryKey[0] !== null &&
+      (query.queryKey[0] as { _id?: string })._id ===
+        "listSessionsApiV1AuthSessionsGet",
   })
-  if (!res.ok) throw new Error(await res.text())
-}
-
-async function revokeAllSessions(currentToken: string): Promise<void> {
-  const res = await fetch(
-    `${API_BASE}/auth/sessions?current_token=${encodeURIComponent(currentToken)}`,
-    { method: "DELETE", headers: authHeaders() },
-  )
-  if (!res.ok) throw new Error(await res.text())
 }
 
 export function useSessions() {
-  const currentToken = localStorage.getItem("refresh_token") || ""
+  const currentToken = getCurrentRefreshToken()
   return useQuery({
-    queryKey: ["sessions"],
-    queryFn: () => fetchSessions(currentToken),
+    ...listSessionsApiV1AuthSessionsGetOptions({
+      query: { current_token: currentToken },
+    }),
     enabled: !!currentToken,
   })
 }
@@ -54,10 +43,10 @@ export function useSessions() {
 export function useRevokeSession() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: revokeSession,
+    ...revokeSessionApiV1AuthSessionsSessionIdDeleteMutation(),
     onSuccess: () => {
       showSuccessToast("Сессия завершена")
-      queryClient.invalidateQueries({ queryKey: ["sessions"] })
+      invalidateSessions(queryClient)
     },
     onError: (err) => {
       showErrorToast(getErrorMessage(err) || "Ошибка при завершении сессии")
@@ -67,12 +56,11 @@ export function useRevokeSession() {
 
 export function useRevokeAllSessions() {
   const queryClient = useQueryClient()
-  const currentToken = localStorage.getItem("refresh_token") || ""
   return useMutation({
-    mutationFn: () => revokeAllSessions(currentToken),
+    ...revokeAllSessionsApiV1AuthSessionsDeleteMutation(),
     onSuccess: () => {
       showSuccessToast("Все остальные сессии завершены")
-      queryClient.invalidateQueries({ queryKey: ["sessions"] })
+      invalidateSessions(queryClient)
     },
     onError: (err) => {
       showErrorToast(

@@ -34,7 +34,7 @@ const useAuth = () => {
             navigate({ to: ROUTES.LOGIN })
             showSuccessToast("Вы успешно зарегистрировались.")
         },
-        onError: (error) => showErrorToast(getErrorMessage(error)),
+        onError: (error) => showErrorToast(getErrorMessage(error) || "Не удалось зарегистрироваться"),
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] })
         },
@@ -48,10 +48,22 @@ const useAuth = () => {
             navigate({ to: ROUTES.DASHBOARD })
             showSuccessToast("Вы успешно вошли в систему.")
         },
-        onError: (error) => showErrorToast(getErrorMessage(error)),
+        onError: (error) => showErrorToast(getErrorMessage(error) || "Не удалось войти"),
     })
 
     const logout = () => {
+        const refreshToken = localStorage.getItem("refresh_token");
+        const accessToken = localStorage.getItem("access_token");
+        if (refreshToken && accessToken) {
+            fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/logout`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ refresh_token: refreshToken }),
+            }).catch(() => {});
+        }
         localStorage.removeItem("access_token")
         localStorage.removeItem("refresh_token");
         navigate({ to: ROUTES.LOGIN })
