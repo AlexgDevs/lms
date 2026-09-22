@@ -38,9 +38,7 @@ export const useCheckout = () => {
       }
     },
     onError: (err) => {
-      const courseId =
-        (err as { body?: { detail?: string } })?.body?.detail ?? ""
-      showErrorToast(getErrorMessage(err) || courseId || "Не удалось перейти к оплате")
+      showErrorToast(getErrorMessage(err) || "Не удалось перейти к оплате")
     },
   })
 }

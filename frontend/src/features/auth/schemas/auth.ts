@@ -6,7 +6,7 @@ const loginFormSchema = z.object({
         .min(1, "Имя пользователя обязательно"),
     password: z
         .string()
-        .min(6, "Пароль обязателен")
+        .min(1, "Пароль обязателен"),
 })
 
 const signupFormSchema = z
@@ -34,27 +34,27 @@ const signupFormSchema = z
     })
 
 const forgotPasswordSchema = z.object({
-    email: z.email("Enter a valid email"),
+    email: z.email("Введите корректный адрес электронной почты"),
 })
 
 const resetPasswordSchema = z
     .object({
-        password: z.string().min(6, "Password must be at least 6 characters"),
-        confirmPassword: z.string().min(1, "Please confirm your password"),
+        password: z.string().min(6, "Пароль должен быть не короче 6 символов"),
+        confirmPassword: z.string().min(1, "Подтвердите пароль"),
     })
     .refine((data) => data.password === data.confirmPassword, {
-        message: "Passwords don't match",
+        message: "Пароли не совпадают",
         path: ["confirmPassword"],
     })
 
 const changePasswordSchema = z
     .object({
-        currentPassword: z.string().min(1, "Current password is required"),
-        newPassword: z.string().min(6, "Password must be at least 6 characters"),
-        confirmNewPassword: z.string().min(1, "Please confirm your password"),
+        currentPassword: z.string().min(1, "Введите текущий пароль"),
+        newPassword: z.string().min(6, "Пароль должен быть не короче 6 символов"),
+        confirmNewPassword: z.string().min(1, "Подтвердите новый пароль"),
     })
     .refine((data) => data.newPassword === data.confirmNewPassword, {
-        message: "Passwords don't match",
+        message: "Пароли не совпадают",
         path: ["confirmNewPassword"],
     })
 

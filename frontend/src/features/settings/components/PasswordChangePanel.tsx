@@ -21,6 +21,7 @@ import {
     changePasswordSchema,
     type ChangePasswordFormData,
 } from "@/features/auth/schemas/auth"
+import { ApiError } from "@/api/errors"
 import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -55,13 +56,13 @@ export function PasswordChangePanel() {
                 }
             )
             if (!res.ok) {
-                const err = await res.json().catch(() => ({}))
-                throw new Error(err.detail || "Failed to change password")
+                const err = await res.json().catch(() => null)
+                throw new ApiError(res.status, err)
             }
             showSuccessToast("Пароль успешно изменён")
             form.reset()
         } catch (error) {
-            showErrorToast(getErrorMessage(error))
+            showErrorToast(getErrorMessage(error) || "Не удалось изменить пароль")
         } finally {
             setIsSubmitting(false)
         }

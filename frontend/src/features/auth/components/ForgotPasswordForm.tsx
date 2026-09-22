@@ -23,6 +23,7 @@ import {
     type ForgotPasswordFormData,
 } from "@/features/auth/schemas/auth"
 import { ROUTES } from "@/routes"
+import { ApiError } from "@/api/errors"
 import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -48,11 +49,14 @@ export function ForgotPasswordForm() {
                     body: JSON.stringify({ email: data.email }),
                 }
             )
-            if (!res.ok) throw new Error("Request failed")
+            if (!res.ok) {
+                const body = await res.json().catch(() => null)
+                throw new ApiError(res.status, body)
+            }
             setIsSent(true)
             showSuccessToast("Ссылка для сброса пароля отправлена на почту.")
         } catch (error) {
-            showErrorToast(getErrorMessage(error))
+            showErrorToast(getErrorMessage(error) || "Не удалось отправить письмо")
         } finally {
             setIsPending(false)
         }

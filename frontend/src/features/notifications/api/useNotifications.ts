@@ -38,7 +38,7 @@ export const useNotifications = (limit = 20, offset = 0) => {
         `${API_BASE}/notifications?limit=${limit}&offset=${offset}`,
         { headers: authHeaders() }
       )
-      if (!res.ok) throw new Error("Failed to load notifications")
+      if (!res.ok) throw new Error("Не удалось загрузить уведомления")
       return res.json()
     },
   })
@@ -52,7 +52,7 @@ export const useNotificationsInfinite = (pageSize = 20) => {
         `${API_BASE}/notifications?limit=${pageSize}&offset=${pageParam}`,
         { headers: authHeaders() }
       )
-      if (!res.ok) throw new Error("Failed to load notifications")
+      if (!res.ok) throw new Error("Не удалось загрузить уведомления")
       return res.json()
     },
     initialPageParam: 0,
@@ -70,7 +70,7 @@ export const useUnreadCount = () => {
       const res = await fetch(`${API_BASE}/notifications/unread-count`, {
         headers: authHeaders(),
       })
-      if (!res.ok) throw new Error("Failed to load unread count")
+      if (!res.ok) throw new Error("Не удалось загрузить счётчик непрочитанных")
       return res.json()
     },
   })
@@ -88,12 +88,13 @@ export const useMarkAsRead = () => {
           headers: authHeaders(),
         }
       )
-      if (!res.ok) throw new Error("Failed to mark as read")
+      if (!res.ok) throw new Error("Не удалось отметить уведомление как прочитанное")
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
     },
-    onError: (err) => showErrorToast(getErrorMessage(err)),
+    onError: (err) =>
+      showErrorToast(getErrorMessage(err) || "Не удалось отметить уведомление как прочитанное"),
   })
 }
 
@@ -106,11 +107,12 @@ export const useMarkAllRead = () => {
         method: "PATCH",
         headers: authHeaders(),
       })
-      if (!res.ok) throw new Error("Failed to mark all as read")
+      if (!res.ok) throw new Error("Не удалось отметить все уведомления прочитанными")
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
     },
-    onError: (err) => showErrorToast(getErrorMessage(err)),
+    onError: (err) =>
+      showErrorToast(getErrorMessage(err) || "Не удалось отметить все уведомления прочитанными"),
   })
 }
