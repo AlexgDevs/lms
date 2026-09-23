@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.ai.gemini import GeminiService
-from src.course.access import course_tgp_outdated
+from src.course.access import course_tgp_outdated, ensure_course_removable
 from src.course.course_member.schemas import (
     CourseMemberCreateSchema,
     CourseMemberSchema,
@@ -145,6 +145,8 @@ class CourseService(BaseService):
         )
         if not course:
             raise CourseNotFoundError
+
+        await ensure_course_removable(self.session, course_id)
 
         members = await self.uow.members.get_filtered(
             limit=10000, offset=0, course_id=course_id, left_at=None

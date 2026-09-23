@@ -1,11 +1,13 @@
 """Shared access rules for course content edits.
 
-Single home for two Phase-2 invariants:
+Single home for three Phase-2 invariants:
 - content mutations (module/lesson/block create/update/delete + media) may only
   happen while the course is **not** published; re-publishing always reruns the
   moderation flow. ``reorder`` is exempt because it never affects student results.
 - content units with student results (``lesson_progress`` / ``block_submissions``)
   cannot be deleted — only their content can be fixed.
+- a course itself is removable only when it has no student results, no active
+  members and no successful payments (``ensure_course_removable``).
 """
 
 from typing import Any
@@ -15,7 +17,12 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.course.enums import CourseStatus
-from src.course.exceptions import ContentHasStudentResultsError, CourseMustBeDraftError
+from src.course.exceptions import (
+    ContentHasStudentResultsError,
+    CourseHasStudentsError,
+    CourseMustBeDraftError,
+)
+from src.course.models import CourseMember
 
 
 def ensure_course_is_draft(course: Any) -> None:
@@ -90,6 +97,49 @@ async def ensure_module_removable(session: AsyncSession, module_id: UUID) -> Non
     )
     if progress + submissions > 0:
         raise ContentHasStudentResultsError
+
+
+async def ensure_course_removable(session: AsyncSession, course_id: UUID) -> None:
+    """Raise if the course has student results, active members or paid purchases."""
+    from src.block.models import BlockSubmission
+    from src.lesson.models import Lesson, LessonProgress
+    from src.payment.enums import PaymentStatus
+    from src.payment.models import Payment
+
+    lesson_ids = select(Lesson.id).where(Lesson.course_id == course_id)
+
+    progress = await _scalar_count(
+        session,
+        select(func.count())
+        .select_from(LessonProgress)
+        .where(LessonProgress.lesson_id.in_(lesson_ids)),
+    )
+    submissions = await _scalar_count(
+        session,
+        select(func.count())
+        .select_from(BlockSubmission)
+        .where(BlockSubmission.lesson_id.in_(lesson_ids)),
+    )
+    if progress + submissions > 0:
+        raise ContentHasStudentResultsError
+
+    members = await _scalar_count(
+        session,
+        select(func.count())
+        .select_from(CourseMember)
+        .where(CourseMember.course_id == course_id, CourseMember.left_at.is_(None)),
+    )
+    payments = await _scalar_count(
+        session,
+        select(func.count())
+        .select_from(Payment)
+        .where(
+            Payment.course_id == course_id,
+            Payment.status == PaymentStatus.SUCCEEDED,
+        ),
+    )
+    if members + payments > 0:
+        raise CourseHasStudentsError
 
 
 async def course_tgp_outdated(session: AsyncSession, course: Any) -> bool:

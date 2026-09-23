@@ -2,9 +2,18 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import EmailStr
+from pydantic import EmailStr, Field
 
 from src.core.schemas import BaseSchema
+from src.core.schemas.limits import (
+    EMAIL_MAX,
+    JWT_MAX,
+    PASSWORD_MAX,
+    PASSWORD_MIN,
+    TOKEN_MAX,
+    USERNAME_MAX,
+    USERNAME_MIN,
+)
 
 
 @dataclass
@@ -13,20 +22,20 @@ class AccessTokenPayload:
 
 
 class UserCreateSchema(BaseSchema):
-    username: str
-    email: str
-    password_hash: str
+    username: str = Field(..., min_length=USERNAME_MIN, max_length=USERNAME_MAX)
+    email: str = Field(..., max_length=EMAIL_MAX)
+    password_hash: str = Field(..., max_length=255)
 
 
 class UserRegisterSchema(BaseSchema):
-    username: str
-    email: EmailStr
-    password: str
+    username: str = Field(..., min_length=USERNAME_MIN, max_length=USERNAME_MAX)
+    email: EmailStr = Field(..., max_length=EMAIL_MAX)
+    password: str = Field(..., min_length=PASSWORD_MIN, max_length=PASSWORD_MAX)
 
 
 class UserLoginSchema(BaseSchema):
-    username: str
-    password: str
+    username: str = Field(..., min_length=1, max_length=USERNAME_MAX)
+    password: str = Field(..., min_length=1, max_length=PASSWORD_MAX)
 
 
 class RefreshTokenCreateSchema(BaseSchema):
@@ -47,8 +56,8 @@ class RefreshTokenSchema(BaseSchema):
 
 
 class TokenPair(BaseSchema):
-    access_token: str
-    refresh_token: str
+    access_token: str = Field(..., max_length=JWT_MAX)
+    refresh_token: str = Field(..., max_length=TOKEN_MAX)
     token_type: str = "bearer"
 
 
@@ -70,7 +79,7 @@ class SessionSchema(BaseSchema):
 
 
 class ForgotPasswordRequestSchema(BaseSchema):
-    email: EmailStr
+    email: EmailStr = Field(..., max_length=EMAIL_MAX)
 
 
 class ForgotPasswordResponseSchema(BaseSchema):
@@ -78,16 +87,16 @@ class ForgotPasswordResponseSchema(BaseSchema):
 
 
 class ResetPasswordRequestSchema(BaseSchema):
-    token: str
-    new_password: str
+    token: str = Field(..., max_length=TOKEN_MAX)
+    new_password: str = Field(..., min_length=PASSWORD_MIN, max_length=PASSWORD_MAX)
 
 
 class VerifyEmailRequestSchema(BaseSchema):
-    token: str
+    token: str = Field(..., max_length=TOKEN_MAX)
 
 
 class ResendVerificationRequestSchema(BaseSchema):
-    email: EmailStr
+    email: EmailStr = Field(..., max_length=EMAIL_MAX)
 
 
 class MessageResponseSchema(BaseSchema):
@@ -95,5 +104,5 @@ class MessageResponseSchema(BaseSchema):
 
 
 class ChangePasswordRequestSchema(BaseSchema):
-    current_password: str
-    new_password: str
+    current_password: str = Field(..., min_length=1, max_length=PASSWORD_MAX)
+    new_password: str = Field(..., min_length=PASSWORD_MIN, max_length=PASSWORD_MAX)

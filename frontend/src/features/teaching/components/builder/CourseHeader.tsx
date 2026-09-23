@@ -33,7 +33,23 @@ import {
 } from "lucide-react"
 import { resolveMediaUrl } from "@/lib/media"
 import { kopeksToRub, rubToKopeks } from "@/lib/price"
+import { showErrorToast } from "@/lib/toast"
 import { CategoryPicker } from "@/features/teaching/components/CategoryPicker"
+import {
+  COURSE_DESCRIPTION_MAX,
+  COURSE_PRICE_MAX_RUB,
+  COURSE_PRICE_MIN_PAID_RUB,
+  COURSE_TITLE_MAX,
+} from "@/features/teaching/schemas/course"
+
+const PRICE_RULE_MESSAGE = `Цена должна быть 0 (бесплатно) или от ${COURSE_PRICE_MIN_PAID_RUB} до ${COURSE_PRICE_MAX_RUB.toLocaleString("ru-RU")} ₽`
+
+function isValidPrice(priceRub: number): boolean {
+  return (
+    priceRub === 0 ||
+    (priceRub >= COURSE_PRICE_MIN_PAID_RUB && priceRub <= COURSE_PRICE_MAX_RUB)
+  )
+}
 
 type CourseStatus = "draft" | "under_review" | "published" | "rejected"
 
@@ -100,6 +116,7 @@ export function CourseHeader({
   const [description, setDescription] = useState(course.description || "")
   const [price, setPrice] = useState<number | "">(kopeksToRub(course.price ?? 0))
   const [isFree, setIsFree] = useState((course.price ?? 0) === 0)
+  const [priceError, setPriceError] = useState<string | null>(null)
   const [categoryId, setCategoryId] = useState<string | null>(course.category_id ?? null)
 
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -135,6 +152,10 @@ export function CourseHeader({
   // --- Название ---
   const handleSaveTitle = () => {
     const trimmed = title.trim()
+    if (trimmed.length > COURSE_TITLE_MAX) {
+      showErrorToast(`Название не должно превышать ${COURSE_TITLE_MAX} символов`)
+      return
+    }
     if (trimmed && trimmed !== course.title) {
       onUpdateCourse({ title: trimmed })
       triggerSavedAnimation("title")
@@ -152,6 +173,12 @@ export function CourseHeader({
   // --- Описание ---
   const handleSaveDescription = () => {
     const trimmed = description.trim()
+    if (trimmed.length > COURSE_DESCRIPTION_MAX) {
+      showErrorToast(
+        `Описание не должно превышать ${COURSE_DESCRIPTION_MAX} символов`,
+      )
+      return
+    }
     if (trimmed !== (course.description || "")) {
       onUpdateCourse({ description: trimmed || null })
       triggerSavedAnimation("description")
@@ -166,7 +193,14 @@ export function CourseHeader({
 
   // --- Цена ---
   const handleSavePrice = () => {
-    const numericPriceKopeks = isFree ? 0 : rubToKopeks(Number(price))
+    const numericPriceRub = isFree ? 0 : Number(price)
+    if (!isValidPrice(numericPriceRub)) {
+      setPriceError(PRICE_RULE_MESSAGE)
+      showErrorToast(PRICE_RULE_MESSAGE)
+      return
+    }
+    setPriceError(null)
+    const numericPriceKopeks = rubToKopeks(numericPriceRub)
     if (numericPriceKopeks !== (course.price ?? 0)) {
       onUpdateCourse({ price: numericPriceKopeks })
       triggerSavedAnimation("price")
@@ -176,6 +210,7 @@ export function CourseHeader({
   const handleCancelPrice = () => {
     setPrice(kopeksToRub(course.price ?? 0))
     setIsFree((course.price ?? 0) === 0)
+    setPriceError(null)
   }
 
   const handleFreeToggle = (checked: boolean) => {
@@ -398,6 +433,7 @@ export function CourseHeader({
             <Textarea
               id="course-desc"
               value={description}
+              maxLength={COURSE_DESCRIPTION_MAX}
               onChange={(e) => setDescription(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Escape") handleCancelDescription()
@@ -405,6 +441,9 @@ export function CourseHeader({
               placeholder="О чём этот курс..."
               className="text-xs min-h-[72px] resize-none leading-relaxed rounded-md bg-muted/20"
             />
+            <p className="text-[10px] text-muted-foreground text-right">
+              {description.trim().length}/{COURSE_DESCRIPTION_MAX}
+            </p>
           </div>
 
           {/* Цена */}
@@ -417,14 +456,25 @@ export function CourseHeader({
               id="course-price"
               type="number"
               min={0}
+              max={COURSE_PRICE_MAX_RUB}
               disabled={isFree}
               value={isFree ? 0 : price}
-              onChange={(e) =>
+              onChange={(e) => {
                 setPrice(e.target.value === "" ? "" : Number(e.target.value))
-              }
+                setPriceError(null)
+              }}
               placeholder="0"
+              aria-invalid={priceError ? true : undefined}
               className="h-9 font-mono font-semibold rounded-md bg-muted/20"
             />
+            {priceError ? (
+              <p className="text-xs text-destructive">{priceError}</p>
+            ) : (
+              <p className="text-[10px] text-muted-foreground">
+                0 ₽ (бесплатно) или {COURSE_PRICE_MIN_PAID_RUB}–
+                {COURSE_PRICE_MAX_RUB.toLocaleString("ru-RU")} ₽
+              </p>
+            )}
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="free-course"

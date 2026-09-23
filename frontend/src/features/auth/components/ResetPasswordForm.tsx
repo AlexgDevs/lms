@@ -23,6 +23,7 @@ import {
     type ResetPasswordFormData,
 } from "@/features/auth/schemas/auth"
 import { ROUTES } from "@/routes"
+import { ApiError } from "@/api/errors"
 import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast, showSuccessToast } from "@/lib/toast"
 
@@ -49,11 +50,14 @@ export function ResetPasswordForm() {
                     body: JSON.stringify({ token, new_password: data.password }),
                 }
             )
-            if (!res.ok) throw new Error("Reset failed")
+            if (!res.ok) {
+                const body = await res.json().catch(() => null)
+                throw new ApiError(res.status, body)
+            }
             showSuccessToast("Пароль успешно сброшен. Войдите в систему.")
             navigate({ to: ROUTES.LOGIN })
         } catch (error) {
-            showErrorToast(getErrorMessage(error))
+            showErrorToast(getErrorMessage(error) || "Не удалось сбросить пароль")
         } finally {
             setIsPending(false)
         }

@@ -72,9 +72,14 @@ class CourseMustBeDraftError(CourseError):
 
 class ContentHasStudentResultsError(CourseError):
     detail = (
-        "Этот элемент нельзя удалить: по нему уже есть прогресс или ответы учащихся. "
-        "Можно только исправить его содержимое."
+        "This item cannot be deleted: there is already student progress or "
+        "submissions. You can only fix its content."
     )
+    status_code = status.HTTP_409_CONFLICT
+
+
+class CourseHasStudentsError(CourseError):
+    detail = "Course has students or successful payments"
     status_code = status.HTTP_409_CONFLICT
 
 

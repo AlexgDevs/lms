@@ -613,7 +613,7 @@ export type CourseCreateRequestSchema = {
     /**
      * Price
      *
-     * Цена курса (не может быть отрицательной)
+     * Цена курса в копейках: 0 (бесплатно) или 50–100000 руб.
      */
     price?: number;
     /**
@@ -937,6 +937,8 @@ export type CourseUpdateRequestSchema = {
     description?: string | null;
     /**
      * Price
+     *
+     * Цена курса в копейках: 0 (бесплатно) или 50–100000 руб.
      */
     price?: number | null;
     /**
@@ -1114,6 +1116,28 @@ export type ForgotPasswordResponseSchema = {
      * Message
      */
     message: string;
+};
+
+/**
+ * FounderProgressSchema
+ */
+export type FounderProgressSchema = {
+    /**
+     * Founders Count
+     */
+    founders_count: number;
+    /**
+     * Max Authors
+     */
+    max_authors: number;
+    /**
+     * Revenue
+     */
+    revenue: number;
+    /**
+     * Revenue Limit
+     */
+    revenue_limit: number;
 };
 
 /**
@@ -4747,6 +4771,22 @@ export type UpsertPayoutAccountApiV1PaymentsPayoutAccountPutResponses = {
 };
 
 export type UpsertPayoutAccountApiV1PaymentsPayoutAccountPutResponse = UpsertPayoutAccountApiV1PaymentsPayoutAccountPutResponses[keyof UpsertPayoutAccountApiV1PaymentsPayoutAccountPutResponses];
+
+export type GetFounderProgressEndpointApiV1FounderProgressGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/founder/progress';
+};
+
+export type GetFounderProgressEndpointApiV1FounderProgressGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: FounderProgressSchema;
+};
+
+export type GetFounderProgressEndpointApiV1FounderProgressGetResponse = GetFounderProgressEndpointApiV1FounderProgressGetResponses[keyof GetFounderProgressEndpointApiV1FounderProgressGetResponses];
 
 export type ListNotificationsNotificationsGetData = {
     body?: never;

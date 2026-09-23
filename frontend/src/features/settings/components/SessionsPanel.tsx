@@ -2,7 +2,12 @@ import { Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getErrorMessage } from "@/lib/errors"
-import { useSessions, useRevokeSession, useRevokeAllSessions } from "../api/useSessions"
+import {
+  useSessions,
+  useRevokeSession,
+  useRevokeAllSessions,
+  getCurrentRefreshToken,
+} from "../api/useSessions"
 import { SessionCard } from "./SessionCard"
 
 export function SessionsPanel() {
@@ -37,7 +42,9 @@ export function SessionsPanel() {
                 <SessionCard
                   key={session.id}
                   session={session}
-                  onRevoke={(id) => revokeSession.mutate(id)}
+                  onRevoke={(id) =>
+                    revokeSession.mutate({ path: { session_id: id } })
+                  }
                   isRevoking={revokeSession.isPending}
                 />
               ))}
@@ -46,7 +53,11 @@ export function SessionsPanel() {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => revokeAll.mutate()}
+                onClick={() =>
+                  revokeAll.mutate({
+                    query: { current_token: getCurrentRefreshToken() },
+                  })
+                }
                 disabled={revokeAll.isPending}
               >
                 Выйти из всех остальных

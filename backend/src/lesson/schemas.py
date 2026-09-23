@@ -1,7 +1,10 @@
 from uuid import UUID
 from datetime import datetime
 
+from pydantic import Field
+
 from src.core.schemas.base_schema import BaseSchema
+from src.core.schemas.limits import DESCRIPTION_MAX, TITLE_MAX, TITLE_MIN
 
 
 class LessonSchema(BaseSchema):
@@ -16,8 +19,8 @@ class LessonSchema(BaseSchema):
 
 
 class LessonCreateRequestSchema(BaseSchema):
-    title: str
-    description: str | None = None
+    title: str = Field(..., min_length=TITLE_MIN, max_length=TITLE_MAX)
+    description: str | None = Field(None, max_length=DESCRIPTION_MAX)
 
 
 class LessonCreateSchema(LessonCreateRequestSchema):
@@ -27,8 +30,8 @@ class LessonCreateSchema(LessonCreateRequestSchema):
 
 
 class LessonUpdateRequestSchema(BaseSchema):
-    title: str | None = None
-    description: str | None = None
+    title: str | None = Field(None, min_length=TITLE_MIN, max_length=TITLE_MAX)
+    description: str | None = Field(None, max_length=DESCRIPTION_MAX)
 
 
 class LessonUpdateSchema(LessonUpdateRequestSchema):

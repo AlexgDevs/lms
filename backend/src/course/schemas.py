@@ -5,6 +5,12 @@ from pydantic import Field
 
 from src.course.enums import CourseMemberRole, CourseStatus
 from src.core.schemas.base_schema import BaseSchema
+from src.core.schemas.limits import (
+    DESCRIPTION_MAX,
+    TITLE_MAX,
+    TITLE_MIN,
+    PriceKopeks,
+)
 
 
 class CourseSchema(BaseSchema):
@@ -44,9 +50,15 @@ class CourseCreateRequestSchema(BaseSchema):
     Does NOT include cover_url as it's handled by the server.
     """
 
-    title: str = Field(..., max_length=128, description="Название курса")
-    description: str | None = Field(None, max_length=300, description="Описание курса")
-    price: int = Field(0, ge=0, description="Цена курса (не может быть отрицательной)")
+    title: str = Field(
+        ..., min_length=TITLE_MIN, max_length=TITLE_MAX, description="Название курса"
+    )
+    description: str | None = Field(
+        None, max_length=DESCRIPTION_MAX, description="Описание курса"
+    )
+    price: PriceKopeks = Field(
+        0, description="Цена курса в копейках: 0 (бесплатно) или 50–100000 руб."
+    )
     category_id: UUID | None = Field(None, description="ID категории курса")
 
 
@@ -71,9 +83,11 @@ class CourseUpdateRequestSchema(BaseSchema):
     All fields are optional because the client might want to update only one field (PATCH-like).
     """
 
-    title: str | None = Field(None, max_length=128)
-    description: str | None = Field(None, max_length=300)
-    price: int | None = Field(None, ge=0)
+    title: str | None = Field(None, min_length=TITLE_MIN, max_length=TITLE_MAX)
+    description: str | None = Field(None, max_length=DESCRIPTION_MAX)
+    price: PriceKopeks | None = Field(
+        None, description="Цена курса в копейках: 0 (бесплатно) или 50–100000 руб."
+    )
     category_id: UUID | None = None
     status: CourseStatus | None = None
     tgp_enabled: bool | None = None

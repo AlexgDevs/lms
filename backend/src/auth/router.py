@@ -5,6 +5,7 @@ from fastapi import APIRouter, Body, Depends, Query, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from src.auth.dependencies import AuthServiceDep
+from src.auth.exceptions import InvalidRefreshTokenError
 from src.auth.security import hash_refresh_token
 from src.core.rate_limit import get_client_ip
 from src.auth.schemas import (
@@ -122,8 +123,9 @@ async def revoke_all_sessions(
 ) -> None:
     token_hash = hash_refresh_token(current_token)
     token = await service.uow.refresh_tokens.get_one(token_hash=token_hash)
-    if token:
-        await service.revoke_all_sessions(user_id, token.id)
+    if token is None:
+        raise InvalidRefreshTokenError
+    await service.revoke_all_sessions(user_id, token.id)
 
 
 @router.post(
