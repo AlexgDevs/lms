@@ -12,6 +12,13 @@ from src.notification.schemas import NotificationListSchema, UnreadCountSchema
 from src.user.dependencies import AuthenticatedUserIdDep
 
 router = APIRouter(tags=["Notifications"])
+"""REST endpoints — mounted under ``/api/v1`` (app_v1), so nginx's ``/api/``
+location proxies them. Never mount this at the app root: the prod nginx SPA
+fallback would swallow ``/notifications`` and return index.html."""
+
+ws_router = APIRouter(tags=["Notifications"])
+"""WebSocket push endpoint — mounted at the app root (``/ws/notifications``)
+because nginx has a dedicated ``/ws/`` location with Upgrade headers."""
 
 
 @router.get(
@@ -67,7 +74,7 @@ async def mark_all_notifications_read(
     await service.mark_all_read(user_id)
 
 
-@router.websocket("/ws/notifications")
+@ws_router.websocket("/ws/notifications")
 async def notifications_ws(websocket: WebSocket) -> None:
     await websocket.accept()
 

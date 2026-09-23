@@ -12,6 +12,7 @@ from starlette.types import Scope
 from src.core.config import settings
 from src.core.events.protocol import InMemoryEvent
 from src.core.rate_limit import RateLimiter, get_client_ip
+from src.core.realtime.fanout import NotificationFanout, NotificationFanoutListener
 from src.core.redis import init_redis, close_redis
 from src.core.logging import setup_logging
 from src.core.router import app_v1, notifications_router
@@ -60,12 +61,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
     event_bus = InMemoryEvent()
     ws_manager = ConnectionManager()
-    handler = NotificationHandler(session_factory=session_maker, ws_manager=ws_manager)
+    fanout = NotificationFanout(app.state.redis)
+    fanout_listener = NotificationFanoutListener(app.state.redis, ws_manager)
+    await fanout_listener.start()
+    handler = NotificationHandler(
+        session_factory=session_maker,
+        ws_manager=ws_manager,
+        fanout=fanout,
+    )
     handler.register(event_bus)
     app.state.event_bus = event_bus
     app.state.ws_manager = ws_manager
 
     yield
+    await fanout_listener.stop()
     await close_storage(app.state.storage)
     await close_redis(app.state.redis)
     logger.info("Application shutdown complete.")

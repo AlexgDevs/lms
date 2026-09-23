@@ -3,6 +3,7 @@ import { getErrorMessage } from "@/lib/errors"
 import { showErrorToast } from "@/lib/toast"
 
 const API_BASE = import.meta.env.VITE_API_URL ?? ""
+const NOTIFICATIONS_URL = `${API_BASE}/api/v1/notifications`
 
 export interface Notification {
   id: string
@@ -35,7 +36,7 @@ export const useNotifications = (limit = 20, offset = 0) => {
     queryKey: ["notifications", limit, offset],
     queryFn: async () => {
       const res = await fetch(
-        `${API_BASE}/notifications?limit=${limit}&offset=${offset}`,
+        `${NOTIFICATIONS_URL}?limit=${limit}&offset=${offset}`,
         { headers: authHeaders() }
       )
       if (!res.ok) throw new Error("Не удалось загрузить уведомления")
@@ -49,7 +50,7 @@ export const useNotificationsInfinite = (pageSize = 20) => {
     queryKey: ["notifications", "infinite", pageSize],
     queryFn: async ({ pageParam }) => {
       const res = await fetch(
-        `${API_BASE}/notifications?limit=${pageSize}&offset=${pageParam}`,
+        `${NOTIFICATIONS_URL}?limit=${pageSize}&offset=${pageParam}`,
         { headers: authHeaders() }
       )
       if (!res.ok) throw new Error("Не удалось загрузить уведомления")
@@ -67,7 +68,7 @@ export const useUnreadCount = () => {
   return useQuery<UnreadCountResponse>({
     queryKey: ["notifications", "unread-count"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/notifications/unread-count`, {
+      const res = await fetch(`${NOTIFICATIONS_URL}/unread-count`, {
         headers: authHeaders(),
       })
       if (!res.ok) throw new Error("Не удалось загрузить счётчик непрочитанных")
@@ -82,7 +83,7 @@ export const useMarkAsRead = () => {
   return useMutation({
     mutationFn: async (notificationId: string) => {
       const res = await fetch(
-        `${API_BASE}/notifications/${notificationId}/read`,
+        `${NOTIFICATIONS_URL}/${notificationId}/read`,
         {
           method: "PATCH",
           headers: authHeaders(),
@@ -103,7 +104,7 @@ export const useMarkAllRead = () => {
 
   return useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${API_BASE}/notifications/read-all`, {
+      const res = await fetch(`${NOTIFICATIONS_URL}/read-all`, {
         method: "PATCH",
         headers: authHeaders(),
       })
