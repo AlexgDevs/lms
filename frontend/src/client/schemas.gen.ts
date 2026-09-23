@@ -255,6 +255,8 @@ export const BlockCreateRequestSchemaSchema = {
         },
         title: {
             type: 'string',
+            maxLength: 128,
+            minLength: 1,
             title: 'Title'
         }
     },
@@ -543,7 +545,9 @@ export const BlockUpdateRequestSchemaSchema = {
         title: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 128,
+                    minLength: 1
                 },
                 {
                     type: 'null'
@@ -806,10 +810,14 @@ export const ChangePasswordRequestSchemaSchema = {
     properties: {
         current_password: {
             type: 'string',
+            maxLength: 128,
+            minLength: 1,
             title: 'Current Password'
         },
         new_password: {
             type: 'string',
+            maxLength: 128,
+            minLength: 6,
             title: 'New Password'
         }
     },
@@ -877,6 +885,7 @@ export const CourseCreateRequestSchemaSchema = {
         title: {
             type: 'string',
             maxLength: 128,
+            minLength: 1,
             title: 'Title',
             description: 'Название курса'
         },
@@ -895,9 +904,8 @@ export const CourseCreateRequestSchemaSchema = {
         },
         price: {
             type: 'integer',
-            minimum: 0,
             title: 'Price',
-            description: 'Цена курса (не может быть отрицательной)',
+            description: 'Цена курса в копейках: 0 (бесплатно) или 50–100000 руб.',
             default: 0
         },
         category_id: {
@@ -1389,7 +1397,8 @@ export const CourseUpdateRequestSchemaSchema = {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 128
+                    maxLength: 128,
+                    minLength: 1
                 },
                 {
                     type: 'null'
@@ -1412,14 +1421,14 @@ export const CourseUpdateRequestSchemaSchema = {
         price: {
             anyOf: [
                 {
-                    type: 'integer',
-                    minimum: 0
+                    type: 'integer'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Price'
+            title: 'Price',
+            description: 'Цена курса в копейках: 0 (бесплатно) или 50–100000 руб.'
         },
         category_id: {
             anyOf: [
@@ -1724,6 +1733,7 @@ export const ForgotPasswordRequestSchemaSchema = {
     properties: {
         email: {
             type: 'string',
+            maxLength: 254,
             format: 'email',
             title: 'Email'
         }
@@ -1749,6 +1759,35 @@ export const ForgotPasswordResponseSchemaSchema = {
     title: 'ForgotPasswordResponseSchema'
 } as const;
 
+export const FounderProgressSchemaSchema = {
+    properties: {
+        founders_count: {
+            type: 'integer',
+            title: 'Founders Count'
+        },
+        max_authors: {
+            type: 'integer',
+            title: 'Max Authors'
+        },
+        revenue: {
+            type: 'integer',
+            title: 'Revenue'
+        },
+        revenue_limit: {
+            type: 'integer',
+            title: 'Revenue Limit'
+        }
+    },
+    type: 'object',
+    required: [
+        'founders_count',
+        'max_authors',
+        'revenue',
+        'revenue_limit'
+    ],
+    title: 'FounderProgressSchema'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -1767,12 +1806,15 @@ export const LessonCreateRequestSchemaSchema = {
     properties: {
         title: {
             type: 'string',
+            maxLength: 128,
+            minLength: 1,
             title: 'Title'
         },
         description: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 300
                 },
                 {
                     type: 'null'
@@ -1969,7 +2011,9 @@ export const LessonUpdateRequestSchemaSchema = {
         title: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 128,
+                    minLength: 1
                 },
                 {
                     type: 'null'
@@ -1980,7 +2024,8 @@ export const LessonUpdateRequestSchemaSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 300
                 },
                 {
                     type: 'null'
@@ -2104,12 +2149,15 @@ export const ModuleCreateRequestSchemaSchema = {
     properties: {
         title: {
             type: 'string',
+            maxLength: 128,
+            minLength: 1,
             title: 'Title'
         },
         description: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 300
                 },
                 {
                     type: 'null'
@@ -2202,7 +2250,9 @@ export const ModuleUpdateRequestSchemaSchema = {
         title: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 128,
+                    minLength: 1
                 },
                 {
                     type: 'null'
@@ -2213,7 +2263,8 @@ export const ModuleUpdateRequestSchemaSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 300
                 },
                 {
                     type: 'null'
@@ -2684,6 +2735,7 @@ export const ResendVerificationRequestSchemaSchema = {
     properties: {
         email: {
             type: 'string',
+            maxLength: 254,
             format: 'email',
             title: 'Email'
         }
@@ -2699,10 +2751,13 @@ export const ResetPasswordRequestSchemaSchema = {
     properties: {
         token: {
             type: 'string',
+            maxLength: 2048,
             title: 'Token'
         },
         new_password: {
             type: 'string',
+            maxLength: 128,
+            minLength: 6,
             title: 'New Password'
         }
     },
@@ -3220,10 +3275,12 @@ export const TokenPairSchema = {
     properties: {
         access_token: {
             type: 'string',
+            maxLength: 4096,
             title: 'Access Token'
         },
         refresh_token: {
             type: 'string',
+            maxLength: 2048,
             title: 'Refresh Token'
         },
         token_type: {
@@ -3381,15 +3438,20 @@ export const UserRegisterSchemaSchema = {
     properties: {
         username: {
             type: 'string',
+            maxLength: 128,
+            minLength: 3,
             title: 'Username'
         },
         email: {
             type: 'string',
+            maxLength: 254,
             format: 'email',
             title: 'Email'
         },
         password: {
             type: 'string',
+            maxLength: 128,
+            minLength: 6,
             title: 'Password'
         }
     },
@@ -3499,6 +3561,7 @@ export const VerifyEmailRequestSchemaSchema = {
     properties: {
         token: {
             type: 'string',
+            maxLength: 2048,
             title: 'Token'
         }
     },

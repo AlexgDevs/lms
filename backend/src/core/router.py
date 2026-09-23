@@ -21,6 +21,7 @@ from src.certificate import router as certificate_router, user_certificates_rout
 from src.review import router as review_router
 from src.payment import router as payment_router
 from src.notification.router import router as notification_router
+from src.founder.router import router as founder_router
 from src.core.config import settings
 
 app_v1 = APIRouter(prefix=settings.app.API_V1_STR)
@@ -43,6 +44,7 @@ app_v1.include_router(certificate_router)
 app_v1.include_router(user_certificates_router)
 app_v1.include_router(review_router)
 app_v1.include_router(payment_router)
+app_v1.include_router(founder_router)
 
 notifications_router = APIRouter()
 notifications_router.include_router(notification_router)

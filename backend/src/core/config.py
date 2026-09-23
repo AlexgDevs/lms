@@ -401,7 +401,8 @@ class FounderSettings(BaseSettings):
     # is granted the lifetime Founder status. The program closes when BOTH the
     # cumulative SUCCEEDED revenue reaches the limit AND the founder quota is filled.
     FOUNDER_PROGRAM_ENABLED: bool = True
-    FOUNDER_PROGRAM_REVENUE_LIMIT: int = 50_000
+    # Stored in kopecks to match Payment.amount: 15_000_000 = 150 000 ₽.
+    FOUNDER_PROGRAM_REVENUE_LIMIT: int = 15_000_000
     FOUNDER_PROGRAM_MAX_AUTHORS: int = 30
     # Lifetime commission for Founders after the platform leaves the beta model
     # (not applied to payment splits while FOUNDER_PROGRAM is in beta / fee = 0).
