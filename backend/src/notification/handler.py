@@ -22,6 +22,7 @@ from src.core.events.event import (
     UserLoggedIn,
 )
 from src.core.realtime.envelope import Envelope, EventType
+from src.core.realtime.fanout import NotificationFanout
 from src.core.websocket.manager import ConnectionManager
 from src.notification.repository import NotificationRepository
 from src.notification.schemas import NotificationCreateSchema
@@ -169,9 +170,11 @@ class NotificationHandler:
         self,
         session_factory: async_sessionmaker[AsyncSession],
         ws_manager: ConnectionManager,
+        fanout: NotificationFanout | None = None,
     ) -> None:
         self._session_factory = session_factory
         self._ws_manager = ws_manager
+        self._fanout = fanout
 
     def register(self, event_bus: "Event") -> None:  # type: ignore[name-defined]
         """Subscribe to all notification-relevant domain events."""
@@ -235,7 +238,13 @@ class NotificationHandler:
                     },
                 )
                 room = f"user:{user_id}"
-                await self._ws_manager.broadcast_to_room(room, envelope)
+                published = False
+                if self._fanout is not None:
+                    published = await self._fanout.publish(user_id, envelope)
+                if not published:
+                    # Redis down (fail-open): at least this replica's own
+                    # sockets get the push; the DB row is already written.
+                    await self._ws_manager.broadcast_to_room(room, envelope)
 
         logger.info(
             "notification.created",

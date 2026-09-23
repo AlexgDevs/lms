@@ -4788,7 +4788,7 @@ export type GetFounderProgressEndpointApiV1FounderProgressGetResponses = {
 
 export type GetFounderProgressEndpointApiV1FounderProgressGetResponse = GetFounderProgressEndpointApiV1FounderProgressGetResponses[keyof GetFounderProgressEndpointApiV1FounderProgressGetResponses];
 
-export type ListNotificationsNotificationsGetData = {
+export type ListNotificationsApiV1NotificationsGetData = {
     body?: never;
     path?: never;
     query?: {
@@ -4801,44 +4801,44 @@ export type ListNotificationsNotificationsGetData = {
          */
         offset?: number;
     };
-    url: '/notifications';
+    url: '/api/v1/notifications';
 };
 
-export type ListNotificationsNotificationsGetErrors = {
+export type ListNotificationsApiV1NotificationsGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ListNotificationsNotificationsGetError = ListNotificationsNotificationsGetErrors[keyof ListNotificationsNotificationsGetErrors];
+export type ListNotificationsApiV1NotificationsGetError = ListNotificationsApiV1NotificationsGetErrors[keyof ListNotificationsApiV1NotificationsGetErrors];
 
-export type ListNotificationsNotificationsGetResponses = {
+export type ListNotificationsApiV1NotificationsGetResponses = {
     /**
      * Successful Response
      */
     200: NotificationListSchema;
 };
 
-export type ListNotificationsNotificationsGetResponse = ListNotificationsNotificationsGetResponses[keyof ListNotificationsNotificationsGetResponses];
+export type ListNotificationsApiV1NotificationsGetResponse = ListNotificationsApiV1NotificationsGetResponses[keyof ListNotificationsApiV1NotificationsGetResponses];
 
-export type GetUnreadCountNotificationsUnreadCountGetData = {
+export type GetUnreadCountApiV1NotificationsUnreadCountGetData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/notifications/unread-count';
+    url: '/api/v1/notifications/unread-count';
 };
 
-export type GetUnreadCountNotificationsUnreadCountGetResponses = {
+export type GetUnreadCountApiV1NotificationsUnreadCountGetResponses = {
     /**
      * Successful Response
      */
     200: UnreadCountSchema;
 };
 
-export type GetUnreadCountNotificationsUnreadCountGetResponse = GetUnreadCountNotificationsUnreadCountGetResponses[keyof GetUnreadCountNotificationsUnreadCountGetResponses];
+export type GetUnreadCountApiV1NotificationsUnreadCountGetResponse = GetUnreadCountApiV1NotificationsUnreadCountGetResponses[keyof GetUnreadCountApiV1NotificationsUnreadCountGetResponses];
 
-export type MarkNotificationReadNotificationsNotificationIdReadPatchData = {
+export type MarkNotificationReadApiV1NotificationsNotificationIdReadPatchData = {
     body?: never;
     path: {
         /**
@@ -4847,42 +4847,42 @@ export type MarkNotificationReadNotificationsNotificationIdReadPatchData = {
         notification_id: string;
     };
     query?: never;
-    url: '/notifications/{notification_id}/read';
+    url: '/api/v1/notifications/{notification_id}/read';
 };
 
-export type MarkNotificationReadNotificationsNotificationIdReadPatchErrors = {
+export type MarkNotificationReadApiV1NotificationsNotificationIdReadPatchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type MarkNotificationReadNotificationsNotificationIdReadPatchError = MarkNotificationReadNotificationsNotificationIdReadPatchErrors[keyof MarkNotificationReadNotificationsNotificationIdReadPatchErrors];
+export type MarkNotificationReadApiV1NotificationsNotificationIdReadPatchError = MarkNotificationReadApiV1NotificationsNotificationIdReadPatchErrors[keyof MarkNotificationReadApiV1NotificationsNotificationIdReadPatchErrors];
 
-export type MarkNotificationReadNotificationsNotificationIdReadPatchResponses = {
+export type MarkNotificationReadApiV1NotificationsNotificationIdReadPatchResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type MarkNotificationReadNotificationsNotificationIdReadPatchResponse = MarkNotificationReadNotificationsNotificationIdReadPatchResponses[keyof MarkNotificationReadNotificationsNotificationIdReadPatchResponses];
+export type MarkNotificationReadApiV1NotificationsNotificationIdReadPatchResponse = MarkNotificationReadApiV1NotificationsNotificationIdReadPatchResponses[keyof MarkNotificationReadApiV1NotificationsNotificationIdReadPatchResponses];
 
-export type MarkAllNotificationsReadNotificationsReadAllPatchData = {
+export type MarkAllNotificationsReadApiV1NotificationsReadAllPatchData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/notifications/read-all';
+    url: '/api/v1/notifications/read-all';
 };
 
-export type MarkAllNotificationsReadNotificationsReadAllPatchResponses = {
+export type MarkAllNotificationsReadApiV1NotificationsReadAllPatchResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type MarkAllNotificationsReadNotificationsReadAllPatchResponse = MarkAllNotificationsReadNotificationsReadAllPatchResponses[keyof MarkAllNotificationsReadNotificationsReadAllPatchResponses];
+export type MarkAllNotificationsReadApiV1NotificationsReadAllPatchResponse = MarkAllNotificationsReadApiV1NotificationsReadAllPatchResponses[keyof MarkAllNotificationsReadApiV1NotificationsReadAllPatchResponses];
 
 export type SayHelloGetData = {
     body?: never;

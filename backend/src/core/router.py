@@ -21,6 +21,7 @@ from src.certificate import router as certificate_router, user_certificates_rout
 from src.review import router as review_router
 from src.payment import router as payment_router
 from src.notification.router import router as notification_router
+from src.notification.router import ws_router as notification_ws_router
 from src.founder.router import router as founder_router
 from src.core.config import settings
 
@@ -45,6 +46,9 @@ app_v1.include_router(user_certificates_router)
 app_v1.include_router(review_router)
 app_v1.include_router(payment_router)
 app_v1.include_router(founder_router)
+app_v1.include_router(notification_router)
 
+# WebSocket-only, mounted at the app root by main.py: nginx proxies /ws/
+# (with Upgrade headers) but has no rule for the bare REST paths.
 notifications_router = APIRouter()
-notifications_router.include_router(notification_router)
+notifications_router.include_router(notification_ws_router)
