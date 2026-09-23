@@ -1,21 +1,26 @@
 import { useState } from "react"
-import { 
-  Plus, 
-  Users, 
-  DollarSign, 
-  Star, 
-  Edit3, 
-  BarChart2, 
+import {
+  Plus,
+  Users,
+  DollarSign,
+  Star,
+  Edit3,
+  BarChart2,
   Layers,
   ChevronRight,
   ChevronDown,
   Sparkle,
   Loader2,
-  BookOpen
+  BookOpen,
+  Trash2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { useNavigate, Link } from "@tanstack/react-router"
-import { useCreatedCoursesPage } from "@/features/teaching/api/useCourses"
+import {
+  useCreatedCoursesPage,
+  useCourses,
+} from "@/features/teaching/api/useCourses"
 import { CreateCourseForm } from "@/features/teaching/components/CreateCourseForm"
 import { CourseGenerateCard } from "@/features/teaching/components/CourseGenerateCard"
 import { resolveMediaUrl } from "@/lib/media"
@@ -42,12 +47,36 @@ export function TeachingPage() {
   } = useCreatedCoursesPage()
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  const [confirmDeleteCourseId, setConfirmDeleteCourseId] = useState<
+    string | null
+  >(null)
+
+  const { deleteCourseAsync, isDeletingCourse } = useCourses()
 
   // 2. Плоский список из всех страниц
   const coursesList: CourseSchema[] = (createdPages?.pages ?? []).flat() as CourseSchema[]
 
   // Выбираем фокусный курс (выбранный вручную или первый в списке)
   const mainCourse = coursesList.find((c) => String(c.id) === String(activeCourseId)) || coursesList[0]
+
+  const courseToDelete = coursesList.find(
+    (c) => String(c.id) === String(confirmDeleteCourseId),
+  )
+
+  const handleDeleteCourse = async () => {
+    if (!confirmDeleteCourseId) return
+    try {
+      await deleteCourseAsync({
+        path: { course_id: confirmDeleteCourseId },
+      })
+      if (String(activeCourseId) === confirmDeleteCourseId) {
+        setActiveCourseId(null)
+      }
+      setConfirmDeleteCourseId(null)
+    } catch {
+      // Ошибка уже обработана в onError мутации (showErrorToast)
+    }
+  }
 
   if (isLoadingCreatedCourses) {
     return (
@@ -279,9 +308,31 @@ export function TeachingPage() {
                       </div>
 
                       <div className="flex items-center gap-4 shrink-0">
-                        <span className="hidden sm:inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-success/10 text-success">
-                          Опубликован
+                        <span
+                          className={`hidden sm:inline-flex px-2 py-0.5 rounded text-[10px] font-medium ${
+                            course.status === CourseStatus.PUBLISHED
+                              ? "bg-success/10 text-success"
+                              : course.status === CourseStatus.UNDER_REVIEW
+                                ? "bg-reward/10 text-reward"
+                                : course.status === CourseStatus.REJECTED
+                                  ? "bg-destructive/10 text-destructive"
+                                  : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {COURSE_STATUS_LABELS[course.status] ?? course.status}
                         </span>
+
+                        <button
+                          type="button"
+                          aria-label="Удалить курс"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setConfirmDeleteCourseId(String(course.id))
+                          }}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
 
                         <button
                           type="button"
@@ -337,6 +388,44 @@ export function TeachingPage() {
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteCourseId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteCourseId(null)
+        }}
+        title={
+          courseToDelete
+            ? `Удалить курс «${courseToDelete.title}»?`
+            : "Удалить курс?"
+        }
+        description={
+          <ul className="list-disc pl-5 space-y-1.5 text-sm">
+            <li>
+              Курс станет недоступен студентам и исчезнет из каталога и студии
+              преподавателя.
+            </li>
+            <li>
+              Все записавшиеся студенты получат уведомление об удалении курса.
+            </li>
+            <li>
+              Модули, уроки, материалы и прогресс по курсу также станут
+              недоступны.
+            </li>
+            <li>
+              Удаление возможно, только если на курсе нет студентов и
+              результатов обучения.
+            </li>
+            <li className="font-medium text-destructive">
+              Действие необратимо — восстановить курс будет нельзя.
+            </li>
+          </ul>
+        }
+        confirmLabel="Удалить курс"
+        destructive
+        isConfirming={isDeletingCourse}
+        onConfirm={handleDeleteCourse}
+      />
 
     </div>
   )

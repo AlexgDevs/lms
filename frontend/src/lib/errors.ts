@@ -43,6 +43,8 @@ const ERROR_MESSAGES: Record<string, string> = {
     CourseGenerateError: "Не удалось сгенерировать курс.",
     CourseGenerateLimitError: "Достигнут лимит генерации курсов ИИ.",
     CoursePaymentRequiredError: "Этот курс требует оплаты перед записью.",
+    CourseHasStudentsError: "Нельзя удалить курс: на нём есть студенты или успешные оплаты.",
+    ContentHasStudentResultsError: "Нельзя удалить: уже есть прогресс или ответы учащихся. Можно только исправить содержимое.",
 
     // module / lesson / block
     ModuleNotFoundError: "Модуль не найден.",
