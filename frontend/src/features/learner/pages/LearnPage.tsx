@@ -11,7 +11,6 @@ import {
   Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import {
   Sheet,
   SheetContent,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/sheet"
 import { BlockView } from "@/features/learner/components/blocks/BlockView"
 import { LearnSidebar } from "@/features/learner/components/LearnSidebar"
+import { LearnSidebarRail } from "@/features/learner/components/LearnSidebarRail"
 import { IrbisDialogue } from "@/features/learner/components/assistant/IrbisDialogue"
 import { useLearnData } from "@/features/learner/api/useLearnData"
 import { useEnrollCourse } from "@/features/dashboard/api/useCourses"
@@ -34,6 +34,18 @@ export function LearnPage() {
   const { courseId, lessonId } = useParams({ strict: false })
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  // Оглавление: развёрнуто или свёрнуто в рейл (Clean Reader, десктоп)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => window.localStorage.getItem("learn:sidebar-collapsed") === "1",
+  )
+  const setCollapsed = (collapsed: boolean) => {
+    setSidebarCollapsed(collapsed)
+    try {
+      window.localStorage.setItem("learn:sidebar-collapsed", collapsed ? "1" : "0")
+    } catch {
+      // localStorage может быть недоступен — состояние просто не переживёт перезагрузку
+    }
+  }
   const data = useLearnData({ courseId, lessonId })
   const { course } = data
 
@@ -68,56 +80,80 @@ export function LearnPage() {
     throw notFound()
   }
 
+  const activeModuleId =
+    data.modules.find((module) =>
+      (data.lessonsByModule.get(module.id) ?? []).some((lesson) => lesson.id === lessonId),
+    )?.id ?? null
+
   return (
     <>
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <div className="hidden lg:block lg:sticky lg:top-20 lg:h-[calc(100vh-7rem)] lg:w-72 shrink-0 overflow-hidden min-h-0 flex flex-col">
-          <LearnSidebar
-            courseTitle={course?.title ?? ""}
-            modules={data.modules}
-            lessonsByModule={data.lessonsByModule}
-            currentLessonId={lessonId}
-            totalLessons={data.flatUnits.length}
-            completedCount={data.progress.filter((item) => item.status === "completed").length}
-            isCompleted={data.isCompleted}
-            onSelectLesson={goToLesson}
-            courseId={course?.id ?? undefined}
-            tgpEnabled={course?.tgp_enabled ?? false}
-            tgpOutdated={course?.tgp_outdated ?? false}
-            isMember={data.isCourseMember}
-            flatUnits={data.flatUnits}
-            widthClassName="w-72"
-          />
+      {/* Clean Reader: слева оглавление (или рейл при сворачивании), справа белое полотно лекции */}
+      <div className="flex w-full items-start">
+        <div
+          className={`hidden lg:flex lg:sticky lg:top-20 h-[calc(100vh-7rem)] min-h-0 shrink-0 flex-col overflow-hidden border-r border-border/60 bg-background ${
+            sidebarCollapsed ? "lg:w-14" : "lg:w-72"
+          }`}
+        >
+          {sidebarCollapsed ? (
+            <LearnSidebarRail
+              modules={data.modules}
+              activeModuleId={activeModuleId}
+              onExpand={() => setCollapsed(false)}
+            />
+          ) : (
+            <LearnSidebar
+              flat
+              onCollapse={() => setCollapsed(true)}
+              courseTitle={course?.title ?? ""}
+              modules={data.modules}
+              lessonsByModule={data.lessonsByModule}
+              currentLessonId={lessonId}
+              totalLessons={data.flatUnits.length}
+              completedCount={data.progress.filter((item) => item.status === "completed").length}
+              isCompleted={data.isCompleted}
+              onSelectLesson={goToLesson}
+              courseId={course?.id ?? undefined}
+              tgpEnabled={course?.tgp_enabled ?? false}
+              tgpOutdated={course?.tgp_outdated ?? false}
+              isMember={data.isCourseMember}
+              flatUnits={data.flatUnits}
+              widthClassName="w-72"
+            />
+          )}
         </div>
 
-        <div className="min-w-0 flex-1">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full mb-4 h-9 lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-4 w-4 mr-2" />
-            Оглавление курса
-          </Button>
+        {/* Белое полотно лекции — монолитная статья по центру (760px), скролл всей страницей */}
+        <div className="min-w-0 flex-1 bg-card min-h-[calc(100vh-4rem)]">
+          <div className="mx-auto w-full max-w-[760px] px-4 py-6 lg:px-8">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full mb-4 h-9 lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-4 w-4 mr-2" />
+              Оглавление курса
+            </Button>
 
-          <LessonStepper
-            data={data}
-            courseId={courseId as string}
-            lessonId={lessonId as string}
-            goToLesson={goToLesson}
-          />
+            <LessonStepper
+              data={data}
+              courseId={courseId as string}
+              lessonId={lessonId as string}
+              goToLesson={goToLesson}
+            />
 
-          {lessonId && data.isCourseMember && (
-            <div className="mt-6">
-              <ReviewSection
-                targetType="lesson"
-                targetId={lessonId}
-                title="Комментарии к уроку"
-                canWrite
-              />
-            </div>
-          )}
+            {lessonId && data.isCourseMember && (
+              <div className="mt-6">
+                <ReviewSection
+                  targetType="lesson"
+                  targetId={lessonId}
+                  title="Комментарии к уроку"
+                  canWrite
+                  compact
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -390,9 +426,9 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
       </div>
 
       {totalSteps === 0 ? (
-        <Card className="rounded-xl p-8 text-center text-sm text-muted-foreground">
+        <p className="py-16 text-center text-sm text-muted-foreground">
           В этом уроке пока нет материалов.
-        </Card>
+        </p>
       ) : (
         <>
           <StepIndicator
@@ -402,27 +438,23 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
             onSelect={goToStep}
           />
 
-          <Card className="rounded-xl overflow-hidden">
-            {currentBlock && (
-              <div className="px-5 py-5 sm:px-6">
-                <BlockView
-                  block={currentBlock}
-                  quizSelected={isQuiz ? (selected[currentBlock.id] ?? []) : []}
-                  onQuizSelect={(blockId, ids) =>
-                    setSelected((prev) => ({ ...prev, [blockId]: ids }))
-                  }
-                  quizResult={stepResult}
-                  quizLocked={isStepDone}
-                  codeValue={isCode ? codeValue : undefined}
-                  onCodeChange={(blockId, value) =>
-                    setCodeByBlock((prev) => ({ ...prev, [blockId]: value }))
-                  }
-                  codeResult={stepResult}
-                  codeLocked={isStepDone}
-                />
-              </div>
-            )}
-          </Card>
+          {currentBlock && (
+            <BlockView
+              block={currentBlock}
+              quizSelected={isQuiz ? (selected[currentBlock.id] ?? []) : []}
+              onQuizSelect={(blockId, ids) =>
+                setSelected((prev) => ({ ...prev, [blockId]: ids }))
+              }
+              quizResult={stepResult}
+              quizLocked={isStepDone}
+              codeValue={isCode ? codeValue : undefined}
+              onCodeChange={(blockId, value) =>
+                setCodeByBlock((prev) => ({ ...prev, [blockId]: value }))
+              }
+              codeResult={stepResult}
+              codeLocked={isStepDone}
+            />
+          )}
 
           <div className="flex items-center justify-between gap-3">
             {completedFooter ? (

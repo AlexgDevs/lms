@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { ROUTES } from "@/routes";
 
 export function NotFoundPage() {
@@ -35,7 +34,6 @@ export function NotFoundPage() {
           </Button>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

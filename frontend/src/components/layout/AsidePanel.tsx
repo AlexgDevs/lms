@@ -12,6 +12,8 @@ interface AsidePanelProps {
   widthClassName?: string
   /** Render full-width (inside a mobile Sheet) instead of a fixed-width column. */
   fill?: boolean
+  /** Strip the card chrome (background/radius/shadow) — for panels embedded in an already-white canvas. */
+  flat?: boolean
 }
 
 /**
@@ -26,17 +28,28 @@ export function AsidePanel({
   bodyClassName,
   widthClassName,
   fill = false,
+  flat = false,
 }: AsidePanelProps) {
   return (
     <aside
       className={cn(
-        "bg-card flex flex-col h-full min-h-0 overflow-hidden rounded-xl shadow-[var(--shadow-card)]",
+        "flex flex-col h-full min-h-0 overflow-hidden",
+        flat
+          ? "bg-transparent"
+          : "bg-card rounded-xl shadow-[var(--shadow-card)]",
         fill ? "w-full" : cn("shrink-0", widthClassName ?? "w-80"),
         className,
       )}
     >
       {header != null && (
-        <div className="shrink-0 border-b border-border/50 bg-muted/20 px-3.5 py-3">
+        <div
+          className={cn(
+            "shrink-0 px-3.5 py-3",
+            flat
+              ? "border-b border-border/60"
+              : "border-b border-border/50 bg-muted/20",
+          )}
+        >
           {header}
         </div>
       )}

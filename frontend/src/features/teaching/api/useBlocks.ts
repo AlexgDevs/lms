@@ -13,6 +13,24 @@ import {
 import type { BlockType } from "@/client" // Импортируй BlockType из твоего сгенерированного клиента (или типов)
 import { applyOrderToCache } from "@/lib/dnd"
 
+/**
+ * Заменяет обновлённый блок в кэше списка (массив или `{ items }`),
+ * не трогая остальные записи и не вызывая рефетч.
+ */
+function mergeBlockIntoCache(old: unknown, updated: { id?: string } | null | undefined): unknown {
+  if (!updated?.id || !old) return old
+  const patch = (list: unknown[]): unknown[] =>
+    list.map((item) =>
+      item && typeof item === "object" && "id" in item && item.id === updated.id
+        ? { ...item, ...updated }
+        : item,
+    )
+  if (Array.isArray(old)) return patch(old)
+  const obj = old as { items?: unknown[] }
+  if (Array.isArray(obj.items)) return { ...obj, items: patch(obj.items) }
+  return old
+}
+
 interface UseBlocksParams {
   courseId?: string
   lessonId?: string
@@ -79,12 +97,18 @@ export const useBlocks = ({ courseId, lessonId, onlyCreated = false }: UseBlocks
     },
   })
 
-  // 2. Обновление блока
+  // 2. Обновление блока — без тоста и без рефетча: патчим блок прямо в кэше
+  //    (автосохранение при вводе не должно ни спамить тостами, ни мигать списком)
   const updateBlockMutation = useMutation({
     ...updateBlockApiV1CoursesCourseIdLessonsLessonIdBlocksBlockIdPatchMutation(),
-    onSuccess: (_, variables) => {
-      showSuccessToast("Блок успешно обновлен")
-      invalidateBlocksQuery(variables.path?.course_id, variables.path?.lesson_id)
+    onSuccess: (updated, variables) => {
+      const targetCourseId = variables.path?.course_id || courseId
+      const targetLessonId = variables.path?.lesson_id || lessonId
+      if (!targetCourseId || !targetLessonId) return
+      const queryKey = getBlocksApiV1CoursesCourseIdLessonsLessonIdBlocksGetQueryKey({
+        path: { course_id: targetCourseId, lesson_id: targetLessonId },
+      })
+      queryClient.setQueryData(queryKey, (old: unknown) => mergeBlockIntoCache(old, updated))
     },
     onError: (err) => {
       showErrorToast(getErrorMessage(err) || "Ошибка при обновлении блока")

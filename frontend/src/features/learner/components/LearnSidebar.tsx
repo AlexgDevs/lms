@@ -1,5 +1,12 @@
 import { useState } from "react"
-import { CheckCircle2, FileText, Folder, Map as MapIcon, Sparkles } from "lucide-react"
+import {
+  CheckCircle2,
+  FileText,
+  Folder,
+  Map as MapIcon,
+  PanelLeftClose,
+  Sparkles,
+} from "lucide-react"
 import type { LessonSchema, ModuleSchema } from "@/client"
 import { cn } from "@/lib/utils"
 import { formatCooldown } from "@/lib/tgp"
@@ -36,6 +43,10 @@ interface LearnSidebarProps {
   fill?: boolean
   /** Width utility for the fixed-width column (defaults to "w-80"). */
   widthClassName?: string
+  /** Свернуть оглавление в узкий рейл (десктоп, Clean Reader). */
+  onCollapse?: () => void
+  /** Плоский вид без карточки/теней — единое полотно как в Студии. */
+  flat?: boolean
 }
 
 export function LearnSidebar({
@@ -54,6 +65,8 @@ export function LearnSidebar({
   flatUnits,
   fill = false,
   widthClassName,
+  onCollapse,
+  flat = false,
 }: LearnSidebarProps) {
   const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
   const navigate = useNavigate()
@@ -118,13 +131,29 @@ export function LearnSidebar({
     <div className={cn("flex flex-col h-full min-h-0 overflow-hidden", fill && "h-full")}>
       <AsidePanel
         fill={fill}
+        flat={flat}
         widthClassName={widthClassName}
         bodyClassName="p-2 pr-1"
         header={
           <div className="space-y-3">
-            <h2 className="text-sm font-bold text-foreground leading-snug line-clamp-2">
-              {courseTitle}
-            </h2>
+            <div className="flex items-start gap-2 min-w-0">
+              <h2 className="text-sm font-bold text-foreground leading-snug line-clamp-2 flex-1 min-w-0">
+                {courseTitle}
+              </h2>
+              {onCollapse && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0 text-muted-foreground hover:text-foreground"
+                  onClick={onCollapse}
+                  title="Свернуть оглавление"
+                  aria-label="Свернуть оглавление"
+                >
+                  <PanelLeftClose size={15} />
+                </Button>
+              )}
+            </div>
 
             <div className="flex items-center gap-2">
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">

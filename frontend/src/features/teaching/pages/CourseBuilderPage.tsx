@@ -20,6 +20,16 @@ import { CertificatePanel } from "@/features/teaching/components/builder/Certifi
 import { ROUTES } from "@/routes"
 import { CourseBlocks } from "@/features/teaching/components/builder/CourseBlocks"
 
+const SIDEBAR_COLLAPSED_KEY = "teaching:builder:sidebar-collapsed"
+
+function readSidebarCollapsed(): boolean {
+  try {
+    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1"
+  } catch {
+    return false
+  }
+}
+
 export function CourseBuilderPage() {
   const { courseId } = useParams({ strict: false })
   const navigate = useNavigate()
@@ -28,6 +38,20 @@ export function CourseBuilderPage() {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null)
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  // Свёрнутый сайдбар (режим фокуса) — состояние между сессиями
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarCollapsed)
+
+  const toggleSidebarCollapsed = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? "1" : "0")
+      } catch {
+        // localStorage может быть недоступен (private mode) — не критично
+      }
+      return next
+    })
+  }
 
   // Забираем данные из хука
   const {
@@ -135,16 +159,16 @@ export function CourseBuilderPage() {
   const certificateEnabled = Boolean(authorCourse?.certificate_enabled)
 
   return (
-    <div className="w-full bg-background text-foreground flex flex-col min-h-0 lg:h-[calc(100vh-7rem)] lg:overflow-hidden">
-       
-      {/* Верхний тулбар: кнопка назад + Структура (моб.) */}
-      <div className="shrink-0 bg-muted/30 px-4 py-1.5 flex items-center justify-between gap-2">
+    <div className="w-full bg-card text-foreground flex flex-col min-h-[calc(100vh-7rem)]">
+
+      {/* Верхняя полоса конструктора — липкая, на белом холсте */}
+      <div className="sticky top-16 z-30 bg-card/95 backdrop-blur-sm border-b border-border/60 px-4 py-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate({ to: ROUTES.TEACHING })}
-            className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+            className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft size={13} />
             <span>К курсам</span>
@@ -161,79 +185,85 @@ export function CourseBuilderPage() {
         </div>
       </div>
 
-      {/* Рабочая область: Асид (модули/уроки) + Холст */}
-      <div className="flex-1 flex flex-col gap-4 p-4 min-h-0 lg:flex-row lg:overflow-hidden">
+      {/* Рабочая область: сворачиваемый сайдбар + единый белый холст */}
+      <div className="flex-1 flex flex-col lg:flex-row lg:items-stretch">
 
-        {/* Левый Асид — десктоп */}
-        <div className="hidden lg:block h-full min-h-0 shrink-0">
-          <CourseSidebar
-            courseId={courseId}
-            selectedModuleId={selectedModuleId}
-            selectedLessonId={selectedLessonId}
-            onSelectModule={(id) => {
-              setSelectedModuleId(id)
-            }}
-            onSelectLesson={(moduleId, lessonId) => {
-              setSelectedModuleId(moduleId)
-              setSelectedLessonId(lessonId)
-            }}
-          />
+        {/* Левый сайдбар — sticky, сворачиваемый в узкий рейл (режим фокуса) */}
+        <div className="hidden lg:block shrink-0 border-r border-border/60">
+          <div className="sticky top-[7rem] h-[calc(100vh-7rem)]">
+            <CourseSidebar
+              courseId={courseId}
+              selectedModuleId={selectedModuleId}
+              selectedLessonId={selectedLessonId}
+              collapsed={sidebarCollapsed}
+              onToggleCollapsed={toggleSidebarCollapsed}
+              className="h-full"
+              onSelectModule={(id) => {
+                setSelectedModuleId(id)
+              }}
+              onSelectLesson={(moduleId, lessonId) => {
+                setSelectedModuleId(moduleId)
+                setSelectedLessonId(lessonId)
+              }}
+            />
+          </div>
         </div>
 
-        {/* Правая колонка: шапка + сворачиваемые панели + холст */}
-        <main className="flex-1 min-w-0 min-h-0 flex flex-col gap-3 lg:overflow-hidden">
+        {/* Правая колонка: шапка курса + белый холст (скроллится страницей) */}
+        <main className="flex-1 min-w-0 flex flex-col">
 
-          {/* Компактная шапка курса + панели (сверху, не давят на асид) */}
-          <div className="shrink-0">
-            <CourseHeader
-              course={authorCourse}
-              onUpdateCourse={handleUpdateCourse}
-              isUpdating={isUpdatingCourse}
-              onSubmitReview={handleSubmitReview}
-              isSubmittingReview={isSubmittingCourseForReview}
-              onUploadCover={uploadCourseCoverAsync}
-              onRemoveCover={removeCourseCoverAsync}
-              isUploadingCover={isUploadingCover || isRemovingCover}
-            />
-          </div>
+          {/* Шапка курса: обложка, название, статус, публикация и настройки */}
+          <CourseHeader
+            course={authorCourse}
+            onUpdateCourse={handleUpdateCourse}
+            isUpdating={isUpdatingCourse}
+            onSubmitReview={handleSubmitReview}
+            isSubmittingReview={isSubmittingCourseForReview}
+            onUploadCover={uploadCourseCoverAsync}
+            onRemoveCover={removeCourseCoverAsync}
+            isUploadingCover={isUploadingCover || isRemovingCover}
+            settingsExtra={
+              <>
+                <CertificatePanel
+                  plain
+                  certificateEnabled={certificateEnabled}
+                  isUpdatingCourse={isUpdatingCourse}
+                  onToggleCertificate={handleToggleCertificate}
+                />
 
-          <div className="shrink-0 space-y-3">
-            <CertificatePanel
-              certificateEnabled={certificateEnabled}
-              isUpdatingCourse={isUpdatingCourse}
-              onToggleCertificate={handleToggleCertificate}
-            />
+                <TgpPanel
+                  plain
+                  courseId={String(authorCourse.id)}
+                  tgpEnabled={tgpEnabled}
+                  tgpLastGeneratedAt={
+                    authorCourse?.tgp_last_full_generated_at ??
+                    tgp.optimisticGeneratedAt ??
+                    null
+                  }
+                  tgpCooldownHours={Math.max(
+                    authorCourse?.tgp_cooldown_hours ?? TGP_GENERATION_COOLDOWN_HOURS,
+                    TGP_GENERATION_COOLDOWN_HOURS,
+                  )}
+                  moduleCount={modules.length}
+                  minModules={TGP_MIN_MODULES}
+                  questions={tgp.questions ?? []}
+                  isLoadingQuestions={tgp.isLoadingQuestions}
+                  isGenerating={tgp.isGenerating}
+                  isUpdatingCourse={tgp.isTogglingTgp || isUpdatingCourse}
+                  isSavingQuestion={tgp.isUpdatingQuestion}
+                  isRegenerating={tgp.isRegenerating}
+                  onToggleTgp={handleToggleTgp}
+                  onGenerate={handleGenerate}
+                  onSaveQuestion={handleSaveQuestion}
+                  onRegenerate={handleRegenerate}
+                  onRefetch={handleRefetchTgp}
+                />
+              </>
+            }
+          />
 
-            <TgpPanel
-              courseId={String(authorCourse.id)}
-              tgpEnabled={tgpEnabled}
-              tgpLastGeneratedAt={
-                authorCourse?.tgp_last_full_generated_at ??
-                tgp.optimisticGeneratedAt ??
-                null
-              }
-              tgpCooldownHours={Math.max(
-                authorCourse?.tgp_cooldown_hours ?? TGP_GENERATION_COOLDOWN_HOURS,
-                TGP_GENERATION_COOLDOWN_HOURS,
-              )}
-              moduleCount={modules.length}
-              minModules={TGP_MIN_MODULES}
-              questions={tgp.questions ?? []}
-              isLoadingQuestions={tgp.isLoadingQuestions}
-              isGenerating={tgp.isGenerating}
-              isUpdatingCourse={tgp.isTogglingTgp || isUpdatingCourse}
-              isSavingQuestion={tgp.isUpdatingQuestion}
-              isRegenerating={tgp.isRegenerating}
-              onToggleTgp={handleToggleTgp}
-              onGenerate={handleGenerate}
-              onSaveQuestion={handleSaveQuestion}
-              onRegenerate={handleRegenerate}
-              onRefetch={handleRefetchTgp}
-            />
-          </div>
-
-          {/* Центральный редактор контента */}
-          <div className="flex-1 min-h-0 flex flex-col">
+          {/* Центральный холст редактора */}
+          <div className="flex-1 flex flex-col">
             {selectedLessonId ? (
               // СНАЧАЛА проверяем урок, так как он приоритетнее
               <CourseBlocks
@@ -242,14 +272,14 @@ export function CourseBuilderPage() {
               />
             ) : selectedModuleId ? (
               // ПОТОМ проверяем модуль, если урок не выбран
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-card rounded-xl shadow-[var(--shadow-card)]">
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-24">
                 <div className="space-y-3">
                   <div className="w-10 h-10 rounded-md bg-reward/10 text-reward flex items-center justify-center mx-auto">
                     <Folder size={20} />
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-lg font-bold">Редактирование модуля</h3>
-                    <p className="text-xs font-mono text-muted-foreground bg-muted/30 px-3 py-1 rounded-md">
+                    <p className="text-xs font-mono text-muted-foreground">
                       Module ID: {selectedModuleId}
                     </p>
                   </div>
@@ -257,7 +287,7 @@ export function CourseBuilderPage() {
               </div>
             ) : (
               // Ничего не выбрано
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-card rounded-xl shadow-[var(--shadow-card)]">
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-24">
                 <div className="max-w-sm space-y-1.5">
                   <p className="text-sm font-semibold text-foreground">
                     Выберите модуль или урок слева

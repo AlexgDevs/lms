@@ -1,3 +1,4 @@
+import type { ElementType } from "react"
 import { Loader2, MessageSquare } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { useReviewRating, useReviews, useCreateReview } from "@/features/review/api/useReviews"
@@ -13,6 +14,9 @@ interface ReviewSectionProps {
   title?: string
   showRating?: boolean
   canWrite?: boolean
+  /** Лёгкий режим для экрана урока (Clean Reader): без карточки,
+   *  с деликатным разделителем, минималистичной формой и компактным тредом. */
+  compact?: boolean
 }
 
 export function ReviewSection({
@@ -21,6 +25,7 @@ export function ReviewSection({
   title = "Отзывы",
   showRating = false,
   canWrite = false,
+  compact = false,
 }: ReviewSectionProps) {
   const reviews = useReviews({ targetType, targetId })
   const rating = useReviewRating({ targetType, targetId, enabled: showRating })
@@ -35,12 +40,23 @@ export function ReviewSection({
 
   const totalRatingValues = Object.values(distribution).reduce((a, b) => a + b, 0)
 
+  const Root = (compact ? "div" : Card) as ElementType
+
   return (
-    <Card className="rounded-xl p-4 sm:p-5 shadow-[var(--shadow-card)]">
-      <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="h-4 w-4 text-primary" />
-        <h2 className="font-bold text-sm sm:text-base text-foreground">{title}</h2>
-      </div>
+    <Root className={compact ? "pt-5" : "rounded-xl p-4 sm:p-5 shadow-[var(--shadow-card)]"}>
+      {compact && (
+        <>
+          {/* Деликатный разделитель: сверху — задание урока, снизу — обсуждение */}
+          <div className="mb-4 h-px bg-gradient-to-r from-border via-border/40 to-transparent" />
+          <h2 className="mb-3 text-xs font-medium text-muted-foreground">{title}</h2>
+        </>
+      )}
+      {!compact && (
+        <div className="flex items-center gap-2 mb-4">
+          <MessageSquare className="h-4 w-4 text-primary" />
+          <h2 className="font-bold text-sm sm:text-base text-foreground">{title}</h2>
+        </div>
+      )}
 
       {showRating && (
         <div className="mb-4 flex flex-col gap-3 rounded-lg bg-muted/30 p-3 sm:flex-row sm:items-center">
@@ -80,11 +96,12 @@ export function ReviewSection({
       )}
 
       {canWrite && (
-        <div className="mb-5">
+        <div className={compact ? "mb-4" : "mb-5"}>
           <ReviewForm
             targetType={targetType}
             targetId={targetId}
             showRating={showRating}
+            compact={compact}
             onSubmit={(data) => createReview.mutate({ body: data })}
             isSubmitting={createReview.isPending}
           />
@@ -92,28 +109,37 @@ export function ReviewSection({
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <div className={cn("flex justify-center", compact ? "py-4" : "py-10")}>
+          <Loader2
+            className={cn("animate-spin text-muted-foreground", compact ? "h-4 w-4" : "h-5 w-5")}
+          />
         </div>
       ) : items.length === 0 ? (
-        <div className="py-10 text-center">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-            <MessageSquare className="h-5 w-5" />
+        compact ? (
+          <p className="py-4 text-center text-xs text-muted-foreground">
+            Здесь пока пусто. Станьте первым, кто поделится мыслями!
+          </p>
+        ) : (
+          <div className="py-10 text-center">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <MessageSquare className="h-5 w-5" />
+            </div>
+            <p className="mt-3 text-sm font-medium text-foreground">
+              {showRating ? "Отзывов пока нет" : "Комментариев пока нет"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {showRating ? "Будьте первым — поделитесь мнением о курсе" : "Начните обсуждение — задайте вопрос или поделитесь мыслью"}
+            </p>
           </div>
-          <p className="mt-3 text-sm font-medium text-foreground">
-            {showRating ? "Отзывов пока нет" : "Комментариев пока нет"}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {showRating ? "Будьте первым — поделитесь мнением о курсе" : "Начните обсуждение — задайте вопрос или поделитесь мыслью"}
-          </p>
-        </div>
+        )
       ) : (
-        <div className={cn("space-y-4 sm:space-y-5")}>
+        <div className={cn(compact ? "space-y-3" : "space-y-4 sm:space-y-5")}>
           {items.map((review) => (
             <ReviewItem
               key={review.id}
               review={review}
               canReply={canWrite}
+              compact={compact}
               onReplySubmit={(parentId, text) =>
                 createReview.mutate({
                   body: { target_type: targetType, target_id: targetId, text, parent_id: parentId },
@@ -124,6 +150,6 @@ export function ReviewSection({
           ))}
         </div>
       )}
-    </Card>
+    </Root>
   )
 }

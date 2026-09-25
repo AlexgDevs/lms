@@ -24,8 +24,8 @@ export function CodeBlockView({ block, value, onChange, result, locked }: CodeBl
   const lines = value ? value.split("\n") : [""]
 
   return (
-    <div className="overflow-hidden rounded-xl bg-[color-mix(in_oklch,var(--secondary),var(--background)_40%)] shadow-[var(--shadow-card)] ring-1 ring-inset ring-border/30">
-      <div className="flex items-center justify-between border-b border-border/40 bg-secondary/50 px-3.5 py-1.5">
+    <div className="overflow-hidden rounded-xl bg-secondary/40">
+      <div className="flex items-center justify-between bg-secondary/60 px-3.5 py-1.5">
         <span className="inline-flex items-center rounded bg-secondary/70 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           {language || "Code"}
         </span>
@@ -60,7 +60,7 @@ export function CodeBlockView({ block, value, onChange, result, locked }: CodeBl
       </div>
 
       {testCases.length > 0 && (
-        <div className="border-t border-secondary/60 px-4 py-3 space-y-2">
+        <div className="px-4 pb-3 pt-2 space-y-2">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Тесты
           </p>

@@ -20,3 +20,17 @@ export const ROUTES = {
     CATALOG: "/catalog",
     ADMIN_MODERATION: "/admin/moderation"
 } as const
+
+/**
+ * Пути, которые рендерятся без общего контейнера Layout (`max-w-7xl px-4 py-6`):
+ * конструктор курсов — «Clean Editor», экран студента — «Clean Reader»,
+ * гайд по созданию курсов — блочный full-interactive лендинг;
+ * все управляют собственными отступами и единым полотном.
+ */
+export function isFullBleedPath(pathname: string): boolean {
+    return (
+        /^\/teaching\/courses\/[^/]+\/?$/.test(pathname) ||
+        /^\/learn(\/|$)/.test(pathname) ||
+        /^\/teaching\/guide\/?$/.test(pathname)
+    )
+}

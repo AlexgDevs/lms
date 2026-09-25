@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { useInView } from "@/features/legal/components/founder/useInView"
+import { useInView } from "@/lib/useInView"
 
 interface FounderSeatGridProps {
   value: number
