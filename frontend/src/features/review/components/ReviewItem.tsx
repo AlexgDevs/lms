@@ -15,6 +15,8 @@ interface ReviewItemProps {
   review: ReviewSchema
   canReply?: boolean
   isReply?: boolean
+  /** Компактный вид для экрана урока: без карточки, мельче аватарки и отступы. */
+  compact?: boolean
   onReplySubmit?: (parentId: string, text: string) => void
   isSubmittingReply?: boolean
 }
@@ -25,6 +27,7 @@ export function ReviewItem({
   review,
   canReply = false,
   isReply = false,
+  compact = false,
   onReplySubmit,
   isSubmittingReply = false,
 }: ReviewItemProps) {
@@ -65,8 +68,10 @@ export function ReviewItem({
       className={cn(
         "group",
         !isReply
-          ? "rounded-xl border border-border bg-card p-3 sm:p-4 shadow-[var(--shadow-card)]"
-          : "py-1"
+          ? compact
+            ? "pb-1"
+            : "rounded-xl border border-border bg-card p-3 sm:p-4 shadow-[var(--shadow-card)]"
+          : "py-1",
       )}
     >
       <div className="flex gap-3">
@@ -79,13 +84,19 @@ export function ReviewItem({
             <Avatar
               className={cn(
                 "shrink-0 border border-border/60 overflow-hidden",
-                isReply ? "h-7 w-7" : "h-9 w-9 sm:h-10 sm:w-10"
+                isReply
+                  ? compact
+                    ? "h-6 w-6"
+                    : "h-7 w-7"
+                  : compact
+                    ? "h-7 w-7"
+                    : "h-9 w-9 sm:h-10 sm:w-10",
               )}
             >
               {avatarSrc ? (
                 <AvatarImage src={avatarSrc} alt={username} />
               ) : null}
-              <AvatarFallback className={cn(isReply ? "text-[10px]" : "text-xs", "font-semibold bg-primary/10 text-primary")}>
+              <AvatarFallback className={cn(isReply || compact ? "text-[10px]" : "text-xs", "font-semibold bg-primary/10 text-primary")}>
                 {initial}
               </AvatarFallback>
             </Avatar>
@@ -100,13 +111,19 @@ export function ReviewItem({
             <Avatar
               className={cn(
                 "shrink-0 border border-border/60 overflow-hidden",
-                isReply ? "h-7 w-7" : "h-9 w-9 sm:h-10 sm:w-10"
+                isReply
+                  ? compact
+                    ? "h-6 w-6"
+                    : "h-7 w-7"
+                  : compact
+                    ? "h-7 w-7"
+                    : "h-9 w-9 sm:h-10 sm:w-10",
               )}
             >
               {avatarSrc ? (
                 <AvatarImage src={avatarSrc} alt={username} />
               ) : null}
-              <AvatarFallback className={cn(isReply ? "text-[10px]" : "text-xs", "font-semibold bg-primary/10 text-primary")}>
+              <AvatarFallback className={cn(isReply || compact ? "text-[10px]" : "text-xs", "font-semibold bg-primary/10 text-primary")}>
                 {initial}
               </AvatarFallback>
             </Avatar>
@@ -121,7 +138,7 @@ export function ReviewItem({
                 to={ROUTES.PROFILE}
                 className={cn(
                   "font-semibold text-foreground hover:text-primary transition-colors truncate",
-                  isReply ? "text-xs" : "text-sm"
+                  isReply || compact ? "text-xs" : "text-sm"
                 )}
               >
                 {username}
@@ -132,7 +149,7 @@ export function ReviewItem({
                 params={{ userId: review.user_id }}
                 className={cn(
                   "font-semibold text-foreground hover:text-primary transition-colors truncate",
-                  isReply ? "text-xs" : "text-sm"
+                  isReply || compact ? "text-xs" : "text-sm"
                 )}
               >
                 {username}
@@ -160,16 +177,25 @@ export function ReviewItem({
           <p
             className={cn(
               "text-foreground/90 leading-relaxed whitespace-pre-wrap break-words",
-              isReply ? "mt-1 text-[13px] sm:text-sm" : "mt-2 text-sm"
+              isReply
+                ? "mt-1 text-[13px] sm:text-sm"
+                : compact
+                  ? "mt-1 text-[13px]"
+                  : "mt-2 text-sm"
             )}
           >
             {review.text}
           </p>
 
           {!isReply && canReply && onReplySubmit && (
-            <div className="mt-2.5">
+            <div className={cn("mt-2.5", compact && "mt-1.5")}>
               {replyOpen ? (
-                <div className="rounded-lg border border-border bg-muted/20 p-3">
+                <div
+                  className={cn(
+                    "rounded-lg p-3",
+                    compact ? "bg-muted/30" : "border border-border bg-muted/20",
+                  )}
+                >
                   <ReplyForm
                     onSubmit={(text) => {
                       onReplySubmit(review.id, text)
@@ -195,13 +221,18 @@ export function ReviewItem({
 
           {/* Threaded replies — Stepik vertical line with dots */}
           {hasReplies && !isReply && (
-            <div className="mt-4">
-              <div className="relative ml-1 sm:ml-2 pl-4 sm:pl-5 border-l border-border/60 space-y-3">
+            <div className={cn("mt-4", compact && "mt-2")}>
+              <div
+                className={cn(
+                  "relative ml-1 sm:ml-2 pl-4 sm:pl-5 border-l border-border/60",
+                  compact ? "space-y-2" : "space-y-3",
+                )}
+              >
                 {visibleReplies.map((reply) => (
                   <div key={reply.id} className="relative">
                     {/* dot on the line */}
                     <span className="absolute -left-[17px] sm:-left-[21px] top-3 h-2 w-2 rounded-full bg-border border-2 border-card shadow-sm" />
-                    <ReviewItem review={reply} isReply />
+                    <ReviewItem review={reply} isReply compact={compact} />
                   </div>
                 ))}
               </div>
@@ -210,7 +241,7 @@ export function ReviewItem({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mt-3 h-7 text-xs gap-1 text-primary hover:text-primary"
+                  className={cn("h-7 text-xs gap-1 text-primary hover:text-primary", compact ? "mt-1.5" : "mt-3")}
                   onClick={() => setExpanded((v) => !v)}
                 >
                   {expanded ? (

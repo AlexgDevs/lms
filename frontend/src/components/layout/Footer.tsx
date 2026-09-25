@@ -1,38 +1,65 @@
 import { Link } from "@tanstack/react-router"
 import { ROUTES } from "@/routes"
 
+const LINK_CLASS = "text-muted-foreground hover:text-foreground transition-colors"
+
 export function Footer() {
   return (
-    <footer className="w-full bg-card text-card-foreground py-6 px-6 shrink-0 transition-colors">
-      <div className="mx-auto max-w-7xl flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground">
-        {/* Копирайт */}
-        <p>© {new Date().getFullYear()} PLECTIX LMS. Все права защищены.</p>
+    <footer className="w-full shrink-0 border-t border-border/60 bg-card text-card-foreground transition-colors">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 lg:py-10">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          {/* 1. Юридическая информация */}
+          <div>
+            <h3 className="mb-3 text-xs font-medium text-foreground/70">
+              Юридическая информация
+            </h3>
+            <div className="space-y-2 text-xs text-muted-foreground">
+              <p>© {new Date().getFullYear()} PLECTIX LMS. Все права защищены.</p>
+              <p>Оператор: Сметанин Алексей Михайлович</p>
+              <p>ИНН 451103864409</p>
+              <div className="flex flex-col gap-2 pt-1">
+                <Link to={ROUTES.PRIVACY} className={LINK_CLASS}>
+                  Политика конфиденциальности
+                </Link>
+                <Link to={ROUTES.TERMS} className={LINK_CLASS}>
+                  Пользовательское соглашение
+                </Link>
+              </div>
+            </div>
+          </div>
 
-        {/* Реквизиты оператора (для проверки ЮKassa) */}
-        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs">
-          <span>Оператор: Сметанин Алексей Михайлович</span>
-          <span>ИНН 451103864409</span>
-          <a href="mailto:asmetanin014@gmail.com" className="hover:text-foreground transition-colors">
-            asmetanin014@gmail.com
-          </a>
-        </div>
+          {/* 2. Сообщество */}
+          <div>
+            <h3 className="mb-3 text-xs font-medium text-foreground/70">Сообщество</h3>
+            <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+              <a
+                href="https://t.me/plectix"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={LINK_CLASS}
+              >
+                Telegram-канал
+              </a>
+              <a
+                href="https://vk.ru/club241692285"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={LINK_CLASS}
+              >
+                Группа ВКонтакте
+              </a>
+            </div>
+          </div>
 
-        {/* Навигационные ссылки подвала */}
-        <div className="flex items-center gap-6 text-xs">
-          <Link
-            to={ROUTES.TERMS}
-            className="hover:text-foreground transition-colors"
-          >
-            Условия использования
-          </Link>
-          <Link
-            to={ROUTES.PRIVACY}
-            className="hover:text-foreground transition-colors"
-          >
-            Конфиденциальность
-          </Link>
+          {/* 3. Поддержка */}
+          <div>
+            <h3 className="mb-3 text-xs font-medium text-foreground/70">Поддержка</h3>
+            <a href="mailto:asmetanin014@gmail.com" className={LINK_CLASS}>
+              asmetanin014@gmail.com
+            </a>
+          </div>
         </div>
       </div>
     </footer>
-  );
+  )
 }

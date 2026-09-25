@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
 
-import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react"
+import {
+  EditorContent,
+  useEditor,
+  useEditorState,
+  type Editor,
+} from "@tiptap/react"
+import { BubbleMenu } from "@tiptap/react/menus"
 import StarterKit from "@tiptap/starter-kit"
 import TiptapLink from "@tiptap/extension-link"
 import TiptapUnderline from "@tiptap/extension-underline"
@@ -14,13 +20,12 @@ import {
   List,
   ListOrdered,
   Quote,
-  Redo2,
   Strikethrough,
   Underline,
-  Undo2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import type { TextBlockPayload } from "@/features/teaching/schemas/block"
 
 interface TextBlockEditorProps {
@@ -83,12 +88,20 @@ export function TextBlockEditor({ payload, onChange }: TextBlockEditorProps) {
   }, [editor, payload.html, payload.text])
 
   return (
-    <div className="space-y-1">
-      <label className="text-[11px] text-muted-foreground font-medium">Текст контента:</label>
-      <div className="overflow-hidden rounded-md border border-input bg-background">
-        <Toolbar editor={editor} />
-        <EditorContent editor={editor} className="px-3 py-2" />
-      </div>
+    <div className="relative">
+      {editor && (
+        <BubbleMenu
+          editor={editor}
+          shouldShow={({ editor: e, state }) =>
+            e.isEditable && !state.selection.empty
+          }
+          options={{ placement: "top", offset: 8 }}
+          className="z-50 flex items-center gap-0.5 rounded-full border border-black/10 bg-foreground px-1.5 py-1 shadow-lg"
+        >
+          <Toolbar editor={editor} />
+        </BubbleMenu>
+      )}
+      <EditorContent editor={editor} />
     </div>
   )
 }
@@ -108,8 +121,6 @@ function Toolbar({ editor }: { editor: Editor }) {
       orderedList: editor.isActive("orderedList"),
       inlineCode: editor.isActive("code"),
       link: editor.isActive("link"),
-      canUndo: editor.can().undo(),
-      canRedo: editor.can().redo(),
     }),
   })
 
@@ -125,7 +136,7 @@ function Toolbar({ editor }: { editor: Editor }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 border-b border-input bg-muted/40 px-1.5 py-1">
+    <>
       <ToolbarButton label="Жирный (Ctrl+B)" active={state.bold} onClick={() => editor.chain().focus().toggleBold().run()}>
         <Bold />
       </ToolbarButton>
@@ -162,29 +173,18 @@ function Toolbar({ editor }: { editor: Editor }) {
       <ToolbarButton label="Ссылка" active={state.link} onClick={toggleLink}>
         <Link />
       </ToolbarButton>
-
-      <ToolbarDivider />
-
-      <ToolbarButton label="Отменить" disabled={!state.canUndo} onClick={() => editor.chain().focus().undo().run()}>
-        <Undo2 />
-      </ToolbarButton>
-      <ToolbarButton label="Повторить" disabled={!state.canRedo} onClick={() => editor.chain().focus().redo().run()}>
-        <Redo2 />
-      </ToolbarButton>
-    </div>
+    </>
   )
 }
 
 function ToolbarButton({
   label,
   active,
-  disabled,
   onClick,
   children,
 }: {
   label: string
   active?: boolean
-  disabled?: boolean
   onClick: () => void
   children: ReactNode
 }) {
@@ -196,9 +196,18 @@ function ToolbarButton({
       title={label}
       aria-label={label}
       aria-pressed={active}
-      disabled={disabled}
-      onClick={onClick}
-      className={active ? "bg-muted text-foreground" : "text-muted-foreground"}
+      onClick={(e) => {
+        // не даём кнопке украсть фокус у редактора
+        e.preventDefault()
+        onClick()
+      }}
+      onMouseDown={(e) => e.preventDefault()}
+      className={cn(
+        "rounded-full",
+        active
+          ? "bg-background/25 text-background hover:bg-background/30 hover:text-background"
+          : "text-background/60 hover:bg-background/10 hover:text-background",
+      )}
     >
       {children}
     </Button>
@@ -206,5 +215,5 @@ function ToolbarButton({
 }
 
 function ToolbarDivider() {
-  return <span className="mx-1 h-4 w-px shrink-0 bg-border" />
+  return <span className="mx-0.5 h-4 w-px shrink-0 bg-background/20" />
 }

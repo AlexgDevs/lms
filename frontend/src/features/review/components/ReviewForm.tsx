@@ -7,11 +7,14 @@ import { StarRating } from "./StarRating"
 import type { ReviewTargetType } from "@/client"
 import useAuth from "@/features/auth/api/useAuth"
 import { resolveMediaUrl } from "@/lib/media"
+import { cn } from "@/lib/utils"
 
 interface ReviewFormProps {
   targetType: ReviewTargetType
   targetId: string
   showRating?: boolean
+  /** Минималистичная строка ввода без рамки (Clean Reader). */
+  compact?: boolean
   onSubmit: (data: {
     target_type: ReviewTargetType
     target_id: string
@@ -25,6 +28,7 @@ export function ReviewForm({
   targetType,
   targetId,
   showRating = false,
+  compact = false,
   onSubmit,
   isSubmitting = false,
 }: ReviewFormProps) {
@@ -34,7 +38,8 @@ export function ReviewForm({
   const avatarSrc = resolveMediaUrl(user?.avatar_url ?? undefined)
   const initial = (user?.username?.[0] ?? "Я").toUpperCase()
 
-  const canSubmit = text.trim().length > 0 && (!showRating || rating > 0)
+  const hasText = text.trim().length > 0
+  const canSubmit = hasText && (!showRating || rating > 0)
 
   const handleSubmit = () => {
     if (!canSubmit) return
@@ -50,7 +55,12 @@ export function ReviewForm({
 
   return (
     <div className="flex gap-3">
-      <Avatar className="h-9 w-9 shrink-0 border border-border/60 hidden sm:flex">
+      <Avatar
+        className={cn(
+          "shrink-0 border border-border/60 hidden sm:flex",
+          compact && "h-7 w-7 border-border/40",
+        )}
+      >
         {avatarSrc ? <AvatarImage src={avatarSrc} alt={user?.username ?? "Я"} /> : null}
         <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">{initial}</AvatarFallback>
       </Avatar>
@@ -67,15 +77,30 @@ export function ReviewForm({
           value={text}
           onChange={(e) => setText(e.target.value)}
           maxLength={2000}
-          className="min-h-[80px] bg-background"
+          rows={1}
+          className={
+            compact
+              ? "min-h-9 resize-none border-transparent bg-transparent px-1 py-1.5 shadow-none placeholder:text-muted-foreground/70 hover:bg-muted/40 focus:bg-muted/50 field-sizing-fixed focus:field-sizing-content max-h-40 overflow-y-auto transition-colors"
+              : "min-h-[80px] bg-background"
+          }
         />
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] text-muted-foreground tabular-nums">{text.length}/2000</span>
+          <span
+            className={cn(
+              "text-[11px] text-muted-foreground tabular-nums",
+              compact && !hasText && "opacity-0",
+            )}
+          >
+            {text.length}/2000
+          </span>
           <Button
             size="sm"
             onClick={handleSubmit}
             disabled={!canSubmit || isSubmitting}
-            className="h-8 gap-1.5"
+            className={cn(
+              "h-8 gap-1.5 transition-opacity duration-200",
+              compact && !hasText && "pointer-events-none opacity-0",
+            )}
           >
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />

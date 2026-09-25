@@ -23,7 +23,14 @@ Non-negotiable conventions:
 - New routers must be registered in `backend/src/core/router.py`.
 - Code must pass `uv run mypy .` (strict) and `black` (from `backend/`).
 - Schema/model changes need an Alembic migration: `uv run alembic revision
-  --autogenerate -m "..."` (from `backend/`).
+  --autogenerate -m "..."` then `uv run alembic upgrade head` (from the REPO
+  ROOT — `alembic.ini` + `alembic/` live there; only mypy/black run from
+  `backend/`).
+- Money (`courses.price`, `payments.*`) is stored in **kopeks**; validate with
+  `core/schemas/limits.py` `PriceKopeks`. Rate limits go through
+  `core/rate_limit.py` (`RateLimiterDep`), never ad-hoc.
+- Content mutations must respect `course/access.py` invariants (draft-only
+  edits, no deleting content with student results).
 
 Read `CLAUDE.md` and `.claude/graph.md` first. Confirm module boundaries before
 writing code.

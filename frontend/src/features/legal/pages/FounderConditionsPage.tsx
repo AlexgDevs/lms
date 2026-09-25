@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { formatPrice } from "@/lib/price"
 import { IRBIS_SPRITE } from "@/lib/irbisSprite"
 import { useFounderProgress } from "@/features/legal/api/useFounderProgress"
-import { FounderSection } from "@/features/legal/components/founder/FounderSection"
+import { SnapSection } from "@/components/sections/SnapSection"
 import { FounderSeatGrid } from "@/features/legal/components/founder/FounderSeatGrid"
 import { CountUp } from "@/features/legal/components/founder/CountUp"
 import { FounderBonusItem } from "@/features/legal/components/founder/FounderBonusItem"
@@ -90,7 +90,7 @@ export function FounderConditionsPage() {
       </nav>
 
       {/* 1. HERO — акция */}
-      <FounderSection
+      <SnapSection
         id={SECTION_IDS[0]}
         index={0}
         onActive={handleActive}
@@ -156,10 +156,10 @@ export function FounderConditionsPage() {
           />
           <ChevronDown className="h-5 w-5 animate-bounce text-muted-foreground" />
         </div>
-      </FounderSection>
+      </SnapSection>
 
       {/* 2. УСЛОВИЕ 1 — места основателей */}
-      <FounderSection
+      <SnapSection
         id={SECTION_IDS[1]}
         index={1}
         onActive={handleActive}
@@ -194,10 +194,10 @@ export function FounderConditionsPage() {
             . Каждое свободное место — ваш шанс войти в число основателей.
           </p>
         </div>
-      </FounderSection>
+      </SnapSection>
 
       {/* 3. УСЛОВИЕ 2 — оборот */}
-      <FounderSection
+      <SnapSection
         id={SECTION_IDS[2]}
         index={2}
         onActive={handleActive}
@@ -228,10 +228,10 @@ export function FounderConditionsPage() {
             .
           </p>
         </div>
-      </FounderSection>
+      </SnapSection>
 
       {/* 4. БОНУСЫ после беты */}
-      <FounderSection
+      <SnapSection
         id={SECTION_IDS[3]}
         index={3}
         onActive={handleActive}
@@ -262,7 +262,7 @@ export function FounderConditionsPage() {
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
-      </FounderSection>
+      </SnapSection>
     </div>
   )
 }

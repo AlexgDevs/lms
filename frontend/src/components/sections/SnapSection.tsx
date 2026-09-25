@@ -1,23 +1,23 @@
 import { useEffect, useRef, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
-interface FounderSectionProps {
+interface SnapSectionProps {
   id?: string
   index: number
   onActive: (index: number) => void
   className?: string
-  /** Outlined watermark shown behind the content (e.g. "01", "FOUNDERS"). */
+  /** Outlined watermark shown behind the content (e.g. "01", "STUDIO"). */
   watermark?: string
   watermarkClassName?: string
   children: ReactNode
 }
 
 /**
- * Full-viewport slide of the founder landing (scroll-snap target).
+ * Full-viewport slide of a block landing (scroll-snap target).
  * Reports `index` when the section crosses the middle of the screen
  * so the page can highlight the matching nav dot.
  */
-export function FounderSection({
+export function SnapSection({
   id,
   index,
   onActive,
@@ -25,7 +25,7 @@ export function FounderSection({
   watermark,
   watermarkClassName,
   children,
-}: FounderSectionProps) {
+}: SnapSectionProps) {
   const ref = useRef<HTMLElement | null>(null)
 
   useEffect(() => {

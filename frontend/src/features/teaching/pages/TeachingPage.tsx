@@ -380,7 +380,10 @@ export function TeachingPage() {
               <div className="p-4 rounded-xl bg-muted/20 text-xs text-muted-foreground space-y-2">
                 <p className="font-semibold text-foreground">💡 Совет для конверсии</p>
                 <p>
-                  Курсы с короткой видео-презентацией (до 2 минут) получают на <span className="text-primary font-bold">+35% больше</span> записавшихся студентов.
+                  Курсы с видео-презентацией получают на{" "}
+                  <span className="text-primary font-bold">+35% больше</span> студентов.
+                  Загрузите видео на YouTube, VK Видео или RuTube и просто вставьте ссылку в
+                  конструктор!
                 </p>
               </div>
             </div>

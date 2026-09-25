@@ -100,6 +100,8 @@ interface CourseHeaderProps {
   onUploadCover?: (file: File) => void
   onRemoveCover?: () => void
   isUploadingCover?: boolean
+  /** Дополнительные секции внутри Popover «Настройки курса» (сертификат, TGP и т.п.). */
+  settingsExtra?: React.ReactNode
 }
 
 export function CourseHeader({
@@ -111,6 +113,7 @@ export function CourseHeader({
   onUploadCover,
   onRemoveCover,
   isUploadingCover = false,
+  settingsExtra,
 }: CourseHeaderProps) {
   const [title, setTitle] = useState(course.title)
   const [description, setDescription] = useState(course.description || "")
@@ -237,7 +240,7 @@ export function CourseHeader({
 
   return (
     <>
-      <div className="rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+      <div className="bg-card px-4 py-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/60">
       {/* Миниатюра обложки — вместо большого баннера, кликабельный триггер загрузки */}
       <div className="relative shrink-0">
         <button
@@ -417,7 +420,20 @@ export function CourseHeader({
               )}
             </Button>
           </PopoverTrigger>
-        <PopoverContent align="end" className="w-80 rounded-xl p-4 space-y-4">
+        <PopoverContent
+          align="end"
+          className="w-96 max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-y-auto rounded-xl p-4 space-y-4"
+          onInteractOutside={(e) => {
+            // Не закрывать поповер, когда внутри него открыт модальный диалог
+            // (например, редактор вопросов TGP) — клик идёт по portal диалога.
+            const target = e.target as HTMLElement | null
+            if (target?.closest("[role=dialog]")) e.preventDefault()
+          }}
+          onFocusOutside={(e) => {
+            const target = e.target as HTMLElement | null
+            if (target?.closest("[role=dialog]")) e.preventDefault()
+          }}
+        >
           {/* Описание */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
@@ -514,6 +530,16 @@ export function CourseHeader({
             )}
           </div>
 
+          {/* Компоненты курса: сертификат, пре-тестирование (TGP) */}
+          {settingsExtra != null && (
+            <div className="space-y-3 border-t border-border/50 pt-3">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Компоненты курса
+              </Label>
+              {settingsExtra}
+            </div>
+          )}
+
           {/* Единая панель сохранения для обоих полей попапа */}
           {settingsDirty && (
             <div className="flex items-center gap-2 pt-1">
@@ -548,7 +574,7 @@ export function CourseHeader({
       </div>
 
       {status === "draft" && (
-        <div className="mt-2 rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-2.5 flex items-start gap-2 border">
+        <div className="border-b border-border/60 bg-reward/5 px-4 py-2.5 flex items-start gap-2">
           <AlertTriangle size={14} className="mt-0.5 shrink-0 text-reward" />
           <div className="text-xs leading-relaxed text-muted-foreground min-w-0">
             <span className="font-medium text-foreground">Курс в черновике.</span>{" "}
@@ -561,7 +587,11 @@ export function CourseHeader({
       )}
 
       {(status === "under_review" || status === "rejected") && (
-        <div className="mt-2 rounded-xl bg-card shadow-[var(--shadow-card)] px-4 py-2.5 flex items-start gap-2 border">
+        <div
+          className={`border-b border-border/60 px-4 py-2.5 flex items-start gap-2 ${
+            status === "rejected" ? "bg-destructive/5" : "bg-primary/5"
+          }`}
+        >
           <AlertTriangle
             size={14}
             className={`mt-0.5 shrink-0 ${
