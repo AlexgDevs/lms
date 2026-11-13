@@ -1,9 +1,10 @@
-from typing import List, Sequence
+from typing import Collection, List, Sequence
 from uuid import UUID
 
 from sqlalchemy import case, func, select, update
 
 
+from src.block.enums import BlockType
 from src.block.mapper import BlockMapper
 from src.block.models import Block
 from src.block.schemas import BlockSchema
@@ -37,8 +38,12 @@ class BlockRepository(BaseRepository[Block, BlockSchema]):
         )
         await self.session.execute(statement)
 
-    async def get_ids_by_lesson(self, lesson_id: UUID) -> set[UUID]:
+    async def get_ids_by_lesson(
+        self, lesson_id: UUID, types: Collection[BlockType] | None = None
+    ) -> set[UUID]:
         stmt = select(self.model).where(self.model.lesson_id == lesson_id)
+        if types is not None:
+            stmt = stmt.where(self.model.block_type.in_(types))
         result = await self.session.execute(stmt)
         return {row[0].id for row in result.fetchall()}
 

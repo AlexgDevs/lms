@@ -10,13 +10,23 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
-_FONTS_DIR = Path(__file__).resolve().parent.parent.parent.parent / "fonts"
-_DEJAVUSans_TTF = _FONTS_DIR / "DejaVuSans.ttf"
-_DEJAVUSans_BOLD_TTF = _FONTS_DIR / "DejaVuSans-Bold.ttf"
+_BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
+_FONT_CANDIDATES = (
+    _BACKEND_DIR / "fonts",  # backend/fonts/ (Docker image: /app/backend/fonts)
+    _BACKEND_DIR.parent / "fonts",  # <repo>/fonts (monorepo root)
+)
 _SYSTEM_ARIAL = Path("C:/Windows/Fonts/arial.ttf")
 _SYSTEM_ARIAL_BOLD = Path("C:/Windows/Fonts/arialbd.ttf")
 
 _font_registered = False
+
+
+def _find_font(name: str) -> Path | None:
+    for fonts_dir in _FONT_CANDIDATES:
+        candidate = fonts_dir / name
+        if candidate.is_file():
+            return candidate
+    return None
 
 
 def _register_fonts() -> None:
@@ -24,12 +34,12 @@ def _register_fonts() -> None:
     if _font_registered:
         return
 
-    if _DEJAVUSans_TTF.is_file():
-        pdfmetrics.registerFont(TTFont("CyrFont", str(_DEJAVUSans_TTF)))
-        if _DEJAVUSans_BOLD_TTF.is_file():
-            pdfmetrics.registerFont(TTFont("CyrFontBold", str(_DEJAVUSans_BOLD_TTF)))
-        else:
-            pdfmetrics.registerFont(TTFont("CyrFontBold", str(_DEJAVUSans_TTF)))
+    dejavu = _find_font("DejaVuSans.ttf")
+    if dejavu is not None:
+        pdfmetrics.registerFont(TTFont("CyrFont", str(dejavu)))
+        dejavu_bold = _find_font("DejaVuSans-Bold.ttf")
+        bold = dejavu_bold if dejavu_bold is not None else dejavu
+        pdfmetrics.registerFont(TTFont("CyrFontBold", str(bold)))
     elif _SYSTEM_ARIAL.is_file():
         pdfmetrics.registerFont(TTFont("CyrFont", str(_SYSTEM_ARIAL)))
         if _SYSTEM_ARIAL_BOLD.is_file():

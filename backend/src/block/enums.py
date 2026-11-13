@@ -16,3 +16,12 @@ class BlockSubmissionType(StrEnum):
     COMPLETED = "completed"
     WRONG = "wrong"
     CORRECT = "correct"
+
+
+INTERACTIVE_BLOCK_TYPES: frozenset[BlockType] = frozenset(
+    {
+        BlockType.QUIZ_SINGLE_CHOICE,
+        BlockType.QUIZ_MULTIPLE_CHOICE,
+        BlockType.CODE,
+    }
+)

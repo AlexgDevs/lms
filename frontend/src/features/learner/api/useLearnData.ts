@@ -122,7 +122,10 @@ export function useLearnData({ courseId, lessonId }: UseLearnDataParams) {
   const isCompleted = (unitLessonId: string): boolean =>
     progressByLesson.get(unitLessonId)?.status === "completed"
 
+  // A completed lesson marks all of its blocks as done — static blocks may
+  // never have been submitted individually (they don't block completion).
   const isBlockCompleted = (blockId: string): boolean => {
+    if (lessonId && isCompleted(lessonId)) return true
     const submission = submissionsByBlock.get(blockId)
     return (
       submission?.submission_type === BlockSubmissionType.CORRECT ||

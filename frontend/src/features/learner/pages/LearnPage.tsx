@@ -284,7 +284,7 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
 
   const goNext = () => goToStep(Math.min(step + 1, totalSteps - 1))
 
-  const submitStep = (payload: Record<string, unknown>) => {
+  const submitStep = (payload: Record<string, unknown>, afterSuccess?: () => void) => {
     if (!currentBlock) return
     data.submitBlock.mutate(
       {
@@ -306,7 +306,11 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
             if (assistantBlockId === currentBlock.id) {
               setAssistantBlockId(null)
             }
-            goNext()
+            if (afterSuccess) {
+              afterSuccess()
+            } else {
+              goNext()
+            }
           } else if (
             submission.submission_type === BlockSubmissionType.WRONG &&
             submission.attempts >= ASSISTANT_ATTEMPT_THRESHOLD &&
@@ -362,11 +366,34 @@ function LessonStepper({ data, courseId, lessonId, goToLesson }: LessonStepperPr
   }
 
   const isLastBlock = step >= totalSteps - 1
-  const primaryLabel = isLastBlock ? (nextUnit ? "Следующий урок" : null) : "Далее"
+  const primaryLabel = isLastBlock
+    ? nextUnit
+      ? "Следующий урок"
+      : isLessonCompleted
+        ? null
+        : "Завершить урок"
+    : "Далее"
   const primaryAction = () => {
     if (!currentBlock) return
     if (isLastBlock) {
-      if (nextUnit) goToLesson(nextUnit.lesson.id)
+      const finish = () => {
+        if (nextUnit) {
+          goToLesson(nextUnit.lesson.id)
+        } else if (!isLessonCompleted) {
+          // Lesson is still incomplete (e.g. a skipped static block) — jump
+          // to the first unfinished step instead of dead-ending.
+          const gap = blocks.findIndex((block) => !isDone(block.id))
+          if (gap >= 0) goToStep(gap)
+        }
+      }
+      // The final block is never submitted by handleNext (no "Далее" past it),
+      // so a trailing static block must be submitted right before leaving —
+      // otherwise the lesson never counts as completed.
+      if (!isQuiz && !isCode && !isStepDone) {
+        submitStep({}, finish)
+        return
+      }
+      finish()
       return
     }
     handleNext()
