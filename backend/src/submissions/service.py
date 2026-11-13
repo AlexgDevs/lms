@@ -19,7 +19,7 @@ from src.submissions.exceptions import (
     DuplicateBlocksInSubmissionError,
     InvalidSubmissionBlocksError,
 )
-from src.block.enums import BlockSubmissionType, BlockType
+from src.block.enums import BlockSubmissionType, BlockType, INTERACTIVE_BLOCK_TYPES
 from src.submissions.checker import BlockChecker
 from src.submissions.schemas import (
     BlockSubmissionCreateSchema,
@@ -312,12 +312,18 @@ class BlockSubmissionService(BaseService):
     async def _recompute_lesson_progress(self, lesson_id: UUID, user_id: UUID) -> None:
         """Recalculates the lesson progress from the user's block submissions.
 
-        Lesson is COMPLETED when every block has an associated CORRECT submission.
-        If some attempts exist but not all blocks are correct, the status is
-        IN_PROGRESS. A previously completed lesson is never downgraded
-        ("persistent green checkmark" behavior).
+        Lesson is COMPLETED when every *required* block has a CORRECT
+        submission. Required blocks are the interactive ones (quiz/code); if a
+        lesson has no interactive blocks, all of its blocks are required.
+        Static blocks (text/media) never block completion of a lesson that
+        has interactive blocks. If some attempts exist but not all required
+        blocks are correct, the status is IN_PROGRESS. A previously completed
+        lesson is never downgraded ("persistent green checkmark" behavior).
         """
         block_ids = await self.uow.blocks.get_ids_by_lesson(lesson_id)
+        interactive_ids = await self.uow.blocks.get_ids_by_lesson(
+            lesson_id, INTERACTIVE_BLOCK_TYPES
+        )
 
         submissions = list(
             await self.uow.submissions.get_filtered(
@@ -336,9 +342,13 @@ class BlockSubmissionService(BaseService):
         if not submissions:
             return
 
+        # Static blocks (text/media) are never required for completion when the
+        # lesson also has interactive blocks; a lesson made of static blocks
+        # only still requires them to be opened/submitted step by step.
+        required_ids = interactive_ids or block_ids
         new_status = (
             LessonProgressType.COMPLETED
-            if block_ids and block_ids.issubset(correct_ids)
+            if required_ids and required_ids.issubset(correct_ids)
             else LessonProgressType.IN_PROGRESS
         )
 
