@@ -68,20 +68,32 @@ class S3Storage:
         content_type: str,
         metadata: Mapping[str, str] | None = None,
     ) -> None:
-        async with self._session.client("s3", endpoint_url=self.endpoint_url) as client:
-            await client.put_object(
-                Bucket=self.bucket,
-                Key=key,
-                Body=data,
-                ContentType=content_type,
-                Metadata=dict(metadata) if metadata else {},
-            )
+        try:
+            async with self._session.client(
+                "s3", endpoint_url=self.endpoint_url
+            ) as client:
+                await client.put_object(
+                    Bucket=self.bucket,
+                    Key=key,
+                    Body=data,
+                    ContentType=content_type,
+                    Metadata=dict(metadata) if metadata else {},
+                )
+        except ClientError as exc:
+            raise StorageError from exc
 
     async def download_bytes(self, key: str) -> bytes:
-        async with self._session.client("s3", endpoint_url=self.endpoint_url) as client:
-            response: Any = await client.get_object(Bucket=self.bucket, Key=key)
-            body: Any = response["Body"]
-            data: bytes = await body.read()
+        try:
+            async with self._session.client(
+                "s3", endpoint_url=self.endpoint_url
+            ) as client:
+                response: Any = await client.get_object(Bucket=self.bucket, Key=key)
+                body: Any = response["Body"]
+                data: bytes = await body.read()
+        except ClientError as exc:
+            if self._is_not_found(exc):
+                raise StorageObjectNotFoundError from exc
+            raise StorageError from exc
         return data
 
     async def delete(self, key: str) -> None:
